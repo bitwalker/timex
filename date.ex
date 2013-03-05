@@ -52,7 +52,7 @@ defmodule Date do
     :calendar.datetime_to_gregorian_seconds(date) - unix_seconds
   end
 
-  def seconds_since(date1, date2) do
+  def seconds_diff(date1, date2) do
     seconds1 = :calendar.datetime_to_gregorian_seconds(date1)
     seconds2 = :calendar.datetime_to_gregorian_seconds(date2)
     seconds1 - seconds2
