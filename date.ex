@@ -84,7 +84,15 @@ defmodule Date do
     { {year, month, day}, time }
   end
 
-  def add({ {y, m, d}, time }, value, :years) do
-    { {y + value, m, d}, time }
+  def add({ {year, month, dday}, time }, value, :years) do
+    year = year + value
+
+    # Check if we got past the last day of the month
+    max_day = :calendar.last_day_of_the_month(year, month)
+    if day > max_day do
+      day = max_day
+    end
+
+    { {year, month, day}, time }
   end
 end
