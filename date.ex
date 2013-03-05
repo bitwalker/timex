@@ -42,11 +42,11 @@ defmodule Date do
 
   ### Date Arithmetic ###
 
-  def add(date, 0, _) do
+  def shift(date, 0, _) do
     date
   end
 
-  def add(date, value, type) when type in [:seconds, :minutes, :hours] do
+  def shift(date, value, type) when type in [:seconds, :minutes, :hours] do
     secs = :calendar.datetime_to_gregorian_seconds(date)
     secs = secs + case type do
       :seconds -> value
@@ -56,33 +56,33 @@ defmodule Date do
     :calendar.gregorian_seconds_to_datetime(secs)
   end
 
-  def add({date, time}, value, :days) do
+  def shift({date, time}, value, :days) do
     days = :calendar.date_to_gregorian_days(date)
     days = days + value
     { :calendar.gregorian_days_to_date(days), time }
   end
 
-  def add(date, value, :weeks) do
-    add(date, value * 7, :days)
+  def shift(date, value, :weeks) do
+    shift(date, value * 7, :days)
   end
 
-  def add({ {year, month, day}, time }, value, :months) do
-    # assert value > 0
+  def shift({ {year, month, day}, time }, value, :months) do
     month = month + value
 
-    # Calculate valid month and year values
-    if month > 12 do
-      year = year + div(month - 1, 12)
-      month = case rem(month, 12) do
-        0 -> 12
-        x -> x
-      end
+    # Calculate a valid year value
+    cond do
+      month == 0 ->
+        year = year - 1
+      month < 0 ->
+        year = year + div(month, 12) - 1
+      month > 12 ->
+        year = year + div(month - 1, 12)
     end
 
-    { validate({year, month, day}), time }
+    { validate({year, round_month(month), day}), time }
   end
 
-  def add({ {year, month, day}, time }, value, :years) do
+  def shift({ {year, month, day}, time }, value, :years) do
     { validate({year + value, month, day}), time }
   end
 
@@ -93,5 +93,16 @@ defmodule Date do
       day = max_day
     end
     {year, month, day}
+  end
+
+  defp mod(a, b) do
+    rem(rem(a, b) + b, b)
+  end
+
+  defp round_month(m) do
+    case mod(m, 12) do
+      0 -> 12
+      other -> other
+    end
   end
 end
