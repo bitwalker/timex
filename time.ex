@@ -1,15 +1,44 @@
+defmodule Time.Helpers do
+  @moduledoc false
+
+  defmacro gen_conversions do
+    lc {name, coef} inlist [{:to_microsecs, 1000000}, {:to_millisecs, 1000}, {:to_seconds, 1}] do
+      quote do
+        def unquote(name)({mega, secs, micro}) do
+          (mega * 1000000 + secs) * unquote(coef) + micro * unquote(coef) / 1000000
+        end
+
+        def unquote(name)(value, :microsecs) do
+          value * unquote(coef) / 1000000
+        end
+
+        def unquote(name)(value, :millisecs) do
+          value * unquote(coef) / 1000
+        end
+
+        def unquote(name)(value, :seconds) do
+          value * unquote(coef)
+        end
+
+        def unquote(name)(value, :minutes) do
+          value * 60 * unquote(coef)
+        end
+
+        def unquote(name)(value, :hours) do
+          value * 60 * 60 * unquote(coef)
+        end
+
+        def unquote(name)({hours, minutes, seconds}, :hms) do
+          unquote(name)(hours, :hours) + unquote(name)(minutes, :minutes) + unquote(name)(seconds, :seconds)
+        end
+      end
+    end
+  end
+end
+
 defmodule Time do
-  def to_microsecs({mega, secs, micro}) do
-    (mega * 1000000 + secs) * 1000000 + micro
-  end
-
-  def to_millisecs({mega, secs, micro}) do
-    (mega * 1000000 + secs) * 1000 + micro / 1000
-  end
-
-  def to_seconds({mega, secs, micro}) do
-    mega * 1000000 + secs + micro / 1000000
-  end
+  import Time.Helpers, only: [gen_conversions: 0]
+  gen_conversions()
 
   def now do
     :os.timestamp
