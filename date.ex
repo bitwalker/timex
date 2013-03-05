@@ -62,19 +62,26 @@ defmodule Date do
     { :calendar.gregorian_days_to_date(days), time }
   end
 
-  def add({ {y, m, d}, time }, value, :months) do
+  def add({ {year, month, day}, time }, value, :months) do
     # assert value > 0
-    months = m + value
-    if months <= 12 do
-      { {y, months, d}, time }
-    else
-      years = y + div(months - 1, 12)
-      months = case rem(months, 12) do
+    month = month + value
+
+    # Calculate valid month and year values
+    if month > 12 do
+      year = year + div(month - 1, 12)
+      month = case rem(month, 12) do
         0 -> 12
         x -> x
       end
-      { {years, months, d}, time }
     end
+
+    # Check if we got past the last day of the month
+    max_day = :calendar.last_day_of_the_month(year, month)
+    if day > max_day do
+      day = max_day
+    end
+
+    { {year, month, day}, time }
   end
 
   def add({ {y, m, d}, time }, value, :years) do
