@@ -60,6 +60,24 @@ defmodule Date do
 
   ### Date Arithmetic ###
 
+  @doc """
+  A single function for adjusting the date using various units: seconds,
+  minutes, hours, days, weeks, months, years.
+
+  The returned date is always valid. If after adding months or years the day
+  exceeds maximum number of days in the resulting month, that month's last day
+  is assumed.
+
+  Examples:
+
+    datetime = {{2013,3,5},{23,23,23}}
+
+    Date.shift(datetime, 24*3600*365, :seconds)
+    #=> {{2014,3,5},{23,23,23}}
+
+    Date.shift(datetime, -24*3600*(365*2 + 1), :seconds)   # +1 day for leap year 2012
+    #=> {{2011,3,5},{23,23,23}}
+  """
   def shift(date, 0, _) do
     date
   end
