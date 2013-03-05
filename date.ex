@@ -62,6 +62,10 @@ defmodule Date do
     { :calendar.gregorian_days_to_date(days), time }
   end
 
+  def add(date, value, :weeks) do
+    add(date, value * 7, :days)
+  end
+
   def add({ {year, month, day}, time }, value, :months) do
     # assert value > 0
     month = month + value
