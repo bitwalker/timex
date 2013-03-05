@@ -37,7 +37,7 @@ defmodule Date do
   @doc "Returns a binary with the RFC 1123 representation of the date"
   def rfc1123(date) do
     # :httpd_util.rfc1123_date() assumes that date is local
-    :httpd_util.rfc1123_date(date)
+    list_to_binary(:httpd_util.rfc1123_date(date))
   end
 
   def seconds_since_0(date) do
