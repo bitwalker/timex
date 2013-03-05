@@ -1,6 +1,8 @@
 defmodule Date do
+  ### Getting The Date ###
+
   def local do
-      # same as :erlang.localtime
+      # same as :erlang.localtime()
       :calendar.local_time
   end
 
@@ -15,7 +17,7 @@ defmodule Date do
   end
 
   def universal do
-      # same as :erlang.universaltime
+      # same as :erlang.universaltime()
       :calendar.universal_time
   end
 
@@ -23,6 +25,22 @@ defmodule Date do
     # TODO: determine date's time zone and adjust for UTC
     :calendar.local_time_to_universal_time_dst(date)
   end
+
+  ### Converting Dates ###
+
+  @doc "Returns a binary with the ISO 8601 representation of the date"
+  def iso8601({ {year, month, day}, {hour, min, sec} }) do
+    list_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B",
+                                  [year, month, day, hour, min, sec]))
+  end
+
+  @doc "Returns a binary with the RFC 1123 representation of the date"
+  def rfc1123(date) do
+    # :httpd_util.rfc1123_date() assumes that date is local
+    :httpd_util.rfc1123_date(date)
+  end
+
+  ### Date Arithmetic ###
 
   def add(date, 0, _) do
     date
