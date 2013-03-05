@@ -40,6 +40,24 @@ defmodule Date do
     :httpd_util.rfc1123_date(date)
   end
 
+  def seconds_since_0(date) do
+    # date has to be in UTC
+    :calendar.datetime_to_gregorian_seconds(date)
+  end
+
+  def seconds_since_1970(date) do
+    # date has to be in UTC
+    unix_epoch = { {1970, 1, 1}, {0, 0, 0} }
+    unix_seconds = :calendar.datetime_to_gregorian_seconds(unix_epoch)
+    :calendar.datetime_to_gregorian_seconds(date) - unix_seconds
+  end
+
+  def seconds_since(date1, date2) do
+    seconds1 = :calendar.datetime_to_gregorian_seconds(date1)
+    seconds2 = :calendar.datetime_to_gregorian_seconds(date2)
+    seconds1 - seconds2
+  end
+
   ### Date Arithmetic ###
 
   def shift(date, 0, _) do
