@@ -1,9 +1,11 @@
 all: date time
 
-date: date.ex
+date: Elixir-Date.beam
+Elixir-Date.beam: date.ex
 	elixirc date.ex
 
-time: time.ex
+time: Elixir-Time.beam Elixir-Time-Helpers.beam
+Elixir-Time.beam, Elixir-Time-Helpers.beam: time.ex
 	elixirc time.ex
 
 .PHONY: test
