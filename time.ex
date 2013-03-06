@@ -2,34 +2,34 @@ defmodule Time.Helpers do
   @moduledoc false
 
   defmacro gen_conversions do
-    lc {name, coef} inlist [{:to_microsecs, 1000000}, {:to_millisecs, 1000}, {:to_seconds, 1}] do
+    lc {name, coef} inlist [{:to_usec, 1000000}, {:to_msec, 1000}, {:to_sec, 1}] do
       quote do
         def unquote(name)({mega, secs, micro}) do
           (mega * 1000000 + secs) * unquote(coef) + micro * unquote(coef) / 1000000
         end
 
-        def unquote(name)(value, :microsecs) do
+        def unquote(name)(value, :usec) do
           value * unquote(coef) / 1000000
         end
 
-        def unquote(name)(value, :millisecs) do
+        def unquote(name)(value, :msec) do
           value * unquote(coef) / 1000
         end
 
-        def unquote(name)(value, :seconds) do
+        def unquote(name)(value, :sec) do
           value * unquote(coef)
         end
 
-        def unquote(name)(value, :minutes) do
-          value * 60 * unquote(coef)
+        def unquote(name)(value, :min) do
+          value * unquote(coef) * 60
         end
 
-        def unquote(name)(value, :hours) do
-          value * 60 * 60 * unquote(coef)
+        def unquote(name)(value, :hour) do
+          value * unquote(coef) * 3600
         end
 
         def unquote(name)({hours, minutes, seconds}, :hms) do
-          unquote(name)(hours, :hours) + unquote(name)(minutes, :minutes) + unquote(name)(seconds, :seconds)
+          unquote(name)(hours, :hour) + unquote(name)(minutes, :min) + unquote(name)(seconds, :sec)
         end
       end
     end
@@ -40,36 +40,73 @@ defmodule Time do
   import Time.Helpers, only: [gen_conversions: 0]
   gen_conversions()
 
-  def now do
+  @doc """
+  Convert the timestamp in the form { megasecs, seconds, microsecs } to the
+  specified time units.
+  """
+  def convert(timestamp, type // nil)
+  def convert(timestamp, nil),   do: timestamp
+  def convert(timestamp, :usec), do: to_usec(timestamp)
+  def convert(timestamp, :msec), do: to_msec(timestamp)
+  def convert(timestamp, :sec),  do: to_sec(timestamp)
+  def convert(timestamp, :min),  do: to_sec(timestamp) / 60
+  def convert(timestamp, :hour), do: to_sec(timestamp) / 3600
+
+  @doc """
+  Time interval since UNIX epoch (January 1, 1970).
+
+  The argument is an atom indicating the type of time units to return:
+  microseconds (:usec), milliseconds (:msec), seconds (:sec), minutes (:min),
+  or hours (:hour).
+
+  When the argument is omitted, the return value's format is { megasecs, seconds, microsecs }.
+  """
+  def now(type // nil)
+
+  def now(nil) do
     :os.timestamp
   end
 
-  def now_us do
-    to_microsecs(now)
+  def now(type) do
+    convert(now, type)
   end
 
-  def now_ms do
-    to_millisecs(now)
+  @doc """
+  Time interval between timestamp and now. If timestamp is after now in time, the
+  return value will be negative.
+
+  The second argument is an atom indicating the type of time units to return:
+  microseconds (:usec), milliseconds (:msec), seconds (:sec), minutes (:min),
+  or hours (:hour).
+
+  When the second argument is omitted, the return value's format is { megasecs,
+  seconds, microsecs }.
+  """
+  def elapsed(timestamp, type // nil)
+
+  def elapsed(timestamp, type) do
+    diff(now, timestamp, type)
   end
 
-  def now_secs do
-    to_seconds(now)
+  @doc """
+  Time interval between two timestamps. If the first timestamp comes before the
+  second one in time, the return value will be negative.
+
+  The third argument is an atom indicating the type of time units to return:
+  microseconds (:usec), milliseconds (:msec), seconds (:sec), minutes (:min),
+  or hours (:hour).
+
+  When the third argument is omitted, the return value's format is { megasecs,
+  seconds, microsecs }.
+  """
+  def diff(t1, t2, type // nil)
+
+  def diff({mega1,secs1,micro1}, {mega2,secs2,micro2}, nil) do
+    # TODO: normalize the result
+    {mega1 - mega2, secs1 - secs2, micro1 - micro2}
   end
 
-  def elapsed({mega, secs, micro}) do
-    {mega_now, secs_now, micro_now} = now
-    {mega_now - mega, secs_now - secs, micro_now - micro}
-  end
-
-  def elapsed_us(timestamp) do
-    to_microsecs(elapsed(timestamp))
-  end
-
-  def elapsed_ms(timestamp) do
-    to_millisecs(elapsed(timestamp))
-  end
-
-  def elapsed_secs(timestamp) do
-    to_seconds(elapsed(timestamp))
+  def diff(t1, t2, type) do
+    convert(diff(t1, t2), type)
   end
 end
