@@ -47,22 +47,12 @@ defmodule DateTest do
     assert Date.shift(datetime, 36, :minutes) == {date,{23,59,23}}
     assert Date.shift(datetime, 37, :minutes) == {{2013,3,6},{0,0,23}}
     assert Date.shift(datetime, 38, :minutes) == {{2013,3,6},{0,1,23}}
-    #assert Date.shift(datetime, 38+60, :minutes) == {date,{23,25,1}}
-    #assert Date.shift(datetime, 38+60*35+58, :minutes) == {date,{23,59,59}}
-    #assert Date.shift(datetime, 38+60*35+59, :minutes) == {{2013,3,6},{0,0,0}}
-    #assert Date.shift(datetime, 38+60*36, :minutes) == {{2013,3,6},{0,0,1}}
-    #assert Date.shift(datetime, 24*3600, :minutes) == {{2013,3,6},{23,23,23}}
-    #assert Date.shift(datetime, 24*3600*365, :minutes) == {{2014,3,5},{23,23,23}}
+    assert Date.shift(datetime, 60*24*365, :minutes) == {{2014,3,5},{23,23,23}}
 
     assert Date.shift(datetime, -1, :minutes) == {date,{23,22,23}}
     assert Date.shift(datetime, -23, :minutes) == {date,{23,0,23}}
     assert Date.shift(datetime, -24, :minutes) == {date,{22,59,23}}
-    #assert Date.shift(datetime, -23*60, :minutes) == {date,{23,0,23}}
-    #assert Date.shift(datetime, -24*60, :minutes) == {date,{22,59,23}}
-    #assert Date.shift(datetime, -23*3600-23*60-23, :minutes) == {date,{0,0,0}}
-    #assert Date.shift(datetime, -23*3600-23*60-24, :minutes) == {{2013,3,4},{23,59,59}}
-    #assert Date.shift(datetime, -24*3600, :minutes) == {{2013,3,4},{23,23,23}}
-    #assert Date.shift(datetime, -24*3600*365, :minutes) == {{2012,3,5},{23,23,23}}
-    #assert Date.shift(datetime, -24*3600*(365*2 + 1), :minutes) == {{2011,3,5},{23,23,23}}   # +1 day for leap year 2012
+    assert Date.shift(datetime, -23*60-24, :minutes) == {{2013,3,4},{23,59,23}}
+    assert Date.shift(datetime, -60*24*(365*2 + 1), :minutes) == {{2011,3,5},{23,23,23}}
   end
 end
