@@ -21,6 +21,52 @@ defmodule Time do
   require Time.Helpers
   Time.Helpers.gen_conversions
 
+  def to_timestamp(value, :usec) do
+    secs = div(value, 1000000)
+    microsecs = rem(value, 1000000)
+    megasecs = div(secs, 1000000)
+    secs = rem(secs, 1000000)
+    {megasecs, secs, microsecs}
+  end
+
+  def to_timestamp(value, :msec) do
+    secs = div(value, 1000)
+    microsecs = rem(value, 1000)
+    megasecs = div(secs, 1000000)
+    secs = rem(secs, 1000000)
+    {megasecs, secs, microsecs}
+  end
+
+  def to_timestamp(value, :sec) do
+    secs = trunc(value)
+    microsecs = trunc((value - secs) * 1000000)
+    megasecs = div(secs, 1000000)
+    secs = rem(secs, 1000000)
+    {megasecs, secs, microsecs}
+  end
+
+  def to_timestamp(value, :min) do
+    to_timestamp(value * 60, :sec)
+  end
+
+  def to_timestamp(value, :hour) do
+    to_timestamp(value * 3600, :sec)
+  end
+
+  def to_timestamp(value, :hms) do
+    to_timestamp(to_sec(value, :hms), :sec)
+  end
+
+  def add(t1, t2) do
+    # TODO: implement
+  end
+
+  def add(timestamps) when is_list(timestamps) do
+    Enum.reduce timestamps, {0,0,0}, fn(a, b) ->
+      add(a, b)
+    end
+  end
+
   @doc """
   Convert the timestamp in the form { megasecs, seconds, microsecs } to the
   specified time units.
