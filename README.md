@@ -80,6 +80,18 @@ Time.to_sec(13, :msec)
 #=> 0.013
 
 
+## We can also convert from timestamps to other units using a single function ##
+
+Time.convert(t, :sec)
+#=> 1362781097.857429
+
+Time.convert(t, :min)
+#=> 22713018.297623817
+
+Time.convert(t, :hour)
+#=> 378550.30496039696
+
+
 ## elapsed() calculates time interval between now and t ##
 
 Time.elapsed(t)
