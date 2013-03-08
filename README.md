@@ -135,3 +135,15 @@ Use functions from the `Time` module for time interval arithmetic.
 **How do I find the time interval between two dates?**
 
 Use `Date.seconds_diff()` to obtain the number of seconds between two given dates. If you'd like to know, how many days, months, weeks, and so on are between the given dates, take look at conversion functions defined in `TimeInterval` module.
+
+**What kind of operations is this lib going to support eventually?**
+
+Can't say for sure yet. My goal is to make it easy to work with dates and time intervals so that you won't ever need to resort to Erlang's `calendar`, `time`, some functions from `erlang` and a bunch of other one.
+
+Some inspirations may be drawn from these: https://github.com/dweldon/edate/blob/master/src/edate.erl, http://www.kodejava.org/browse/73.html
+
+**What is support for time zones going to look like?**
+
+Not sure yet. Erlang does not support working time zones, so we can either use OS-specific functions and implement this feature for each platform separately or package a time zone database with this library and write the implementation in Elixir itself.
+
+References: https://github.com/drfloob/ezic
