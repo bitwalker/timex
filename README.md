@@ -1,6 +1,12 @@
 Date & Time modules for Elixir
 ==============================
 
+## Overview ##
+
+This is a draft implementation of two modules for Elixir that are going to deal with all aspects of working with dates and time intervals. I'm also planning to add another module for parsing dates from strings and formatting dates to strings later on.
+
+Basically, the `Date` module is for dealing with dates. It will support getting current date in any time zone, calculating time intervals between two dates, shifting a date by some amount of seconds/hours/days/years towards past and future. As Erlang provides support only for the Gregorian calendar, that's what I'm going to stick for the moment.
+
 ## FAQ ##
 
 **Which functions provide microsecond precision?**
