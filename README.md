@@ -114,6 +114,8 @@ Use functions from the `Time` module for time interval arithmetic.
 
 **What is TimeDelta module for?**
 
+***this will likely not make it far; I'm going to use timestamps instead***
+
 `TimeDelta` provides functions for encapsulating a certain time interval in one value. This value can later be used to adjust multiple dates by the same amount. The delta values can be defined in terms of seconds, minutes, hours, days, weeks, months, and years.
 
 **How do I find the time interval between two dates?**
