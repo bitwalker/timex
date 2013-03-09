@@ -1,9 +1,14 @@
 defmodule DateTest do
   use ExUnit.Case, async: true
 
+  test :iso8601 do
+    date = {{2013,3,5},{23,25,19}}
+    assert Date.iso_format(date) == "2013-03-05 23:25:19"
+  end
+
   test :rfc1123 do
     date = {{2013,3,5},{23,25,19}}
-    assert Date.rfc1123(date) == "Tue, 05 Mar 2013 21:25:19 GMT"
+    assert Date.rfc_format(date) == "Tue, 05 Mar 2013 21:25:19 GMT"
   end
 
   test :shift_seconds do
@@ -54,5 +59,16 @@ defmodule DateTest do
     assert Date.shift(datetime, -24, :minutes) == {date,{22,59,23}}
     assert Date.shift(datetime, -23*60-24, :minutes) == {{2013,3,4},{23,59,23}}
     assert Date.shift(datetime, -60*24*(365*2 + 1), :minutes) == {{2011,3,5},{23,23,23}}
+  end
+
+  test :arbitrary_shifts do
+    datetime = { {2013,3,5}, {23,23,23} }
+    assert Date.shift(datetime, [{3, :months}, {1, :days}]) == { {2013,6,6}, {23,23,23} }
+
+    datetime = { {2012,2,29}, {23,23,23} }
+    assert Date.shift(datetime, [{12, :months}]) == { {2013,2,28}, {23,23,23} }
+    assert Date.shift(datetime, [{12, :months}, {1, :days}]) == { {2013,3,1}, {23,23,23} }
+    assert Date.shift(datetime, [{12, :months}, {36, :minutes}, {36, :seconds}]) == { {2013,2,28}, {23,59,59} }
+    assert Date.shift(datetime, [{12, :months}, {36, :minutes}, {37, :seconds}]) == { {2013,3,1}, {0,0,0} }
   end
 end

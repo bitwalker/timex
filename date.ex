@@ -1,6 +1,57 @@
 defmodule Date do
   ### Getting The Date ###
 
+  def from(value, type // nil)
+
+  def from({mega, secs, _}, type) when type in [nil, :timestamp] do
+    # microseconds are ingnored
+    from(mega * 1000000 + secs, :sec)
+  end
+
+  def from(seconds, :sec) do
+    :calendar.gregorian_seconds_to_datetime(seconds)
+  end
+
+  def from(days, :days) do
+    { :calendar.gregorian_days_to_date(days), {0,0,0} }
+  end
+
+  def to_sec(date) do
+    :calendar.datetime_to_gregorian_seconds(date)
+  end
+
+  def to_days(date) do
+    :calendar.date_to_gregorian_days(date)
+  end
+
+  def convert(date, :sec) do
+    to_sec(date)
+  end
+
+  def convert(date, :days) do
+    to_days(date)
+  end
+
+  @doc """
+  1 - Monday, ..., 7 - Sunday
+  """
+  def weekday({date, _}) do
+    weekday(date)
+  end
+
+  def weekday(date) do
+    :calendar.day_of_the_week(date)
+  end
+
+  def iso_triplet({date, _}) do
+    iso_triplet(date)
+  end
+
+  def iso_triplet(date) do
+    { iso_year, iso_week } = :calendar.iso_week_number(date)
+    { iso_year, iso_week, weekday(date) }
+  end
+
   def local do
       # same as :erlang.localtime()
       :calendar.local_time
@@ -26,16 +77,24 @@ defmodule Date do
     :calendar.local_time_to_universal_time_dst(date)
   end
 
+  def distant_past do
+    { {0,1,1}, {0,0,0} }
+  end
+
+  def distant_future do
+    { {9999,12,31}, {23,59,59} }
+  end
+
   ### Converting Dates ###
 
   @doc "Returns a binary with the ISO 8601 representation of the date"
-  def iso8601({ {year, month, day}, {hour, min, sec} }) do
+  def iso_format({ {year, month, day}, {hour, min, sec} }) do
     list_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B",
                                   [year, month, day, hour, min, sec]))
   end
 
   @doc "Returns a binary with the RFC 1123 representation of the date"
-  def rfc1123(date) do
+  def rfc_format(date) do
     # :httpd_util.rfc1123_date() assumes that date is local
     list_to_binary(:httpd_util.rfc1123_date(date))
   end
@@ -67,6 +126,12 @@ defmodule Date do
   def shift(date, {mega, secs, _}) do
     # microseconds are simply ignored
     shift(date, mega * 1000000 + secs, :seconds)
+  end
+
+  def shift(datetime, spec) when is_list(spec) do
+    Enum.reduce spec, datetime, fn({value, type}, result) ->
+      shift(result, value, type)
+    end
   end
 
   @doc """
@@ -118,13 +183,11 @@ defmodule Date do
     month = month + value
 
     # Calculate a valid year value
-    cond do
-      month == 0 ->
-        year = year - 1
-      month < 0 ->
-        year = year + div(month, 12) - 1
-      month > 12 ->
-        year = year + div(month - 1, 12)
+    year = cond do
+      month == 0 -> year - 1
+      month < 0  -> year + div(month, 12) - 1
+      month > 12 -> year + div(month - 1, 12)
+      true       -> year
     end
 
     { validate({year, round_month(month), day}), time }
