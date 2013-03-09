@@ -1,11 +1,13 @@
 defmodule Date do
+  def _UNIX_EPOCH, do: {{1970,1,1}, {0,0,0}}
+
   ### Getting The Date ###
 
   def from(value, type // nil)
 
   def from({mega, secs, _}, type) when type in [nil, :timestamp] do
     # microseconds are ingnored
-    from(mega * 1000000 + secs, :sec)
+    from(mega * 1000000 + secs + :calendar.datetime_to_gregorian_seconds(_UNIX_EPOCH), :sec)
   end
 
   def from(seconds, :sec) do
@@ -14,6 +16,9 @@ defmodule Date do
 
   def from(days, :days) do
     { :calendar.gregorian_days_to_date(days), {0,0,0} }
+  end
+
+  def to_timestamp(date) do
   end
 
   def to_sec(date) do
@@ -32,24 +37,40 @@ defmodule Date do
     to_days(date)
   end
 
+  def convert(date, type) when type in [nil, :timestamp] do
+    to_timestamp(date)
+  end
+
   @doc """
   1 - Monday, ..., 7 - Sunday
   """
+  def weekday(date={_year,_month,_day}) do
+    :calendar.day_of_the_week(date)
+  end
+
   def weekday({date, _}) do
     weekday(date)
   end
 
-  def weekday(date) do
-    :calendar.day_of_the_week(date)
+  def week_number(date={_year,_month,_day}) do
+    :calendar.iso_week_number(date)
+  end
+
+  def week_number({date, _}) do
+    week_number(date)
+  end
+
+  def iso_triplet(date={_year,_month,_day}) do
+    { iso_year, iso_week } = week_number(date)
+    { iso_year, iso_week, weekday(date) }
   end
 
   def iso_triplet({date, _}) do
     iso_triplet(date)
   end
 
-  def iso_triplet(date) do
-    { iso_year, iso_week } = :calendar.iso_week_number(date)
-    { iso_year, iso_week, weekday(date) }
+  def days_in_month(year, month) do
+    :calendar.last_day_of_the_month(year, month)
   end
 
   def local do
@@ -99,15 +120,22 @@ defmodule Date do
     list_to_binary(:httpd_util.rfc1123_date(date))
   end
 
+  def seconds_since_0 do
+    seconds_since_0(Date.local)
+  end
+
   def seconds_since_0(date) do
     # date has to be in UTC
     :calendar.datetime_to_gregorian_seconds(date)
   end
 
+  def seconds_since_1970 do
+    seconds_since_1970(Date.local)
+  end
+
   def seconds_since_1970(date) do
     # date has to be in UTC
-    unix_epoch = { {1970, 1, 1}, {0, 0, 0} }
-    unix_seconds = :calendar.datetime_to_gregorian_seconds(unix_epoch)
+    unix_seconds = :calendar.datetime_to_gregorian_seconds(_UNIX_EPOCH)
     :calendar.datetime_to_gregorian_seconds(date) - unix_seconds
   end
 
@@ -199,7 +227,7 @@ defmodule Date do
 
   defp validate({year, month, day}) do
     # Check if we got past the last day of the month
-    max_day = :calendar.last_day_of_the_month(year, month)
+    max_day = days_in_month(year, month)
     if day > max_day do
       day = max_day
     end

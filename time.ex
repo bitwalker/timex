@@ -1,3 +1,20 @@
+#Time:
+
+ #* to_usec
+ #* to_msec
+ #* to_sec
+ #* to_timestamp
+ #* convert
+
+ #* now
+ #* elapsed
+ #* diff
+
+ #* add
+ #* subtract
+ #* cmp
+
+
 defmodule Time.Helpers do
   @moduledoc false
   defmacro gen_conversions do
@@ -57,13 +74,39 @@ defmodule Time do
     to_timestamp(to_sec(value, :hms), :sec)
   end
 
-  def add(t1, t2) do
-    # TODO: implement
+  def add({mega1,sec1,micro1}, {mega2,sec2,micro2}) do
+    normalize { mega1+mega2, sec1+sec2, micro1+micro2 }
+  end
+
+  def sub({mega1,sec1,micro1}, {mega2,sec2,micro2}) do
+    normalize { mega1-mega2, sec1-sec2, micro1-micro2 }
+  end
+
+  def scale({mega, secs, micro}, coef) do
+    normalize { mega*coef, secs*coef, micro*coef }
   end
 
   def add(timestamps) when is_list(timestamps) do
     Enum.reduce timestamps, {0,0,0}, fn(a, b) ->
       add(a, b)
+    end
+  end
+
+  def invert({mega, sec, micro}) do
+    { -mega, -sec, -micro }
+  end
+
+  def abs(timestamp={mega, sec, micro}) do
+    cond do
+      mega != 0 -> value = mega
+      sec != 0  -> value = sec
+      true      -> value = micro
+    end
+
+    if value < 0 do
+      invert(timestamp)
+    else
+      timestamp
     end
   end
 
@@ -78,6 +121,8 @@ defmodule Time do
   def convert(timestamp, :sec),  do: to_sec(timestamp)
   def convert(timestamp, :min),  do: to_sec(timestamp) / 60
   def convert(timestamp, :hour), do: to_sec(timestamp) / 3600
+  def convert(timestamp, :day),  do: to_sec(timestamp) / (3600 * 24)
+  def convert(timestamp, :week), do: to_sec(timestamp) / (3600 * 24 * 7)
 
   @doc """
   Time interval since UNIX epoch (January 1, 1970).
@@ -135,5 +180,20 @@ defmodule Time do
 
   def diff(t1, t2, type) do
     convert(diff(t1, t2), type)
+  end
+
+  defp normalize({mega, sec, micro}) do
+    # TODO: check for negative values
+    if micro >= 1000000 do
+      sec = sec + div(micro, 1000000)
+      micro = rem(micro, 1000000)
+    end
+
+    if sec >= 1000000 do
+      mega = mega + div(sec, 1000000)
+      sec = rem(sec, 1000000)
+    end
+
+    { mega, sec, micro }
   end
 end

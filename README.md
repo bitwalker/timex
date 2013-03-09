@@ -11,6 +11,46 @@ Basically, the `Date` module is for dealing with dates. It will support getting 
 
 The `Time` module supports a finer grain level of calculations over time intervals. It is going to be used for timestamps in logs, measuring code executions times, converting time units, and so forth.
 
+## Use cases ##
+
+### Getting current date and time ###
+
+Get current local date and format it to string.
+
+```elixir
+dt = Date.local()
+Date.rfc_format(dt)
+Date.iso_format(dt)
+
+# Use Time module for microsecond precision
+t = Time.now()
+Time.rfc_format(t)
+Time.iso_format(t)
+```
+
+### Extracting information about date ###
+
+Find out current weekday, week number, number if days in a given month, etc.
+
+```elixir
+dt = Date.local()     #=> {{2013,3,10},{0,0,30}}
+Date.weekday(dt)      #=> 7  # Sunday
+Date.week_number(dt)  #=> {2013,10}
+Date.iso_triplet(dt)  #=> {2013,10,7}  # { year, week number, weekday }
+```
+
+### Converting time units ###
+
+```elixir
+dt = Time.now
+Time.convert(dt, :sec)
+Time.convert(dt, :min)
+Time.convert(dt, :hour)
+
+Time.to_timestamp(13, :sec)
+Time.to_timestamp([{13, :sec}, {1, :days}, {6, :hour}], :strict)
+```
+
 ## What already works ##
 
 There is no support for different time zones yet, but you can already shift dates and format them to standard string representations.
