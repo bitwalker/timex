@@ -1,7 +1,7 @@
 all: date time
 
-date: Elixir-Date.beam Elixir-TimeDelta.beam Elixir-TimeDelta-Struct.beam
-Elixir-Date.beam, Elixir-TimeDelta.beam, Elixir-TimeDelta-Struct.beam: date.ex
+date: Elixir-Date.beam
+Elixir-Date.beam: date.ex
 	elixirc date.ex
 
 time: Elixir-Time.beam Elixir-Time-Helpers.beam
