@@ -1,13 +1,19 @@
 defmodule Date do
-  def _UNIX_EPOCH, do: {{1970,1,1}, {0,0,0}}
+  def _epoch_sec, do: :calendar.datetime_to_gregorian_seconds({{1970,1,1}, {0,0,0}})
+  def _epoch_days, do: :calendar.date_to_gregorian_days({1970,1,1})
+  defp _million, do: 1000000
 
   ### Getting The Date ###
 
-  def from(value, type // nil)
+  def epoch do
+    { {1970,1,1}, {0,0,0} }
+  end
 
-  def from({mega, secs, _}, type) when type in [nil, :timestamp] do
+  def from(value, type // :timestamp)
+
+  def from({mega, secs, _}, :timestamp) do
     # microseconds are ingnored
-    from(mega * 1000000 + secs + :calendar.datetime_to_gregorian_seconds(_UNIX_EPOCH), :sec)
+    from(mega * _million + secs + _epoch_sec, :sec)
   end
 
   def from(seconds, :sec) do
@@ -18,16 +24,40 @@ defmodule Date do
     { :calendar.gregorian_days_to_date(days), {0,0,0} }
   end
 
-  def to_timestamp(date) do
+  def to_timestamp(datetime) do
+    seconds = to_sec(datetime)
+    { div(seconds, _million), rem(seconds, _million), 0 }
   end
 
-  def to_sec(date) do
-    :calendar.datetime_to_gregorian_seconds(date)
+  def to_sec(datetime, reference // :epoch)
+
+  def to_sec(datetime, 0) do
+    :calendar.datetime_to_gregorian_seconds(datetime)
   end
 
-  def to_days(date) do
+  def to_sec(datetime, :epoch) do
+    to_sec(datetime, 0) - _epoch_sec
+  end
+
+  def to_sec(datetime1, datetime2) do
+    to_sec(datetime1, 0) - to_sec(datetime2, 0)
+  end
+
+  def to_days(date, reference // :epoch)
+
+  def to_days(date, 0) do
     :calendar.date_to_gregorian_days(date)
   end
+
+  def to_days(date, :epoch) do
+    :calendar.date_to_gregorian_days(date, 0) - _epoch_days
+  end
+
+  def to_days(date1, date2) do
+    :calendar.date_to_gregorian_days(date1, 0) - :calendar.date_to_gregorian_days(date2, 0)
+  end
+
+  def convert(date, type // :timestamp)
 
   def convert(date, :sec) do
     to_sec(date)
@@ -37,7 +67,7 @@ defmodule Date do
     to_days(date)
   end
 
-  def convert(date, type) when type in [nil, :timestamp] do
+  def convert(date, :timestamp) do
     to_timestamp(date)
   end
 
@@ -120,31 +150,6 @@ defmodule Date do
     list_to_binary(:httpd_util.rfc1123_date(date))
   end
 
-  def seconds_since_0 do
-    seconds_since_0(Date.local)
-  end
-
-  def seconds_since_0(date) do
-    # date has to be in UTC
-    :calendar.datetime_to_gregorian_seconds(date)
-  end
-
-  def seconds_since_1970 do
-    seconds_since_1970(Date.local)
-  end
-
-  def seconds_since_1970(date) do
-    # date has to be in UTC
-    unix_seconds = :calendar.datetime_to_gregorian_seconds(_UNIX_EPOCH)
-    :calendar.datetime_to_gregorian_seconds(date) - unix_seconds
-  end
-
-  def seconds_diff(date1, date2) do
-    seconds1 = :calendar.datetime_to_gregorian_seconds(date1)
-    seconds2 = :calendar.datetime_to_gregorian_seconds(date2)
-    seconds1 - seconds2
-  end
-
   ### Date Arithmetic ###
 
   @doc """
@@ -153,7 +158,7 @@ defmodule Date do
   """
   def shift(date, {mega, secs, _}) do
     # microseconds are simply ignored
-    shift(date, mega * 1000000 + secs, :seconds)
+    shift(date, mega * _million + secs, :seconds)
   end
 
   def shift(datetime, spec) when is_list(spec) do
@@ -187,7 +192,7 @@ defmodule Date do
 
   def shift(date, value, type) when type in [:seconds, :minutes, :hours] do
     # TODO: time zone adjustments
-    secs = :calendar.datetime_to_gregorian_seconds(date)
+    secs = to_sec(date)
     secs = secs + case type do
       :seconds -> value
       :minutes -> value * 60

@@ -124,6 +124,16 @@ defmodule Time do
   def convert(timestamp, :day),  do: to_sec(timestamp) / (3600 * 24)
   def convert(timestamp, :week), do: to_sec(timestamp) / (3600 * 24 * 7)
 
+  def epoch do
+    epoch({{0,1,1},{0,0,0}})
+  end
+
+  def epoch(reference_date) do
+    seconds = :calendar.datetime_to_gregorian_seconds({ {1970,1,1}, {0,0,0} }) \
+              - :calendar.datetime_to_gregorian_seconds(reference_date)
+    { div(seconds, 1000000), rem(seconds, 1000000), 0 }
+  end
+
   @doc """
   Time interval since UNIX epoch (January 1, 1970).
 
