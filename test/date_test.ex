@@ -67,6 +67,20 @@ defmodule DateTest do
     assert Date.shift(datetime, -60*24*(365*2 + 1), :minutes) == {{2011,3,5},{23,23,23}}
   end
 
+  test :shift_days do
+    date = {2013,3,5}
+    time = {23,23,23}
+    datetime = { date, time }
+    assert Date.shift(datetime, 1, :days) == { {2013,3,6}, time }
+  end
+
+  test :shift_months do
+    date = {2013,3,5}
+    time = {23,23,23}
+    datetime = { date, time }
+    assert Date.shift(datetime, 3, :months) == { {2013,6,5}, time }
+  end
+
   test :arbitrary_shifts do
     datetime = { {2013,3,5}, {23,23,23} }
     assert Date.shift(datetime, [{3, :months}, {1, :days}]) == { {2013,6,6}, {23,23,23} }

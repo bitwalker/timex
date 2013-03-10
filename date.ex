@@ -220,7 +220,7 @@ defmodule Date do
     # TODO: time zone adjustments
     days = to_days(date, 0)
     days = days + value
-    { from(days, :days), time }
+    { :calendar.gregorian_days_to_date(days), time }
   end
 
   def shift(date, value, :weeks) do
