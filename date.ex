@@ -1,6 +1,4 @@
 defmodule Date do
-  def _epoch_sec, do: :calendar.datetime_to_gregorian_seconds({{1970,1,1}, {0,0,0}})
-  def _epoch_days, do: :calendar.date_to_gregorian_days({1970,1,1})
   defp _million, do: 1000000
 
   ### Getting The Date ###
@@ -9,11 +7,23 @@ defmodule Date do
     { {1970,1,1}, {0,0,0} }
   end
 
+  def epoch(:sec) do
+    to_sec(epoch, 0)
+  end
+
+  def epoch(:days) do
+    to_days(epoch, 0)
+  end
+
   def from(value, type // :timestamp)
 
   def from({mega, secs, _}, :timestamp) do
     # microseconds are ingnored
-    from(mega * _million + secs + _epoch_sec, :sec)
+    from(mega * _million + secs + epoch(:sec), :sec)
+  end
+
+  def from({mega, secs, _}, :timestamp_since_year_0) do
+    from(mega * _million + secs, :sec)
   end
 
   def from(seconds, :sec) do
@@ -36,25 +46,30 @@ defmodule Date do
   end
 
   def to_sec(datetime, :epoch) do
-    to_sec(datetime, 0) - _epoch_sec
+    to_sec(datetime, 0) - epoch(:sec)
   end
 
   def to_sec(datetime1, datetime2) do
     to_sec(datetime1, 0) - to_sec(datetime2, 0)
   end
 
+
   def to_days(date, reference // :epoch)
+
+  def to_days({date, _}, ref) do
+    to_days(date, ref)
+  end
 
   def to_days(date, 0) do
     :calendar.date_to_gregorian_days(date)
   end
 
   def to_days(date, :epoch) do
-    :calendar.date_to_gregorian_days(date, 0) - _epoch_days
+    to_days(date, 0) - epoch(:days)
   end
 
   def to_days(date1, date2) do
-    :calendar.date_to_gregorian_days(date1, 0) - :calendar.date_to_gregorian_days(date2, 0)
+    to_days(date1, 0) - to_days(date2, 0)
   end
 
   def convert(date, type // :timestamp)
@@ -192,20 +207,20 @@ defmodule Date do
 
   def shift(date, value, type) when type in [:seconds, :minutes, :hours] do
     # TODO: time zone adjustments
-    secs = to_sec(date)
-    secs = secs + case type do
+    sec = to_sec(date, 0)
+    sec = sec + case type do
       :seconds -> value
       :minutes -> value * 60
       :hours   -> value * 60 * 60
     end
-    :calendar.gregorian_seconds_to_datetime(secs)
+    from(sec, :sec)
   end
 
   def shift({date, time}, value, :days) do
     # TODO: time zone adjustments
-    days = :calendar.date_to_gregorian_days(date)
+    days = to_days(date, 0)
     days = days + value
-    { :calendar.gregorian_days_to_date(days), time }
+    { from(days, :days), time }
   end
 
   def shift(date, value, :weeks) do

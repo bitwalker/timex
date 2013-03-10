@@ -1,6 +1,12 @@
 defmodule DateTest do
   use ExUnit.Case, async: true
 
+  test :epoch do
+    assert Date.epoch == { {1970,1,1}, {0,0,0} }
+    assert Date.to_sec(Date.epoch) == 0
+    assert Date.to_days(Date.epoch) == 0
+  end
+
   test :iso8601 do
     date = {{2013,3,5},{23,25,19}}
     assert Date.iso_format(date) == "2013-03-05 23:25:19"
