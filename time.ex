@@ -39,26 +39,21 @@ defmodule Time do
   Time.Helpers.gen_conversions
 
   def to_timestamp(value, :usec) do
-    secs = div(value, 1000000)
-    microsecs = rem(value, 1000000)
-    megasecs = div(secs, 1000000)
-    secs = rem(secs, 1000000)
+    { secs, microsecs } = mdivmod(value)
+    { megasecs, secs } = mdivmod(secs)
     {megasecs, secs, microsecs}
   end
 
   def to_timestamp(value, :msec) do
-    secs = div(value, 1000)
-    microsecs = rem(value, 1000)
-    megasecs = div(secs, 1000000)
-    secs = rem(secs, 1000000)
+    { secs, microsecs } = divmod(value, 1000)
+    { megasecs, secs } = mdivmod(secs)
     {megasecs, secs, microsecs}
   end
 
   def to_timestamp(value, :sec) do
     secs = trunc(value)
-    microsecs = trunc((value - secs) * 1000000)
-    megasecs = div(secs, 1000000)
-    secs = rem(secs, 1000000)
+    microsecs = trunc((value - secs) * _million)
+    { megasecs, secs } = mdivmod(secs)
     {megasecs, secs, microsecs}
   end
 
@@ -114,8 +109,8 @@ defmodule Time do
   Convert the timestamp in the form { megasecs, seconds, microsecs } to the
   specified time units.
   """
-  def convert(timestamp, type // nil)
-  def convert(timestamp, nil),   do: timestamp
+  def convert(timestamp, type // :timestamp)
+  def convert(timestamp, :timestamp),   do: timestamp
   def convert(timestamp, :usec), do: to_usec(timestamp)
   def convert(timestamp, :msec), do: to_msec(timestamp)
   def convert(timestamp, :sec),  do: to_sec(timestamp)
@@ -124,14 +119,16 @@ defmodule Time do
   def convert(timestamp, :day),  do: to_sec(timestamp) / (3600 * 24)
   def convert(timestamp, :week), do: to_sec(timestamp) / (3600 * 24 * 7)
 
-  def epoch do
-    epoch({{0,1,1},{0,0,0}})
+  def epoch(type // :timestamp)
+
+  def epoch(:timestamp) do
+    seconds = :calendar.datetime_to_gregorian_seconds({ {1970,1,1}, {0,0,0} })
+    { mega, sec } = mdivmod(seconds)
+    { mega, sec, 0 }
   end
 
-  def epoch(reference_date) do
-    seconds = :calendar.datetime_to_gregorian_seconds({ {1970,1,1}, {0,0,0} }) \
-              - :calendar.datetime_to_gregorian_seconds(reference_date)
-    { div(seconds, 1000000), rem(seconds, 1000000), 0 }
+  def epoch(type) do
+    convert(epoch, type)
   end
 
   @doc """
@@ -143,9 +140,9 @@ defmodule Time do
 
   When the argument is omitted, the return value's format is { megasecs, seconds, microsecs }.
   """
-  def now(type // nil)
+  def now(type // :timestamp)
 
-  def now(nil) do
+  def now(:timestamp) do
     :os.timestamp
   end
 
@@ -164,7 +161,7 @@ defmodule Time do
   When the second argument is omitted, the return value's format is { megasecs,
   seconds, microsecs }.
   """
-  def elapsed(timestamp, type // nil)
+  def elapsed(timestamp, type // :timestamp)
 
   def elapsed(timestamp, type) do
     diff(now, timestamp, type)
@@ -181,9 +178,9 @@ defmodule Time do
   When the third argument is omitted, the return value's format is { megasecs,
   seconds, microsecs }.
   """
-  def diff(t1, t2, type // nil)
+  def diff(t1, t2, type // :timestamp)
 
-  def diff({mega1,secs1,micro1}, {mega2,secs2,micro2}, nil) do
+  def diff({mega1,secs1,micro1}, {mega2,secs2,micro2}, :timestamp) do
     # TODO: normalize the result
     {mega1 - mega2, secs1 - secs2, micro1 - micro2}
   end
@@ -194,16 +191,32 @@ defmodule Time do
 
   defp normalize({mega, sec, micro}) do
     # TODO: check for negative values
-    if micro >= 1000000 do
-      sec = sec + div(micro, 1000000)
-      micro = rem(micro, 1000000)
+    if micro >= _million do
+      { sec, micro } = mdivmod(sec, micro)
     end
 
-    if sec >= 1000000 do
-      mega = mega + div(sec, 1000000)
-      sec = rem(sec, 1000000)
+    if sec >= _million do
+      { mega, sec } = mdivmod(mega, sec)
     end
 
     { mega, sec, micro }
   end
+
+  defp divmod(a, b) do
+    { div(a, b), rem(a, b) }
+  end
+
+  defp divmod(initial, a, b) do
+    { initial + div(a, b), rem(a, b) }
+  end
+
+  defp mdivmod(a) do
+    divmod(a, _million)
+  end
+
+  defp mdivmod(initial, a) do
+    divmod(initial, a, _million)
+  end
+
+  defp _million, do: 1000000
 end
