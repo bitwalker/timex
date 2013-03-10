@@ -30,7 +30,7 @@ Time.iso_format(t)
 
 ### Extracting information about date ###
 
-Find out current weekday, week number, number if days in a given month, etc.
+Find out current weekday, week number, number of days in a given month, etc.
 
 ```elixir
 dt = Date.local()     #=> {{2013,3,10},{0,0,30}}

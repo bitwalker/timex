@@ -1,34 +1,24 @@
-#Time:
-
- #* to_usec
- #* to_msec
- #* to_sec
- #* to_timestamp
- #* convert
-
- #* now
- #* elapsed
- #* diff
-
- #* add
- #* subtract
- #* cmp
-
-
 defmodule Time.Helpers do
   @moduledoc false
-  defmacro gen_conversions do
-    lc {name, coef} inlist [{:to_usec, 1000000}, {:to_msec, 1000}, {:to_sec, 1}] do
+
+  defmacro gen_conversions_alt do
+    lc {type, coef} inlist [{:usec, 1 / 1000000}, {:msec, 1 / 1000}, {:sec, 1}, {:min, 60}, {:hour, 3600}] do
       quote do
-        def unquote(name)({mega, secs, micro}), do:
-          (mega * 1000000 + secs) * unquote(coef) + micro * unquote(coef) / 1000000
-        def unquote(name)(value, :usec), do: value * unquote(coef) / 1000000
-        def unquote(name)(value, :msec), do: value * unquote(coef) / 1000
-        def unquote(name)(value, :sec),  do: value * unquote(coef)
-        def unquote(name)(value, :min),  do: value * unquote(coef) * 60
-        def unquote(name)(value, :hour), do: value * unquote(coef) * 3600
-        def unquote(name)({hours, minutes, seconds}, :hms), do:
-          unquote(name)(hours, :hour) + unquote(name)(minutes, :min) + unquote(name)(seconds, :sec)
+        def to_usec(value, unquote(type)), do: value * unquote(coef) * 1000000
+        def to_msec(value, unquote(type)), do: value * unquote(coef) * 1000
+        def to_sec(value, unquote(type)),  do: value * unquote(coef)
+        def to_min(value, unquote(type)),  do: value * unquote(coef) / 60
+        def to_hour(value, unquote(type)), do: value * unquote(coef) / 3600
+        def to_day(value, unquote(type)),  do: value * unquote(coef) / (3600 * 24)
+        def to_week(value, unquote(type)), do: value * unquote(coef) / (3600 * 24 * 7)
+      end
+    end
+  end
+
+  defmacro gen_conversions_hms do
+    lc name inlist [:to_usec, :to_msec, :to_sec, :to_min, :to_hour, :to_dat, :to_week] do
+      quote do
+        def unquote(name)({hours, minutes, seconds}, :hms), do: unquote(name)(hours * 3600 + minutes * 60 + seconds, :sec)
       end
     end
   end
@@ -36,7 +26,8 @@ end
 
 defmodule Time do
   require Time.Helpers
-  Time.Helpers.gen_conversions
+  Time.Helpers.gen_conversions_alt
+  Time.Helpers.gen_conversions_hms
 
   def to_timestamp(value, :usec) do
     { secs, microsecs } = mdivmod(value)
@@ -81,12 +72,6 @@ defmodule Time do
     normalize { mega*coef, secs*coef, micro*coef }
   end
 
-  def add(timestamps) when is_list(timestamps) do
-    Enum.reduce timestamps, {0,0,0}, fn(a, b) ->
-      add(a, b)
-    end
-  end
-
   def invert({mega, sec, micro}) do
     { -mega, -sec, -micro }
   end
@@ -106,19 +91,48 @@ defmodule Time do
   end
 
   @doc """
-  Convert the timestamp in the form { megasecs, seconds, microsecs } to the
+  Return a timestamp representing a time lapse of length 0.
+
+    Time.convert(Time.zero, :sec)
+    #=> 0
+
+  Can be useful for operations on collections of timestamps. For instance,
+
+    Enum.reduce timestamps, Time.zero, Time.add(&1, &2)
+
+  """
+  def zero do
+    {0, 0, 0}
+  end
+
+  @doc """
+  The main conversion function for timestamps. Return number of seconds
+  represented by timestamp.
+  """
+  def to_sec({mega, sec, micro}) do
+    (mega * 1000000 + sec) + micro / 1000000
+  end
+
+  @doc """
+  Convert timestamp in the form { megasecs, seconds, microsecs } to the
   specified time units.
+
+  Supported units: microseconds (:usec), milliseconds (:msec), seconds (:sec),
+  minutes (:min), hours (:hour), days (:day), or weeks (:week).
   """
   def convert(timestamp, type // :timestamp)
-  def convert(timestamp, :timestamp),   do: timestamp
-  def convert(timestamp, :usec), do: to_usec(timestamp)
-  def convert(timestamp, :msec), do: to_msec(timestamp)
+  def convert(timestamp, :timestamp), do: timestamp
+  def convert(timestamp, :usec), do: to_sec(timestamp) * 1000000
+  def convert(timestamp, :msec), do: to_sec(timestamp) * 1000
   def convert(timestamp, :sec),  do: to_sec(timestamp)
   def convert(timestamp, :min),  do: to_sec(timestamp) / 60
   def convert(timestamp, :hour), do: to_sec(timestamp) / 3600
   def convert(timestamp, :day),  do: to_sec(timestamp) / (3600 * 24)
   def convert(timestamp, :week), do: to_sec(timestamp) / (3600 * 24 * 7)
 
+  @doc """
+  Return time interval since the first day of year 0 to Epoch.
+  """
   def epoch(type // :timestamp)
 
   def epoch(:timestamp) do
@@ -132,11 +146,10 @@ defmodule Time do
   end
 
   @doc """
-  Time interval since UNIX epoch (January 1, 1970).
+  Time interval since Epoch.
 
-  The argument is an atom indicating the type of time units to return:
-  microseconds (:usec), milliseconds (:msec), seconds (:sec), minutes (:min),
-  or hours (:hour).
+  The argument is an atom indicating the type of time units to return (see
+  convert/2 for supported values).
 
   When the argument is omitted, the return value's format is { megasecs, seconds, microsecs }.
   """
