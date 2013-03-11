@@ -5,6 +5,9 @@ defmodule DateTest do
     assert Date.epoch == { {1970,1,1}, {0,0,0} }
     assert Date.to_sec(Date.epoch) == 0
     assert Date.to_days(Date.epoch) == 0
+    assert Date.to_sec(Date.epoch, 0) == Date.epoch(:sec)
+    assert Date.to_days(Date.epoch, 0) == Date.epoch(:day)
+    assert Date.to_timestamp(Date.epoch) == Date.epoch(:timestamp)
   end
 
   test :iso8601 do
@@ -71,7 +74,7 @@ defmodule DateTest do
     date = {2013,3,5}
     time = {23,23,23}
     datetime = { date, time }
-    assert Date.shift(datetime, 1, :days) == { {2013,3,6}, time }
+    assert Date.shift(datetime, 1, :day) == { {2013,3,6}, time }
   end
 
   test :shift_months do
@@ -83,11 +86,11 @@ defmodule DateTest do
 
   test :arbitrary_shifts do
     datetime = { {2013,3,5}, {23,23,23} }
-    assert Date.shift(datetime, [{3, :months}, {1, :days}]) == { {2013,6,6}, {23,23,23} }
+    assert Date.shift(datetime, [{3, :months}, {1, :day}]) == { {2013,6,6}, {23,23,23} }
 
     datetime = { {2012,2,29}, {23,23,23} }
     assert Date.shift(datetime, [{12, :months}]) == { {2013,2,28}, {23,23,23} }
-    assert Date.shift(datetime, [{12, :months}, {1, :days}]) == { {2013,3,1}, {23,23,23} }
+    assert Date.shift(datetime, [{12, :months}, {1, :day}]) == { {2013,3,1}, {23,23,23} }
     assert Date.shift(datetime, [{12, :months}, {36, :minutes}, {36, :seconds}]) == { {2013,2,28}, {23,59,59} }
     assert Date.shift(datetime, [{12, :months}, {36, :minutes}, {37, :seconds}]) == { {2013,3,1}, {0,0,0} }
   end

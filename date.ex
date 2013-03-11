@@ -1,19 +1,88 @@
 defmodule Date do
-  defp _million, do: 1000000
-
   ### Getting The Date ###
 
+  @doc """
+  Get current date in the local time zone.
+  """
+  def local do
+      # same as :erlang.localtime()
+      :calendar.local_time
+  end
+
+  @doc """
+  Convert date to local time.
+  """
+  def local(date) do
+      # TODO: determine date's time zone and adjust for the current time zone
+      :calendar.universal_time_to_local_time(date)
+  end
+
+  @doc """
+  Convert date to local time, the time zone of which is passed as the seconds
+  argument.
+  """
+  def local(date, tz) do
+      # TODO: determine date's time zone and adjust for tz
+      date
+  end
+
+  @doc """
+  Get current UTC date.
+  """
+  def universal do
+      # same as :erlang.universaltime()
+      :calendar.universal_time
+  end
+
+  @doc """
+  Convert local date to UTC.
+  """
+  def universal(date) do
+    # TODO: determine date's time zone and adjust for UTC
+    :calendar.local_time_to_universal_time_dst(date)
+  end
+
+  @doc """
+  Return a date representing midnight the first day of year zero. This same
+  date is used as a reference point by Erlang's calendar module.
+  """
+  def distant_past do
+    { {0,1,1}, {0,0,0} }
+  end
+
+  @doc """
+  Return a date representing a remote moment in in the future. Can be used as a
+  timeout value to effectively make the timeout indefinite.
+  """
+  def distant_future do
+    { {9999,12,31}, {23,59,59} }
+  end
+
+  @doc """
+  The date of UNIX epoch used as default reference date by this module and also
+  by Time module.
+  """
   def epoch do
     { {1970,1,1}, {0,0,0} }
+  end
+
+  @doc """
+  Time interval since year 0 to UNIX epoch expressed in the specified units.
+  """
+  def epoch(:timestamp) do
+    to_timestamp(epoch)
   end
 
   def epoch(:sec) do
     to_sec(epoch, 0)
   end
 
-  def epoch(:days) do
+  def epoch(:day) do
     to_days(epoch, 0)
   end
+
+
+  ### Constructing the date from an existing value ###
 
   def from(value, type // :timestamp)
 
@@ -30,9 +99,12 @@ defmodule Date do
     :calendar.gregorian_seconds_to_datetime(seconds)
   end
 
-  def from(days, :days) do
+  def from(days, :day) do
     { :calendar.gregorian_days_to_date(days), {0,0,0} }
   end
+
+
+  ### Converting dates ###
 
   def to_timestamp(datetime) do
     seconds = to_sec(datetime)
@@ -65,7 +137,7 @@ defmodule Date do
   end
 
   def to_days(date, :epoch) do
-    to_days(date, 0) - epoch(:days)
+    to_days(date, 0) - epoch(:day)
   end
 
   def to_days(date1, date2) do
@@ -78,13 +150,16 @@ defmodule Date do
     to_sec(date)
   end
 
-  def convert(date, :days) do
+  def convert(date, :day) do
     to_days(date)
   end
 
   def convert(date, :timestamp) do
     to_timestamp(date)
   end
+
+
+  ### Retrieving information about a date ###
 
   @doc """
   1 - Monday, ..., 7 - Sunday
@@ -118,40 +193,8 @@ defmodule Date do
     :calendar.last_day_of_the_month(year, month)
   end
 
-  def local do
-      # same as :erlang.localtime()
-      :calendar.local_time
-  end
 
-  def local(date) do
-      # TODO: determine date's time zone and adjust for the current time zone
-      :calendar.universal_time_to_local_time(date)
-  end
-
-  def local(date, tz) do
-      # TODO: determine date's time zone and adjust for tz
-      date
-  end
-
-  def universal do
-      # same as :erlang.universaltime()
-      :calendar.universal_time
-  end
-
-  def universal(date) do
-    # TODO: determine date's time zone and adjust for UTC
-    :calendar.local_time_to_universal_time_dst(date)
-  end
-
-  def distant_past do
-    { {0,1,1}, {0,0,0} }
-  end
-
-  def distant_future do
-    { {9999,12,31}, {23,59,59} }
-  end
-
-  ### Converting Dates ###
+  ### Formatting dates ###
 
   @doc "Returns a binary with the ISO 8601 representation of the date"
   def iso_format({ {year, month, day}, {hour, min, sec} }) do
@@ -164,6 +207,7 @@ defmodule Date do
     # :httpd_util.rfc1123_date() assumes that date is local
     list_to_binary(:httpd_util.rfc1123_date(date))
   end
+
 
   ### Date Arithmetic ###
 
@@ -216,7 +260,7 @@ defmodule Date do
     from(sec, :sec)
   end
 
-  def shift({date, time}, value, :days) do
+  def shift({date, time}, value, :day) do
     # TODO: time zone adjustments
     days = to_days(date, 0)
     days = days + value
@@ -224,7 +268,7 @@ defmodule Date do
   end
 
   def shift(date, value, :weeks) do
-    shift(date, value * 7, :days)
+    shift(date, value * 7, :day)
   end
 
   def shift({ {year, month, day}, time }, value, :months) do
@@ -264,4 +308,6 @@ defmodule Date do
       other -> other
     end
   end
+
+  defp _million, do: 1000000
 end
