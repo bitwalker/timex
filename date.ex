@@ -211,6 +211,15 @@ defmodule Date do
 
   ### Date Arithmetic ###
 
+  def compare(date, 0) do
+  end
+
+  def compare(date, :epoch) do
+  end
+
+  def compare(date1, date2) do
+  end
+
   @doc """
   Another flavor of the shift function that accepts a timestamp value as its
   second argument.
