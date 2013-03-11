@@ -77,30 +77,36 @@ defmodule Date do
     to_sec(epoch, 0)
   end
 
-  def epoch(:day) do
+  def epoch(:days) do
     to_days(epoch, 0)
   end
 
+  @doc """
+  The first day of year zero (calendar's module default reference date).
+  """
+  def zero do
+    { {0,1,1}, {0,0,0} }
+  end
 
   ### Constructing the date from an existing value ###
 
   def from(value, type // :timestamp)
 
-  def from({mega, secs, _}, :timestamp) do
+  def from({mega, sec, _}, :timestamp) do
     # microseconds are ingnored
-    from(mega * _million + secs + epoch(:sec), :sec)
+    from(mega * _million + sec, :sec)
   end
 
-  def from({mega, secs, _}, :timestamp_since_year_0) do
-    from(mega * _million + secs, :sec)
+  def from({mega, sec, _}, :timestamp_since_year_0) do
+    from(mega * _million + sec - epoch(:sec), :sec)
   end
 
   def from(seconds, :sec) do
-    :calendar.gregorian_seconds_to_datetime(seconds)
+    :calendar.gregorian_seconds_to_datetime(seconds + epoch(:sec))
   end
 
-  def from(days, :day) do
-    { :calendar.gregorian_days_to_date(days), {0,0,0} }
+  def from(days, :days) do
+    { :calendar.gregorian_days_to_date(days + epoch(:days)), {0,0,0} }
   end
 
 
@@ -137,7 +143,7 @@ defmodule Date do
   end
 
   def to_days(date, :epoch) do
-    to_days(date, 0) - epoch(:day)
+    to_days(date, 0) - epoch(:days)
   end
 
   def to_days(date1, date2) do
@@ -150,7 +156,7 @@ defmodule Date do
     to_sec(date)
   end
 
-  def convert(date, :day) do
+  def convert(date, :days) do
     to_days(date)
   end
 
@@ -211,25 +217,63 @@ defmodule Date do
 
   ### Date Arithmetic ###
 
-  def compare(date, 0) do
+  def cmp(date, 0) do
+    cmp(date, zero)
   end
 
-  def compare(date, :epoch) do
+  def cmp(date, :epoch) do
+    cmp(date, epoch)
   end
 
-  def compare(date1, date2) do
+  def cmp(date1, date2) do
+    diff = to_sec(date1) - to_sec(date2)
+    cond do
+      diff < 0  -> -1
+      diff == 0 -> 0
+      diff > 0  -> 1
+    end
   end
 
   @doc """
-  Another flavor of the shift function that accepts a timestamp value as its
-  second argument.
+  Same as cmp, but returns atoms :ascending, :equal, and :descending for cmp's
+  -1, 0, and 1, respectively.
   """
-  def shift(date, {mega, secs, _}) do
+  def compare(date, 0) do
+    compare(date, zero)
+  end
+
+  def compare(date, :epoch) do
+    compare(date, epoch)
+  end
+
+  def compare(date1, date2) do
+    diff = to_sec(date1) - to_sec(date2)
+    cond do
+      diff < 0  -> :ascending
+      diff == 0 -> :equal
+      diff > 0  -> :descending
+    end
+  end
+
+
+  @doc """
+  """
+  def add(date, {mega, sec, _}) do
     # microseconds are simply ignored
-    shift(date, mega * _million + secs, :seconds)
+    shift(date, mega * _million + sec, :sec)
+  end
+
+  def sub(date, {mega, sec, _}) do
+    shift(date, -mega * _million - sec, :sec)
   end
 
   def shift(datetime, spec) when is_list(spec) do
+    Enum.reduce spec, datetime, fn({value, type}, result) ->
+      shift(result, value, type)
+    end
+  end
+
+  def shift(datetime, spec, :strict) when is_list(spec) do
     Enum.reduce spec, datetime, fn({value, type}, result) ->
       shift(result, value, type)
     end
@@ -247,10 +291,10 @@ defmodule Date do
 
     datetime = {{2013,3,5},{23,23,23}}
 
-    Date.shift(datetime, 24*3600*365, :seconds)
+    Date.shift(datetime, 24*3600*365, :sec)
     #=> {{2014,3,5},{23,23,23}}
 
-    Date.shift(datetime, -24*3600*(365*2 + 1), :seconds)   # +1 day for leap year 2012
+    Date.shift(datetime, -24*3600*(365*2 + 1), :sec)   # +1 day for leap year 2012
     #=> {{2011,3,5},{23,23,23}}
 
   """
@@ -258,18 +302,18 @@ defmodule Date do
     date
   end
 
-  def shift(date, value, type) when type in [:seconds, :minutes, :hours] do
+  def shift(date, value, type) when type in [:sec, :min, :hours] do
     # TODO: time zone adjustments
-    sec = to_sec(date, 0)
+    sec = to_sec(date)
     sec = sec + case type do
-      :seconds -> value
-      :minutes -> value * 60
-      :hours   -> value * 60 * 60
+      :sec   -> value
+      :min   -> value * 60
+      :hours -> value * 60 * 60
     end
     from(sec, :sec)
   end
 
-  def shift({date, time}, value, :day) do
+  def shift({date, time}, value, :days) do
     # TODO: time zone adjustments
     days = to_days(date, 0)
     days = days + value
@@ -277,7 +321,7 @@ defmodule Date do
   end
 
   def shift(date, value, :weeks) do
-    shift(date, value * 7, :day)
+    shift(date, value * 7, :days)
   end
 
   def shift({ {year, month, day}, time }, value, :months) do
