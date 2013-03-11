@@ -1,8 +1,22 @@
 defmodule Time.Helpers do
   @moduledoc false
 
+  defmacro gen_conversions_small do
+    lc {type, coef} inlist [{:usec, 1000000}, {:msec, 1000}] do
+      quote do
+        def to_usec(value, unquote(type)), do: value * 1000000 / unquote(coef)
+        def to_msec(value, unquote(type)), do: value * 1000 / unquote(coef)
+        def to_sec(value, unquote(type)),  do: value / unquote(coef)
+        def to_min(value, unquote(type)),  do: value / unquote(coef) / 60
+        def to_hour(value, unquote(type)), do: value / unquote(coef) / 3600
+        def to_day(value, unquote(type)),  do: value / unquote(coef) / (3600 * 24)
+        def to_week(value, unquote(type)), do: value / unquote(coef) / (3600 * 24 * 7)
+      end
+    end
+  end
+
   defmacro gen_conversions_alt do
-    lc {type, coef} inlist [{:usec, 1 / 1000000}, {:msec, 1 / 1000}, {:sec, 1}, {:min, 60}, {:hour, 3600}] do
+    lc {type, coef} inlist [{:sec, 1}, {:min, 60}, {:hour, 3600}, {:day, 3600*24}, {:week, 3600*24*7}] do
       quote do
         def to_usec(value, unquote(type)), do: value * unquote(coef) * 1000000
         def to_msec(value, unquote(type)), do: value * unquote(coef) * 1000
@@ -16,18 +30,58 @@ defmodule Time.Helpers do
   end
 
   defmacro gen_conversions_hms do
+    lc name inlist [:to_usec, :to_msec, :to_sec, :to_min, :to_hour, :to_day, :to_week] do
+      quote do
+        def unquote(name)({hours, minutes, seconds}, :hms), do: unquote(name)(hours * 3600 + minutes * 60 + seconds, :sec)
+      end
+    end
+  end
+
+  defmacro gen_conversions_from do
+    quote do
+      def from(value, :usec) do
+        { sec, micro } = mdivmod(value)
+        { mega, sec }  = mdivmod(sec)
+        { mega, sec, micro }
+      end
+
+      def from(value, :msec) do
+        micro = value * 1000
+        { sec, micro } = divmod(micro)
+        { mega, sec }  = mdivmod(sec)
+        { mega, sec, micro }
+      end
+
+      def from(value, :sec) do
+        # trunc ...
+        { sec, micro } = mdivmod(value)
+        { mega, sec }  = mdivmod(sec)
+        { mega, sec, micro }
+      end
+    end
+
     lc name inlist [:to_usec, :to_msec, :to_sec, :to_min, :to_hour, :to_dat, :to_week] do
       quote do
         def unquote(name)({hours, minutes, seconds}, :hms), do: unquote(name)(hours * 3600 + minutes * 60 + seconds, :sec)
       end
     end
   end
+
 end
 
 defmodule Time do
   require Time.Helpers
+  Time.Helpers.gen_conversions_small
   Time.Helpers.gen_conversions_alt
   Time.Helpers.gen_conversions_hms
+
+  def to_usec({mega, sec, micro}), do: (mega * _million + sec) * _million + micro
+  def to_msec({mega, sec, micro}), do: (mega * _million + sec) * 1000 + micro / 1000
+  def to_sec({mega, sec, micro}),  do: mega * _million + sec + micro / _million
+  def to_min(timestamp),  do: to_sec(timestamp) / 60
+  def to_hour(timestamp), do: to_sec(timestamp) / 3600
+  def to_day(timestamp),  do: to_sec(timestamp) / (3600 * 24)
+  def to_week(timestamp), do: to_sec(timestamp) / (3600 * 24 * 7)
 
   def to_timestamp(value, :usec) do
     { secs, microsecs } = mdivmod(value)
@@ -54,6 +108,14 @@ defmodule Time do
 
   def to_timestamp(value, :hour) do
     to_timestamp(value * 3600, :sec)
+  end
+
+  def to_timestamp(value, :day) do
+    to_timestamp(value * 3600 * 24, :sec)
+  end
+
+  def to_timestamp(value, :week) do
+    to_timestamp(value * 3600 * 24 * 7, :sec)
   end
 
   def to_timestamp(value, :hms) do
@@ -103,14 +165,6 @@ defmodule Time do
   """
   def zero do
     {0, 0, 0}
-  end
-
-  @doc """
-  The main conversion function for timestamps. Return number of seconds
-  represented by timestamp.
-  """
-  def to_sec({mega, sec, micro}) do
-    (mega * 1000000 + sec) + micro / 1000000
   end
 
   @doc """
