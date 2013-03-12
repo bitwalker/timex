@@ -375,7 +375,13 @@ defmodule Date do
   def normalize_shift(spec) when is_list(spec) do
   end
 
-  defp validate({year, month, day}) do
+  def is_valid({date, _time}) do
+    :calendar.is_valid(date)
+  end
+
+  def validate({year, month, day}, direction // :past)
+
+  def validate({year, month, day}, :past) do
     # Check if we got past the last day of the month
     max_day = days_in_month(year, month)
     if day > max_day do
@@ -383,6 +389,16 @@ defmodule Date do
     end
     {year, month, day}
   end
+
+  def validate({year, month, day}, :future) do
+    # Check if we got past the last day of the month
+    max_day = days_in_month(year, month)
+    if day > max_day do
+      day = max_day
+    end
+    {year, month, day}
+  end
+
 
   defp mod(a, b) do
     rem(rem(a, b) + b, b)
