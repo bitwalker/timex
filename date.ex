@@ -150,6 +150,32 @@ defmodule Date do
     to_days(date1, 0) - to_days(date2, 0)
   end
 
+  def diff(date1, date2, type // :timestamp)
+
+  def diff(date1, date2, :timestamp) do
+    Time.from_sec(to_sec(date1, date2))
+  end
+
+  def diff(date1, date2, :sec) do
+    to_sec(date1, date2)
+  end
+
+  def diff(date1, date2, :days) do
+    to_days(date1, date2)
+  end
+
+  def diff(date1, date2, :weeks) do
+    to_days(date1, date2)
+  end
+
+  def diff(date1, date2, :months) do
+    to_days(date1, date2)
+  end
+
+  def diff(date1, date2, :years) do
+    to_days(date1, date2)
+  end
+
   def convert(date, type // :timestamp)
 
   def convert(date, :sec) do
@@ -258,13 +284,17 @@ defmodule Date do
 
   @doc """
   """
-  def add(date, {mega, sec, _}) do
+  def add(datetime, {mega, sec, _}) do
     # microseconds are simply ignored
-    shift(date, mega * _million + sec, :sec)
+    shift(datetime, mega * _million + sec, :sec)
   end
 
-  def sub(date, {mega, sec, _}) do
-    shift(date, -mega * _million - sec, :sec)
+  def sub(datetime, {mega, sec, _}) do
+    shift(datetime, -mega * _million - sec, :sec)
+  end
+
+  def shift(datetime, timestamp={_,_,_}) do
+    add(datetime, timestamp)
   end
 
   def shift(datetime, spec) when is_list(spec) do
@@ -274,7 +304,7 @@ defmodule Date do
   end
 
   def shift(datetime, spec, :strict) when is_list(spec) do
-    Enum.reduce spec, datetime, fn({value, type}, result) ->
+    Enum.reduce normalize_shift(spec), datetime, fn({value, type}, result) ->
       shift(result, value, type)
     end
   end
@@ -340,6 +370,9 @@ defmodule Date do
 
   def shift({ {year, month, day}, time }, value, :years) do
     { validate({year + value, month, day}), time }
+  end
+
+  def normalize_shift(spec) when is_list(spec) do
   end
 
   defp validate({year, month, day}) do
