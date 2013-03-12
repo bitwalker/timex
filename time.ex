@@ -256,6 +256,22 @@ defmodule Time do
     convert(diff(t1, t2), type)
   end
 
+  def measure(fun) do
+    measure_result(:timer.tc(fun))
+  end
+
+  def measure(fun, args) do
+    measure_result(:timer.tc(fun, args))
+  end
+
+  def measure(module, fun, args) do
+    measure_result(:timer.tc(module, fun, args))
+  end
+
+  defp measure_result({micro, ret}) do
+    { to_timestamp(micro, :usec), ret }
+  end
+
   defp normalize({mega, sec, micro}) do
     # TODO: check for negative values
     if micro >= _million do
