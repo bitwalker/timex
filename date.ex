@@ -212,6 +212,18 @@ defmodule Date do
     week_number(date)
   end
 
+  def is_leap({year,_,_}) do
+    is_leap(year)
+  end
+
+  def is_leap({{year,_,_}, _}) do
+    is_leap(year)
+  end
+
+  def is_leap(year) do
+    :calendar.is_leap_year(year)
+  end
+
   def iso_triplet(date={_year,_month,_day}) do
     { iso_year, iso_week } = week_number(date)
     { iso_year, iso_week, weekday(date) }
