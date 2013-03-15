@@ -1,45 +1,89 @@
+# Consider adding the following functions
+# is_future = diff(date, :now) > 0
+# is_past = diff(date, :now) < 0
+# next(date, type) = shift(date, 1, type)
+# prev(date, type) = shift(date, -1, type)
+# beginning_of_month
+# end_of_month
+
 defmodule Date do
   ### Getting The Date ###
+
+  @doc """
+  Get a time zone object for the specified offset or name.
+
+  When the argument is omitted, retuns system's local time zone.
+  """
+  def timezone(spec // :local)
+
+  def timezone(:local) do
+    datetime = :calendar.universal_time()
+    local_time = :calendar.universal_time_to_local_time(datetime)
+    hour_offset = (:calendar.datetime_to_gregorian_seconds(local_time) - :calendar.datetime_to_gregorian_seconds(datetime)) / 3600
+    timezone(hour_offset, "TimeZoneName")
+  end
+
+  def timezone(offset) when is_number(offset) do
+    # TODO: fetch time zone name
+    # An exception should be thrown for invalid offsets
+    timezone(offset, "TimeZoneName")
+  end
+
+  def timezone(name) when is_binary(name) do
+    # TODO: determine the offset
+    # An exception should be thrown for invalid names
+    timezone(2, name)
+  end
+
+  def timezone(offset, name) when is_number(offset) and is_binary(name) do
+    { offset, name }
+  end
+
+  @doc """
+  Get current date and time.
+  """
+  def now do
+    datetime = :calendar.universal_time()
+    tz = timezone()
+    { datetime, tz }
+  end
 
   @doc """
   Get current date in the local time zone.
   """
   def local do
-      # same as :erlang.localtime()
-      :calendar.local_time
+    local(Date.now)
   end
 
   @doc """
   Convert date to local time.
   """
-  def local(date) do
-      # TODO: determine date's time zone and adjust for the current time zone
-      :calendar.universal_time_to_local_time(date)
+  def local({ datetime, {offset,_} }) do
+    sec = :calendar.datetime_to_gregorian_seconds(datetime) + offset * 3600
+    from(trunc(sec), :sec, 0)
   end
 
   @doc """
   Convert date to local time, the time zone of which is passed as the seconds
   argument.
   """
-  def local(date, tz) do
-      # TODO: determine date's time zone and adjust for tz
-      date
+  def local({ datetime, _}, tz) do
+    # simply ignore the dtz's timezone and use the other one
+    local({ datetime, tz})
   end
 
   @doc """
   Get current UTC date.
   """
   def universal do
-      # same as :erlang.universaltime()
-      :calendar.universal_time
+    universal(Date.now)
   end
 
   @doc """
-  Convert local date to UTC.
+  Convert date to UTC.
   """
-  def universal(date) do
-    # TODO: determine date's time zone and adjust for UTC
-    :calendar.local_time_to_universal_time_dst(date)
+  def universal({datetime, _}) do
+    datetime
   end
 
   @doc """
@@ -109,6 +153,13 @@ defmodule Date do
     { :calendar.gregorian_days_to_date(days + epoch(:days)), {0,0,0} }
   end
 
+  def from(seconds, :sec, 0) do
+    :calendar.gregorian_seconds_to_datetime(seconds)
+  end
+
+  def from(days, :days, 0) do
+    { :calendar.gregorian_days_to_date(days), {0,0,0} }
+  end
 
   ### Converting dates ###
 
