@@ -13,14 +13,29 @@ defmodule Date do
   Get a time zone object for the specified offset or name.
 
   When the argument is omitted, retuns system's local time zone.
+
+  If the argument has value :utc, UTC time zone is returned which has offset 0.
   """
   def timezone(spec // :local)
 
   def timezone(:local) do
-    datetime = :calendar.universal_time()
-    local_time = :calendar.universal_time_to_local_time(datetime)
-    hour_offset = (:calendar.datetime_to_gregorian_seconds(local_time) - :calendar.datetime_to_gregorian_seconds(datetime)) / 3600
-    timezone(hour_offset, "TimeZoneName")
+    # TODO: change implmenetation for cross-platform support
+    datestr = System.cmd('date "+%z %Z"')
+    { :ok, [offs|[name]], _ } = :io_lib.fread('~d ~s', datestr)
+
+    hours_offs = div(offs, 100)
+    min_offs = offs - hours_offs * 100
+    offset = hours_offs + min_offs / 60
+
+    timezone(offset, to_binary(name))
+    #datetime = :calendar.universal_time()
+    #local_time = :calendar.universal_time_to_local_time(datetime)
+    #hour_offset = (:calendar.datetime_to_gregorian_seconds(local_time) - :calendar.datetime_to_gregorian_seconds(datetime)) / 3600
+    #timezone(hour_offset, "TimeZoneName")
+  end
+
+  def timezone(:utc) do
+    { 0.0, "UTC" }
   end
 
   def timezone(offset) when is_number(offset) do
@@ -48,58 +63,73 @@ defmodule Date do
     { datetime, tz }
   end
 
-  @doc """
-  Get current date in the local time zone.
-  """
-  def local do
-    local(Date.now)
+  def now(:sec) do
+    to_sec(now)
+  end
+
+  def now(:days) do
+    to_days(now)
   end
 
   @doc """
-  Convert date to local time.
+  Get current local date in Erlang datetime format.
+  """
+  def local do
+    local(now)
+  end
+
+  @doc """
+  Convert date to local date in Erlang datetime format.
   """
   def local({ datetime, {offset,_} }) do
     sec = :calendar.datetime_to_gregorian_seconds(datetime) + offset * 3600
-    from(trunc(sec), :sec, 0)
+    :calendar.gregorian_seconds_to_datetime(sec)
   end
 
   @doc """
-  Convert date to local time, the time zone of which is passed as the seconds
-  argument.
+  Convert date to local date in Erlang datetime format using the provided time zone.
   """
-  def local({ datetime, _}, tz) do
-    # simply ignore the dtz's timezone and use the other one
-    local({ datetime, tz})
+  def local({datetime,_}, tz) do
+    # simply ignore the date's timezone and use tz instead
+    local({datetime, tz})
   end
 
   @doc """
-  Get current UTC date.
+  Get current UTC date in Erlang datetime format.
   """
   def universal do
-    universal(Date.now)
+    universal(now)
   end
 
   @doc """
-  Convert date to UTC.
+  Convert date to UTC in Erlang datetime format.
   """
   def universal({datetime, _}) do
     datetime
   end
 
   @doc """
-  Return a date representing midnight the first day of year zero. This same
-  date is used as a reference point by Erlang's calendar module.
+  The first day of year zero (calendar's module default reference date).
+  """
+  def zero do
+    { {{0,1,1}, {0,0,0}}, timezone(:utc) }
+  end
+
+  @doc """
+  Return a date representing midnight the first day of year zero.
   """
   def distant_past do
-    { {0,1,1}, {0,0,0} }
+    # TODO: think of a use cases
+    { {{0,1,1}, {0,0,0}}, timezone(:utc) }
   end
 
   @doc """
   Return a date representing a remote moment in in the future. Can be used as a
-  timeout value to effectively make the timeout indefinite.
+  timeout value to effectively make the timeout infinite.
   """
   def distant_future do
-    { {9999,12,31}, {23,59,59} }
+    # TODO: evaluate whether it's distant enough
+    { {{9999,12,31}, {23,59,59}}, timezone(:utc) }
   end
 
   @doc """
@@ -107,7 +137,7 @@ defmodule Date do
   by Time module.
   """
   def epoch do
-    { {1970,1,1}, {0,0,0} }
+    { {{1970,1,1}, {0,0,0}}, timezone(:utc) }
   end
 
   @doc """
@@ -125,61 +155,55 @@ defmodule Date do
     to_days(epoch, 0)
   end
 
-  @doc """
-  The first day of year zero (calendar's module default reference date).
-  """
-  def zero do
-    { {0,1,1}, {0,0,0} }
-  end
-
   ### Constructing the date from an existing value ###
 
-  def from(value, type // :timestamp)
+  def from(value, type // :timestamp, reference // :epoch)
 
-  def from({mega, sec, _}, :timestamp) do
+  def from({mega, sec, _}, :timestamp, :epoch) do
     # microseconds are ingnored
     from(mega * _million + sec, :sec)
   end
 
-  def from({mega, sec, _}, :timestamp_since_year_0) do
-    from(mega * _million + sec - epoch(:sec), :sec)
+  def from({mega, sec, _}, :timestamp, 0) do
+    from(mega * _million + sec, :sec, 0)
   end
 
-  def from(seconds, :sec) do
-    :calendar.gregorian_seconds_to_datetime(seconds + epoch(:sec))
+  def from(sec, :sec, :epoch) do
+    { :calendar.gregorian_seconds_to_datetime(sec + epoch(:sec)), timezone(:utc) }
   end
 
-  def from(days, :days) do
-    { :calendar.gregorian_days_to_date(days + epoch(:days)), {0,0,0} }
+  def from(sec, :sec, 0) do
+    { :calendar.gregorian_seconds_to_datetime(sec), timezone(:utc) }
   end
 
-  def from(seconds, :sec, 0) do
-    :calendar.gregorian_seconds_to_datetime(seconds)
+  def from(days, :days, :epoch) do
+    { {:calendar.gregorian_days_to_date(days + epoch(:days)),{0,0,0}}, timezone(:utc) }
   end
 
   def from(days, :days, 0) do
-    { :calendar.gregorian_days_to_date(days), {0,0,0} }
+    { {:calendar.gregorian_days_to_date(days),{0,0,0}}, timezone(:utc) }
   end
 
   ### Converting dates ###
 
-  def to_timestamp(datetime) do
-    seconds = to_sec(datetime)
-    { div(seconds, _million), rem(seconds, _million), 0 }
+  def to_timestamp(dtz) do
+    sec = to_sec(dtz)
+    { div(sec, _million), rem(sec, _million), 0 }
   end
 
-  def to_sec(datetime, reference // :epoch)
+  def to_sec(dtz, reference // :epoch)
 
-  def to_sec(datetime, 0) do
+  def to_sec(dtz, 0) do
+    datetime = universal(dtz)
     :calendar.datetime_to_gregorian_seconds(datetime)
   end
 
-  def to_sec(datetime, :epoch) do
-    to_sec(datetime, 0) - epoch(:sec)
+  def to_sec(dtz, :epoch) do
+    to_sec(dtz, 0) - epoch(:sec)
   end
 
-  def to_sec(datetime1, datetime2) do
-    to_sec(datetime1, 0) - to_sec(datetime2, 0)
+  def to_sec(dtz1, dtz2) do
+    to_sec(dtz1, 0) - to_sec(dtz2, 0)
   end
 
 
@@ -199,32 +223,6 @@ defmodule Date do
 
   def to_days(date1, date2) do
     to_days(date1, 0) - to_days(date2, 0)
-  end
-
-  def diff(date1, date2, type // :timestamp)
-
-  def diff(date1, date2, :timestamp) do
-    Time.from_sec(to_sec(date1, date2))
-  end
-
-  def diff(date1, date2, :sec) do
-    to_sec(date1, date2)
-  end
-
-  def diff(date1, date2, :days) do
-    to_days(date1, date2)
-  end
-
-  def diff(date1, date2, :weeks) do
-    to_days(date1, date2)
-  end
-
-  def diff(date1, date2, :months) do
-    to_days(date1, date2)
-  end
-
-  def diff(date1, date2, :years) do
-    to_days(date1, date2)
   end
 
   def convert(date, type // :timestamp)
@@ -303,8 +301,7 @@ defmodule Date do
     list_to_binary(:httpd_util.rfc1123_date(date))
   end
 
-
-  ### Date Arithmetic ###
+  ### Comparing dates ###
 
   def cmp(date, 0) do
     cmp(date, zero)
@@ -344,6 +341,33 @@ defmodule Date do
     end
   end
 
+  def diff(date1, date2, type // :timestamp)
+
+  def diff(date1, date2, :timestamp) do
+    Time.from_sec(to_sec(date1, date2))
+  end
+
+  def diff(date1, date2, :sec) do
+    to_sec(date1, date2)
+  end
+
+  def diff(date1, date2, :days) do
+    to_days(date1, date2)
+  end
+
+  def diff(date1, date2, :weeks) do
+    to_days(date1, date2)
+  end
+
+  def diff(date1, date2, :months) do
+    to_days(date1, date2)
+  end
+
+  def diff(date1, date2, :years) do
+    to_days(date1, date2)
+  end
+
+  ### Date arithmetic ###
 
   @doc """
   """

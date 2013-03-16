@@ -1,8 +1,13 @@
 defmodule DateTest do
   use ExUnit.Case, async: true
 
+  test :distant_past do
+    {datetime, _} = Date.zero
+    assert :calendar.datetime_to_gregorian_seconds(datetime) == 0
+  end
+
   test :epoch do
-    assert Date.epoch == { {1970,1,1}, {0,0,0} }
+    assert Date.epoch == { {{1970,1,1}, {0,0,0}}, {0.0, "UTC"} }
     assert Date.to_sec(Date.epoch) == 0
     assert Date.to_days(Date.epoch) == 0
     assert Date.to_sec(Date.epoch, 0) == Date.epoch(:sec)
