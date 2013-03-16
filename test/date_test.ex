@@ -11,11 +11,11 @@ defmodule DateTest do
   end
 
   test :local do
-    {datetime, tz} = Date.now
+    {datetime, _} = Date.now
     assert Date.local({datetime, Date.timezone(:utc)}) == :calendar.universal_time
   end
 
-  test :distant_past do
+  test :zero do
     {datetime, _} = Date.zero
     assert :calendar.datetime_to_gregorian_seconds(datetime) == 0
   end
