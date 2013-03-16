@@ -83,7 +83,7 @@ defmodule Date do
   """
   def local({ datetime, {offset,_} }) do
     sec = :calendar.datetime_to_gregorian_seconds(datetime) + offset * 3600
-    :calendar.gregorian_seconds_to_datetime(sec)
+    :calendar.gregorian_seconds_to_datetime(trunc(sec))
   end
 
   @doc """

@@ -1,6 +1,11 @@
 defmodule DateTest do
   use ExUnit.Case, async: true
 
+  test :local do
+    {datetime, tz} = Date.now
+    assert Date.local({datetime, Date.timezone(:utc)}) == :calendar.universal_time
+  end
+
   test :distant_past do
     {datetime, _} = Date.zero
     assert :calendar.datetime_to_gregorian_seconds(datetime) == 0
