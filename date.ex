@@ -9,6 +9,18 @@
 defmodule Date do
   ### Getting The Date ###
 
+  defmacrop local_tz do
+    # TODO: change implmenetation for cross-platform support
+    datestr = System.cmd('date "+%z %Z"')
+    { :ok, [offs|[name]], _ } = :io_lib.fread('~d ~s', datestr)
+
+    hours_offs = div(offs, 100)
+    min_offs = offs - hours_offs * 100
+    offset = hours_offs + min_offs / 60
+
+    { offset, to_binary(name) }
+  end
+
   @doc """
   Get a time zone object for the specified offset or name.
 
@@ -19,19 +31,11 @@ defmodule Date do
   def timezone(spec // :local)
 
   def timezone(:local) do
-    # TODO: change implmenetation for cross-platform support
-    datestr = System.cmd('date "+%z %Z"')
-    { :ok, [offs|[name]], _ } = :io_lib.fread('~d ~s', datestr)
-
-    hours_offs = div(offs, 100)
-    min_offs = offs - hours_offs * 100
-    offset = hours_offs + min_offs / 60
-
-    timezone(offset, to_binary(name))
     #datetime = :calendar.universal_time()
     #local_time = :calendar.universal_time_to_local_time(datetime)
     #hour_offset = (:calendar.datetime_to_gregorian_seconds(local_time) - :calendar.datetime_to_gregorian_seconds(datetime)) / 3600
     #timezone(hour_offset, "TimeZoneName")
+    local_tz()
   end
 
   def timezone(:utc) do
@@ -75,7 +79,8 @@ defmodule Date do
   Get current local date in Erlang datetime format.
   """
   def local do
-    local(now)
+    #local(now)
+    :calendar.local_time()
   end
 
   @doc """
@@ -98,7 +103,8 @@ defmodule Date do
   Get current UTC date in Erlang datetime format.
   """
   def universal do
-    universal(now)
+    #universal(now)
+    :calendar.universal_time()
   end
 
   @doc """
