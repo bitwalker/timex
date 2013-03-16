@@ -9,6 +9,12 @@
 defmodule Date do
   ### Getting The Date ###
 
+  defmacrop make_tz(offset, name) do
+    quote do
+      { unquote(offset), unquote(name) }
+    end
+  end
+
   defmacrop local_tz do
     # TODO: change implmenetation for cross-platform support
     datestr = System.cmd('date "+%z %Z"')
@@ -18,16 +24,25 @@ defmodule Date do
     min_offs = offs - hours_offs * 100
     offset = hours_offs + min_offs / 60
 
-    { offset, to_binary(name) }
+    make_tz(offset, to_binary(name))
   end
+
+  @type tz :: { number, binary }
 
   @doc """
   Get a time zone object for the specified offset or name.
 
-  When the argument is omitted, retuns system's local time zone.
+  When offset or name is invalid, an exception is thrown.
 
-  If the argument has value :utc, UTC time zone is returned which has offset 0.
+  ## Examples
+
+    timezone(2)      #=> { 2.0, "EET" }
+    timezone("EET")  #=> { 2.0, "EET" }
+    timezone(:utc)   #=> { 0.0, "UTC" }
+    timezone() or timezone(:local)  #=> <local time zone>
+
   """
+  @spec timezone(none | :local | :utc | number | binary) :: tz
   def timezone(spec // :local)
 
   def timezone(:local) do
@@ -39,23 +54,35 @@ defmodule Date do
   end
 
   def timezone(:utc) do
-    { 0.0, "UTC" }
+    make_tz(0.0, "UTC")
   end
 
   def timezone(offset) when is_number(offset) do
     # TODO: fetch time zone name
     # An exception should be thrown for invalid offsets
-    timezone(offset, "TimeZoneName")
+    make_tz(offset, "TimeZoneName")
   end
 
   def timezone(name) when is_binary(name) do
     # TODO: determine the offset
     # An exception should be thrown for invalid names
-    timezone(2, name)
+    make_tz(2, name)
   end
 
+  @doc """
+  Return a time zone object for the given offset-name combination.
+
+  An exception is thrown in the case of invalid or non-matching arguments.
+
+  ## Examples
+
+    timezone(2, "EET")  #=> { 2.0, "EET" }
+    timezone(2, "PST")  #=> <exception>
+
+  """
+  @spec timezone(number, binary) :: tz
   def timezone(offset, name) when is_number(offset) and is_binary(name) do
-    { offset, name }
+    make_tz(offset, name)
   end
 
 
