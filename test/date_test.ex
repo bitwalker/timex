@@ -1,18 +1,36 @@
 defmodule DateTest do
   use ExUnit.Case, async: true
 
-  test :to_sec do
-    dt = Date.now
-    assert Date.to_sec(dt, 0) == :calendar.datetime_to_gregorian_seconds(Date.local(dt))
-
-    # Extract universal time
-    { datetime, _ } = dt
-    assert Date.to_sec(datetime, 0) == :calendar.datetime_to_gregorian_seconds(Date.universal(dt))
+  test :from_date do
+    date = {2000, 11, 11}
+    assert Date.local(Date.from(date)) == {date, {0,0,0}}
+    { dt, tz } = Date.from(date)
+    assert tz == Date.timezone(:utc)
+    { dt, tz } = Date.from(date, :local)
+    assert tz == Date.timezone()
   end
 
-  test :local do
-    {datetime, _} = Date.now
-    assert Date.local({datetime, Date.timezone(:utc)}) == :calendar.universal_time
+  test :from_datetime do
+    assert Date.from({{1970,1,1}, {0,0,0}}) == Date.from({1970,1,1})
+    assert Date.to_sec(Date.from({{1970,1,1}, {0,0,0}})) == 0
+  end
+
+  test :from_timestamp do
+    now = Time.now
+    assert Date.to_sec(Date.from(now, :timestamp)) == trunc(Time.to_sec(now))
+    assert Date.to_sec(Date.from({0,0,0}, :timestamp)) == 0
+    assert Date.to_sec(Date.from({0,0,0}, :timestamp, 0)) == -Date.epoch(:sec)
+  end
+
+  test :from_sec do
+    now = Time.now(:sec)
+    assert Date.to_sec(Date.from(now, :sec)) == trunc(now)
+    assert Date.to_sec(Date.from(now, :sec, 0)) == trunc(now) - Date.epoch(:sec)
+  end
+
+  test :from_days do
+    assert Date.local(Date.from(30, :days)) == {{1970,1,31}, {0,0,0}}
+    assert Date.local(Date.from(31, :days)) == {{1970,2,1}, {0,0,0}}
   end
 
   test :zero do
@@ -27,6 +45,15 @@ defmodule DateTest do
     assert Date.to_sec(Date.epoch, 0) == Date.epoch(:sec)
     assert Date.to_days(Date.epoch, 0) == Date.epoch(:days)
     assert Date.to_timestamp(Date.epoch) == Date.epoch(:timestamp)
+  end
+
+  test :to_sec do
+    dt = Date.now
+    assert Date.to_sec(dt, 0) == :calendar.datetime_to_gregorian_seconds(Date.local(dt))
+
+    # Extract universal time
+    { datetime, _ } = dt
+    assert Date.to_sec(datetime, 0) == :calendar.datetime_to_gregorian_seconds(Date.universal(dt))
   end
 
   test :iso8601 do
