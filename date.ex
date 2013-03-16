@@ -193,13 +193,13 @@ defmodule Date do
 
   def to_sec(dtz, reference // :epoch)
 
+  def to_sec(dtz, :epoch) do
+    to_sec(dtz, 0) - epoch(:sec)
+  end
+
   def to_sec(dtz, 0) do
     datetime = universal(dtz)
     :calendar.datetime_to_gregorian_seconds(datetime)
-  end
-
-  def to_sec(dtz, :epoch) do
-    to_sec(dtz, 0) - epoch(:sec)
   end
 
   def to_sec(dtz1, dtz2) do
