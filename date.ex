@@ -10,6 +10,11 @@ defmodule Date do
   @moduledoc """
   Module for working with dates.
 
+  Functions that produce time intervals use UNIX epoch (or simly Epoch) as
+  default reference date. Epoch is defined as midnight of January 1, 1970.
+
+  Time intervals in this module don't account for leap seconds.
+
   Supported tasks:
 
     * get current date in the desired time zone
@@ -23,6 +28,7 @@ defmodule Date do
 
   """
 
+  ## Primary constructor for time zones
   defmacrop make_tz(:utc) do
     { 0.0, "UTC" }
   end
@@ -33,6 +39,7 @@ defmodule Date do
     end
   end
 
+  ## Primary constructor for dates
   defmacrop make_date(datetime, tz) do
     quote do
       { unquote(datetime), unquote(tz) }
@@ -62,7 +69,7 @@ defmodule Date do
   @type minute :: 0..59
   @type second :: 0..59
 
-  # Same as Time module's timestamp type
+  # Same as Time's timestamp type
   @type timestamp :: {megaseconds, seconds, microseconds }
   @type megaseconds :: non_neg_integer
   @type seconds :: non_neg_integer
@@ -77,17 +84,18 @@ defmodule Date do
 
   ## Examples
 
+    timezone()       #=> <local time zone>
+    timezone(:utc)   #=> { 0.0, "UTC" }
     timezone(2)      #=> { 2.0, "EET" }
     timezone("EET")  #=> { 2.0, "EET" }
-    timezone(:utc)   #=> { 0.0, "UTC" }
-    timezone() or timezone(:local)  #=> <local time zone>
 
   """
-  @spec timezone(none | :local | :utc | number | binary) :: tz
+  @spec timezone() :: tz
+  @spec timezone(:local | :utc | number | binary) :: tz
   def timezone(spec // :local)
 
   def timezone(:local) do
-    # TODO: change implmentation for cross-platform support
+    # TODO: change implementation for cross-platform support
     datestr = System.cmd('date "+%z %Z"')
     { :ok, [offs|[name]], _ } = :io_lib.fread('~d ~s', datestr)
 
@@ -165,15 +173,17 @@ defmodule Date do
   """
   @spec now(:sec | :days) :: integer
   def now(:sec) do
-    to_sec(now)
+    to_sec(now())
   end
 
   def now(:days) do
-    to_days(now)
+    to_days(now())
   end
 
   @doc """
   Get current local date.
+
+  See also `universal/0`.
 
   ## Examples
 
@@ -188,6 +198,8 @@ defmodule Date do
 
   @doc """
   Convert date to local date.
+
+  See also `universal/1`.
 
   ## Examples
 
@@ -216,6 +228,8 @@ defmodule Date do
   @doc """
   Get current UTC date.
 
+  See also `local/0`.
+
   ## Examples
 
     universal()  #=> {{2013,3,16}, {12,33,6}}
@@ -230,6 +244,8 @@ defmodule Date do
   @doc """
   Convert date to UTC date.
 
+  See also `local/1`.
+
   ## Examples
 
     universal(now())  #=> {{2013,3,16}, {12,33,16}}
@@ -243,6 +259,8 @@ defmodule Date do
   @doc """
   The first day of year zero (calendar's module default reference date).
 
+  See also `epoch/0`.
+
   ## Examples
 
     to_sec(zero(), 0)  #=> 0
@@ -255,6 +273,8 @@ defmodule Date do
 
   @doc """
   Return the date representing a very distant moment in the past.
+
+  See also `distant_future/0`.
   """
   @spec distant_past() :: dtz
   def distant_past do
@@ -265,6 +285,8 @@ defmodule Date do
   @doc """
   Return the date representing a remote moment in the future. Can be used as
   a timeout value to effectively make the timeout infinite.
+
+  See also `distant_past/0`.
   """
   @spec distant_future() :: dtz
   def distant_future do
@@ -273,8 +295,10 @@ defmodule Date do
   end
 
   @doc """
-  The date of UNIX epoch (or Epoch) used as default reference date by this
-  module and also by Time module.
+  The date of Epoch (used as default reference date by this module and also by
+  Time module).
+
+  See also `zero/0`.
 
   ## Examples
 
@@ -315,8 +339,8 @@ defmodule Date do
   @doc """
   Construct a date from Erlang's date or datetime value.
 
-  You may specify the date's time zone as a second argument. If the argument is
-  omitted, UTC time zone is assumed.
+  You may specify the date's time zone as the second argument. If the argument
+  is omitted, UTC time zone is assumed.
 
   ## Examples
 
