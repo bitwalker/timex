@@ -3,10 +3,6 @@
 defmodule DateTimeTest do
   use ExUnit.Case, async: true
 
-  test :now do
-    assert Date.now(:sec) == trunc(Time.now(:sec))
-  end
-
   test :epoch do
     assert Date.to_sec(Date.epoch, 0) == Time.to_sec(Time.epoch)
     assert Date.epoch(:sec) == Time.epoch(:sec)
