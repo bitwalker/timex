@@ -34,12 +34,12 @@ defmodule DateTest do
   end
 
   test :zero do
-    {datetime, _} = Date.zero
+    {datetime, _} = Date.zero()
     assert :calendar.datetime_to_gregorian_seconds(datetime) == 0
   end
 
   test :epoch do
-    assert Date.epoch == { {{1970,1,1}, {0,0,0}}, {0.0, "UTC"} }
+    assert Date.epoch() == { {{1970,1,1}, {0,0,0}}, {0.0, "UTC"} }
     assert Date.to_sec(Date.epoch) == 0
     assert Date.to_days(Date.epoch) == 0
     assert Date.to_sec(Date.epoch, 0) == Date.epoch(:sec)
@@ -47,13 +47,38 @@ defmodule DateTest do
     assert Date.to_timestamp(Date.epoch) == Date.epoch(:timestamp)
   end
 
-  test :to_sec do
-    dt = Date.now
-    assert Date.to_sec(dt, 0) == :calendar.datetime_to_gregorian_seconds(Date.local(dt))
+  test :convert do
+    date = Date.now()
+    assert Date.convert(date, :sec) + Date.epoch(:sec) == Date.to_sec(date, 0)
+    assert Date.convert(date, :days) + Date.epoch(:days) == Date.to_days(date, 0)
+  end
 
-    # Extract universal time
-    { datetime, _ } = dt
-    assert Date.to_sec(datetime, 0) == :calendar.datetime_to_gregorian_seconds(Date.universal(dt))
+  test :to_timestamp do
+    assert Date.to_timestamp(Date.epoch()) == {0,0,0}
+    assert Time.to_sec(Date.to_timestamp(Date.epoch(), 0)) == Date.epoch(:sec)
+  end
+
+  test :to_sec do
+    date = Date.now()
+    assert Date.to_sec(date, 0) == :calendar.datetime_to_gregorian_seconds(Date.universal(date))
+    assert Date.to_sec(date, 0) - Date.epoch(:sec) == Date.to_sec(date)
+    assert Date.to_sec(Date.now()) == trunc(Time.now(:sec))
+
+    date = Date.from({{1999,1,2}, {12,13,14}})
+    assert Date.to_sec(date) == 915279194
+    assert Date.to_sec(date, 0) == 63082498394
+
+    assert Date.to_sec(Date.epoch()) == 0
+    assert Date.to_sec(Date.epoch(), 0) == 62167219200
+  end
+
+  test :to_days do
+    date = Date.from({2013,3,16})
+    assert Date.to_days(date) == 15780
+    assert Date.to_days(date, 0) == 735308
+
+    assert Date.to_days(Date.epoch()) == 0
+    assert Date.to_days(Date.epoch(), 0) == 719528
   end
 
   test :iso8601 do

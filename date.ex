@@ -435,51 +435,25 @@ defmodule Date do
 
   ### Converting dates ###
 
-  def to_timestamp(dtz) do
-    sec = to_sec(dtz)
-    { div(sec, _million), rem(sec, _million), 0 }
-  end
+  @doc """
+  Multi-purpose conversion function. Converts a date to the specified time
+  interval since Epoch. If you'd like to specify year 0 as a reference date,
+  use one of the to_* functions.
 
-  def to_sec(date, reference // :epoch)
+  ## Examples
 
-  def to_sec(date, :epoch) do
-    to_sec(date, 0) - epoch(:sec)
-  end
+    date = now()
+    convert(date, :sec) + epoch(:sec) == to_sec(date, 0)  #=> true
 
-  def to_sec(dtz={{{_,_,_},{_,_,_}}, {_,_}}, 0) do
-    datetime = local(dtz)
-    to_sec(datetime, 0)
-  end
-
-  def to_sec(datetime={{_,_,_},{_,_,_}}, 0) do
-    :calendar.datetime_to_gregorian_seconds(datetime)
-  end
-
-  def to_sec(dtz1, dtz2) do
-    # deprecate in favor of diff
-    to_sec(dtz1, 0) - to_sec(dtz2, 0)
-  end
-
-
-  def to_days(date, reference // :epoch)
-
-  def to_days({date, _}, ref) do
-    to_days(date, ref)
-  end
-
-  def to_days(date, 0) do
-    :calendar.date_to_gregorian_days(date)
-  end
-
-  def to_days(date, :epoch) do
-    to_days(date, 0) - epoch(:days)
-  end
-
-  def to_days(date1, date2) do
-    to_days(date1, 0) - to_days(date2, 0)
-  end
-
+  """
+  @spec convert(dtz) :: timestamp
+  @spec convert(dtz, :timestamp)   :: timestamp
+  @spec convert(dtz, :sec | :days) :: timestamp
   def convert(date, type // :timestamp)
+
+  def convert(date, :timestamp) do
+    to_timestamp(date)
+  end
 
   def convert(date, :sec) do
     to_sec(date)
@@ -489,8 +463,73 @@ defmodule Date do
     to_days(date)
   end
 
-  def convert(date, :timestamp) do
-    to_timestamp(date)
+  @doc """
+  Convert the date to timestamp value consumable by the Time module.
+
+  See also `diff/2` if you want to specify an arbitrary reference date.
+
+  ## Examples
+
+    to_timestamp(epoch()) #=> {0,0,0}
+
+  """
+  @spec to_timestamp(dtz) :: timestamp
+  @spec to_timestamp(dtz, :epoch | 0) :: timestamp
+  def to_timestamp(dtz, reference // :epoch)
+
+  def to_timestamp(dtz, :epoch) do
+    sec = to_sec(dtz)
+    { div(sec, _million), rem(sec, _million), 0 }
+  end
+
+  def to_timestamp(dtz, 0) do
+    sec = to_sec(dtz, 0)
+    { div(sec, _million), rem(sec, _million), 0 }
+  end
+
+  @doc """
+  Convert the date to an integer number of seconds since Epoch or year 0.
+
+  See also `diff/2` if you want to specify an arbitrary reference date.
+
+  ## Examples
+
+    date = from({{1999,1,2}, {12,13,14}})
+    to_sec(date)  #=> 915279194
+
+  """
+  @spec to_sec(dtz) :: integer
+  @spec to_sec(dtz, :epoch | 0) :: integer
+  def to_sec(date, reference // :epoch)
+
+  def to_sec(date, :epoch) do
+    to_sec(date, 0) - epoch(:sec)
+  end
+
+  def to_sec({datetime, _}, 0) do
+    :calendar.datetime_to_gregorian_seconds(datetime)
+  end
+
+  @doc """
+  Convert the date to an integer number of days since Epoch or year 0.
+
+  See also `diff/2` if you want to specify an arbitray reference date.
+
+  ## Examples
+
+    to_days(now())  #=> 15780
+
+  """
+  @spec to_days(dtz) :: integer
+  @spec to_days(dtz, :epoch | 0) :: integer
+  def to_days(date, reference // :epoch)
+
+  def to_days(date, :epoch) do
+    to_days(date, 0) - epoch(:days)
+  end
+
+  def to_days({{date,_}, _}, 0) do
+    :calendar.date_to_gregorian_days(date)
   end
 
   ### Retrieving information about a date ###
