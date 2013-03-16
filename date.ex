@@ -7,7 +7,21 @@
 # end_of_month
 
 defmodule Date do
-  ### Getting The Date ###
+  @moduledoc """
+  Module for working with dates.
+
+  Supported tasks:
+
+    * get current date in the desired time zone
+    * convert dates between time zones and time units
+    * introspect dates to find out weekday, week number, number of days in
+      a given month, etc.
+    * parse dates from string
+    * format dates to string
+    * compare dates
+    * date arithmetic
+
+  """
 
   defmacrop make_tz(offset, name) do
     quote do
@@ -16,7 +30,7 @@ defmodule Date do
   end
 
   defmacrop local_tz do
-    # TODO: change implmenetation for cross-platform support
+    # TODO: change implmentation for cross-platform support
     datestr = System.cmd('date "+%z %Z"')
     { :ok, [offs|[name]], _ } = :io_lib.fread('~d ~s', datestr)
 
@@ -24,10 +38,44 @@ defmodule Date do
     min_offs = offs - hours_offs * 100
     offset = hours_offs + min_offs / 60
 
+    #datetime = :calendar.universal_time()
+    #local_time = :calendar.universal_time_to_local_time(datetime)
+    #hour_offset = (:calendar.datetime_to_gregorian_seconds(local_time) - :calendar.datetime_to_gregorian_seconds(datetime)) / 3600
+    #timezone(hour_offset, "TimeZoneName")
+
     make_tz(offset, to_binary(name))
   end
 
+  defmacrop make_date(datetime, tz) do
+    quote do
+      { unquote(datetime), unquote(tz) }
+    end
+  end
+
+  defmacrop make_date(date, time, tz) do
+    quote do
+      { {unquote(date), unquote(time)}, unquote(tz) }
+    end
+  end
+
+  ### Base types ###
+
+  @type dtz :: { datetime, tz }
   @type tz :: { number, binary }
+
+  @type datetime :: { date, time }
+
+  @type date :: { year, month, day }
+  @type year :: non_neg_integer
+  @type month :: 1..12
+  @type day :: 1..31
+
+  @type time :: { hour, minute, second }
+  @type hour :: 0..23
+  @type minute :: 0..59
+  @type second :: 0..59
+
+  ### Constructing time zone objects ###
 
   @doc """
   Get a time zone object for the specified offset or name.
@@ -46,10 +94,6 @@ defmodule Date do
   def timezone(spec // :local)
 
   def timezone(:local) do
-    #datetime = :calendar.universal_time()
-    #local_time = :calendar.universal_time_to_local_time(datetime)
-    #hour_offset = (:calendar.datetime_to_gregorian_seconds(local_time) - :calendar.datetime_to_gregorian_seconds(datetime)) / 3600
-    #timezone(hour_offset, "TimeZoneName")
     local_tz()
   end
 
@@ -85,24 +129,35 @@ defmodule Date do
     make_tz(offset, name)
   end
 
-
-
-  def replace(dtz, value, type)
-
-  def replace({datetime,_}, value, :tz) do
-    {datetime, value}
-  end
-
+  ### Getting the date ###
 
   @doc """
-  Get current date and time.
+  Get current date.
+
+  ### Examples
+
+    now  #=> { {{2013,3,16}, {11,1,12}}, {2.0,"EET"} }
+
   """
+  @spec now() :: dtz
   def now do
     datetime = :calendar.universal_time()
     tz = timezone()
-    { datetime, tz }
+    make_date(datetime, tz)
   end
 
+  @doc """
+  Get representation of the current date in seconds or days since Epoch.
+
+  See convert/2 for converting arbitrary dates to various time units.
+
+  ### Examples
+
+    now(:sec)   #=> 1363439013
+    now(:days)  #=> 15780
+
+  """
+  @spec now(:sec | :days) :: integer
   def now(:sec) do
     to_sec(now)
   end
@@ -112,40 +167,45 @@ defmodule Date do
   end
 
   @doc """
-  Get current local date in Erlang datetime format.
+  Get current local date.
   """
+  @spec local() :: datetime
   def local do
     #local(now)
     :calendar.local_time()
   end
 
   @doc """
-  Convert date to local date in Erlang datetime format.
+  Convert date to local date.
   """
+  @spec local(dtz) :: datetime
   def local({ datetime, {offset,_} }) do
     sec = :calendar.datetime_to_gregorian_seconds(datetime) + offset * 3600
     :calendar.gregorian_seconds_to_datetime(trunc(sec))
   end
 
   @doc """
-  Convert date to local date in Erlang datetime format using the provided time zone.
+  Convert date to local date using the provided time zone.
   """
+  @spec local(dtz, tz) :: datetime
   def local({datetime,_}, tz) do
     # simply ignore the date's timezone and use tz instead
-    local({datetime, tz})
+    local(make_date(datetime, tz))
   end
 
   @doc """
-  Get current UTC date in Erlang datetime format.
+  Get current UTC date.
   """
+  @spec universal() :: datetime
   def universal do
     #universal(now)
     :calendar.universal_time()
   end
 
   @doc """
-  Convert date to UTC in Erlang datetime format.
+  Convert date to UTC date.
   """
+  @spec universal(dtz) :: datetime
   def universal({datetime, _}) do
     datetime
   end
@@ -286,7 +346,6 @@ defmodule Date do
     to_timestamp(date)
   end
 
-
   ### Retrieving information about a date ###
 
   @doc """
@@ -333,6 +392,38 @@ defmodule Date do
     :calendar.last_day_of_the_month(year, month)
   end
 
+  ### Validating and modifying dates ###
+
+  def is_valid({date, _time}) do
+    # TODO: validate the time as well
+    :calendar.is_valid(date)
+  end
+
+  def validate({year, month, day}, direction // :past)
+
+  def validate({year, month, day}, :past) do
+    # Check if we got past the last day of the month
+    max_day = days_in_month(year, month)
+    if day > max_day do
+      day = max_day
+    end
+    {year, month, day}
+  end
+
+  def validate({year, month, day}, :future) do
+    # Check if we got past the last day of the month
+    max_day = days_in_month(year, month)
+    if day > max_day do
+      day = max_day
+    end
+    {year, month, day}
+  end
+
+  def replace(dtz, value, type)
+
+  def replace({datetime,_}, value, :tz) do
+    {datetime, value}
+  end
 
   ### Formatting dates ###
 
@@ -509,29 +600,6 @@ defmodule Date do
   def normalize_shift(spec) when is_list(spec) do
   end
 
-  def is_valid({date, _time}) do
-    :calendar.is_valid(date)
-  end
-
-  def validate({year, month, day}, direction // :past)
-
-  def validate({year, month, day}, :past) do
-    # Check if we got past the last day of the month
-    max_day = days_in_month(year, month)
-    if day > max_day do
-      day = max_day
-    end
-    {year, month, day}
-  end
-
-  def validate({year, month, day}, :future) do
-    # Check if we got past the last day of the month
-    max_day = days_in_month(year, month)
-    if day > max_day do
-      day = max_day
-    end
-    {year, month, day}
-  end
 
 
   defp mod(a, b) do
