@@ -58,6 +58,15 @@ defmodule Date do
     { offset, name }
   end
 
+
+
+  def replace(dtz, value, type)
+
+  def replace({datetime,_}, value, :tz) do
+    {datetime, value}
+  end
+
+
   @doc """
   Get current date and time.
   """
@@ -197,18 +206,23 @@ defmodule Date do
     { div(sec, _million), rem(sec, _million), 0 }
   end
 
-  def to_sec(dtz, reference // :epoch)
+  def to_sec(date, reference // :epoch)
 
-  def to_sec(dtz, :epoch) do
-    to_sec(dtz, 0) - epoch(:sec)
+  def to_sec(date, :epoch) do
+    to_sec(date, 0) - epoch(:sec)
   end
 
-  def to_sec(dtz, 0) do
-    datetime = universal(dtz)
+  def to_sec(dtz={{{_,_,_},{_,_,_}}, {_,_}}, 0) do
+    datetime = local(dtz)
+    to_sec(datetime, 0)
+  end
+
+  def to_sec(datetime={{_,_,_},{_,_,_}}, 0) do
     :calendar.datetime_to_gregorian_seconds(datetime)
   end
 
   def to_sec(dtz1, dtz2) do
+    # deprecate in favor of diff
     to_sec(dtz1, 0) - to_sec(dtz2, 0)
   end
 
