@@ -23,27 +23,14 @@ defmodule Date do
 
   """
 
+  defmacrop make_tz(:utc) do
+    { 0.0, "UTC" }
+  end
+
   defmacrop make_tz(offset, name) do
     quote do
       { unquote(offset), unquote(name) }
     end
-  end
-
-  defmacrop local_tz do
-    # TODO: change implmentation for cross-platform support
-    datestr = System.cmd('date "+%z %Z"')
-    { :ok, [offs|[name]], _ } = :io_lib.fread('~d ~s', datestr)
-
-    hours_offs = div(offs, 100)
-    min_offs = offs - hours_offs * 100
-    offset = hours_offs + min_offs / 60
-
-    #datetime = :calendar.universal_time()
-    #local_time = :calendar.universal_time_to_local_time(datetime)
-    #hour_offset = (:calendar.datetime_to_gregorian_seconds(local_time) - :calendar.datetime_to_gregorian_seconds(datetime)) / 3600
-    #timezone(hour_offset, "TimeZoneName")
-
-    make_tz(offset, to_binary(name))
   end
 
   defmacrop make_date(datetime, tz) do
@@ -75,6 +62,12 @@ defmodule Date do
   @type minute :: 0..59
   @type second :: 0..59
 
+  # Same as Time module's timestamp type
+  @type timestamp :: {megaseconds, seconds, microseconds }
+  @type megaseconds :: non_neg_integer
+  @type seconds :: non_neg_integer
+  @type microseconds :: non_neg_integer
+
   ### Constructing time zone objects ###
 
   @doc """
@@ -94,11 +87,24 @@ defmodule Date do
   def timezone(spec // :local)
 
   def timezone(:local) do
-    local_tz()
+    # TODO: change implmentation for cross-platform support
+    datestr = System.cmd('date "+%z %Z"')
+    { :ok, [offs|[name]], _ } = :io_lib.fread('~d ~s', datestr)
+
+    hours_offs = div(offs, 100)
+    min_offs = offs - hours_offs * 100
+    offset = hours_offs + min_offs / 60
+
+    #datetime = :calendar.universal_time()
+    #local_time = :calendar.universal_time_to_local_time(datetime)
+    #hour_offset = (:calendar.datetime_to_gregorian_seconds(local_time) - :calendar.datetime_to_gregorian_seconds(datetime)) / 3600
+    #timezone(hour_offset, "TimeZoneName")
+
+    make_tz(offset, to_binary(name))
   end
 
   def timezone(:utc) do
-    make_tz(0.0, "UTC")
+    make_tz(:utc)
   end
 
   def timezone(offset) when is_number(offset) do
@@ -134,7 +140,7 @@ defmodule Date do
   @doc """
   Get current date.
 
-  ### Examples
+  ## Examples
 
     now  #=> { {{2013,3,16}, {11,1,12}}, {2.0,"EET"} }
 
@@ -151,7 +157,7 @@ defmodule Date do
 
   See convert/2 for converting arbitrary dates to various time units.
 
-  ### Examples
+  ## Examples
 
     now(:sec)   #=> 1363439013
     now(:days)  #=> 15780
@@ -168,6 +174,11 @@ defmodule Date do
 
   @doc """
   Get current local date.
+
+  ## Examples
+
+    local()  #=> {{2013,3,16}, {14,28,42}}
+
   """
   @spec local() :: datetime
   def local do
@@ -177,6 +188,11 @@ defmodule Date do
 
   @doc """
   Convert date to local date.
+
+  ## Examples
+
+    local(now())  #=> {{2013,3,16}, {14,29,22}} (same as local())
+
   """
   @spec local(dtz) :: datetime
   def local({ datetime, {offset,_} }) do
@@ -186,15 +202,24 @@ defmodule Date do
 
   @doc """
   Convert date to local date using the provided time zone.
+
+  ## Examples
+
+    local(now(), timezone(:utc))  #=> {{2013,3,16}, {12,29,22}}
+
   """
   @spec local(dtz, tz) :: datetime
   def local({datetime,_}, tz) do
-    # simply ignore the date's timezone and use tz instead
     local(make_date(datetime, tz))
   end
 
   @doc """
   Get current UTC date.
+
+  ## Examples
+
+    universal()  #=> {{2013,3,16}, {12,33,6}}
+
   """
   @spec universal() :: datetime
   def universal do
@@ -204,6 +229,11 @@ defmodule Date do
 
   @doc """
   Convert date to UTC date.
+
+  ## Examples
+
+    universal(now())  #=> {{2013,3,16}, {12,33,16}}
+
   """
   @spec universal(dtz) :: datetime
   def universal({datetime, _}) do
@@ -212,39 +242,62 @@ defmodule Date do
 
   @doc """
   The first day of year zero (calendar's module default reference date).
+
+  ## Examples
+
+    to_sec(zero(), 0)  #=> 0
+
   """
+  @spec zero() :: dtz
   def zero do
-    { {{0,1,1}, {0,0,0}}, timezone(:utc) }
+    make_date({0,1,1}, {0,0,0}, make_tz(:utc))
   end
 
   @doc """
-  Return a date representing midnight the first day of year zero.
+  Return the date representing a very distant moment in the past.
   """
+  @spec distant_past() :: dtz
   def distant_past do
-    # TODO: think of a use cases
-    { {{0,1,1}, {0,0,0}}, timezone(:utc) }
+    # TODO: think of use cases
+    make_date({0,1,1}, {0,0,0}, make_tz(:utc))
   end
 
   @doc """
-  Return a date representing a remote moment in in the future. Can be used as a
-  timeout value to effectively make the timeout infinite.
+  Return the date representing a remote moment in the future. Can be used as
+  a timeout value to effectively make the timeout infinite.
   """
+  @spec distant_future() :: dtz
   def distant_future do
     # TODO: evaluate whether it's distant enough
-    { {{9999,12,31}, {23,59,59}}, timezone(:utc) }
+    make_date({9999,12,31}, {23,59,59}, make_tz(:utc))
   end
 
   @doc """
-  The date of UNIX epoch used as default reference date by this module and also
-  by Time module.
+  The date of UNIX epoch (or Epoch) used as default reference date by this
+  module and also by Time module.
+
+  ## Examples
+
+    to_sec(epoch())  #=> 0
+
   """
+  @spec epoch() :: dtz
   def epoch do
-    { {{1970,1,1}, {0,0,0}}, timezone(:utc) }
+    make_date({1970,1,1}, {0,0,0}, make_tz(:utc))
   end
 
   @doc """
-  Time interval since year 0 to UNIX epoch expressed in the specified units.
+  Time interval since year 0 to Epoch expressed in the specified units.
+
+  ## Examples
+
+    epoch()       #=> {{{1970,1,1},{0,0,0}},{0.0,"UTC"}}
+    epoch(:sec)   #=> 62167219200
+    epoch(:days)  #=> 719528
+
   """
+  @spec epoch(:timestamp)   :: timestamp
+  @spec epoch(:sec | :days) :: integer
   def epoch(:timestamp) do
     to_timestamp(epoch)
   end
@@ -259,10 +312,80 @@ defmodule Date do
 
   ### Constructing the date from an existing value ###
 
-  def from(value, type // :timestamp, reference // :epoch)
+  @doc """
+  Construct a date from Erlang's date or datetime value.
+
+  You may specify the date's time zone as a second argument. If the argument is
+  omitted, UTC time zone is assumed.
+
+  ## Examples
+
+    from(:erlang.universaltime)      #=> { {{2013,3,16}, {12,22,20}}, {0.0,"UTC"} }
+
+    from(:erlang.localtime)          #=> { {{2013,3,16}, {14,18,41}}, {0.0,"UTC"} }
+    from(:erlang.localtime, :local)  #=> { {{2013,3,16}, {14,18,51}}, {2.0,"EET"} }
+
+    tz = Date.timezone(-8, "PST")
+    from({2013,3,16}, tz)            #=> { {{2013,3,16}, {0,0,0}}, {-8,"PST"} }
+
+  """
+  @spec from(date | datetime) :: dtz
+  @spec from(date | datetime, :utc | :local | tz) :: dtz
+
+  def from(date={_,_,_}) do
+    from({date, {0,0,0}}, :utc)
+  end
+
+  def from(datetime={ {_,_,_},{_,_,_} }) do
+    from(datetime, :utc)
+  end
+
+  def from(date={_,_,_}, :utc) do
+    from({date, {0,0,0}}, :utc)
+  end
+
+  def from(datetime={ {_,_,_},{_,_,_} }, :utc) do
+    make_date(datetime, make_tz(:utc))
+  end
+
+  def from(date={_,_,_}, :local) do
+    from({date, {0,0,0}}, :local)
+  end
+
+  def from(datetime={ {_,_,_},{_,_,_} }, :local) do
+    make_date(datetime, timezone())
+  end
+
+  def from(date={_,_,_}, tz={_,_}) do
+    from({date, {0,0,0}}, tz)
+  end
+
+  def from(datetime={ {_,_,_},{_,_,_} }, tz={_,_}) do
+    make_date(datetime, tz)
+  end
+
+  @doc """
+  Construct a date from a time interval since Epoch or year 0.
+
+  UTC time zone is assumed. This assumption can be modified by setting desired
+  time zone using replace/3 after the date is constructed.
+
+  ## Examples
+
+    from(13, :sec)      #=> { {{1970,1,1}, {0,0,13}}, {0.0,"UTC"} }
+    from(13, :days, 0)  #=> { {{0,1,14}, {0,0,0}}, {0.0,"UTC"} }
+
+    date = from(Time.now, :timestamp)
+    replace(date, :tz, timezone())     #=> yields the same value as Date.now would
+
+  """
+  @spec from(timestamp, :timestamp) :: dtz
+  @spec from(number, :sec | :days)  :: dtz
+  @spec from(timestamp, :timestamp, :epoch | 0) :: dtz
+  @spec from(number, :sec | :days, :epoch | 0)  :: dtz
+  def from(value, type, reference // :epoch)
 
   def from({mega, sec, _}, :timestamp, :epoch) do
-    # microseconds are ingnored
     from(mega * _million + sec, :sec)
   end
 
@@ -271,19 +394,19 @@ defmodule Date do
   end
 
   def from(sec, :sec, :epoch) do
-    { :calendar.gregorian_seconds_to_datetime(sec + epoch(:sec)), timezone(:utc) }
+    make_date(:calendar.gregorian_seconds_to_datetime(trunc(sec) + epoch(:sec)), make_tz(:utc))
   end
 
   def from(sec, :sec, 0) do
-    { :calendar.gregorian_seconds_to_datetime(sec), timezone(:utc) }
+    make_date(:calendar.gregorian_seconds_to_datetime(trunc(sec)), make_tz(:utc))
   end
 
   def from(days, :days, :epoch) do
-    { {:calendar.gregorian_days_to_date(days + epoch(:days)),{0,0,0}}, timezone(:utc) }
+    make_date(:calendar.gregorian_days_to_date(trunc(days) + epoch(:days)), {0,0,0}, make_tz(:utc))
   end
 
   def from(days, :days, 0) do
-    { {:calendar.gregorian_days_to_date(days),{0,0,0}}, timezone(:utc) }
+    make_date(:calendar.gregorian_days_to_date(trunc(days)), {0,0,0}, make_tz(:utc))
   end
 
   ### Converting dates ###
@@ -419,9 +542,9 @@ defmodule Date do
     {year, month, day}
   end
 
-  def replace(dtz, value, type)
+  def replace(dtz, type, value)
 
-  def replace({datetime,_}, value, :tz) do
+  def replace({datetime,_}, :tz, value) do
     {datetime, value}
   end
 
@@ -542,7 +665,7 @@ defmodule Date do
   exceeds maximum number of days in the resulting month, that month's last day
   is assumed.
 
-  Examples:
+  ## Examples
 
     datetime = {{2013,3,5},{23,23,23}}
 
