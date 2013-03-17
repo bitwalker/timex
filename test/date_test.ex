@@ -5,7 +5,7 @@ defmodule DateTest do
     date = {2000, 11, 11}
     assert Date.local(Date.from(date)) == {date, {0,0,0}}
 
-    { datetime, tz } = Date.from(date, :local)
+    { _, tz } = Date.from(date, :local)
     assert tz == Date.timezone()
     assert Date.local(Date.from(date, :local)) == {date, {0,0,0}}
 
@@ -29,7 +29,7 @@ defmodule DateTest do
     date = {{2000, 11, 11}, {0, 0, 0}}
     assert Date.local(Date.from(date)) == date
 
-    { datetime, tz } = Date.from(date, :local)
+    { _, tz } = Date.from(date, :local)
     assert tz == Date.timezone()
 
     { datetime, tz } = Date.from(date)
@@ -38,7 +38,6 @@ defmodule DateTest do
 
     { datetime, _ } = Date.from(date, Date.timezone(2, "EET"))
     assert datetime == {{2000,11,10}, {22,0,0}}
-
   end
 
   test :from_timestamp do
@@ -179,7 +178,12 @@ defmodule DateTest do
   end
 
   test :normalize do
-    raise NotImplemented
+    date = Date.now()
+    assert Date.normalize(date, :clamp) == date
+
+    date = { {1,13,44}, {-8,60,61} }
+    assert Date.local(Date.normalize(Date.from(date), :clamp)) == { {1,12,31}, {0,59,59} }
+    assert Date.local(Date.normalize(Date.from(date), :round)) == { {2,2,12}, {17,1,1} }
   end
 
   test :replace do

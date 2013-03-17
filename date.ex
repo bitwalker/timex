@@ -214,7 +214,8 @@ defmodule Date do
   end
 
   @doc """
-  Convert date to local date.
+  Convert date to local date in the date's time zone. If you'd like to specify
+  time zone local to your system, use `local/2`.
 
   See also `universal/1`.
 
@@ -742,6 +743,13 @@ defmodule Date do
 
   @doc """
   Return a boolean indicating whether the given date is valid.
+
+  ## Examples
+
+    is_valid(from({{1,1,1}, {1,1,1}}))        #=> true
+    is_valid(from({12,13,14}))                #=> false
+    is_valid(from({{12,12,12}, {-1,59,59}}))  #=> false
+
   """
   @spec is_valid(dtz) :: boolean
 
@@ -758,12 +766,58 @@ defmodule Date do
     true
   end
 
-  def normalize(date, :clamp) do
-    date
+  @doc """
+  Produce a valid date from a possibly invalid one.
+
+  If the second argument is :clamp, all date's components will be clamped to
+  the minimum or maximum valid value.
+
+  If the second argument is :round, overflowing components will be taken into
+  account to produce a valid date.
+
+  ## Examples
+
+    date = { {1,13,44}, {-8,60,61} }
+    local(normalize(from(date), :clamp))  #=> { {1,12,31}, {0,59,59} }
+    local(normalize(from(date), :round))  #=> { {2,2,12}, {17,1,1} }
+
+  """
+  @spec normalize(dtz, :clamp | :round) :: dtz
+
+  def normalize({{{year,month,day}, {hour,min,sec}}, tz}, :clamp) do
+    month = cond do
+      month < 1   -> 1
+      month > 12  -> 12
+      true        -> month
+    end
+    ndays = days_in_month(year, month)
+    day = cond do
+      day < 1     -> 1
+      day > ndays -> ndays
+      true        -> day
+    end
+
+    hour = cond do
+      hour < 0    -> 0
+      hour > 23   -> 23
+      true        -> hour
+    end
+    min = cond do
+      min < 0    -> 0
+      min > 59   -> 59
+      true       -> min
+    end
+    sec = cond do
+      sec < 0    -> 0
+      sec > 59   -> 59
+      true       -> sec
+    end
+
+    make_date({year,month,day}, {hour,min,sec}, tz)
   end
 
   def normalize(date, :round) do
-    date
+    normalize(date, :clamp)
   end
 
   @doc """
