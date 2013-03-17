@@ -1008,9 +1008,9 @@ defmodule Date do
   ## Examples
 
   """
-  @spec shift(dtz, list, :strict) :: dtz
+  @spec shift_strict(dtz, list) :: dtz
 
-  def shift(date, spec, :strict) when is_list(spec) do
+  def shift_strict(date, spec) when is_list(spec) do
     Enum.reduce normalize_shift(spec), date, fn({type, value}, date) ->
       shift(date, value, type)
     end
