@@ -530,7 +530,7 @@ defmodule Date do
     list_to_binary(:io_lib.format(fstr, [day_name, day, month_name, year, hour, min, sec, tz_name]))
   end
 
-  def format(date, fmt) do
+  def format(_date, _fmt) do
     raise NotImplemented
   end
 
@@ -969,23 +969,30 @@ defmodule Date do
     shift(datetime, mega * _million + sec, :sec)
   end
 
+  @doc """
+  """
   def sub(datetime, {mega, sec, _}) do
     shift(datetime, -mega * _million - sec, :sec)
   end
 
-  def shift(datetime, timestamp={_,_,_}) do
-    add(datetime, timestamp)
+  @doc """
+  """
+  @spec shift(dtz, timestamp | list) :: dtz
+  @spec shift(dtz, list, :strict)    :: dtz
+
+  def shift(date, timestamp={_,_,_}) do
+    add(date, timestamp)
   end
 
-  def shift(datetime, spec) when is_list(spec) do
-    Enum.reduce spec, datetime, fn({value, type}, result) ->
-      shift(result, value, type)
+  def shift(date, spec) when is_list(spec) do
+    Enum.reduce spec, date, fn({value, type}, date) ->
+      shift(date, value, type)
     end
   end
 
-  def shift(datetime, spec, :strict) when is_list(spec) do
-    Enum.reduce normalize_shift(spec), datetime, fn({value, type}, result) ->
-      shift(result, value, type)
+  def shift(date, spec, :strict) when is_list(spec) do
+    Enum.reduce normalize_shift(spec), date, fn({value, type}, date) ->
+      shift(date, value, type)
     end
   end
 
@@ -1008,33 +1015,33 @@ defmodule Date do
     #=> {{2011,3,5},{23,23,23}}
 
   """
+  @spec shift(dtz, integer, :sec | :min | :hour | :days | :weeks | :months | :years) :: dtz
+
   def shift(date, 0, _) do
     date
   end
 
-  def shift(date, value, type) when type in [:sec, :min, :hours] do
-    # TODO: time zone adjustments
+  def shift(date={_, tz}, value, type) when type in [:sec, :min, :hours] do
     sec = to_sec(date)
     sec = sec + case type do
       :sec   -> value
       :min   -> value * 60
       :hours -> value * 60 * 60
     end
-    from(sec, :sec)
+    replace(from(sec, :sec), :tz, tz)
   end
 
-  def shift({date, time}, value, :days) do
-    # TODO: time zone adjustments
-    days = to_days(date, 0)
+  def shift(date={{_, time}, tz}, value, :days) do
+    days = to_days(date)
     days = days + value
-    { :calendar.gregorian_days_to_date(days), time }
+    replace(from(days, :days), [time: time, tz: tz])
   end
 
   def shift(date, value, :weeks) do
     shift(date, value * 7, :days)
   end
 
-  def shift({ {year, month, day}, time }, value, :months) do
+  def shift({{{year,month,day},time}, tz}, value, :months) do
     month = month + value
 
     # Calculate a valid year value
@@ -1045,17 +1052,19 @@ defmodule Date do
       true       -> year
     end
 
-    { validate({year, round_month(month), day}), time }
+    make_date(validate({year, round_month(month), day}), time, tz)
   end
 
-  def shift({ {year, month, day}, time }, value, :years) do
-    { validate({year + value, month, day}), time }
-  end
-
-  def normalize_shift(spec) when is_list(spec) do
+  def shift({{{year,month,day},time}, tz}, value, :years) do
+    make_date(validate({year + value, month, day}), time, tz)
   end
 
   ### Private helper function ###
+
+  defp normalize_shift(spec) when is_list(spec) do
+    # FIXME: implement proper algorithm
+    spec
+  end
 
   defp validate({year, month, day})
 
