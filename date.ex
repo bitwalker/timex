@@ -475,15 +475,15 @@ defmodule Date do
   """
   @spec to_timestamp(dtz) :: timestamp
   @spec to_timestamp(dtz, :epoch | 0) :: timestamp
-  def to_timestamp(dtz, reference // :epoch)
+  def to_timestamp(date, reference // :epoch)
 
-  def to_timestamp(dtz, :epoch) do
-    sec = to_sec(dtz)
+  def to_timestamp(date, :epoch) do
+    sec = to_sec(date)
     { div(sec, _million), rem(sec, _million), 0 }
   end
 
-  def to_timestamp(dtz, 0) do
-    sec = to_sec(dtz, 0)
+  def to_timestamp(date, 0) do
+    sec = to_sec(date, 0)
     { div(sec, _million), rem(sec, _million), 0 }
   end
 
@@ -605,7 +605,7 @@ defmodule Date do
     {year, month, day}
   end
 
-  def replace(dtz, type, value)
+  def replace(date, type, value)
 
   def replace({datetime,_}, :tz, value) do
     {datetime, value}
