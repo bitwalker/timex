@@ -1,4 +1,4 @@
-all: app date time
+all: date time
 
 date: Elixir-Date.beam
 Elixir-Date.beam: date.ex
@@ -11,12 +11,15 @@ Elixir-Time.beam: time.ex
 Elixir-Time-Helpers.beam: time.ex
 	deps/elixir/bin/elixirc time.ex
 
-.PHONY: clean test docs
+.PHONY: clean test test-rebar docs
 
 clean:
 	rm *.beam
 
 test: all
+	deps/elixir/bin/elixir -r 'test/test_helper.ex' -pr 'test/*_test.ex'
+
+test-rebar: app all
 	deps/elixir/bin/elixir -r 'test/test_helper.ex' -pr 'test/*_test.ex'
 
 docs:
