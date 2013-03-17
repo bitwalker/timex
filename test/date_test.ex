@@ -4,9 +4,9 @@ defmodule DateTest do
   test :from_date do
     date = {2000, 11, 11}
     assert Date.local(Date.from(date)) == {date, {0,0,0}}
-    { dt, tz } = Date.from(date)
+    { _, tz } = Date.from(date)
     assert tz == Date.timezone(:utc)
-    { dt, tz } = Date.from(date, :local)
+    { _, tz } = Date.from(date, :local)
     assert tz == Date.timezone()
   end
 
