@@ -96,7 +96,6 @@ defmodule DateTest do
   end
 
   test :format do
-    raise NotImplemented
   end
 
   test :convert do
@@ -168,7 +167,15 @@ defmodule DateTest do
   end
 
   test :is_valid do
-    raise NotImplemented
+    assert Date.is_valid(Date.now())
+    assert Date.is_valid(Date.from({1,1,1}))
+    assert Date.is_valid(Date.from({{1,1,1}, {1,1,1}}))
+    assert not Date.is_valid(Date.from({12,13,14}))
+    assert not Date.is_valid(Date.from({12,12,34}))
+    assert not Date.is_valid(Date.from({{12,12,12}, {24,0,0}}))
+    assert not Date.is_valid(Date.from({{12,12,12}, {23,60,0}}))
+    assert not Date.is_valid(Date.from({{12,12,12}, {23,59,60}}))
+    assert not Date.is_valid(Date.from({{12,12,12}, {-1,59,59}}))
   end
 
   test :normalize do

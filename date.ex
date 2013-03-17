@@ -530,6 +530,7 @@ defmodule Date do
   end
 
   def format(date, fmt) do
+    raise NotImplemented
   end
 
   ### Converting dates ###
@@ -745,7 +746,7 @@ defmodule Date do
   @spec is_valid(dtz) :: boolean
 
   def is_valid({{date,time}, tz}) do
-    :calendar.is_valid(date) and is_valid_time(time) and is_valid_tz(tz)
+    :calendar.valid_date(date) and is_valid_time(time) and is_valid_tz(tz)
   end
 
   defp is_valid_time({hour,min,sec}) do
