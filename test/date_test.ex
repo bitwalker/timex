@@ -74,23 +74,23 @@ defmodule DateTest do
   end
 
   test :iso_format do
-    eet = Date.timezone(2, "EET")
-    pst = Date.timezone(-8, "PST")
     date = {{2013,3,5},{23,25,19}}
 
-    assert Date.iso_format(Date.from(date, eet), :utc) == "2013-03-05 21:25:19Z"
-    assert Date.iso_format(Date.from(date, eet), :local) == "2013-03-05 23:25:19"
-    assert Date.iso_format(Date.from(date, pst), :full) == "2013-03-05 23:25:19-0800"
+    eet = Date.timezone(2, "EET")
+    assert Date.format(Date.from(date, eet), :iso) == "2013-03-05 21:25:19Z"
+    assert Date.format(Date.from(date, eet), :iso_local) == "2013-03-05 23:25:19"
+    pst = Date.timezone(-8, "PST")
+    assert Date.format(Date.from(date, pst), :iso_full) == "2013-03-05 23:25:19-0800"
   end
 
   test :rfc_format do
     eet = Date.timezone(2, "EET")
     date = Date.from({{2013,3,5},{23,25,19}}, eet)
-    assert Date.rfc_format(date) == "Tue, 05 Mar 2013 21:25:19 GMT"
+    assert Date.format(date, :rfc) == "Tue, 05 Mar 2013 21:25:19 GMT"
 
-    eet = Date.timezone(-8, "PST")
-    date = Date.from({{2013,3,5},{23,25,19}}, eet)
-    assert Date.rfc_format(date) == "Wed, 06 Mar 2013 07:25:19 GMT"
+    pst = Date.timezone(-8, "PST")
+    date = Date.from({{2013,3,5},{23,25,19}}, pst)
+    assert Date.format(date, :rfc) == "Wed, 06 Mar 2013 07:25:19 GMT"
   end
 
   test :convert do

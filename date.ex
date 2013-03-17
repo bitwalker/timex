@@ -459,6 +459,66 @@ defmodule Date do
   ### Formatting dates ###
 
   @doc """
+  Return date's string representation in the specified format.
+
+  Format specifiers :iso* produce a string in ISO 8601 format.
+
+  Format specifiers :rfc* produce a string in RFC 3339 format.
+
+  ## Examples
+
+    date = {{2013,3,5},{23,25,19}}
+    eet = timezone(2, "EET")
+    pst = Date.timezone(-8, "PST")
+
+    format(from(date, eet), :iso)        #=> "2013-03-05 21:25:19Z"
+    format(from(date, eet), :iso_local)  #=> "2013-03-05 23:25:19"
+    format(from(date, pst), :iso_full)   #=> "2013-03-05 23:25:19-0800"
+
+  """
+  @spec format(dtz, :iso | :iso_local | :iso_full | :rfc | :rfc_local | binary) :: binary
+
+  def format(date, :iso) do
+    {{year,month,day}, {hour,min,sec}} = universal(date)
+    list_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0BZ",
+                                  [year, month, day, hour, min, sec]))
+  end
+
+  def format(date, :iso_local) do
+    {{year,month,day}, {hour,min,sec}} = local(date)
+    list_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B",
+                                  [year, month, day, hour, min, sec]))
+  end
+
+  def format(date={_, {offset,_}}, :iso_full) do
+    {{year,month,day}, {hour,min,sec}} = local(date)
+    abs_offs = abs(offset)
+    hour_offs = trunc(abs_offs)
+    min_offs = round((abs_offs - hour_offs) * 60)
+    fstr = if offset < 0 do
+      "~4..0B-~2..0B-~2..0B ~2..0B:~2..0B:~2..0B-~2..0B~2..0B"
+    else
+      "~4..0B-~2..0B-~2..0B ~2..0B:~2..0B:~2..0B+~2..0B~2..0B"
+    end
+    list_to_binary(:io_lib.format(fstr, [year, month, day, hour, min, sec, hour_offs, min_offs]))
+  end
+
+  def format(date, :rfc) do
+    # :httpd_util.rfc1123_date() assumes that date is local
+    localdate = local(replace(date, :tz, timezone()))
+    list_to_binary(:httpd_util.rfc1123_date(localdate))
+  end
+
+  def format(date, :rfc_local) do
+    # :httpd_util.rfc1123_date() assumes that date is local
+    localdate = local(replace(date, :tz, timezone()))
+    list_to_binary(:httpd_util.rfc1123_date(localdate))
+  end
+
+  def format(date, fmt) do
+  end
+
+  @doc """
   Return a binary with the ISO 8601 representation of the date.
   """
   def iso_format(date, type // :utc)
