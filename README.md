@@ -7,89 +7,100 @@ A draft implementation of date and time functionality based on **Idea #6** from 
 
 ## Overview ##
 
-This is a draft implementation of two modules for Elixir that are going to deal with all aspects of working with dates and time intervals. I'm also planning to add another module for parsing dates from strings and formatting dates to strings later on.
+This is a draft implementation of two modules for Elixir that are going to deal with all aspects of working with dates and time intervals.
 
-Basically, the `Date` module is for dealing with dates. It will support getting current date in any time zone, calculating time intervals between two dates, shifting a date by some amount of seconds/hours/days/years towards past and future. As Erlang provides support only for the Gregorian calendar, that's what I'm going to stick for the moment.
+Basically, the `Date` module is for dealing with dates. It supports getting current date in any time zone, calculating time intervals between two dates, shifting a date by some amount of seconds/hours/days/years towards past and future. As Erlang provides support only for the Gregorian calendar, that's what I'm going to stick to for the time being.
+
+Support for working with time zones is not finalized. Although there is no time zone database yet, you may create time zones by manually specifying offset and name and it'll work correctly, i.e. you'll be able to convert between time zones, format dates to strings, etc.
 
 The `Time` module supports a finer grain level of calculations over time intervals. It is going to be used for timestamps in logs, measuring code executions times, converting time units, and so forth.
 
 ## Use cases ##
 
-### Getting current date and time ###
+### Getting current date ###
 
-Get current local date and format it to string.
+Get current date in UTC or some other time zone.
 
 ```elixir
-dt = Date.local()
-Date.rfc_format(dt)
-Date.iso_format(dt)
-
-# Use Time module for microsecond precision
-t = Time.now()
-Time.rfc_format(t)
-Time.iso_format(t)
+date = Date.now()
+Date.format(date, :iso)        #=> "2013-03-17 18:39:21Z"
+Date.format(date, :rfc)        #=> "Sun, 17 Mar 2013 18:39:21 GMT"
+Date.format(date, :rfc_local)  #=> "Sun, 17 Mar 2013 20:39:21 EET"
 ```
 
-### Extracting information about date ###
+The date value that `Date` produced encapsulates current date, time, and time zone information. This allows for great flexibility without any overhead on the user's part.
+
+Since Erlang's native date format doesn't carry any time zone information, `Date` provides a bunch of constructors that takes Erlang's date value and an optional time zone.
+
+```elixir
+datetime = {{2013,3,17},{21,22,23}}
+
+date = Date.from(datetime)          # datetime is assumed to be in UTC by default
+Date.format(date, :rfc)             #=> "Sun, 17 Mar 2013 21:22:23 GMT"
+
+date = Date.from(datetime, :local)  # indicates that datetime is in local time zone
+Date.format(date, :rfc)             #=> "Sun, 17 Mar 2013 19:22:23 GMT"
+Date.format(date, :rfc_local)       #=> "Sun, 17 Mar 2013 21:22:23 EET"
+
+Date.local(date)  # convert date to local time zone
+#=> {{2013,3,17},{21,22,23}}
+
+# Let's see what happens if we switch the time zone
+date = Date.replace(date, :tz, { -8, "PST" })
+Date.format(date, :rfc_local)
+#=> "Sun, 17 Mar 2013 11:22:23 PST"
+
+Date.universal(date)  # convert date to UTC
+#=> {{2013,3,17},{19,22,23}}
+```
+
+### Extracting information about dates ###
 
 Find out current weekday, week number, number of days in a given month, etc.
 
 ```elixir
-dt = Date.local()     #=> {{2013,3,10},{0,0,30}}
-Date.weekday(dt)      #=> 7  # Sunday
-Date.week_number(dt)  #=> {2013,10}
-Date.iso_triplet(dt)  #=> {2013,10,7}  # { year, week number, weekday }
+date = Date.now()
+Date.format(date, :rfc_local)  #=> "Sun, 17 Mar 2013 20:57:19 EET"
+
+Date.weekday(date)           #=> 7
+Date.weeknum(date)           #=> {2013,11}
+Date.iso_triplet(date)       #=> {2013,11,7}
+
+Date.days_in_month(date)     #=> 31
+Date.days_in_month(2012, 2)  #=> 29
+
+Date.is_leap(date)           #=> false
+Date.is_leap(2012)           #=> true
 ```
 
-### Converting time units ###
+### Date arithmetic ###
+
+`Date` can convert dates to time intervals since UNIX epoch or year 0. Calculating time intervals between two dates is possible via the `diff()` function (not implemented yet).
 
 ```elixir
-dt = Time.now
-Time.convert(dt, :sec)
-Time.convert(dt, :min)
-Time.convert(dt, :hour)
+date = Date.now()
+Date.format(date, :rfc_local)
+#=> "Sun, 17 Mar 2013 21:08:07 EET"
 
-Time.to_timestamp(13, :sec)
-Time.to_timestamp([{13, :sec}, {1, :days}, {6, :hour}], :strict)
+Date.format( Date.shift(date, 78, :sec), :rfc_local )
+#=> "Sun, 17 Mar 2013 21:09:25 EET"
+
+Date.format( Date.shift(date, -1078, :sec), :rfc_local )
+#=> "Sun, 17 Mar 2013 20:50:09 EET"
+
+Date.format( Date.shift(date, 1, :days), :rfc_local )
+#=> "Mon, 18 Mar 2013 21:08:07 EET"
+
+Date.format( Date.shift(date, 3, :weeks), :rfc_local )
+#=> "Sun, 07 Apr 2013 21:08:07 EET"
+
+Date.format( Date.shift(date, -13, :years), :rfc_local )
+#=> "Fri, 17 Mar 2000 21:08:07 EET"
 ```
 
-## What already works ##
+## Working with Time module ##
 
-There is no support for different time zones yet, but you can already shift dates and format them to standard string representations.
-
-```elixir
-local = Date.local
-#=> {{2013,3,9},{0,13,51}}
-
-Date.universal(local)
-#=> [{{2013,3,8},{22,13,51}}]
-
-Date.seconds_diff(Date.local, local)
-#=> 51
-
-
-## Moving in time ##
-
-Date.shift(local, 1, :days)
-#=> {{2013,3,10},{0,13,51}}
-
-Date.shift(local, 3, :weeks)
-#=> {{2013,3,30},{0,13,51}}
-
-Date.shift(local, -13, :years)
-#=> {{2000,3,9},{0,13,51}}
-
-
-## Basic formatting ##
-
-Date.iso8601(local)
-#=> "2013-03-09 00:13:51"
-
-Date.rfc1123(local)
-#=> "Fri, 08 Mar 2013 22:13:51 GMT"
-```
-
-Now, the `Time` module already has some conversions and functionality for measuring time.
+The `Time` module already has some conversions and functionality for measuring time.
 
 ```elixir
 ## Time.now returns time since UNIX epoch ##
@@ -156,6 +167,18 @@ Time.diff(Time.now, t)
 
 Time.diff(Time.now, t, :hour)
 #=> 0.03031450388888889
+```
+
+### Converting time units ###
+
+```elixir
+dt = Time.now
+Time.convert(dt, :sec)
+Time.convert(dt, :min)
+Time.convert(dt, :hour)
+
+Time.to_timestamp(13, :sec)
+Time.to_timestamp([{13, :sec}, {1, :days}, {6, :hour}], :strict)
 ```
 
 ## FAQ ##
