@@ -1,6 +1,8 @@
 Date & Time modules for Elixir
 ==============================
 
+[![Build Status](https://travis-ci.org/alco/elixir-datetime.png?branch=master)](https://travis-ci.org/alco/elixir-datetime)
+
 A draft implementation of date and time functionality based on **Idea #6** from this [proposal page](https://github.com/beamcommunity/beamcommunity.github.com/wiki/Project:-Elixir).
 
 ## Overview ##
