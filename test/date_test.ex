@@ -186,7 +186,13 @@ defmodule DateTest do
   end
 
   test :replace do
-    raise NotImplemented
+    date = { {{2013,3,17}, {17,26,5}}, {2.0,"EET"} }
+    assert Date.replace(date, :date, {1,1,1}) == { {{1,1,1}, {17,26,5}}, {2.0,"EET"} }
+    assert Date.replace(date, :hour, 0) == { {{2013,3,17}, {0,26,5}}, {2.0,"EET"} }
+    assert Date.replace(date, :tz, Date.timezone(:utc)) == { {{2013,3,17}, {17,26,5}}, {0.0,"UTC"} }
+
+    assert Date.replace(date, [date: {1,1,1}, hour: 13, second: 61, tz: Date.timezone(:utc)]) \
+           == { {{1,1,1}, {13,26,61}}, {0.0,"UTC"} }
   end
 
   test :shift_seconds do
