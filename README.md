@@ -54,6 +54,24 @@ Date.universal(date)  # convert date to UTC
 #=> {{2013,3,17},{19,22,23}}
 ```
 
+### Working with time zones ###
+
+Currently, we need to build time zones by hand. The functions in `Date` are already respecting time zone offsets when doing calculations and use time zone name in `format()`.
+
+```elixir
+date = Date.from({2013,1,1}, Date.timezone(5, "SomewhereInRussia"))
+Date.format(date, :iso)
+#=> "2012-12-31 19:00:00Z"
+
+Date.format(date, :rfc_local)
+#=> "Tue, 01 Jan 2013 00:00:00 SomewhereInRussia"
+
+date = Date.now()
+Date.universal(date)                        #=> {{2013,3,17},{19,37,39}}
+Date.local(date)                            #=> {{2013,3,17},{21,37,39}}
+Date.local(date, Date.timezone(-8, "PST"))  #=> {{2013,3,17},{11,37,39}}
+```
+
 ### Extracting information about dates ###
 
 Find out current weekday, week number, number of days in a given month, etc.
