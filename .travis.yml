@@ -1,6 +1,5 @@
 language: erlang
-script: "make"
-after_script: "make test-only"
+script: "make test"
 otp_release:
   - R15B02
   - R15B01

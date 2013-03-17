@@ -11,15 +11,12 @@ Elixir-Time.beam: time.ex
 Elixir-Time-Helpers.beam: time.ex
 	deps/elixir/bin/elixirc time.ex
 
-.PHONY: clean test test-only docs
+.PHONY: clean test docs
 
 clean:
 	rm *.beam
 
 test: all
-	deps/elixir/bin/elixir -r 'test/test_helper.ex' -pr 'test/*_test.ex'
-
-test-only:
 	deps/elixir/bin/elixir -r 'test/test_helper.ex' -pr 'test/*_test.ex'
 
 docs:
