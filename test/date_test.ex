@@ -55,6 +55,7 @@ defmodule DateTest do
 
   test :to_timestamp do
     assert Date.to_timestamp(Date.epoch()) == {0,0,0}
+    assert Date.to_timestamp(Date.epoch(), 0) == {62167,219200,0}
     assert Time.to_sec(Date.to_timestamp(Date.epoch(), 0)) == Date.epoch(:sec)
   end
 
@@ -79,6 +80,39 @@ defmodule DateTest do
 
     assert Date.to_days(Date.epoch()) == 0
     assert Date.to_days(Date.epoch(), 0) == 719528
+  end
+
+  test :weekday do
+    localdate = {{2013,3,17},{11,59,10}}
+    assert Date.weekday(localdate) == 7
+    assert Date.weekday(Date.from(localdate)) == 7
+    assert Date.weekday(Date.epoch()) == 4
+  end
+
+  test :weeknum do
+    localdate = {{2013,3,17},{11,59,10}}
+    assert Date.weeknum(localdate) == {2013,11}
+    assert Date.weeknum(Date.from(localdate)) == {2013,11}
+    assert Date.weeknum(Date.epoch()) == {1970,1}
+  end
+
+  test :iso_triplet do
+    localdate = {{2013,3,17},{11,59,10}}
+    assert Date.iso_triplet(Date.from(localdate)) == {2013,11,7}
+    assert Date.iso_triplet(Date.epoch()) == {1970,1,4}
+  end
+
+  test :days_in_month do
+    localdate = {{2013,2,17},{11,59,10}}
+    assert Date.days_in_month(Date.from(localdate)) == 28
+    assert Date.days_in_month(Date.epoch()) == 31
+    assert Date.days_in_month(2012, 2) == 29
+    assert Date.days_in_month(2013, 2) == 28
+  end
+
+  test :is_leap do
+    assert Date.is_leap(Date.epoch()) == false
+    assert Date.is_leap(2012) == true
   end
 
   test :iso8601 do

@@ -63,6 +63,9 @@ defmodule Date do
   @type year :: non_neg_integer
   @type month :: 1..12
   @type day :: 1..31
+  @type weekday :: 1..7
+  @type weeknum :: 1..53
+  @type num_of_days :: 28..31
 
   @type time :: { hour, minute, second }
   @type hour :: 0..23
@@ -535,47 +538,107 @@ defmodule Date do
   ### Retrieving information about a date ###
 
   @doc """
-  1 - Monday, ..., 7 - Sunday
+  Return weekday number (as defined by ISO 8601) of the specified date.
+
+  ## Examples
+
+    weekday(epoch())  #=> 4 (i.e. Thursday)
+
   """
-  def weekday(date={_year,_month,_day}) do
+  @spec weekday(dtz | datetime) :: weekday
+
+  def weekday({date={_year,_month,_day}, _time}) do
     :calendar.day_of_the_week(date)
   end
 
-  def weekday({date, _}) do
-    weekday(date)
+  def weekday(date) do
+    weekday(local(date))
   end
 
-  def week_number(date={_year,_month,_day}) do
+  @doc """
+  Return a pair {year, week number} (as defined by ISO 8601) that date falls
+  on.
+
+  ## Examples
+
+    weeknum(epoch())  #=> {1970,1}
+
+  """
+  @spec weeknum(dtz | datetime) :: {year, weeknum}
+
+  def weeknum({date={_year,_month,_day}, _time}) do
     :calendar.iso_week_number(date)
   end
 
-  def week_number({date, _}) do
-    week_number(date)
+  def weeknum(date) do
+    weeknum(local(date))
   end
 
-  def is_leap({year,_,_}) do
-    is_leap(year)
+  @doc """
+  Return a 3-tuple {year, week number, weekday} for the given date.
+
+  ## Examples
+
+    iso_triplet(epoch())  #=> {1970, 1, 4}
+
+  """
+  @spec iso_triplet(dtz) :: {year, weeknum, weekday}
+
+  def iso_triplet(date) do
+    localtime = local(date)
+    { iso_year, iso_week } = weeknum(localtime)
+    { iso_year, iso_week, weekday(localtime) }
   end
 
-  def is_leap({{year,_,_}, _}) do
-    is_leap(year)
+  @doc """
+  Return number of days is in the month which date falls on.
+
+  ## Examples
+
+    days_in_month(epoch())  #=> 31
+
+  """
+  @spec days_in_month(dtz) :: num_of_days
+
+  def days_in_month(date) do
+    {{year,month,_}, _} = local(date)
+    days_in_month(year, month)
   end
 
-  def is_leap(year) do
-    :calendar.is_leap_year(year)
-  end
+  @doc """
+  Return number of days in the given month.
 
-  def iso_triplet(date={_year,_month,_day}) do
-    { iso_year, iso_week } = week_number(date)
-    { iso_year, iso_week, weekday(date) }
-  end
+  ## Examples
 
-  def iso_triplet({date, _}) do
-    iso_triplet(date)
-  end
+    days_in_month(2012, 2)  #=> 29
+    days_in_month(2013, 2)  #=> 28
+
+  """
+  @spec days_in_month(year, month) :: num_of_days
 
   def days_in_month(year, month) do
     :calendar.last_day_of_the_month(year, month)
+  end
+
+  @doc """
+  Return a boolean indicating whether the given year is a leap year. You may
+  pase a date or a year number.
+
+  ## Examples
+
+    is_leap(epoch())  #=> false
+    is_leap(2012)     #=> true
+
+  """
+  @spec is_leap(dtz | year) :: boolean
+
+  def is_leap(year) when is_integer(year) do
+    :calendar.is_leap_year(year)
+  end
+
+  def is_leap(date) do
+    {{year,_,_}, _} = local(date)
+    is_leap(year)
   end
 
   ### Validating and modifying dates ###
