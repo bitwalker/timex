@@ -30,7 +30,7 @@ Date.format(date, :rfc_local)  #=> "Sun, 17 Mar 2013 20:39:21 EET"
 
 The date value that `Date` produced encapsulates current date, time, and time zone information. This allows for great flexibility without any overhead on the user's part.
 
-Since Erlang's native date format doesn't carry any time zone information, `Date` provides a bunch of constructors that takes Erlang's date value and an optional time zone.
+Since Erlang's native date format doesn't carry any time zone information, `Date` provides a bunch of constructors that take Erlang's date value and an optional time zone.
 
 ```elixir
 datetime = {{2013,3,17},{21,22,23}}
@@ -62,20 +62,46 @@ Find out current weekday, week number, number of days in a given month, etc.
 date = Date.now()
 Date.format(date, :rfc_local)  #=> "Sun, 17 Mar 2013 20:57:19 EET"
 
-Date.weekday(date)           #=> 7
-Date.weeknum(date)           #=> {2013,11}
-Date.iso_triplet(date)       #=> {2013,11,7}
+Date.weekday(date)             #=> 7
+Date.weeknum(date)             #=> {2013,11}
+Date.iso_triplet(date)         #=> {2013,11,7}
 
-Date.days_in_month(date)     #=> 31
-Date.days_in_month(2012, 2)  #=> 29
+Date.days_in_month(date)       #=> 31
+Date.days_in_month(2012, 2)    #=> 29
 
-Date.is_leap(date)           #=> false
-Date.is_leap(2012)           #=> true
+Date.is_leap(date)             #=> false
+Date.is_leap(2012)             #=> true
 ```
 
 ### Date arithmetic ###
 
 `Date` can convert dates to time intervals since UNIX epoch or year 0. Calculating time intervals between two dates is possible via the `diff()` function (not implemented yet).
+
+```elixir
+date = Date.now()
+Date.format(date, :rfc_local)
+#=> "Sun, 17 Mar 2013 21:20:36 EET"
+
+Date.convert(date, :sec)  # seconds since Epoch
+#=> 1363548036
+
+Date.to_sec(date, 0)      # seconds since year 0
+#=> 63530767236
+
+Date.format(Date.epoch(), :iso)
+#=> "1970-01-01 00:00:00Z"
+
+Date.epoch(:sec)  # seconds since year 0 to Epoch
+#=> 62167219200
+
+date = Date.from(Date.epoch(:sec) + 144, :sec, 0)  # 0 indicates year 0
+Date.format(date, :iso)
+#=> "1970-01-01 00:02:24Z"
+```
+
+### Shifting dates ###
+
+Shifting refers to moving by some amount of time towards past or future. `Date` supports multiple ways of doing this.
 
 ```elixir
 date = Date.now()
