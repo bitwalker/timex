@@ -179,11 +179,10 @@ defmodule DateTest do
 
   test :normalize do
     date = Date.now()
-    assert Date.normalize(date, :clamp) == date
+    assert Date.normalize(date) == date
 
     date = { {1,13,44}, {-8,60,61} }
-    assert Date.local(Date.normalize(Date.from(date), :clamp)) == { {1,12,31}, {0,59,59} }
-    assert Date.local(Date.normalize(Date.from(date), :round)) == { {2,2,12}, {17,1,1} }
+    assert Date.local(Date.normalize(Date.from(date))) == { {1,12,31}, {0,59,59} }
   end
 
   test :replace do

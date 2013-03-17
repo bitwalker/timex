@@ -769,22 +769,19 @@ defmodule Date do
   @doc """
   Produce a valid date from a possibly invalid one.
 
-  If the second argument is :clamp, all date's components will be clamped to
-  the minimum or maximum valid value.
-
-  If the second argument is :round, overflowing components will be taken into
-  account to produce a valid date.
+  All date's components will be clamped to the minimum or maximum valid value.
 
   ## Examples
 
     date = { {1,13,44}, {-8,60,61} }
-    local(normalize(from(date), :clamp))  #=> { {1,12,31}, {0,59,59} }
-    local(normalize(from(date), :round))  #=> { {2,2,12}, {17,1,1} }
+    local(normalize(from(date)))  #=> { {1,12,31}, {0,59,59} }
 
   """
-  @spec normalize(dtz, :clamp | :round) :: dtz
+  @spec normalize(dtz) :: dtz
 
-  def normalize({{{year,month,day}, {hour,min,sec}}, tz}, :clamp) do
+  def normalize({{{year,month,day}, {hour,min,sec}}, tz}) do
+    # FIXME: add time zone normalization
+
     month = cond do
       month < 1   -> 1
       month > 12  -> 12
@@ -814,10 +811,6 @@ defmodule Date do
     end
 
     make_date({year,month,day}, {hour,min,sec}, tz)
-  end
-
-  def normalize(date, :round) do
-    normalize(date, :clamp)
   end
 
   @doc """
