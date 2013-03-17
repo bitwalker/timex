@@ -261,13 +261,14 @@ defmodule DateTest do
 
   test :arbitrary_shifts do
     datetime = { {2013,3,5}, {23,23,23} }
-    assert shift(datetime, [{3, :months}, {1, :days}]) == { {2013,6,6}, {23,23,23} }
+    assert shift(datetime, [months: 3, days: 1]) == { {2013,6,6}, {23,23,23} }
+    assert shift(datetime, [sec: 13, days: -1, weeks: 2]) == { {2013,3,18}, {23,23,36} }
 
     datetime = { {2012,2,29}, {23,23,23} }
-    assert shift(datetime, [{12, :months}]) == { {2013,2,28}, {23,23,23} }
-    assert shift(datetime, [{12, :months}, {1, :days}]) == { {2013,3,1}, {23,23,23} }
-    assert shift(datetime, [{12, :months}, {36, :min}, {36, :sec}]) == { {2013,2,28}, {23,59,59} }
-    assert shift(datetime, [{12, :months}, {36, :min}, {37, :sec}]) == { {2013,3,1}, {0,0,0} }
+    assert shift(datetime, [months: 12]) == { {2013,2,28}, {23,23,23} }
+    assert shift(datetime, [months: 12, days: 1]) == { {2013,3,1}, {23,23,23} }
+    assert shift(datetime, [months: 12, min: 36, sec: 36]) == { {2013,2,28}, {23,59,59} }
+    assert shift(datetime, [months: 12, min: 36, sec: 37]) == { {2013,3,1}, {0,0,0} }
   end
 
   defp shift(date, spec) when is_list(spec) do

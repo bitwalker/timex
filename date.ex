@@ -963,62 +963,84 @@ defmodule Date do
   ### Date arithmetic ###
 
   @doc """
+  Same as shift(date, timestamp, :timestamp).
   """
-  def add(datetime, {mega, sec, _}) do
-    # microseconds are simply ignored
-    shift(datetime, mega * _million + sec, :sec)
+  @spec add(dtz, timestamp) :: dtz
+
+  def add(date, {mega, sec, _}) do
+    shift(date, mega * _million + sec, :sec)
   end
 
   @doc """
+  Same as shift(date, Time.invert(timestamp), :timestamp).
   """
-  def sub(datetime, {mega, sec, _}) do
-    shift(datetime, -mega * _million - sec, :sec)
+  @spec sub(dtz, timestamp) :: dtz
+
+  def sub(date, {mega, sec, _}) do
+    shift(date, -mega * _million - sec, :sec)
   end
 
   @doc """
-  """
-  @spec shift(dtz, timestamp | list) :: dtz
-  @spec shift(dtz, list, :strict)    :: dtz
-
-  def shift(date, timestamp={_,_,_}) do
-    add(date, timestamp)
-  end
-
-  def shift(date, spec) when is_list(spec) do
-    Enum.reduce spec, date, fn({value, type}, date) ->
-      shift(date, value, type)
-    end
-  end
-
-  def shift(date, spec, :strict) when is_list(spec) do
-    Enum.reduce normalize_shift(spec), date, fn({value, type}, date) ->
-      shift(date, value, type)
-    end
-  end
-
-  @doc """
-  A single function for adjusting the date using various units: seconds,
-  minutes, hours, days, weeks, months, years.
-
-  The returned date is always valid. If after adding months or years the day
-  exceeds maximum number of days in the resulting month, that month's last day
-  is assumed.
+  Shift the date by each time interval in order. To achieve the most accurate
+  result, use `shift(date, list, :strict)`.
 
   ## Examples
 
-    datetime = {{2013,3,5},{23,23,23}}
+    date = from({{2013,3,5}, {23,23,23}})
 
-    Date.shift(datetime, 24*3600*365, :sec)
-    #=> {{2014,3,5},{23,23,23}}
-
-    Date.shift(datetime, -24*3600*(365*2 + 1), :sec)   # +1 day for leap year 2012
-    #=> {{2011,3,5},{23,23,23}}
+    local(shift(date, [sec: 13, days: -1, weeks: 2]))
+    #=> {{2013,3,18}, {23,23,36}}
 
   """
-  @spec shift(dtz, integer, :sec | :min | :hour | :days | :weeks | :months | :years) :: dtz
+  @spec shift(dtz, list) :: dtz
+
+  def shift(date, spec) when is_list(spec) do
+    Enum.reduce spec, date, fn({type, value}, date) ->
+      shift(date, value, type)
+    end
+  end
+
+  @spec shift(dtz, list, :strict)    :: dtz
+
+  def shift(date, spec, :strict) when is_list(spec) do
+    Enum.reduce normalize_shift(spec), date, fn({type, value}, date) ->
+      shift(date, value, type)
+    end
+  end
+
+  @doc """
+  A single function for adjusting the date using various units: timestamp,
+  seconds, minutes, hours, days, weeks, months, years.
+
+  When shifting by timestamps, microseconds are ignored.
+
+  The returned date is always valid. If after adding months or years the day
+  exceeds maximum number of days in the resulting month, that month's last day
+  is used.
+
+  ## Examples
+
+    date = from({{2013,3,5}, {23,23,23}})
+
+    local(shift(date, 24*3600*365, :sec))
+    #=> {{2014,3,5}, {23,23,23}}
+
+    local(shift(date, -24*3600*(365*2 + 1), :sec))  # +1 day for leap year 2012
+    #=> {{2011,3,5}, {23,23,23}}
+
+  """
+  @spec shift(dtz, integer, :timestamp | :sec | :min | :hour | :days | :weeks | :months | :years) :: dtz
 
   def shift(date, 0, _) do
     date
+  end
+
+  def shift(date, {0,0,0}, :timestamp) do
+    date
+  end
+
+  def shift(date, timestamp, :timestamp) do
+    add(date, timestamp)
   end
 
   def shift(date={_, tz}, value, type) when type in [:sec, :min, :hours] do
