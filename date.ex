@@ -359,22 +359,26 @@ defmodule Date do
   You may specify the date's time zone as the second argument. If the argument
   is omitted, UTC time zone is assumed.
 
+  When passing {year, month, day} as the first argument, the resulting date
+  will indicate midnight of that day in the specified timezone (UTC by
+  default).
+
   ## Examples
 
     from(:erlang.universaltime)      #=> { {{2013,3,16}, {12,22,20}}, {0.0,"UTC"} }
 
     from(:erlang.localtime)          #=> { {{2013,3,16}, {14,18,41}}, {0.0,"UTC"} }
-    from(:erlang.localtime, :local)  #=> { {{2013,3,16}, {14,18,51}}, {2.0,"EET"} }
+    from(:erlang.localtime, :local)  #=> { {{2013,3,16}, {12,18,51}}, {2.0,"EET"} }
 
     tz = Date.timezone(-8, "PST")
-    from({2013,3,16}, tz)            #=> { {{2013,3,16}, {0,0,0}}, {-8,"PST"} }
+    from({2013,3,16}, tz)            #=> { {{2013,3,16}, {8,0,0}}, {-8,"PST"} }
 
   """
   @spec from(date | datetime) :: dtz
   @spec from(date | datetime, :utc | :local | tz) :: dtz
 
   def from(date={_,_,_}) do
-    from({date, {0,0,0}}, :utc)
+    from(date, :utc)
   end
 
   def from(datetime={ {_,_,_},{_,_,_} }) do
@@ -382,7 +386,7 @@ defmodule Date do
   end
 
   def from(date={_,_,_}, :utc) do
-    from({date, {0,0,0}}, :utc)
+    make_date({date, {0,0,0}}, make_tz(:utc))
   end
 
   def from(datetime={ {_,_,_},{_,_,_} }, :utc) do
@@ -390,19 +394,21 @@ defmodule Date do
   end
 
   def from(date={_,_,_}, :local) do
-    from({date, {0,0,0}}, :local)
+    from({date, {0,0,0}}, timezone())
   end
 
   def from(datetime={ {_,_,_},{_,_,_} }, :local) do
-    make_date(datetime, timezone())
+    from(datetime, timezone())
   end
 
   def from(date={_,_,_}, tz={_,_}) do
     from({date, {0,0,0}}, tz)
   end
 
-  def from(datetime={ {_,_,_},{_,_,_} }, tz={_,_}) do
-    make_date(datetime, tz)
+  def from(datetime={ {_,_,_},{_,_,_} }, tz={offset,_}) do
+    # convert datetime to UTC
+    sec = :calendar.datetime_to_gregorian_seconds(datetime) - offset * 3600
+    make_date(:calendar.gregorian_seconds_to_datetime(trunc(sec)), tz)
   end
 
   @doc """

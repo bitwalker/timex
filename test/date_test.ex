@@ -4,15 +4,41 @@ defmodule DateTest do
   test :from_date do
     date = {2000, 11, 11}
     assert Date.local(Date.from(date)) == {date, {0,0,0}}
-    { dt, tz } = Date.from(date)
-    assert tz == Date.timezone(:utc)
-    { dt, tz } = Date.from(date, :local)
+
+    { datetime, tz } = Date.from(date, :local)
     assert tz == Date.timezone()
+    assert Date.local(Date.from(date, :local)) == {date, {0,0,0}}
+
+    { datetime, tz } = Date.from(date)
+    assert tz == Date.timezone(:utc)
+    assert datetime == {{2000,11,11}, {0,0,0}}
+
+    { datetime, _ } = date = Date.from(date, Date.timezone(2, "EET"))
+    assert datetime == {{2000,11,10}, {22,0,0}}
+    assert Date.local(date) == {{2000,11,11}, {0,0,0}}
+
+    { datetime, _ } = date = Date.from({2013,3,16}, Date.timezone(-8, "PST"))
+    assert datetime == {{2013,3,16}, {8,0,0}}
+    assert Date.local(date) == {{2013,3,16}, {0,0,0}}
   end
 
   test :from_datetime do
     assert Date.from({{1970,1,1}, {0,0,0}}) == Date.from({1970,1,1})
     assert Date.to_sec(Date.from({{1970,1,1}, {0,0,0}})) == 0
+
+    date = {{2000, 11, 11}, {0, 0, 0}}
+    assert Date.local(Date.from(date)) == date
+
+    { datetime, tz } = Date.from(date, :local)
+    assert tz == Date.timezone()
+
+    { datetime, tz } = Date.from(date)
+    assert tz == Date.timezone(:utc)
+    assert datetime == date
+
+    { datetime, _ } = Date.from(date, Date.timezone(2, "EET"))
+    assert datetime == {{2000,11,10}, {22,0,0}}
+
   end
 
   test :from_timestamp do
