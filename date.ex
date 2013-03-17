@@ -463,7 +463,7 @@ defmodule Date do
 
   Format specifiers :iso* produce a string in ISO 8601 format.
 
-  Format specifiers :rfc* produce a string in RFC 3339 format.
+  Format specifiers :rfc* produce a string in RFC 1123 format.
 
   ## Examples
 
@@ -474,6 +474,9 @@ defmodule Date do
     format(from(date, eet), :iso)        #=> "2013-03-05 21:25:19Z"
     format(from(date, eet), :iso_local)  #=> "2013-03-05 23:25:19"
     format(from(date, pst), :iso_full)   #=> "2013-03-05 23:25:19-0800"
+
+    format(from(date, pst), :rfc)        #=> "Wed, 06 Mar 2013 07:25:19 GMT"
+    format(from(date, pst), :rfc_local)  #=> "Tue, 05 Mar 2013 23:25:19 PST"
 
   """
   @spec format(dtz, :iso | :iso_local | :iso_full | :rfc | :rfc_local | binary) :: binary
@@ -510,39 +513,23 @@ defmodule Date do
   end
 
   def format(date, :rfc_local) do
-    # :httpd_util.rfc1123_date() assumes that date is local
-    localdate = local(replace(date, :tz, timezone()))
-    list_to_binary(:httpd_util.rfc1123_date(localdate))
+    localdate = { {year,month,day}, {hour,min,sec} } = local(date)
+    { _, {_,tz_name} } = date
+
+    day_name = case weekday(localdate) do
+      1 -> "Mon"; 2 -> "Tue"; 3 -> "Wed"; 4 -> "Thu";
+      5 -> "Fri"; 6 -> "Sat"; 7 -> "Sun"
+    end
+    month_name = case month do
+       1 -> "Jan";  2 -> "Feb";  3 -> "Mar";  4 -> "Apr";
+       5 -> "May";  6 -> "Jun";  7 -> "Jul";  8 -> "Aug";
+       9 -> "Sep"; 10 -> "Oct"; 11 -> "Nov"; 12 -> "Dec"
+    end
+    fstr = "~s, ~2..0B ~s ~4..0B ~2..0B:~2..0B:~2..0B ~s"
+    list_to_binary(:io_lib.format(fstr, [day_name, day, month_name, year, hour, min, sec, tz_name]))
   end
 
   def format(date, fmt) do
-  end
-
-  @doc """
-  Return a binary with the ISO 8601 representation of the date.
-  """
-  def iso_format(date, type // :utc)
-
-  def iso_format({ {year, month, day}, {hour, min, sec} }, :utc) do
-  end
-
-  def iso_format({ {year, month, day}, {hour, min, sec} }, :full) do
-  end
-
-  def iso_format({ {year, month, day}, {hour, min, sec} }, :local) do
-    list_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B",
-                                  [year, month, day, hour, min, sec]))
-  end
-
-  @doc """
-  Return a binary with the RFC 1123 representation of the date.
-  """
-  @spec rfc_format(dtz) :: binary
-
-  def rfc_format(date) do
-    # :httpd_util.rfc1123_date() assumes that date is local
-    localdate = local(replace(date, :tz, timezone()))
-    list_to_binary(:httpd_util.rfc1123_date(localdate))
   end
 
   ### Converting dates ###

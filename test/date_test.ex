@@ -87,10 +87,16 @@ defmodule DateTest do
     eet = Date.timezone(2, "EET")
     date = Date.from({{2013,3,5},{23,25,19}}, eet)
     assert Date.format(date, :rfc) == "Tue, 05 Mar 2013 21:25:19 GMT"
+    assert Date.format(date, :rfc_local) == "Tue, 05 Mar 2013 23:25:19 EET"
 
     pst = Date.timezone(-8, "PST")
     date = Date.from({{2013,3,5},{23,25,19}}, pst)
     assert Date.format(date, :rfc) == "Wed, 06 Mar 2013 07:25:19 GMT"
+    assert Date.format(date, :rfc_local) == "Tue, 05 Mar 2013 23:25:19 PST"
+  end
+
+  test :format do
+    raise NotImplemented
   end
 
   test :convert do
