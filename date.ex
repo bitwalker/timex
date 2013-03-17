@@ -981,8 +981,8 @@ defmodule Date do
   end
 
   @doc """
-  Shift the date by each time interval in order. To achieve the most accurate
-  result, use `shift(date, list, :strict)`.
+  Shift the date by each time interval in the list in order. To achieve the
+  most accurate result, use `shift(date, list, :strict)`.
 
   ## Examples
 
@@ -1000,7 +1000,15 @@ defmodule Date do
     end
   end
 
-  @spec shift(dtz, list, :strict)    :: dtz
+  @doc """
+  Shift the date by each time interval in the list, sorting the list in
+  advance. The intervals in the list are ordered in such a way as to minimise
+  the skew of applying each shift.
+
+  ## Examples
+
+  """
+  @spec shift(dtz, list, :strict) :: dtz
 
   def shift(date, spec, :strict) when is_list(spec) do
     Enum.reduce normalize_shift(spec), date, fn({type, value}, date) ->
