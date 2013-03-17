@@ -83,7 +83,7 @@ defmodule Date do
   @doc """
   Get a time zone object for the specified offset or name.
 
-  When offset or name is invalid, an exception is thrown.
+  When offset or name is invalid, ArgumentError exception is raised.
 
   ## Examples
 
@@ -98,7 +98,7 @@ defmodule Date do
   def timezone(spec // :local)
 
   def timezone(:local) do
-    # TODO: change implementation for cross-platform support
+    # FIXME: change implementation for cross-platform support
     datestr = System.cmd('date "+%z %Z"')
     { :ok, [offs|[name]], _ } = :io_lib.fread('~d ~s', datestr)
 
@@ -119,31 +119,45 @@ defmodule Date do
   end
 
   def timezone(offset) when is_number(offset) do
-    # TODO: fetch time zone name
-    # An exception should be thrown for invalid offsets
-    make_tz(offset, "TimeZoneName")
+    # FIXME: fetch time zone name
+    tz = make_tz(offset, "TimeZoneName")
+    if not is_valid_tz(tz) do
+      raise ArgumentError, message: "Time zone with given name not found"
+    else
+      tz
+    end
   end
 
   def timezone(name) when is_binary(name) do
     # TODO: determine the offset
-    # An exception should be thrown for invalid names
-    make_tz(2, name)
+    tz = make_tz(2, name)
+    if not is_valid_tz(tz) do
+      raise ArgumentError, message: "Time zone with given offset not found"
+    else
+      tz
+    end
   end
 
   @doc """
   Return a time zone object for the given offset-name combination.
 
-  An exception is thrown in the case of invalid or non-matching arguments.
+  ArgumentError exception is raised in the case of invalid or non-matching
+  arguments.
 
   ## Examples
 
     timezone(2, "EET")  #=> { 2.0, "EET" }
-    timezone(2, "PST")  #=> <exception>
+    timezone(2, "PST")  #=> <ArgumentError>
 
   """
   @spec timezone(number, binary) :: tz
   def timezone(offset, name) when is_number(offset) and is_binary(name) do
-    make_tz(offset, name)
+    tz = make_tz(offset, name)
+    if not is_valid_tz(tz) do
+      raise ArgumentError, message: "Time zone with given name and offset combination not found"
+    else
+      tz
+    end
   end
 
   ### Getting the date ###
