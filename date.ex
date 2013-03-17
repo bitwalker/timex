@@ -456,6 +456,35 @@ defmodule Date do
     make_date(:calendar.gregorian_days_to_date(trunc(days)), {0,0,0}, make_tz(:utc))
   end
 
+  ### Formatting dates ###
+
+  @doc """
+  Return a binary with the ISO 8601 representation of the date.
+  """
+  def iso_format(date, type // :utc)
+
+  def iso_format({ {year, month, day}, {hour, min, sec} }, :utc) do
+  end
+
+  def iso_format({ {year, month, day}, {hour, min, sec} }, :full) do
+  end
+
+  def iso_format({ {year, month, day}, {hour, min, sec} }, :local) do
+    list_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B",
+                                  [year, month, day, hour, min, sec]))
+  end
+
+  @doc """
+  Return a binary with the RFC 1123 representation of the date.
+  """
+  @spec rfc_format(dtz) :: binary
+
+  def rfc_format(date) do
+    # :httpd_util.rfc1123_date() assumes that date is local
+    localdate = local(replace(date, :tz, timezone()))
+    list_to_binary(:httpd_util.rfc1123_date(localdate))
+  end
+
   ### Converting dates ###
 
   @doc """
@@ -663,49 +692,111 @@ defmodule Date do
 
   ### Validating and modifying dates ###
 
-  def is_valid({date, _time}) do
-    # TODO: validate the time as well
-    :calendar.is_valid(date)
+  @doc """
+  Return a boolean indicating whether the given date is valid.
+  """
+  @spec is_valid(dtz) :: boolean
+
+  def is_valid({{date,time}, tz}) do
+    :calendar.is_valid(date) and is_valid_time(time) and is_valid_tz(tz)
   end
 
-  def validate({year, month, day}, direction // :past)
-
-  def validate({year, month, day}, :past) do
-    # Check if we got past the last day of the month
-    max_day = days_in_month(year, month)
-    if day > max_day do
-      day = max_day
-    end
-    {year, month, day}
+  defp is_valid_time({hour,min,sec}) do
+    hour >= 0 and hour < 24 and min >= 0 and min < 60 and sec >= 0 and sec < 60
   end
 
-  def validate({year, month, day}, :future) do
-    # Check if we got past the last day of the month
-    max_day = days_in_month(year, month)
-    if day > max_day do
-      day = max_day
-    end
-    {year, month, day}
+  defp is_valid_tz({_offset, _name}) do
+    # FIXME: implement time zone validation
+    true
   end
 
-  def replace(date, type, value)
+  def normalize(date, :clamp) do
+    date
+  end
+
+  def normalize(date, :round) do
+    date
+  end
+
+  @doc """
+  Return a new date with the specified fields replaced by new values.
+
+  ## Examples
+
+    replace(now(), :date, {1,1,1})       #=> { {{1,1,1}, {12,52,47}}, {2.0,"EET"} }
+    replace(now(), :hour, 0)             #=> { {{2013,3,17}, {0,53,39}}, {2.0,"EET"} }
+    replace(now(), :tz, timezone(:utc))  #=> { {{2013,3,17}, {12,54,23}}, {0.0,"UTC"} }
+
+  """
+  @spec replace(dtz, :datetime, datetime) :: dtz
+
+  @spec replace(dtz, :date, date) :: dtz
+  @spec replace(dtz, :year, year) :: dtz
+  @spec replace(dtz, :month, month) :: dtz
+  @spec replace(dtz, :day, day) :: dtz
+
+  @spec replace(dtz, :time, time) :: dtz
+  @spec replace(dtz, :hour, hour) :: dtz
+  @spec replace(dtz, :minute, minute) :: dtz
+  @spec replace(dtz, :second, second) :: dtz
+
+  @spec replace(dtz, :tz, tz) :: dtz
+
+  def replace({_,tz}, :datetime, value) do
+    make_date(value, tz)
+  end
+
+  def replace({{_,time}, tz}, :date, value) do
+    make_date({value, time}, tz)
+  end
+
+  def replace({{{_,month,day}, time}, tz}, :year, value) do
+    make_date({{value,month,day}, time}, tz)
+  end
+
+  def replace({{{year,_,day}, time}, tz}, :month, value) do
+    make_date({{year,value,day}, time}, tz)
+  end
+
+  def replace({{{year,month,_}, time}, tz}, :day, value) do
+    make_date({{year,month,value}, time}, tz)
+  end
+
+  def replace({{date, _}, tz}, :time, value) do
+    make_date({date, value}, tz)
+  end
+
+  def replace({{date, {_,min,sec}}, tz}, :hour, value) do
+    make_date({date, {value,min,sec}}, tz)
+  end
+
+  def replace({{date, {hour,_,sec}}, tz}, :minute, value) do
+    make_date({date, {hour,value,sec}}, tz)
+  end
+
+  def replace({{date, {hour,min,_}}, tz}, :second, value) do
+    make_date({date, {hour,min,value}}, tz)
+  end
 
   def replace({datetime,_}, :tz, value) do
-    {datetime, value}
+    make_date(datetime, value)
   end
 
-  ### Formatting dates ###
+  @doc """
+  Return a new date with the specified fields replaced by new values.
 
-  @doc "Returns a binary with the ISO 8601 representation of the date"
-  def iso_format({ {year, month, day}, {hour, min, sec} }) do
-    list_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B",
-                                  [year, month, day, hour, min, sec]))
-  end
+  ## Examples
 
-  @doc "Returns a binary with the RFC 1123 representation of the date"
-  def rfc_format(date) do
-    # :httpd_util.rfc1123_date() assumes that date is local
-    list_to_binary(:httpd_util.rfc1123_date(date))
+    replace(now(), [date: {1,1,1}, hour: 13, second: 61, tz: timezone(:utc)])
+    #=> { {{1,1,1}, {13,45,61}}, {0.0,"UTC"} }
+
+  """
+  @spec replace(dtz, list) :: dtz
+
+  def replace(date, values) when is_list(values) do
+    Enum.reduce values, date, fn({atom, value}, date) ->
+      replace(date, atom, value)
+    end
   end
 
   ### Comparing dates ###
@@ -869,7 +960,18 @@ defmodule Date do
   def normalize_shift(spec) when is_list(spec) do
   end
 
+  ### Private helper function ###
 
+  defp validate({year, month, day})
+
+  defp validate({year, month, day}) do
+    # Check if we got past the last day of the month
+    max_day = days_in_month(year, month)
+    if day > max_day do
+      day = max_day
+    end
+    {year, month, day}
+  end
 
   defp mod(a, b) do
     rem(rem(a, b) + b, b)

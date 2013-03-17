@@ -73,6 +73,26 @@ defmodule DateTest do
     assert Date.to_timestamp(Date.epoch) == Date.epoch(:timestamp)
   end
 
+  test :iso_format do
+    eet = Date.timezone(2, "EET")
+    pst = Date.timezone(-8, "PST")
+    date = {{2013,3,5},{23,25,19}}
+
+    assert Date.iso_format(Date.from(date, eet), :utc) == "2013-03-05 21:25:19Z"
+    assert Date.iso_format(Date.from(date, eet), :local) == "2013-03-05 23:25:19"
+    assert Date.iso_format(Date.from(date, pst), :full) == "2013-03-05 23:25:19-0800"
+  end
+
+  test :rfc_format do
+    eet = Date.timezone(2, "EET")
+    date = Date.from({{2013,3,5},{23,25,19}}, eet)
+    assert Date.rfc_format(date) == "Tue, 05 Mar 2013 21:25:19 GMT"
+
+    eet = Date.timezone(-8, "PST")
+    date = Date.from({{2013,3,5},{23,25,19}}, eet)
+    assert Date.rfc_format(date) == "Wed, 06 Mar 2013 07:25:19 GMT"
+  end
+
   test :convert do
     date = Date.now()
     assert Date.convert(date, :sec) + Date.epoch(:sec) == Date.to_sec(date, 0)
@@ -141,14 +161,16 @@ defmodule DateTest do
     assert Date.is_leap(2012) == true
   end
 
-  test :iso8601 do
-    date = {{2013,3,5},{23,25,19}}
-    assert Date.iso_format(date) == "2013-03-05 23:25:19"
+  test :is_valid do
+    raise NotImplemented
   end
 
-  test :rfc1123 do
-    date = {{2013,3,5},{23,25,19}}
-    assert Date.rfc_format(date) == "Tue, 05 Mar 2013 21:25:19 GMT"
+  test :normalize do
+    raise NotImplemented
+  end
+
+  test :replace do
+    raise NotImplemented
   end
 
   test :shift_seconds do
