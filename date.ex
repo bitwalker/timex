@@ -87,10 +87,10 @@ defmodule Date do
 
   ## Examples
 
-    timezone()       #=> <local time zone>
-    timezone(:utc)   #=> { 0.0, "UTC" }
-    timezone(2)      #=> { 2.0, "EET" }
-    timezone("EET")  #=> { 2.0, "EET" }
+      timezone()       #=> <local time zone>
+      timezone(:utc)   #=> { 0.0, "UTC" }
+      timezone(2)      #=> { 2.0, "EET" }
+      timezone("EET")  #=> { 2.0, "EET" }
 
   """
   @spec timezone() :: tz
@@ -146,8 +146,8 @@ defmodule Date do
 
   ## Examples
 
-    timezone(2, "EET")  #=> { 2.0, "EET" }
-    timezone(2, "PST")  #=> <ArgumentError>
+      timezone(2, "EET")  #=> { 2.0, "EET" }
+      timezone(2, "PST")  #=> <ArgumentError>
 
   """
   @spec timezone(number, binary) :: tz
@@ -167,7 +167,7 @@ defmodule Date do
 
   ## Examples
 
-    now  #=> { {{2013,3,16}, {11,1,12}}, {2.0,"EET"} }
+      now  #=> { {{2013,3,16}, {11,1,12}}, {2.0,"EET"} }
 
   """
   @spec now() :: dtz
@@ -184,8 +184,8 @@ defmodule Date do
 
   ## Examples
 
-    now(:sec)   #=> 1363439013
-    now(:days)  #=> 15780
+      now(:sec)   #=> 1363439013
+      now(:days)  #=> 15780
 
   """
   @spec now(:sec | :days) :: integer
@@ -204,7 +204,7 @@ defmodule Date do
 
   ## Examples
 
-    local()  #=> {{2013,3,16}, {14,28,42}}
+      local()  #=> {{2013,3,16}, {14,28,42}}
 
   """
   @spec local() :: datetime
@@ -221,7 +221,7 @@ defmodule Date do
 
   ## Examples
 
-    local(now())  #=> {{2013,3,16}, {14,29,22}} (same as local())
+      local(now())  #=> {{2013,3,16}, {14,29,22}} (same as local())
 
   """
   @spec local(dtz) :: datetime
@@ -235,7 +235,7 @@ defmodule Date do
 
   ## Examples
 
-    local(now(), timezone(:utc))  #=> {{2013,3,16}, {12,29,22}}
+      local(now(), timezone(:utc))  #=> {{2013,3,16}, {12,29,22}}
 
   """
   @spec local(dtz, tz) :: datetime
@@ -250,7 +250,7 @@ defmodule Date do
 
   ## Examples
 
-    universal()  #=> {{2013,3,16}, {12,33,6}}
+      universal()  #=> {{2013,3,16}, {12,33,6}}
 
   """
   @spec universal() :: datetime
@@ -266,7 +266,7 @@ defmodule Date do
 
   ## Examples
 
-    universal(now())  #=> {{2013,3,16}, {12,33,16}}
+      universal(now())  #=> {{2013,3,16}, {12,33,16}}
 
   """
   @spec universal(dtz) :: datetime
@@ -281,7 +281,7 @@ defmodule Date do
 
   ## Examples
 
-    to_sec(zero(), 0)  #=> 0
+      to_sec(zero(), 0)  #=> 0
 
   """
   @spec zero() :: dtz
@@ -320,7 +320,7 @@ defmodule Date do
 
   ## Examples
 
-    to_sec(epoch())  #=> 0
+      to_sec(epoch())  #=> 0
 
   """
   @spec epoch() :: dtz
@@ -333,9 +333,9 @@ defmodule Date do
 
   ## Examples
 
-    epoch()       #=> {{{1970,1,1},{0,0,0}},{0.0,"UTC"}}
-    epoch(:sec)   #=> 62167219200
-    epoch(:days)  #=> 719528
+      epoch()       #=> {{{1970,1,1},{0,0,0}},{0.0,"UTC"}}
+      epoch(:sec)   #=> 62167219200
+      epoch(:days)  #=> 719528
 
   """
   @spec epoch(:timestamp)   :: timestamp
@@ -366,13 +366,13 @@ defmodule Date do
 
   ## Examples
 
-    from(:erlang.universaltime)      #=> { {{2013,3,16}, {12,22,20}}, {0.0,"UTC"} }
+      from(:erlang.universaltime)      #=> { {{2013,3,16}, {12,22,20}}, {0.0,"UTC"} }
 
-    from(:erlang.localtime)          #=> { {{2013,3,16}, {14,18,41}}, {0.0,"UTC"} }
-    from(:erlang.localtime, :local)  #=> { {{2013,3,16}, {12,18,51}}, {2.0,"EET"} }
+      from(:erlang.localtime)          #=> { {{2013,3,16}, {14,18,41}}, {0.0,"UTC"} }
+      from(:erlang.localtime, :local)  #=> { {{2013,3,16}, {12,18,51}}, {2.0,"EET"} }
 
-    tz = Date.timezone(-8, "PST")
-    from({2013,3,16}, tz)            #=> { {{2013,3,16}, {8,0,0}}, {-8,"PST"} }
+      tz = Date.timezone(-8, "PST")
+      from({2013,3,16}, tz)            #=> { {{2013,3,16}, {8,0,0}}, {-8,"PST"} }
 
   """
   @spec from(date | datetime) :: dtz
@@ -420,11 +420,11 @@ defmodule Date do
 
   ## Examples
 
-    from(13, :sec)      #=> { {{1970,1,1}, {0,0,13}}, {0.0,"UTC"} }
-    from(13, :days, 0)  #=> { {{0,1,14}, {0,0,0}}, {0.0,"UTC"} }
+      from(13, :sec)      #=> { {{1970,1,1}, {0,0,13}}, {0.0,"UTC"} }
+      from(13, :days, 0)  #=> { {{0,1,14}, {0,0,0}}, {0.0,"UTC"} }
 
-    date = from(Time.now, :timestamp)
-    replace(date, :tz, timezone())     #=> yields the same value as Date.now would
+      date = from(Time.now, :timestamp)
+      replace(date, :tz, timezone())     #=> yields the same value as Date.now would
 
   """
   @spec from(timestamp, :timestamp) :: dtz
@@ -468,16 +468,16 @@ defmodule Date do
 
   ## Examples
 
-    date = {{2013,3,5},{23,25,19}}
-    eet = timezone(2, "EET")
-    pst = Date.timezone(-8, "PST")
+      date = {{2013,3,5},{23,25,19}}
+      eet = timezone(2, "EET")
+      pst = Date.timezone(-8, "PST")
 
-    format(from(date, eet), :iso)        #=> "2013-03-05 21:25:19Z"
-    format(from(date, eet), :iso_local)  #=> "2013-03-05 23:25:19"
-    format(from(date, pst), :iso_full)   #=> "2013-03-05 23:25:19-0800"
+      format(from(date, eet), :iso)        #=> "2013-03-05 21:25:19Z"
+      format(from(date, eet), :iso_local)  #=> "2013-03-05 23:25:19"
+      format(from(date, pst), :iso_full)   #=> "2013-03-05 23:25:19-0800"
 
-    format(from(date, pst), :rfc)        #=> "Wed, 06 Mar 2013 07:25:19 GMT"
-    format(from(date, pst), :rfc_local)  #=> "Tue, 05 Mar 2013 23:25:19 PST"
+      format(from(date, pst), :rfc)        #=> "Wed, 06 Mar 2013 07:25:19 GMT"
+      format(from(date, pst), :rfc_local)  #=> "Tue, 05 Mar 2013 23:25:19 PST"
 
   """
   @spec format(dtz, :iso | :iso_local | :iso_full | :rfc | :rfc_local | binary) :: binary
@@ -543,8 +543,8 @@ defmodule Date do
 
   ## Examples
 
-    date = now()
-    convert(date, :sec) + epoch(:sec) == to_sec(date, 0)  #=> true
+      date = now()
+      convert(date, :sec) + epoch(:sec) == to_sec(date, 0)  #=> true
 
   """
   @spec convert(dtz) :: timestamp
@@ -571,7 +571,7 @@ defmodule Date do
 
   ## Examples
 
-    to_timestamp(epoch()) #=> {0,0,0}
+      to_timestamp(epoch()) #=> {0,0,0}
 
   """
   @spec to_timestamp(dtz) :: timestamp
@@ -595,8 +595,8 @@ defmodule Date do
 
   ## Examples
 
-    date = from({{1999,1,2}, {12,13,14}})
-    to_sec(date)  #=> 915279194
+      date = from({{1999,1,2}, {12,13,14}})
+      to_sec(date)  #=> 915279194
 
   """
   @spec to_sec(dtz) :: integer
@@ -618,7 +618,7 @@ defmodule Date do
 
   ## Examples
 
-    to_days(now())  #=> 15780
+      to_days(now())  #=> 15780
 
   """
   @spec to_days(dtz) :: integer
@@ -640,7 +640,7 @@ defmodule Date do
 
   ## Examples
 
-    weekday(epoch())  #=> 4 (i.e. Thursday)
+      weekday(epoch())  #=> 4 (i.e. Thursday)
 
   """
   @spec weekday(dtz | datetime) :: weekday
@@ -659,7 +659,7 @@ defmodule Date do
 
   ## Examples
 
-    weeknum(epoch())  #=> {1970,1}
+      weeknum(epoch())  #=> {1970,1}
 
   """
   @spec weeknum(dtz | datetime) :: {year, weeknum}
@@ -677,7 +677,7 @@ defmodule Date do
 
   ## Examples
 
-    iso_triplet(epoch())  #=> {1970, 1, 4}
+      iso_triplet(epoch())  #=> {1970, 1, 4}
 
   """
   @spec iso_triplet(dtz) :: {year, weeknum, weekday}
@@ -693,7 +693,7 @@ defmodule Date do
 
   ## Examples
 
-    days_in_month(epoch())  #=> 31
+      days_in_month(epoch())  #=> 31
 
   """
   @spec days_in_month(dtz) :: num_of_days
@@ -708,8 +708,8 @@ defmodule Date do
 
   ## Examples
 
-    days_in_month(2012, 2)  #=> 29
-    days_in_month(2013, 2)  #=> 28
+      days_in_month(2012, 2)  #=> 29
+      days_in_month(2013, 2)  #=> 28
 
   """
   @spec days_in_month(year, month) :: num_of_days
@@ -724,8 +724,8 @@ defmodule Date do
 
   ## Examples
 
-    is_leap(epoch())  #=> false
-    is_leap(2012)     #=> true
+      is_leap(epoch())  #=> false
+      is_leap(2012)     #=> true
 
   """
   @spec is_leap(dtz | year) :: boolean
@@ -746,9 +746,9 @@ defmodule Date do
 
   ## Examples
 
-    is_valid(from({{1,1,1}, {1,1,1}}))        #=> true
-    is_valid(from({12,13,14}))                #=> false
-    is_valid(from({{12,12,12}, {-1,59,59}}))  #=> false
+      is_valid(from({{1,1,1}, {1,1,1}}))        #=> true
+      is_valid(from({12,13,14}))                #=> false
+      is_valid(from({{12,12,12}, {-1,59,59}}))  #=> false
 
   """
   @spec is_valid(dtz) :: boolean
@@ -773,8 +773,8 @@ defmodule Date do
 
   ## Examples
 
-    date = { {1,13,44}, {-8,60,61} }
-    local(normalize(from(date)))  #=> { {1,12,31}, {0,59,59} }
+      date = { {1,13,44}, {-8,60,61} }
+      local(normalize(from(date)))  #=> { {1,12,31}, {0,59,59} }
 
   """
   @spec normalize(dtz) :: dtz
@@ -818,9 +818,9 @@ defmodule Date do
 
   ## Examples
 
-    replace(now(), :date, {1,1,1})       #=> { {{1,1,1}, {12,52,47}}, {2.0,"EET"} }
-    replace(now(), :hour, 0)             #=> { {{2013,3,17}, {0,53,39}}, {2.0,"EET"} }
-    replace(now(), :tz, timezone(:utc))  #=> { {{2013,3,17}, {12,54,23}}, {0.0,"UTC"} }
+      replace(now(), :date, {1,1,1})       #=> { {{1,1,1}, {12,52,47}}, {2.0,"EET"} }
+      replace(now(), :hour, 0)             #=> { {{2013,3,17}, {0,53,39}}, {2.0,"EET"} }
+      replace(now(), :tz, timezone(:utc))  #=> { {{2013,3,17}, {12,54,23}}, {0.0,"UTC"} }
 
   """
   @spec replace(dtz, :datetime, datetime) :: dtz
@@ -882,8 +882,8 @@ defmodule Date do
 
   ## Examples
 
-    replace(now(), [date: {1,1,1}, hour: 13, second: 61, tz: timezone(:utc)])
-    #=> { {{1,1,1}, {13,45,61}}, {0.0,"UTC"} }
+      replace(now(), [date: {1,1,1}, hour: 13, second: 61, tz: timezone(:utc)])
+      #=> { {{1,1,1}, {13,45,61}}, {0.0,"UTC"} }
 
   """
   @spec replace(dtz, list) :: dtz
@@ -986,10 +986,10 @@ defmodule Date do
 
   ## Examples
 
-    date = from({{2013,3,5}, {23,23,23}})
+      date = from({{2013,3,5}, {23,23,23}})
 
-    local(shift(date, [sec: 13, days: -1, weeks: 2]))
-    #=> {{2013,3,18}, {23,23,36}}
+      local(shift(date, [sec: 13, days: -1, weeks: 2]))
+      #=> {{2013,3,18}, {23,23,36}}
 
   """
   @spec shift(dtz, list) :: dtz
@@ -1028,13 +1028,13 @@ defmodule Date do
 
   ## Examples
 
-    date = from({{2013,3,5}, {23,23,23}})
+      date = from({{2013,3,5}, {23,23,23}})
 
-    local(shift(date, 24*3600*365, :sec))
-    #=> {{2014,3,5}, {23,23,23}}
+      local(shift(date, 24*3600*365, :sec))
+      #=> {{2014,3,5}, {23,23,23}}
 
-    local(shift(date, -24*3600*(365*2 + 1), :sec))  # +1 day for leap year 2012
-    #=> {{2011,3,5}, {23,23,23}}
+      local(shift(date, -24*3600*(365*2 + 1), :sec))  # +1 day for leap year 2012
+      #=> {{2011,3,5}, {23,23,23}}
 
   """
   @spec shift(dtz, integer, :timestamp | :sec | :min | :hour | :days | :weeks | :months | :years) :: dtz
