@@ -195,6 +195,22 @@ defmodule DateTest do
            == { {{1,1,1}, {13,26,61}}, {0.0,"UTC"} }
   end
 
+  test :compare do
+    assert Date.compare(Date.epoch(), Date.zero()) == -1
+    assert Date.compare(Date.zero(), Date.epoch()) == 1
+
+    date = {2013,3,18}
+    tz1 = Date.timezone(2)
+    tz2 = Date.timezone(-3)
+    assert Date.compare(Date.from({date, {13,44,0}}, tz1), Date.from({date, {8,44,0}}, tz2)) == 0
+
+    tz3 = Date.timezone(3)
+    assert Date.compare(Date.from({date, {13,44,0}}, tz1), Date.from({date, {13,44,0}}, tz3)) == -1
+
+    date = Date.now()
+    assert Date.compare(Date.epoch(), date) == 1
+  end
+
   test :shift_seconds do
     date = {2013,3,5}
     time = {23,23,23}

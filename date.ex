@@ -896,41 +896,35 @@ defmodule Date do
 
   ### Comparing dates ###
 
-  def cmp(date, 0) do
-    cmp(date, zero)
-  end
-
-  def cmp(date, :epoch) do
-    cmp(date, epoch)
-  end
-
-  def cmp(date1, date2) do
-    diff = to_sec(date1) - to_sec(date2)
-    cond do
-      diff < 0  -> -1
-      diff == 0 -> 0
-      diff > 0  -> 1
-    end
-  end
-
   @doc """
-  Same as cmp, but returns atoms :ascending, :equal, and :descending for cmp's
-  -1, 0, and 1, respectively.
+  Compare two dates returning one of the following values:
+
+    -1  -- date2 comes before date1 in time
+
+     0  -- both arguments represent the same date (their representation is not
+           necessarily the same, e.g. they may have different times defined in
+           different time zones; but after coalescing them to the same time zone,
+           they would be equal down to separate components)
+
+     1  -- date2 comes after date1 in time (natural order)
+
   """
-  def compare(date, 0) do
-    compare(date, zero)
-  end
+  @spec compare(dtz, dtz | :epoch | 0) :: -1 | 0 | 1
 
   def compare(date, :epoch) do
     compare(date, epoch)
   end
 
+  def compare(date, 0) do
+    compare(date, zero)
+  end
+
   def compare(date1, date2) do
-    diff = to_sec(date1) - to_sec(date2)
+    diffsec = to_sec(date2) - to_sec(date1)
     cond do
-      diff < 0  -> :ascending
-      diff == 0 -> :equal
-      diff > 0  -> :descending
+      diffsec < 0  -> -1
+      diffsec == 0 -> 0
+      diffsec > 0  -> 1
     end
   end
 
