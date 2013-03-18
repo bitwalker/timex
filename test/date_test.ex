@@ -211,6 +211,9 @@ defmodule DateTest do
     assert Date.compare(Date.epoch(), date) == 1
   end
 
+  test :diff do
+  end
+
   test :shift_seconds do
     date = {2013,3,5}
     time = {23,23,23}

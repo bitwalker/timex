@@ -928,30 +928,39 @@ defmodule Date do
     end
   end
 
-  def diff(date1, date2, type // :timestamp)
+  @doc """
+  Calculate time interval between two dates. If the second date comes after the
+  first one in time, return value will be positive; and negative otherwise.
+  """
+  @spec diff(dtz, dtz, :timestamp) :: timestamp
+  @spec diff(dtz, dtz, :sec | :days | :weeks | :months | :years) :: integer
 
   def diff(date1, date2, :timestamp) do
-    Time.from_sec(to_sec(date1, date2))
+    Time.from_sec(diff(date1, date2, :sec))
   end
 
   def diff(date1, date2, :sec) do
-    to_sec(date1, date2)
+    to_sec(date2, 0) - to_sec(date1, 0)
   end
 
   def diff(date1, date2, :days) do
-    to_days(date1, date2)
+    to_days(date2, 0) - to_days(date1, 0)
   end
 
   def diff(date1, date2, :weeks) do
-    to_days(date1, date2)
+    # TODO: think of a more accurate method
+    div(diff(date1, date2, :days), 7)
   end
 
-  def diff(date1, date2, :months) do
-    to_days(date1, date2)
+  def diff(_date1, _date2, :months) do
+    # FIXME: this is tricky. Need to calculate actual months rather than days * 30.
+    raise NotImplemented
   end
 
   def diff(date1, date2, :years) do
-    to_days(date1, date2)
+    {{year1,_,_}, _} = local(date1)
+    {{year2,_,_}, _} = local(date2)
+    year2 - year1
   end
 
   ### Date arithmetic ###
