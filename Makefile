@@ -1,4 +1,8 @@
-all: date time
+all: date time date_proto
+
+date_proto: Elixir-DateRec.beam
+Elixir-DateRec.beam: date_proto.ex
+	deps/elixir/bin/elixirc date_proto.ex
 
 date: Elixir-Date.beam
 Elixir-Date.beam: date.ex

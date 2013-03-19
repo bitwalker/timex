@@ -6,6 +6,20 @@
 # beginning_of_month
 # end_of_month
 
+defmodule Date.Helper do
+  @moduledoc false
+
+  defmacro def_replace(arg) do
+    quote do
+      def replace(date, unquote(arg), value) do
+        greg_date = Date.Conversions.to_gregorian(date)
+        { date, time, tz } = replace_priv(greg_date, unquote(arg), value)
+        make_date(date, time, tz)
+      end
+    end
+  end
+end
+
 defmodule Date do
   @moduledoc """
   Module for working with dates.
@@ -42,13 +56,13 @@ defmodule Date do
   ## Primary constructor for dates
   defmacrop make_date(datetime, tz) do
     quote do
-      { unquote(datetime), unquote(tz) }
+      Date.Utils.from(unquote(datetime), unquote(tz))
     end
   end
 
   defmacrop make_date(date, time, tz) do
     quote do
-      { {unquote(date), unquote(time)}, unquote(tz) }
+      Date.Utils.from(unquote(date), unquote(time), unquote(tz))
     end
   end
 
@@ -225,8 +239,9 @@ defmodule Date do
 
   """
   @spec local(dtz) :: datetime
-  def local({ datetime, {offset,_} }) do
-    sec = :calendar.datetime_to_gregorian_seconds(datetime) + offset * 3600
+  def local(date) do
+    { date, time, {offset,_} } = Date.Conversions.to_gregorian(date)
+    sec = :calendar.datetime_to_gregorian_seconds({date, time}) + offset * 3600
     :calendar.gregorian_seconds_to_datetime(trunc(sec))
   end
 
@@ -239,8 +254,9 @@ defmodule Date do
 
   """
   @spec local(dtz, tz) :: datetime
-  def local({datetime,_}, tz) do
-    local(make_date(datetime, tz))
+  def local(date, tz) do
+    { date, time, _ } = Date.Conversions.to_gregorian(date)
+    local(make_date(date, time, tz))
   end
 
   @doc """
@@ -270,8 +286,9 @@ defmodule Date do
 
   """
   @spec universal(dtz) :: datetime
-  def universal({datetime, _}) do
-    datetime
+  def universal(date) do
+    { date, time, _ } = Date.Conversions.to_gregorian(date)
+    { date, time }
   end
 
   @doc """
@@ -494,8 +511,9 @@ defmodule Date do
                                   [year, month, day, hour, min, sec]))
   end
 
-  def format(date={_, {offset,_}}, :iso_full) do
+  def format(date, :iso_full) do
     {{year,month,day}, {hour,min,sec}} = local(date)
+    { _, _, {offset,_} } = Date.Conversions.to_gregorian(date)
     abs_offs = abs(offset)
     hour_offs = trunc(abs_offs)
     min_offs = round((abs_offs - hour_offs) * 60)
@@ -515,7 +533,7 @@ defmodule Date do
 
   def format(date, :rfc_local) do
     localdate = { {year,month,day}, {hour,min,sec} } = local(date)
-    { _, {_,tz_name} } = date
+    { _, _, {_,tz_name} } = Date.Conversions.to_gregorian(date)
 
     day_name = case weekday(localdate) do
       1 -> "Mon"; 2 -> "Tue"; 3 -> "Wed"; 4 -> "Thu";
@@ -607,8 +625,9 @@ defmodule Date do
     to_sec(date, 0) - epoch(:sec)
   end
 
-  def to_sec({datetime, _}, 0) do
-    :calendar.datetime_to_gregorian_seconds(datetime)
+  def to_sec(date, 0) do
+    { date, time, _ } = Date.Conversions.to_gregorian(date)
+    :calendar.datetime_to_gregorian_seconds({date,time})
   end
 
   @doc """
@@ -629,7 +648,8 @@ defmodule Date do
     to_days(date, 0) - epoch(:days)
   end
 
-  def to_days({{date,_}, _}, 0) do
+  def to_days(date, 0) do
+    { date, _, _ } = Date.Conversions.to_gregorian(date)
     :calendar.date_to_gregorian_days(date)
   end
 
@@ -753,7 +773,8 @@ defmodule Date do
   """
   @spec is_valid(dtz) :: boolean
 
-  def is_valid({{date,time}, tz}) do
+  def is_valid(date) do
+    { date, time, tz } = Date.Conversions.to_gregorian(date)
     :calendar.valid_date(date) and is_valid_time(time) and is_valid_tz(tz)
   end
 
@@ -779,8 +800,10 @@ defmodule Date do
   """
   @spec normalize(dtz) :: dtz
 
-  def normalize({{{year,month,day}, {hour,min,sec}}, tz}) do
+  def normalize(date) do
     # FIXME: add time zone normalization
+
+    { {year,month,day}, {hour,min,sec}, tz } = Date.Conversions.to_gregorian(date)
 
     month = cond do
       month < 1   -> 1
@@ -837,44 +860,57 @@ defmodule Date do
 
   @spec replace(dtz, :tz, tz) :: dtz
 
-  def replace({_,tz}, :datetime, value) do
-    make_date(value, tz)
+  import Date.Helper, only: [def_replace: 1]
+  def_replace(:datetime)
+  def_replace(:date)
+  def_replace(:year)
+  def_replace(:month)
+  def_replace(:day)
+  def_replace(:time)
+  def_replace(:hour)
+  def_replace(:min)
+  def_replace(:sec)
+  def_replace(:tz)
+
+  defp replace_priv({_, _, tz}, :datetime, value) do
+    { date, time } = value
+    { date, time, tz }
   end
 
-  def replace({{_,time}, tz}, :date, value) do
-    make_date({value, time}, tz)
+  defp replace_priv({_, time, tz}, :date, value) do
+    { value, time, tz }
   end
 
-  def replace({{{_,month,day}, time}, tz}, :year, value) do
-    make_date({{value,month,day}, time}, tz)
+  defp replace_priv({{_,month,day}, time, tz}, :year, value) do
+    { {value,month,day}, time, tz }
   end
 
-  def replace({{{year,_,day}, time}, tz}, :month, value) do
-    make_date({{year,value,day}, time}, tz)
+  defp replace_priv({{year,_,day}, time, tz}, :month, value) do
+    { {year,value,day}, time, tz }
   end
 
-  def replace({{{year,month,_}, time}, tz}, :day, value) do
-    make_date({{year,month,value}, time}, tz)
+  defp replace_priv({{year,month,_}, time, tz}, :day, value) do
+    { {year,month,value}, time, tz }
   end
 
-  def replace({{date, _}, tz}, :time, value) do
-    make_date({date, value}, tz)
+  defp replace_priv({date, _, tz}, :time, value) do
+    { date, value, tz }
   end
 
-  def replace({{date, {_,min,sec}}, tz}, :hour, value) do
-    make_date({date, {value,min,sec}}, tz)
+  defp replace_priv({date, {_,min,sec}, tz}, :hour, value) do
+    { date, {value,min,sec}, tz }
   end
 
-  def replace({{date, {hour,_,sec}}, tz}, :minute, value) do
-    make_date({date, {hour,value,sec}}, tz)
+  defp replace_priv({date, {hour,_,sec}, tz}, :min, value) do
+    { date, {hour,value,sec}, tz }
   end
 
-  def replace({{date, {hour,min,_}}, tz}, :second, value) do
-    make_date({date, {hour,min,value}}, tz)
+  defp replace_priv({date, {hour,min,_}, tz}, :sec, value) do
+    { date, {hour,min,value}, tz }
   end
 
-  def replace({datetime,_}, :tz, value) do
-    make_date(datetime, value)
+  defp replace_priv({date, time, _}, :tz, value) do
+    { date, time, value }
   end
 
   @doc """
@@ -889,9 +925,11 @@ defmodule Date do
   @spec replace(dtz, list) :: dtz
 
   def replace(date, values) when is_list(values) do
-    Enum.reduce values, date, fn({atom, value}, date) ->
-      replace(date, atom, value)
+    greg_date = Date.Conversions.to_gregorian(date)
+    { date, time, tz } = Enum.reduce values, greg_date, fn({atom, value}, date) ->
+      replace_priv(date, atom, value)
     end
+    make_date(date, time, tz)
   end
 
   ### Comparing dates ###
@@ -1054,19 +1092,21 @@ defmodule Date do
     add(date, timestamp)
   end
 
-  def shift(date={_, tz}, value, type) when type in [:sec, :min, :hours] do
+  def shift(date, value, type) when type in [:sec, :min, :hours] do
     sec = to_sec(date)
     sec = sec + case type do
       :sec   -> value
       :min   -> value * 60
       :hours -> value * 60 * 60
     end
+    { _, _, tz } = Date.Conversions.to_gregorian(date)
     replace(from(sec, :sec), :tz, tz)
   end
 
-  def shift(date={{_, time}, tz}, value, :days) do
+  def shift(date, value, :days) do
     days = to_days(date)
     days = days + value
+    { _, time, tz } = Date.Conversions.to_gregorian(date)
     replace(from(days, :days), [time: time, tz: tz])
   end
 
@@ -1074,7 +1114,9 @@ defmodule Date do
     shift(date, value * 7, :days)
   end
 
-  def shift({{{year,month,day},time}, tz}, value, :months) do
+  def shift(date, value, :months) do
+    { {year,month,day}, time, tz } = Date.Conversions.to_gregorian(date)
+
     month = month + value
 
     # Calculate a valid year value
@@ -1088,7 +1130,8 @@ defmodule Date do
     make_date(validate({year, round_month(month), day}), time, tz)
   end
 
-  def shift({{{year,month,day},time}, tz}, value, :years) do
+  def shift(date, value, :years) do
+    { {year,month,day}, time, tz } = Date.Conversions.to_gregorian(date)
     make_date(validate({year + value, month, day}), time, tz)
   end
 

@@ -5,21 +5,23 @@ defmodule DateTest do
     date = {2000, 11, 11}
     assert Date.local(Date.from(date)) == {date, {0,0,0}}
 
-    { _, tz } = Date.from(date, :local)
+    { _, _, tz } = Date.Conversions.to_gregorian(Date.from(date, :local))
     assert tz == Date.timezone()
     assert Date.local(Date.from(date, :local)) == {date, {0,0,0}}
 
-    { datetime, tz } = Date.from(date)
+    { date, time, tz } = Date.Conversions.to_gregorian(Date.from(date))
     assert tz == Date.timezone(:utc)
-    assert datetime == {{2000,11,11}, {0,0,0}}
+    assert {date,time} == {{2000,11,11}, {0,0,0}}
 
-    { datetime, _ } = date = Date.from(date, Date.timezone(2, "EET"))
-    assert datetime == {{2000,11,10}, {22,0,0}}
-    assert Date.local(date) == {{2000,11,11}, {0,0,0}}
+    fulldate = Date.from(date, Date.timezone(2, "EET"))
+    { date, time, _ } = Date.Conversions.to_gregorian(fulldate)
+    assert {date,time} == {{2000,11,10}, {22,0,0}}
+    assert Date.local(fulldate) == {{2000,11,11}, {0,0,0}}
 
-    { datetime, _ } = date = Date.from({2013,3,16}, Date.timezone(-8, "PST"))
-    assert datetime == {{2013,3,16}, {8,0,0}}
-    assert Date.local(date) == {{2013,3,16}, {0,0,0}}
+    fulldate = Date.from({2013,3,16}, Date.timezone(-8, "PST"))
+    { date, time, _ } = Date.Conversions.to_gregorian(fulldate)
+    assert {date,time} == {{2013,3,16}, {8,0,0}}
+    assert Date.local(fulldate) == {{2013,3,16}, {0,0,0}}
   end
 
   test :from_datetime do
@@ -29,15 +31,15 @@ defmodule DateTest do
     date = {{2000, 11, 11}, {0, 0, 0}}
     assert Date.local(Date.from(date)) == date
 
-    { _, tz } = Date.from(date, :local)
+    { _, _, tz } = Date.Conversions.to_gregorian(Date.from(date, :local))
     assert tz == Date.timezone()
 
-    { datetime, tz } = Date.from(date)
+    { d, time, tz } = Date.Conversions.to_gregorian(Date.from(date))
     assert tz == Date.timezone(:utc)
-    assert datetime == date
+    assert {d,time} == date
 
-    { datetime, _ } = Date.from(date, Date.timezone(2, "EET"))
-    assert datetime == {{2000,11,10}, {22,0,0}}
+    { d, time, _ } = Date.Conversions.to_gregorian(Date.from(date, Date.timezone(2, "EET")))
+    assert {d,time} == {{2000,11,10}, {22,0,0}}
   end
 
   test :from_timestamp do
@@ -59,12 +61,12 @@ defmodule DateTest do
   end
 
   test :zero do
-    {datetime, _} = Date.zero()
-    assert :calendar.datetime_to_gregorian_seconds(datetime) == 0
+    { date, time, _ } = Date.Conversions.to_gregorian(Date.zero())
+    assert :calendar.datetime_to_gregorian_seconds({date,time}) == 0
   end
 
   test :epoch do
-    assert Date.epoch() == { {{1970,1,1}, {0,0,0}}, {0.0, "UTC"} }
+    assert Date.Conversions.to_gregorian(Date.epoch()) == { {1970,1,1}, {0,0,0}, {0.0,"UTC"} }
     assert Date.to_sec(Date.epoch) == 0
     assert Date.to_days(Date.epoch) == 0
     assert Date.to_sec(Date.epoch, 0) == Date.epoch(:sec)
@@ -186,13 +188,13 @@ defmodule DateTest do
   end
 
   test :replace do
-    date = { {{2013,3,17}, {17,26,5}}, {2.0,"EET"} }
-    assert Date.replace(date, :date, {1,1,1}) == { {{1,1,1}, {17,26,5}}, {2.0,"EET"} }
-    assert Date.replace(date, :hour, 0) == { {{2013,3,17}, {0,26,5}}, {2.0,"EET"} }
-    assert Date.replace(date, :tz, Date.timezone(:utc)) == { {{2013,3,17}, {17,26,5}}, {0.0,"UTC"} }
+    date = Date.from({{2013,3,17}, {17,26,5}}, {2.0,"EET"})
+    assert Date.Conversions.to_gregorian(Date.replace(date, :date, {1,1,1})) == { {1,1,1}, {15,26,5}, {2.0,"EET"} }
+    assert Date.Conversions.to_gregorian(Date.replace(date, :hour, 0)) == { {2013,3,17}, {0,26,5}, {2.0,"EET"} }
+    assert Date.Conversions.to_gregorian(Date.replace(date, :tz, Date.timezone(:utc))) == { {2013,3,17}, {15,26,5}, {0.0,"UTC"} }
 
-    assert Date.replace(date, [date: {1,1,1}, hour: 13, second: 61, tz: Date.timezone(:utc)]) \
-           == { {{1,1,1}, {13,26,61}}, {0.0,"UTC"} }
+    assert Date.Conversions.to_gregorian(Date.replace(date, [date: {1,1,1}, hour: 13, sec: 61, tz: Date.timezone(:utc)])) \
+           == { {1,1,1}, {13,26,61}, {0.0,"UTC"} }
   end
 
   test :compare do
