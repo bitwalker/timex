@@ -212,6 +212,20 @@ defmodule DateTest do
   end
 
   test :diff do
+    epoch = Date.epoch()
+    date1 = Date.from({1971,1,1})
+    date2 = Date.from({1973,1,1})
+
+    assert Date.diff(epoch, date1, :days) == 365
+    assert Date.diff(epoch, date1, :sec) == 365 * 24 * 3600
+    assert Date.diff(epoch, date1, :years) == 1
+    #assert Date.diff(epoch, date1, :months) == 12
+
+    # additional day is added because 1972 was a leap year
+    assert Date.diff(epoch, date2, :days) == 365*3 + 1
+    assert Date.diff(epoch, date2, :sec) == (365*3 + 1) * 24 * 3600
+    assert Date.diff(epoch, date2, :years) == 3
+    #assert Date.diff(epoch, date1, :months) == 36
   end
 
   test :shift_seconds do
