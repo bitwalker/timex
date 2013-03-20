@@ -56,13 +56,13 @@ defmodule Date do
   ## Primary constructor for dates
   defmacrop make_date(datetime, tz) do
     quote do
-      Date.Utils.from(unquote(datetime), unquote(tz))
+      Date.Helpers.from(unquote(datetime), unquote(tz))
     end
   end
 
   defmacrop make_date(date, time, tz) do
     quote do
-      Date.Utils.from(unquote(date), unquote(time), unquote(tz))
+      Date.Helpers.from(unquote(date), unquote(time), unquote(tz))
     end
   end
 
