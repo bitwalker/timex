@@ -1,30 +1,30 @@
 all: date time date_proto
 
 date_proto: Elixir-DateRec.beam
-Elixir-DateRec.beam: date_proto.ex
-	deps/elixir/bin/elixirc date_proto.ex
+Elixir-DateRec.beam: lib/date_proto.ex
+	deps/elixir/bin/elixirc lib/date_proto.ex
 
 date: Elixir-Date.beam
-Elixir-Date.beam: date.ex
-	deps/elixir/bin/elixirc date.ex
+Elixir-Date.beam: lib/date.ex
+	deps/elixir/bin/elixirc lib/date.ex
 
 time: Elixir-Time.beam Elixir-Time-Helpers.beam
-Elixir-Time.beam: time.ex
-	deps/elixir/bin/elixirc time.ex
+Elixir-Time.beam: lib/time.ex
+	deps/elixir/bin/elixirc lib/time.ex
 
-Elixir-Time-Helpers.beam: time.ex
-	deps/elixir/bin/elixirc time.ex
+Elixir-Time-Helpers.beam: lib/time.ex
+	deps/elixir/bin/elixirc lib/time.ex
 
 .PHONY: clean test test-rebar docs
 
 clean:
-	rm *.beam
+	rm -f *.beam
 
 test: all
-	deps/elixir/bin/elixir -r 'test/test_helper.ex' -pr 'test/*_test.ex'
+	deps/elixir/bin/elixir -r 'test/test_helper.exs' -pr 'test/*_test.exs'
 
 test-rebar: app all
-	deps/elixir/bin/elixir -r 'test/test_helper.ex' -pr 'test/*_test.ex'
+	deps/elixir/bin/elixir -r 'test/test_helper.exs' -pr 'test/*_test.exs'
 
 docs:
 	mkdir -p ebin
