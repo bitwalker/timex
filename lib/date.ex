@@ -526,16 +526,20 @@ defmodule Date do
   end
 
   def format(date, :rfc) do
-    # :httpd_util.rfc1123_date() assumes that date is local
-    localdate = local(replace(date, :tz, timezone()))
-    list_to_binary(:httpd_util.rfc1123_date(localdate))
+    { edate, time, _ } = Date.Conversions.to_gregorian(date)
+    format_rfc({ edate, time }, "GMT")
   end
 
   def format(date, :rfc_local) do
-    localdate = { {year,month,day}, {hour,min,sec} } = local(date)
+    localdate = local(date)
     { _, _, {_,tz_name} } = Date.Conversions.to_gregorian(date)
 
-    day_name = case weekday(localdate) do
+    format_rfc(localdate, tz_name)
+  end
+
+  defp format_rfc(date, tz_name) do
+    { {year,month,day}, {hour,min,sec} } = date
+    day_name = case weekday(date) do
       1 -> "Mon"; 2 -> "Tue"; 3 -> "Wed"; 4 -> "Thu";
       5 -> "Fri"; 6 -> "Sat"; 7 -> "Sun"
     end
