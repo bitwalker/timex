@@ -1,5 +1,0 @@
-language: erlang
-script: "make test-rebar"
-otp_release:
-  - R15B03
-  - R16B
