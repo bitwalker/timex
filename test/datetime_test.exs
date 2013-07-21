@@ -1,4 +1,5 @@
 # Test interop between Date and Time.
+#Code.require_file "test_helper.exs", __DIR__
 
 defmodule DateTimeTest do
   use ExUnit.Case, async: true
