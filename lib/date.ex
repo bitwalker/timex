@@ -25,7 +25,7 @@ defmodule Date do
   Module for working with dates.
 
   Functions that produce time intervals use UNIX epoch (or simly Epoch) as
-  default reference date. Epoch is defined as midnight of January 1, 1970.
+  default reference date. Epoch is defined as UTC midnight of January 1, 1970.
 
   Time intervals in this module don't account for leap seconds.
 
@@ -501,13 +501,13 @@ defmodule Date do
 
   def format(date, :iso) do
     {{year,month,day}, {hour,min,sec}} = universal(date)
-    list_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0BZ",
+    iolist_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0BZ",
                                   [year, month, day, hour, min, sec]))
   end
 
   def format(date, :iso_local) do
     {{year,month,day}, {hour,min,sec}} = local(date)
-    list_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B",
+    iolist_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B",
                                   [year, month, day, hour, min, sec]))
   end
 
@@ -522,7 +522,7 @@ defmodule Date do
     else
       "~4..0B-~2..0B-~2..0B ~2..0B:~2..0B:~2..0B+~2..0B~2..0B"
     end
-    list_to_binary(:io_lib.format(fstr, [year, month, day, hour, min, sec, hour_offs, min_offs]))
+    iolist_to_binary(:io_lib.format(fstr, [year, month, day, hour, min, sec, hour_offs, min_offs]))
   end
 
   def format(date, :rfc) do
@@ -537,6 +537,10 @@ defmodule Date do
     format_rfc(localdate, tz_name)
   end
 
+  def format(_date, _fmt) do
+    raise NotImplemented
+  end
+
   defp format_rfc(date, tz_name) do
     { {year,month,day}, {hour,min,sec} } = date
     day_name = case weekday(date) do
@@ -549,11 +553,7 @@ defmodule Date do
        9 -> "Sep"; 10 -> "Oct"; 11 -> "Nov"; 12 -> "Dec"
     end
     fstr = "~s, ~2..0B ~s ~4..0B ~2..0B:~2..0B:~2..0B ~s"
-    list_to_binary(:io_lib.format(fstr, [day_name, day, month_name, year, hour, min, sec, tz_name]))
-  end
-
-  def format(_date, _fmt) do
-    raise NotImplemented
+    iolist_to_binary(:io_lib.format(fstr, [day_name, day, month_name, year, hour, min, sec, tz_name]))
   end
 
   ### Converting dates ###
@@ -713,7 +713,7 @@ defmodule Date do
   end
 
   @doc """
-  Return number of days is in the month which date falls on.
+  Return the number of days in the month which the date falls on.
 
   ## Examples
 
