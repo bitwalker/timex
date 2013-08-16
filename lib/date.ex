@@ -1118,14 +1118,14 @@ defmodule Date do
   @doc """
   Compare two dates returning one of the following values:
 
-    -1  -- date2 comes before date1 in time
+   * `-1` -- date2 comes before date1 in time
 
-     0  -- both arguments represent the same date (their representation is not
-           necessarily the same, e.g. they may have different times defined in
-           different time zones; but after coalescing them to the same time zone,
-           they would be equal down to separate components)
+   * `0`  -- both arguments represent the same date (their representation is not
+            necessarily the same, e.g. they may have different times defined in
+            different time zones; but after coalescing them to the same time zone,
+            they would be equal down to separate components)
 
-     1  -- date2 comes after date1 in time (natural order)
+   * `1`  -- date2 comes after date1 in time (natural order)
 
   """
   @spec compare(dtz, dtz | :epoch | :zero) :: -1 | 0 | 1
