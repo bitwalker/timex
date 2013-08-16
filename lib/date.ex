@@ -207,15 +207,15 @@ defmodule Date do
   ## Examples
 
       now(:sec)   #=> 1363439013
-      now(:days)  #=> 15780
+      now(:day)  #=> 15780
 
   """
-  @spec now(:sec | :days) :: integer
+  @spec now(:sec | :day) :: integer
   def now(:sec) do
     to_sec(now())
   end
 
-  def now(:days) do
+  def now(:day) do
     to_days(now())
   end
 
@@ -337,11 +337,11 @@ defmodule Date do
 
       epoch()       #=> {{{1970,1,1},{0,0,0}},{0.0,"UTC"}}
       epoch(:sec)   #=> 62167219200
-      epoch(:days)  #=> 719528
+      epoch(:day)  #=> 719528
 
   """
   @spec epoch(:timestamp)   :: timestamp
-  @spec epoch(:sec | :days) :: integer
+  @spec epoch(:sec | :day) :: integer
   def epoch(:timestamp) do
     to_timestamp(epoch)
   end
@@ -350,7 +350,7 @@ defmodule Date do
     to_sec(epoch, :zero)
   end
 
-  def epoch(:days) do
+  def epoch(:day) do
     to_days(epoch, :zero)
   end
 
@@ -450,16 +450,16 @@ defmodule Date do
   ## Examples
 
       from(13, :sec)          #=> { {{1970,1,1}, {0,0,13}}, {0.0,"UTC"} }
-      from(13, :days, :zero)  #=> { {{0,1,14}, {0,0,0}}, {0.0,"UTC"} }
+      from(13, :day, :zero)  #=> { {{0,1,14}, {0,0,0}}, {0.0,"UTC"} }
 
       date = from(Time.now, :timestamp)
       set(date, :tz, timezone())     #=> yields the same value as Date.now would
 
   """
   @spec from(timestamp, :timestamp) :: dtz
-  @spec from(number, :sec | :days)  :: dtz
+  @spec from(number, :sec | :day)  :: dtz
   @spec from(timestamp, :timestamp, :epoch | :zero) :: dtz
-  @spec from(number, :sec | :days, :epoch | :zero)  :: dtz
+  @spec from(number, :sec | :day, :epoch | :zero)  :: dtz
   def from(value, type, reference // :epoch)
 
   def from({mega, sec, _}, :timestamp, :epoch) do
@@ -478,11 +478,11 @@ defmodule Date do
     make_date(:calendar.gregorian_seconds_to_datetime(trunc(sec)), make_tz(:utc))
   end
 
-  def from(days, :days, :epoch) do
-    make_date(:calendar.gregorian_days_to_date(trunc(days) + epoch(:days)), {0,0,0}, make_tz(:utc))
+  def from(days, :day, :epoch) do
+    make_date(:calendar.gregorian_days_to_date(trunc(days) + epoch(:day)), {0,0,0}, make_tz(:utc))
   end
 
-  def from(days, :days, :zero) do
+  def from(days, :day, :zero) do
     make_date(:calendar.gregorian_days_to_date(trunc(days)), {0,0,0}, make_tz(:utc))
   end
 
@@ -547,7 +547,7 @@ defmodule Date do
     {{year,_,_},_} = local(date)
 
     start_of_year = set(date, [month: 1, day: 1])
-    days = diff(start_of_year, date, :days)
+    days = diff(start_of_year, date, :day)
 
     iolist_to_binary(:io_lib.format("~4.10.0B-~3.10.0B", [year, days]))
   end
@@ -664,7 +664,7 @@ defmodule Date do
   """
   @spec convert(dtz) :: timestamp
   @spec convert(dtz, :timestamp)   :: timestamp
-  @spec convert(dtz, :sec | :days) :: integer
+  @spec convert(dtz, :sec | :day) :: integer
   def convert(date, type // :timestamp)
 
   def convert(date, :timestamp) do
@@ -675,7 +675,7 @@ defmodule Date do
     to_sec(date)
   end
 
-  def convert(date, :days) do
+  def convert(date, :day) do
     to_days(date)
   end
 
@@ -746,7 +746,7 @@ defmodule Date do
   def to_days(date, reference // :epoch)
 
   def to_days(date, :epoch) do
-    to_days(date, :zero) - epoch(:days)
+    to_days(date, :zero) - epoch(:day)
   end
 
   def to_days(date, :zero) do
@@ -1192,7 +1192,7 @@ defmodule Date do
   first one in time, return value will be positive; and negative otherwise.
   """
   @spec diff(dtz, dtz, :timestamp) :: timestamp
-  @spec diff(dtz, dtz, :sec | :days | :weeks | :months | :years) :: integer
+  @spec diff(dtz, dtz, :sec | :day | :week | :month | :year) :: integer
 
   def diff(date1, date2, :timestamp) do
     Time.from_sec(diff(date1, date2, :sec))
@@ -1202,21 +1202,21 @@ defmodule Date do
     to_sec(date2, :zero) - to_sec(date1, :zero)
   end
 
-  def diff(date1, date2, :days) do
+  def diff(date1, date2, :day) do
     to_days(date2, :zero) - to_days(date1, :zero)
   end
 
-  def diff(date1, date2, :weeks) do
+  def diff(date1, date2, :week) do
     # TODO: think of a more accurate method
-    div(diff(date1, date2, :days), 7)
+    div(diff(date1, date2, :day), 7)
   end
 
-  def diff(_date1, _date2, :months) do
+  def diff(_date1, _date2, :month) do
     # FIXME: this is tricky. Need to calculate actual months rather than days * 30.
     raise NotImplemented
   end
 
-  def diff(date1, date2, :years) do
+  def diff(date1, date2, :year) do
     {{year1,_,_}, _} = local(date1)
     {{year2,_,_}, _} = local(date2)
     year2 - year1
@@ -1250,32 +1250,50 @@ defmodule Date do
 
       date = from({{2013,3,5}, {23,23,23}})
 
-      local(shift(date, [sec: 13, days: -1, weeks: 2]))
+      local(shift(date, [sec: 13, day: -1, week: 2]))
       #=> {{2013,3,18}, {23,23,36}}
 
   """
   @spec shift(dtz, list) :: dtz
 
-  def shift(date, spec) when is_list(spec) do
-    Enum.reduce spec, date, fn({type, value}, date) ->
-      shift(date, value, type)
-    end
+  def shift(date, [month: value]) do
+    shift(date, value, :month)
   end
 
-  @doc """
-  Shift the date by each time interval in the list, sorting the list in
-  advance. The intervals in the list are ordered in such a way as to minimise
-  the skew of applying each shift.
+  defrecordp :shift_rec, sec: 0, day: 0, year: 0
 
-  ## Examples
+  # This clause will match lists with at least 2 values
+  def shift(date, spec) when is_list(spec) do
+    shift_rec(sec: sec, day: day, year: year)
+      = Enum.reduce spec, shift_rec(), fn
+        ({:timestamp, {mega, tsec, _}}, shift_rec(sec: sec)=rec) ->
+          shift_rec(rec, [sec: sec + mega * _million + tsec])
 
-  """
-  @spec shift_strict(dtz, list) :: dtz
+        ({:sec, tsec}, shift_rec(sec: sec)=rec) ->
+          shift_rec(rec, [sec: sec + tsec])
 
-  def shift_strict(date, spec) when is_list(spec) do
-    Enum.reduce normalize_shift(spec), date, fn({type, value}, date) ->
-      shift(date, value, type)
-    end
+        ({:min, min}, shift_rec(sec: sec)=rec) ->
+          shift_rec(rec, [sec: sec + min * 60])
+
+        ({:hour, hrs}, shift_rec(sec: sec)=rec) ->
+          shift_rec(rec, [sec: sec + hrs * 3600])
+
+        ({:day, days}, shift_rec(day: day)=rec) ->
+          shift_rec(rec, [day: day + days])
+
+        ({:week, weeks}, shift_rec(day: day)=rec) ->
+          shift_rec(rec, [day: day + weeks * 7])
+
+        ({:year, years}, shift_rec(year: year)=rec) ->
+          shift_rec(rec, [year: year + years])
+
+        ({:month, _}, _) ->
+          raise ArgumentError, message: ":month not supported in bulk shifts"
+      end
+
+    # The order in which we apply sec and days is not important.
+    # The year shift must always go last though.
+    date |> shift(sec, :sec) |> shift(day, :day) |> shift(year, :year)
   end
 
   @doc """
@@ -1288,6 +1306,14 @@ defmodule Date do
   exceeds maximum number of days in the resulting month, that month's last day
   is used.
 
+  To prevent day skew, fix up the date after shifting. For example, if you want
+  land on the last day of each successive month, do the following:
+
+      shift(date, 1, :month) |> set(:month, 31)
+
+  Since `set/3` is capping values that are out of range, you will get the
+  correct last day for each month.
+
   ## Examples
 
       date = from({{2013,3,5}, {23,23,23}})
@@ -1299,7 +1325,7 @@ defmodule Date do
       #=> {{2011,3,5}, {23,23,23}}
 
   """
-  @spec shift(dtz, integer, :timestamp | :sec | :min | :hour | :days | :weeks | :months | :years) :: dtz
+  @spec shift(dtz, integer, :timestamp | :sec | :min | :hour | :day | :week | :month | :year) :: dtz
 
   def shift(date, 0, _) do
     date
@@ -1313,29 +1339,29 @@ defmodule Date do
     add(date, timestamp)
   end
 
-  def shift(date, value, type) when type in [:sec, :min, :hours] do
+  def shift(date, value, type) when type in [:sec, :min, :hour] do
     sec = to_sec(date)
     sec = sec + case type do
       :sec   -> value
       :min   -> value * 60
-      :hours -> value * 60 * 60
+      :hour  -> value * 3600
     end
     { _, _, tz } = Date.Conversions.to_gregorian(date)
-    set(from(sec, :sec), :tz, tz)
+    rawset(from(sec, :sec), :tz, tz)  # rawset for performance
   end
 
-  def shift(date, value, :days) do
+  def shift(date, value, :day) do
     days = to_days(date)
     days = days + value
     { _, time, tz } = Date.Conversions.to_gregorian(date)
-    set(from(days, :days), [time: time, tz: tz])
+    set(from(days, :day), [time: time, tz: tz])  # rawset for performance
   end
 
-  def shift(date, value, :weeks) do
-    shift(date, value * 7, :days)
+  def shift(date, value, :week) do
+    shift(date, value * 7, :day)
   end
 
-  def shift(date, value, :months) do
+  def shift(date, value, :month) do
     { {year,month,day}, time, tz } = Date.Conversions.to_gregorian(date)
 
     month = month + value
@@ -1351,17 +1377,12 @@ defmodule Date do
     make_date(validate({year, round_month(month), day}), time, tz)
   end
 
-  def shift(date, value, :years) do
+  def shift(date, value, :year) do
     { {year,month,day}, time, tz } = Date.Conversions.to_gregorian(date)
     make_date(validate({year + value, month, day}), time, tz)
   end
 
   ### Private helper function ###
-
-  defp normalize_shift(spec) when is_list(spec) do
-    # FIXME: implement proper algorithm
-    spec
-  end
 
   defp validate({year, month, day})
 
