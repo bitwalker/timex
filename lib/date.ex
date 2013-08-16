@@ -481,9 +481,7 @@ defmodule Date do
   @doc """
   Return date's string representation in the specified format.
 
-  Format specifiers :iso* produce a string in ISO 8601 format.
-
-  Format specifiers :rfc* produce a string in RFC 1123 format.
+  Format specifiers :iso* produce a string according to ISO 8601.
 
   ## Examples
 
@@ -495,22 +493,18 @@ defmodule Date do
       format(from(date, eet), :iso_local)  #=> "2013-03-05 23:25:19"
       format(from(date, pst), :iso_full)   #=> "2013-03-05 23:25:19-0800"
 
-      format(from(date, pst), :rfc)        #=> "Wed, 06 Mar 2013 07:25:19 GMT"
-      format(from(date, pst), :rfc_local)  #=> "Tue, 05 Mar 2013 23:25:19 PST"
+      format(from(date, pst), :rfc1123)    #=> "Wed, 05 Mar 2013 23:25:19 PST"
+      format(from(date, pst), :rfc1123z)   #=> "Tue, 05 Mar 2013 23:25:19 -0800"
 
   """
-  @spec format(dtz, :iso | :iso_local | :iso_full | :rfc | :rfc_local | binary) :: binary
+  @spec format(dtz, :iso | :iso_local | :iso_full | :iso_week | :iso_weekday | :iso_ordinal | :rfc1123 | :rfc1123z | binary) :: binary
 
   def format(date, :iso) do
-    {{year,month,day}, {hour,min,sec}} = universal(date)
-    iolist_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0BZ",
-                                  [year, month, day, hour, min, sec]))
+    format_iso(universal(date), "Z")
   end
 
   def format(date, :iso_local) do
-    {{year,month,day}, {hour,min,sec}} = local(date)
-    iolist_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B",
-                                  [year, month, day, hour, min, sec]))
+     format_iso(local(date), "")
   end
 
   def format(date, :iso_full) do
@@ -520,30 +514,56 @@ defmodule Date do
     hour_offs = trunc(abs_offs)
     min_offs = round((abs_offs - hour_offs) * 60)
     fstr = if offset < 0 do
-      "~4..0B-~2..0B-~2..0B ~2..0B:~2..0B:~2..0B-~2..0B~2..0B"
+      "~4..0B-~2..0B-~2..0BT~2..0B:~2..0B:~2..0B-~2..0B~2..0B"
     else
-      "~4..0B-~2..0B-~2..0B ~2..0B:~2..0B:~2..0B+~2..0B~2..0B"
+      "~4..0B-~2..0B-~2..0BT~2..0B:~2..0B:~2..0B+~2..0B~2..0B"
     end
     iolist_to_binary(:io_lib.format(fstr, [year, month, day, hour, min, sec, hour_offs, min_offs]))
   end
 
-  def format(date, :rfc) do
-    { edate, time, _ } = Date.Conversions.to_gregorian(date)
-    format_rfc({ edate, time }, "GMT")
+  def format(date, :iso_week) do
+    {year, week} = weeknum(date)
+    iolist_to_binary(:io_lib.format("~4.10.0B-W~2.10.0B", [year, week]))
   end
 
-  def format(date, :rfc_local) do
+  def format(date, :iso_weekday) do
+    {year, week, day} = iso_triplet(date)
+    iolist_to_binary(:io_lib.format("~4.10.0B-W~2.10.0B-~B", [year, week, day]))
+  end
+
+  def format(date, :iso_ordinal) do
+    {{year,_,_},_} = local(date)
+
+    start_of_year = replace(date, [month: 1, day: 1])
+    days = diff(start_of_year, date, :days)
+
+    iolist_to_binary(:io_lib.format("~4.10.0B-~3.10.0B", [year, days]))
+  end
+
+  def format(date, :rfc1123) do
     localdate = local(date)
     { _, _, {_,tz_name} } = Date.Conversions.to_gregorian(date)
 
-    format_rfc(localdate, tz_name)
+    format_rfc(localdate, {:name, tz_name})
+  end
+
+  def format(date, :rfc1123z) do
+    localdate = local(date)
+    { _, _, {tz_offset,_} } = Date.Conversions.to_gregorian(date)
+
+    format_rfc(localdate, {:offset, tz_offset})
   end
 
   def format(_date, _fmt) do
     raise NotImplemented
   end
 
-  defp format_rfc(date, tz_name) do
+  defp format_iso({{year,month,day}, {hour,min,sec}}, tz_char) do
+    iolist_to_binary(:io_lib.format("~4.10.0B-~2.10.0B-~2.10.0BT~2.10.0B:~2.10.0B:~2.10.0B~s",
+                                  [year, month, day, hour, min, sec, tz_char]))
+  end
+
+  defp format_rfc(date, tz) do
     { {year,month,day}, {hour,min,sec} } = date
     day_name = case weekday(date) do
       1 -> "Mon"; 2 -> "Tue"; 3 -> "Wed"; 4 -> "Thu";
@@ -554,8 +574,22 @@ defmodule Date do
        5 -> "May";  6 -> "Jun";  7 -> "Jul";  8 -> "Aug";
        9 -> "Sep"; 10 -> "Oct"; 11 -> "Nov"; 12 -> "Dec"
     end
-    fstr = "~s, ~2..0B ~s ~4..0B ~2..0B:~2..0B:~2..0B ~s"
-    iolist_to_binary(:io_lib.format(fstr, [day_name, day, month_name, year, hour, min, sec, tz_name]))
+    fstr = case tz do
+      { :name, tz_name } ->
+        if tz_name == "UTC" do
+          tz_name = "GMT"
+        end
+        "~s, ~2..0B ~s ~4..0B ~2..0B:~2..0B:~2..0B #{tz_name}"
+      { :offset, tz_offset } ->
+        sign = if tz_offset >= 0 do "+" else "-" end
+        tz_offset = abs(tz_offset)
+        tz_hrs = trunc(tz_offset)
+        tz_min = trunc((tz_offset - tz_hrs) * 60)
+        tz_spec = :io_lib.format("~s~2..0B~2..0B", [sign, tz_hrs, tz_min])
+        "~s, ~2..0B ~s ~4..0B ~2..0B:~2..0B:~2..0B #{tz_spec}"
+    end
+    iolist_to_binary(:io_lib.format(fstr,
+        [day_name, day, month_name, year, hour, min, sec]))
   end
 
   ### Converting dates ###
@@ -708,10 +742,13 @@ defmodule Date do
   """
   @spec iso_triplet(dtz) :: {year, weeknum, weekday}
 
+  def iso_triplet(datetime={{_year,_month,_day}, _time}) do
+    { iso_year, iso_week } = weeknum(datetime)
+    { iso_year, iso_week, weekday(datetime) }
+  end
+
   def iso_triplet(date) do
-    localtime = local(date)
-    { iso_year, iso_week } = weeknum(localtime)
-    { iso_year, iso_week, weekday(localtime) }
+    iso_triplet(local(date))
   end
 
   @doc """
