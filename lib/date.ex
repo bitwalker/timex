@@ -7,7 +7,7 @@ defmodule Date.Helper do
 
   defp body(arg, name, priv) do
     quote do
-      def unquote(name)(date, unquote(arg), value) do
+      def unquote(name)(date, [{unquote(arg), value}]) do
         greg_date = Date.Conversions.to_gregorian(date)
         { date, time, tz } = unquote(priv)(greg_date, unquote(arg), value)
         make_date(date, time, tz)
@@ -922,7 +922,7 @@ defmodule Date do
     end
   end
 
-  def norm_min(min) do
+  defp norm_min(min) do
     cond do
       min < 0    -> 0
       min > 59   -> 59
@@ -930,7 +930,7 @@ defmodule Date do
     end
   end
 
-  def norm_sec(sec) do
+  defp norm_sec(sec) do
     cond do
       sec < 0    -> 0
       sec > 59   -> 59
@@ -938,7 +938,7 @@ defmodule Date do
     end
   end
 
-  def norm_tz(tz) do
+  defp norm_tz(tz) do
     # FIXME: add time zone normalization
     tz
   end
@@ -947,28 +947,31 @@ defmodule Date do
   Return a new date with the specified fields replaced by new values.
 
   Values that are not in range are capped from both sides. The result is always
-  a valid date. If you don't want to enforce date validity, use rawset/3 instead.
+  a valid date. If you don't want to enforce date validity, use rawset/2 instead.
 
   ## Examples
 
-      set(now(), :date, {1,1,1})       #=> { {{1,1,1}, {12,52,47}}, {2.0,"EET"} }
-      set(now(), :hour, 0)             #=> { {{2013,3,17}, {0,53,39}}, {2.0,"EET"} }
-      set(now(), :tz, timezone(:utc))  #=> { {{2013,3,17}, {12,54,23}}, {0.0,"UTC"} }
+      set(now(), date: {1,1,1})       #=> { {{1,1,1}, {12,52,47}}, {2.0,"EET"} }
+      set(now(), hour: 0)             #=> { {{2013,3,17}, {0,53,39}}, {2.0,"EET"} }
+      set(now(), tz: timezone(:utc))  #=> { {{2013,3,17}, {12,54,23}}, {0.0,"UTC"} }
+
+      set(now(), [date: {1,1,1}, hour: 13, second: 61, tz: timezone(:utc)])
+      #=> { {{1,1,1}, {13,45,61}}, {0.0,"UTC"} }
 
   """
-  @spec set(dtz, :datetime, datetime) :: dtz
+  @spec set(dtz, [datetime: datetime]) :: dtz
 
-  @spec set(dtz, :date, date) :: dtz
-  @spec set(dtz, :year, year) :: dtz
-  @spec set(dtz, :month, month) :: dtz
-  @spec set(dtz, :day, day) :: dtz
+  @spec set(dtz, [date: date]) :: dtz
+  @spec set(dtz, [year: year]) :: dtz
+  @spec set(dtz, [month: month]) :: dtz
+  @spec set(dtz, [day: day]) :: dtz
 
-  @spec set(dtz, :time, time) :: dtz
-  @spec set(dtz, :hour, hour) :: dtz
-  @spec set(dtz, :minute, minute) :: dtz
-  @spec set(dtz, :second, second) :: dtz
+  @spec set(dtz, [time: time]) :: dtz
+  @spec set(dtz, [hour: hour]) :: dtz
+  @spec set(dtz, [minute: minute]) :: dtz
+  @spec set(dtz, [second: second]) :: dtz
 
-  @spec set(dtz, :tz, tz) :: dtz
+  @spec set(dtz, [tz: tz]) :: dtz
 
   import Date.Helper, only: [def_set: 1, def_rawset: 1]
   def_set(:datetime)
@@ -981,6 +984,14 @@ defmodule Date do
   def_set(:min)
   def_set(:sec)
   def_set(:tz)
+
+  def set(date, values) when is_list(values) do
+    greg_date = Date.Conversions.to_gregorian(date)
+    { date, time, tz } = Enum.reduce values, greg_date, fn({atom, value}, date) ->
+      set_priv(date, atom, value)
+    end
+    make_date(date, time, tz)
+  end
 
   defp set_priv({_, _, tz}, :datetime, value) do
     { date, time } = value
@@ -1026,28 +1037,8 @@ defmodule Date do
   @doc """
   Return a new date with the specified fields replaced by new values.
 
-  ## Examples
-
-      set(now(), [date: {1,1,1}, hour: 13, second: 61, tz: timezone(:utc)])
-      #=> { {{1,1,1}, {13,45,61}}, {0.0,"UTC"} }
-
-  """
-  @spec set(dtz, list) :: dtz
-
-  def set(date, values) when is_list(values) do
-    greg_date = Date.Conversions.to_gregorian(date)
-    { date, time, tz } = Enum.reduce values, greg_date, fn({atom, value}, date) ->
-      set_priv(date, atom, value)
-    end
-    make_date(date, time, tz)
-  end
-
-
-  @doc """
-  Return a new date with the specified fields replaced by new values.
-
   The values are not checked, so the result is not guaranteed to be a valid
-  date. If you want to enforce date validity, use set/3 instead.
+  date. If you want to enforce date validity, use set/2 instead.
 
   ## Examples
 
@@ -1056,19 +1047,19 @@ defmodule Date do
       rawset(now(), :tz, timezone(:utc))  #=> { {{2013,3,17}, {12,54,23}}, {0.0,"UTC"} }
 
   """
-  @spec rawset(dtz, :datetime, datetime) :: dtz
+  @spec rawset(dtz, [datetime: datetime]) :: dtz
 
-  @spec rawset(dtz, :date, date) :: dtz
-  @spec rawset(dtz, :year, year) :: dtz
-  @spec rawset(dtz, :month, month) :: dtz
-  @spec rawset(dtz, :day, day) :: dtz
+  @spec rawset(dtz, [date: date]) :: dtz
+  @spec rawset(dtz, [year: year]) :: dtz
+  @spec rawset(dtz, [month: month]) :: dtz
+  @spec rawset(dtz, [day: day]) :: dtz
 
-  @spec rawset(dtz, :time, time) :: dtz
-  @spec rawset(dtz, :hour, hour) :: dtz
-  @spec rawset(dtz, :minute, minute) :: dtz
-  @spec rawset(dtz, :second, second) :: dtz
+  @spec rawset(dtz, [time: time]) :: dtz
+  @spec rawset(dtz, [hour: hour]) :: dtz
+  @spec rawset(dtz, [minute: minute]) :: dtz
+  @spec rawset(dtz, [second: second]) :: dtz
 
-  @spec rawset(dtz, :tz, tz) :: dtz
+  @spec rawset(dtz, [tz: tz]) :: dtz
 
   def_rawset(:datetime)
   def_rawset(:date)
@@ -1279,7 +1270,7 @@ defmodule Date do
       :hour  -> value * 3600
     end
     { _, _, tz } = Date.Conversions.to_gregorian(date)
-    rawset(from(sec, :sec), :tz, tz)  # rawset for performance
+    rawset(from(sec, :sec), [tz: tz])  # rawset for performance
   end
 
   def shift(date, [day: value]) do

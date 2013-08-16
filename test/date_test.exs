@@ -289,9 +289,9 @@ defmodule DTest do
     import D.Conversions, only: [to_gregorian: 1]
 
     date = D.from({{2013,3,17}, {17,26,5}}, {2.0,"EET"})
-    assert to_gregorian(D.set(date, :date, {1,1,1})) === { {1,1,1}, {15,26,5}, {2.0,"EET"} }
-    assert to_gregorian(D.set(date, :hour, 0)) === { {2013,3,17}, {0,26,5}, {2.0,"EET"} }
-    assert to_gregorian(D.set(date, :tz, D.timezone(:utc))) === { {2013,3,17}, {15,26,5}, {0.0,"UTC"} }
+    assert to_gregorian(D.set(date, date: {1,1,1})) === { {1,1,1}, {15,26,5}, {2.0,"EET"} }
+    assert to_gregorian(D.set(date, hour: 0)) === { {2013,3,17}, {0,26,5}, {2.0,"EET"} }
+    assert to_gregorian(D.set(date, tz: D.timezone(:utc))) === { {2013,3,17}, {15,26,5}, {0.0,"UTC"} }
 
     assert to_gregorian(D.set(date, [date: {1,1,1}, hour: 13, sec: 61, tz: D.timezone(:utc)]))
            === { {1,1,1}, {13,26,59}, {0.0,"UTC"} }
