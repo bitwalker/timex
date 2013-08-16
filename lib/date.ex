@@ -354,33 +354,6 @@ defmodule Date do
     to_days(epoch, :zero)
   end
 
-  @doc """
-  Return the date representing a very distant moment in the past.
-
-  See also `distant_future/0`.
-  """
-  @spec distant_past() :: dtz
-  def distant_past do
-    # TODO: think of use cases
-    # cannot set the year to less than 0 here because Erlang functions don't
-    # accept it
-    # FIXME: consider returning an atom
-    make_date({0,1,1}, {0,0,0}, make_tz(:utc))
-  end
-
-  @doc """
-  Return the date representing a remote moment in the future. Can be used as
-  a timeout value to effectively make the timeout infinite.
-
-  See also `distant_past/0`.
-  """
-  @spec distant_future() :: dtz
-  def distant_future do
-    # TODO: evaluate whether it's distant enough
-    make_date({9999,12,31}, {23,59,59}, make_tz(:utc))
-    # FIXME: consider returning an atom
-  end
-
   ### Constructing the date from an existing value ###
 
   @doc """
@@ -1178,6 +1151,11 @@ defmodule Date do
     compare(date, zero)
   end
 
+  def compare(_, :distant_past), do: -1
+  def compare(_, :distant_future), do: 1
+
+  def compare(date, date), do: 0
+
   def compare(date1, date2) do
     diffsec = to_sec(date2) - to_sec(date1)
     cond do
@@ -1211,9 +1189,11 @@ defmodule Date do
     div(diff(date1, date2, :day), 7)
   end
 
-  def diff(_date1, _date2, :month) do
-    # FIXME: this is tricky. Need to calculate actual months rather than days * 30.
-    raise NotImplemented
+  def diff(date1, date2, :month) do
+    # Only take years and months into account
+    {{y1, m1, _}, _} = universal(date1)
+    {{y2, m2, _}, _} = universal(date2)
+    (y2 - y1) * 12 + m2 - m1
   end
 
   def diff(date1, date2, :year) do

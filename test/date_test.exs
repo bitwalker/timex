@@ -67,17 +67,6 @@ defmodule DTest do
     assert D.to_timestamp(epoch) === D.epoch(:timestamp)
   end
 
-  test :distant_past do
-    #assert D.compare(D.distant_past(), D.zero()) === 1
-    assert D.is_valid(D.distant_past())
-  end
-
-  test :distant_future do
-    # I wonder what the Earth will look like when this test fails
-    assert D.compare(D.now(), D.distant_future()) === 1
-    assert D.is_valid(D.distant_future())
-  end
-
   test :from_date do
     date = {2000, 11, 11}
     assert D.universal(D.from(date)) === {date, {0,0,0}}
@@ -308,6 +297,10 @@ defmodule DTest do
            === { {1,1,1}, {13,26,59}, {0.0,"UTC"} }
   end
 
+  test :rawset do
+    assert nil
+  end
+
   test :compare do
     assert D.compare(D.epoch(), D.zero()) === -1
     assert D.compare(D.zero(), D.epoch()) === 1
@@ -321,7 +314,11 @@ defmodule DTest do
     assert D.compare(D.from({date, {13,44,0}}, tz1), D.from({date, {13,44,0}}, tz3)) === -1
 
     date = D.now()
+    # Won't fail unless we go back in time
     assert D.compare(D.epoch(), date) === 1
+
+    assert D.compare(date, :distant_past) === -1
+    assert D.compare(date, :distant_future) === 1
   end
 
   test :diff do
@@ -329,16 +326,31 @@ defmodule DTest do
     date1 = D.from({1971,1,1})
     date2 = D.from({1973,1,1})
 
-    assert D.diff(epoch, date1, :day) == 365
-    assert D.diff(epoch, date1, :sec) == 365 * 24 * 3600
-    assert D.diff(epoch, date1, :year) == 1
-    #assert D.diff(epoch, date1, :month) == 12
+    assert D.diff(date1, date2, :sec)   === -D.diff(date2, date1, :sec)
+    #assert D.diff(date1, date2, :min)   === -D.diff(date2, date1, :min)
+    #assert D.diff(date1, date2, :hour)  === -D.diff(date2, date1, :hour)
+    assert D.diff(date1, date2, :day)   === -D.diff(date2, date1, :day)
+    assert D.diff(date1, date2, :week)  === -D.diff(date2, date1, :week)
+    assert D.diff(date1, date2, :month) === -D.diff(date2, date1, :month)
+    assert D.diff(date1, date2, :year)  === -D.diff(date2, date1, :year)
+
+    assert D.diff(epoch, date1, :day) === 365
+    assert D.diff(epoch, date1, :sec) === 365 * 24 * 3600
+    assert D.diff(epoch, date1, :year) === 1
 
     # additional day is added because 1972 was a leap year
-    assert D.diff(epoch, date2, :day) == 365*3 + 1
-    assert D.diff(epoch, date2, :sec) == (365*3 + 1) * 24 * 3600
-    assert D.diff(epoch, date2, :year) == 3
-    #assert D.diff(epoch, date1, :month) == 36
+    assert D.diff(epoch, date2, :day) === 365*3 + 1
+    assert D.diff(epoch, date2, :sec) === (365*3 + 1) * 24 * 3600
+    assert D.diff(epoch, date2, :year) === 3
+
+    assert D.diff(epoch, date1, :month) === 12
+    assert D.diff(epoch, date2, :month) === 36
+    assert D.diff(date1, date2, :month) === 24
+
+    date1 = D.from({1971,3,31})
+    date2 = D.from({1969,2,11})
+    assert D.diff(date1, date2, :month) === -25
+    assert D.diff(date2, date1, :month) === 25
   end
 
   test :shift_seconds do
