@@ -5,8 +5,8 @@ defmodule DateTimeTest do
   use ExUnit.Case, async: true
 
   test :epoch do
-    assert Date.to_sec(Date.epoch, 0) == Time.to_sec(Time.epoch)
+    assert Date.to_sec(Date.epoch, :zero) == Time.to_sec(Time.epoch)
     assert Date.epoch(:sec) == Time.epoch(:sec)
-    assert Date.from(Time.epoch, :timestamp, 0) == Date.epoch
+    assert Date.from(Time.epoch, :timestamp, :zero) == Date.epoch
   end
 end
