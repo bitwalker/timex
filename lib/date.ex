@@ -298,35 +298,12 @@ defmodule Date do
 
   ## Examples
 
-      to_sec(zero(), 0)  #=> 0
+      to_sec(zero(), :zero)  #=> 0
 
   """
   @spec zero() :: dtz
   def zero do
     make_date({0,1,1}, {0,0,0}, make_tz(:utc))
-  end
-
-  @doc """
-  Return the date representing a very distant moment in the past.
-
-  See also `distant_future/0`.
-  """
-  @spec distant_past() :: dtz
-  def distant_past do
-    # TODO: think of use cases
-    make_date({0,1,1}, {0,0,0}, make_tz(:utc))
-  end
-
-  @doc """
-  Return the date representing a remote moment in the future. Can be used as
-  a timeout value to effectively make the timeout infinite.
-
-  See also `distant_past/0`.
-  """
-  @spec distant_future() :: dtz
-  def distant_future do
-    # TODO: evaluate whether it's distant enough
-    make_date({9999,12,31}, {23,59,59}, make_tz(:utc))
   end
 
   @doc """
@@ -362,11 +339,36 @@ defmodule Date do
   end
 
   def epoch(:sec) do
-    to_sec(epoch, 0)
+    to_sec(epoch, :zero)
   end
 
   def epoch(:days) do
-    to_days(epoch, 0)
+    to_days(epoch, :zero)
+  end
+
+  @doc """
+  Return the date representing a very distant moment in the past.
+
+  See also `distant_future/0`.
+  """
+  @spec distant_past() :: dtz
+  def distant_past do
+    # TODO: think of use cases
+    # cannot set the year to less than 0 here because Erlang functions don't
+    # accept it
+    make_date({0,1,1}, {0,0,-1}, make_tz(:utc))
+  end
+
+  @doc """
+  Return the date representing a remote moment in the future. Can be used as
+  a timeout value to effectively make the timeout infinite.
+
+  See also `distant_past/0`.
+  """
+  @spec distant_future() :: dtz
+  def distant_future do
+    # TODO: evaluate whether it's distant enough
+    make_date({9999,12,31}, {23,59,59}, make_tz(:utc))
   end
 
   ### Constructing the date from an existing value ###
@@ -437,8 +439,8 @@ defmodule Date do
 
   ## Examples
 
-      from(13, :sec)      #=> { {{1970,1,1}, {0,0,13}}, {0.0,"UTC"} }
-      from(13, :days, 0)  #=> { {{0,1,14}, {0,0,0}}, {0.0,"UTC"} }
+      from(13, :sec)          #=> { {{1970,1,1}, {0,0,13}}, {0.0,"UTC"} }
+      from(13, :days, :zero)  #=> { {{0,1,14}, {0,0,0}}, {0.0,"UTC"} }
 
       date = from(Time.now, :timestamp)
       replace(date, :tz, timezone())     #=> yields the same value as Date.now would
@@ -446,23 +448,23 @@ defmodule Date do
   """
   @spec from(timestamp, :timestamp) :: dtz
   @spec from(number, :sec | :days)  :: dtz
-  @spec from(timestamp, :timestamp, :epoch | 0) :: dtz
-  @spec from(number, :sec | :days, :epoch | 0)  :: dtz
+  @spec from(timestamp, :timestamp, :epoch | :zero) :: dtz
+  @spec from(number, :sec | :days, :epoch | :zero)  :: dtz
   def from(value, type, reference // :epoch)
 
   def from({mega, sec, _}, :timestamp, :epoch) do
     from(mega * _million + sec, :sec)
   end
 
-  def from({mega, sec, _}, :timestamp, 0) do
-    from(mega * _million + sec, :sec, 0)
+  def from({mega, sec, _}, :timestamp, :zero) do
+    from(mega * _million + sec, :sec, :zero)
   end
 
   def from(sec, :sec, :epoch) do
     make_date(:calendar.gregorian_seconds_to_datetime(trunc(sec) + epoch(:sec)), make_tz(:utc))
   end
 
-  def from(sec, :sec, 0) do
+  def from(sec, :sec, :zero) do
     make_date(:calendar.gregorian_seconds_to_datetime(trunc(sec)), make_tz(:utc))
   end
 
@@ -470,7 +472,7 @@ defmodule Date do
     make_date(:calendar.gregorian_days_to_date(trunc(days) + epoch(:days)), {0,0,0}, make_tz(:utc))
   end
 
-  def from(days, :days, 0) do
+  def from(days, :days, :zero) do
     make_date(:calendar.gregorian_days_to_date(trunc(days)), {0,0,0}, make_tz(:utc))
   end
 
@@ -566,7 +568,7 @@ defmodule Date do
   ## Examples
 
       date = now()
-      convert(date, :sec) + epoch(:sec) == to_sec(date, 0)  #=> true
+      convert(date, :sec) + epoch(:sec) == to_sec(date, :zero)  #=> true
 
   """
   @spec convert(dtz) :: timestamp
@@ -597,7 +599,7 @@ defmodule Date do
 
   """
   @spec to_timestamp(dtz) :: timestamp
-  @spec to_timestamp(dtz, :epoch | 0) :: timestamp
+  @spec to_timestamp(dtz, :epoch | :zero) :: timestamp
   def to_timestamp(date, reference // :epoch)
 
   def to_timestamp(date, :epoch) do
@@ -605,8 +607,8 @@ defmodule Date do
     { div(sec, _million), rem(sec, _million), 0 }
   end
 
-  def to_timestamp(date, 0) do
-    sec = to_sec(date, 0)
+  def to_timestamp(date, :zero) do
+    sec = to_sec(date, :zero)
     { div(sec, _million), rem(sec, _million), 0 }
   end
 
@@ -622,14 +624,14 @@ defmodule Date do
 
   """
   @spec to_sec(dtz) :: integer
-  @spec to_sec(dtz, :epoch | 0) :: integer
+  @spec to_sec(dtz, :epoch | :zero) :: integer
   def to_sec(date, reference // :epoch)
 
   def to_sec(date, :epoch) do
-    to_sec(date, 0) - epoch(:sec)
+    to_sec(date, :zero) - epoch(:sec)
   end
 
-  def to_sec(date, 0) do
+  def to_sec(date, :zero) do
     { date, time, _ } = Date.Conversions.to_gregorian(date)
     :calendar.datetime_to_gregorian_seconds({date,time})
   end
@@ -645,14 +647,14 @@ defmodule Date do
 
   """
   @spec to_days(dtz) :: integer
-  @spec to_days(dtz, :epoch | 0) :: integer
+  @spec to_days(dtz, :epoch | :zero) :: integer
   def to_days(date, reference // :epoch)
 
   def to_days(date, :epoch) do
-    to_days(date, 0) - epoch(:days)
+    to_days(date, :zero) - epoch(:days)
   end
 
-  def to_days(date, 0) do
+  def to_days(date, :zero) do
     { date, _, _ } = Date.Conversions.to_gregorian(date)
     :calendar.date_to_gregorian_days(date)
   end
@@ -951,13 +953,13 @@ defmodule Date do
      1  -- date2 comes after date1 in time (natural order)
 
   """
-  @spec compare(dtz, dtz | :epoch | 0) :: -1 | 0 | 1
+  @spec compare(dtz, dtz | :epoch | :zero) :: -1 | 0 | 1
 
   def compare(date, :epoch) do
     compare(date, epoch)
   end
 
-  def compare(date, 0) do
+  def compare(date, :zero) do
     compare(date, zero)
   end
 
@@ -982,11 +984,11 @@ defmodule Date do
   end
 
   def diff(date1, date2, :sec) do
-    to_sec(date2, 0) - to_sec(date1, 0)
+    to_sec(date2, :zero) - to_sec(date1, :zero)
   end
 
   def diff(date1, date2, :days) do
-    to_days(date2, 0) - to_days(date1, 0)
+    to_days(date2, :zero) - to_days(date1, :zero)
   end
 
   def diff(date1, date2, :weeks) do
