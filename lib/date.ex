@@ -9,14 +9,22 @@
 defmodule Date.Helper do
   @moduledoc false
 
-  defmacro def_replace(arg) do
+  defp body(arg, name, priv) do
     quote do
-      def replace(date, unquote(arg), value) do
+      def unquote(name)(date, unquote(arg), value) do
         greg_date = Date.Conversions.to_gregorian(date)
-        { date, time, tz } = replace_priv(greg_date, unquote(arg), value)
+        { date, time, tz } = unquote(priv)(greg_date, unquote(arg), value)
         make_date(date, time, tz)
       end
     end
+  end
+
+  defmacro def_set(arg) do
+    body(arg, :set, :set_priv)
+  end
+
+  defmacro def_rawset(arg) do
+    body(arg, :rawset, :rawset_priv)
   end
 end
 
@@ -437,7 +445,7 @@ defmodule Date do
   Construct a date from a time interval since Epoch or year 0.
 
   UTC time zone is assumed. This assumption can be modified by setting desired
-  time zone using replace/3 after the date is constructed.
+  time zone using set/3 after the date is constructed.
 
   ## Examples
 
@@ -445,7 +453,7 @@ defmodule Date do
       from(13, :days, :zero)  #=> { {{0,1,14}, {0,0,0}}, {0.0,"UTC"} }
 
       date = from(Time.now, :timestamp)
-      replace(date, :tz, timezone())     #=> yields the same value as Date.now would
+      set(date, :tz, timezone())     #=> yields the same value as Date.now would
 
   """
   @spec from(timestamp, :timestamp) :: dtz
@@ -538,7 +546,7 @@ defmodule Date do
   def format(date, :iso_ordinal) do
     {{year,_,_},_} = local(date)
 
-    start_of_year = replace(date, [month: 1, day: 1])
+    start_of_year = set(date, [month: 1, day: 1])
     days = diff(start_of_year, date, :days)
 
     iolist_to_binary(:io_lib.format("~4.10.0B-~3.10.0B", [year, days]))
@@ -899,39 +907,151 @@ defmodule Date do
   @spec normalize(dtz) :: dtz
 
   def normalize(date) do
-    # FIXME: add time zone normalization
+    { date, time, tz } = Date.Conversions.to_gregorian(date)
+    make_date(norm_date(date), norm_time(time), norm_tz(tz))
+  end
 
-    { {year,month,day}, {hour,min,sec}, tz } = Date.Conversions.to_gregorian(date)
+  defp norm_date({year,month,day}) do
+    month = norm_month(month)
+    day   = norm_day(year, month, day)
+    {year, month, day}
+  end
 
-    month = cond do
+  defp norm_year(year) do
+    year
+  end
+
+  defp norm_month(month) do
+    cond do
       month < 1   -> 1
       month > 12  -> 12
       true        -> month
     end
+  end
+
+  defp norm_day(year, month, day) do
     ndays = days_in_month(year, month)
-    day = cond do
+    cond do
       day < 1     -> 1
       day > ndays -> ndays
       true        -> day
     end
+  end
 
-    hour = cond do
+  defp norm_time({hour,min,sec}) do
+    hour  = norm_hour(hour)
+    min   = norm_min(min)
+    sec   = norm_sec(sec)
+    {hour, min, sec}
+  end
+
+  defp norm_hour(hour) do
+    cond do
       hour < 0    -> 0
       hour > 23   -> 23
       true        -> hour
     end
-    min = cond do
+  end
+
+  def norm_min(min) do
+    cond do
       min < 0    -> 0
       min > 59   -> 59
       true       -> min
     end
-    sec = cond do
+  end
+
+  def norm_sec(sec) do
+    cond do
       sec < 0    -> 0
       sec > 59   -> 59
       true       -> sec
     end
+  end
 
-    make_date({year,month,day}, {hour,min,sec}, tz)
+  def norm_tz(tz) do
+    # FIXME: add time zone normalization
+    tz
+  end
+
+  @doc """
+  Return a new date with the specified fields replaced by new values.
+
+  Values that are not in range are capped from both sides. The result is always
+  a valid date. If you don't want to enforce date validity, use rawset/3 instead.
+
+  ## Examples
+
+      set(now(), :date, {1,1,1})       #=> { {{1,1,1}, {12,52,47}}, {2.0,"EET"} }
+      set(now(), :hour, 0)             #=> { {{2013,3,17}, {0,53,39}}, {2.0,"EET"} }
+      set(now(), :tz, timezone(:utc))  #=> { {{2013,3,17}, {12,54,23}}, {0.0,"UTC"} }
+
+  """
+  @spec set(dtz, :datetime, datetime) :: dtz
+
+  @spec set(dtz, :date, date) :: dtz
+  @spec set(dtz, :year, year) :: dtz
+  @spec set(dtz, :month, month) :: dtz
+  @spec set(dtz, :day, day) :: dtz
+
+  @spec set(dtz, :time, time) :: dtz
+  @spec set(dtz, :hour, hour) :: dtz
+  @spec set(dtz, :minute, minute) :: dtz
+  @spec set(dtz, :second, second) :: dtz
+
+  @spec set(dtz, :tz, tz) :: dtz
+
+  import Date.Helper, only: [def_set: 1, def_rawset: 1]
+  def_set(:datetime)
+  def_set(:date)
+  def_set(:year)
+  def_set(:month)
+  def_set(:day)
+  def_set(:time)
+  def_set(:hour)
+  def_set(:min)
+  def_set(:sec)
+  def_set(:tz)
+
+  defp set_priv({_, _, tz}, :datetime, value) do
+    { date, time } = value
+    { norm_date(date), norm_time(time), tz }
+  end
+
+  defp set_priv({_, time, tz}, :date, value) do
+    { norm_date(value), time, tz }
+  end
+
+  defp set_priv({{_,month,day}, time, tz}, :year, value) do
+    { {norm_year(value),month,day}, time, tz }
+  end
+
+  defp set_priv({{year,_,day}, time, tz}, :month, value) do
+    { {year,norm_month(value),day}, time, tz }
+  end
+
+  defp set_priv({{year,month,_}, time, tz}, :day, value) do
+    { {year,month,norm_day(year,month,value)}, time, tz }
+  end
+
+  defp set_priv({date, _, tz}, :time, value) do
+    { date, norm_time(value), tz }
+  end
+
+  defp set_priv({date, {_,min,sec}, tz}, :hour, value) do
+    { date, {norm_hour(value),min,sec}, tz }
+  end
+
+  defp set_priv({date, {hour,_,sec}, tz}, :min, value) do
+    { date, {hour,norm_min(value),sec}, tz }
+  end
+
+  defp set_priv({date, {hour,min,_}, tz}, :sec, value) do
+    { date, {hour,min,norm_sec(value)}, tz }
+  end
+
+  defp set_priv({date, time, _}, :tz, value) do
+    { date, time, norm_tz(value) }
   end
 
   @doc """
@@ -939,95 +1059,98 @@ defmodule Date do
 
   ## Examples
 
-      replace(now(), :date, {1,1,1})       #=> { {{1,1,1}, {12,52,47}}, {2.0,"EET"} }
-      replace(now(), :hour, 0)             #=> { {{2013,3,17}, {0,53,39}}, {2.0,"EET"} }
-      replace(now(), :tz, timezone(:utc))  #=> { {{2013,3,17}, {12,54,23}}, {0.0,"UTC"} }
+      set(now(), [date: {1,1,1}, hour: 13, second: 61, tz: timezone(:utc)])
+      #=> { {{1,1,1}, {13,45,61}}, {0.0,"UTC"} }
 
   """
-  @spec replace(dtz, :datetime, datetime) :: dtz
+  @spec set(dtz, list) :: dtz
 
-  @spec replace(dtz, :date, date) :: dtz
-  @spec replace(dtz, :year, year) :: dtz
-  @spec replace(dtz, :month, month) :: dtz
-  @spec replace(dtz, :day, day) :: dtz
+  def set(date, values) when is_list(values) do
+    greg_date = Date.Conversions.to_gregorian(date)
+    { date, time, tz } = Enum.reduce values, greg_date, fn({atom, value}, date) ->
+      set_priv(date, atom, value)
+    end
+    make_date(date, time, tz)
+  end
 
-  @spec replace(dtz, :time, time) :: dtz
-  @spec replace(dtz, :hour, hour) :: dtz
-  @spec replace(dtz, :minute, minute) :: dtz
-  @spec replace(dtz, :second, second) :: dtz
 
-  @spec replace(dtz, :tz, tz) :: dtz
+  @doc """
+  Return a new date with the specified fields replaced by new values.
 
-  import Date.Helper, only: [def_replace: 1]
-  def_replace(:datetime)
-  def_replace(:date)
-  def_replace(:year)
-  def_replace(:month)
-  def_replace(:day)
-  def_replace(:time)
-  def_replace(:hour)
-  def_replace(:min)
-  def_replace(:sec)
-  def_replace(:tz)
+  The values are not checked, so the result is not guaranteed to be a valid
+  date. If you want to enforce date validity, use set/3 instead.
 
-  defp replace_priv({_, _, tz}, :datetime, value) do
+  ## Examples
+
+      rawset(now(), :date, {1,1,1})       #=> { {{1,1,1}, {12,52,47}}, {2.0,"EET"} }
+      rawset(now(), :hour, 0)             #=> { {{2013,3,17}, {0,53,39}}, {2.0,"EET"} }
+      rawset(now(), :tz, timezone(:utc))  #=> { {{2013,3,17}, {12,54,23}}, {0.0,"UTC"} }
+
+  """
+  @spec rawset(dtz, :datetime, datetime) :: dtz
+
+  @spec rawset(dtz, :date, date) :: dtz
+  @spec rawset(dtz, :year, year) :: dtz
+  @spec rawset(dtz, :month, month) :: dtz
+  @spec rawset(dtz, :day, day) :: dtz
+
+  @spec rawset(dtz, :time, time) :: dtz
+  @spec rawset(dtz, :hour, hour) :: dtz
+  @spec rawset(dtz, :minute, minute) :: dtz
+  @spec rawset(dtz, :second, second) :: dtz
+
+  @spec rawset(dtz, :tz, tz) :: dtz
+
+  def_rawset(:datetime)
+  def_rawset(:date)
+  def_rawset(:year)
+  def_rawset(:month)
+  def_rawset(:day)
+  def_rawset(:time)
+  def_rawset(:hour)
+  def_rawset(:min)
+  def_rawset(:sec)
+  def_rawset(:tz)
+
+  defp rawset_priv({_, _, tz}, :datetime, value) do
     { date, time } = value
     { date, time, tz }
   end
 
-  defp replace_priv({_, time, tz}, :date, value) do
+  defp rawset_priv({_, time, tz}, :date, value) do
     { value, time, tz }
   end
 
-  defp replace_priv({{_,month,day}, time, tz}, :year, value) do
+  defp rawset_priv({{_,month,day}, time, tz}, :year, value) do
     { {value,month,day}, time, tz }
   end
 
-  defp replace_priv({{year,_,day}, time, tz}, :month, value) do
+  defp rawset_priv({{year,_,day}, time, tz}, :month, value) do
     { {year,value,day}, time, tz }
   end
 
-  defp replace_priv({{year,month,_}, time, tz}, :day, value) do
+  defp rawset_priv({{year,month,_}, time, tz}, :day, value) do
     { {year,month,value}, time, tz }
   end
 
-  defp replace_priv({date, _, tz}, :time, value) do
+  defp rawset_priv({date, _, tz}, :time, value) do
     { date, value, tz }
   end
 
-  defp replace_priv({date, {_,min,sec}, tz}, :hour, value) do
+  defp rawset_priv({date, {_,min,sec}, tz}, :hour, value) do
     { date, {value,min,sec}, tz }
   end
 
-  defp replace_priv({date, {hour,_,sec}, tz}, :min, value) do
+  defp rawset_priv({date, {hour,_,sec}, tz}, :min, value) do
     { date, {hour,value,sec}, tz }
   end
 
-  defp replace_priv({date, {hour,min,_}, tz}, :sec, value) do
+  defp rawset_priv({date, {hour,min,_}, tz}, :sec, value) do
     { date, {hour,min,value}, tz }
   end
 
-  defp replace_priv({date, time, _}, :tz, value) do
+  defp rawset_priv({date, time, _}, :tz, value) do
     { date, time, value }
-  end
-
-  @doc """
-  Return a new date with the specified fields replaced by new values.
-
-  ## Examples
-
-      replace(now(), [date: {1,1,1}, hour: 13, second: 61, tz: timezone(:utc)])
-      #=> { {{1,1,1}, {13,45,61}}, {0.0,"UTC"} }
-
-  """
-  @spec replace(dtz, list) :: dtz
-
-  def replace(date, values) when is_list(values) do
-    greg_date = Date.Conversions.to_gregorian(date)
-    { date, time, tz } = Enum.reduce values, greg_date, fn({atom, value}, date) ->
-      replace_priv(date, atom, value)
-    end
-    make_date(date, time, tz)
   end
 
   ### Comparing dates ###
@@ -1198,14 +1321,14 @@ defmodule Date do
       :hours -> value * 60 * 60
     end
     { _, _, tz } = Date.Conversions.to_gregorian(date)
-    replace(from(sec, :sec), :tz, tz)
+    set(from(sec, :sec), :tz, tz)
   end
 
   def shift(date, value, :days) do
     days = to_days(date)
     days = days + value
     { _, time, tz } = Date.Conversions.to_gregorian(date)
-    replace(from(days, :days), [time: time, tz: tz])
+    set(from(days, :days), [time: time, tz: tz])
   end
 
   def shift(date, value, :weeks) do
