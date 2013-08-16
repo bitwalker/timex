@@ -1230,7 +1230,7 @@ defmodule Date do
   @spec add(dtz, timestamp) :: dtz
 
   def add(date, {mega, sec, _}) do
-    shift(date, mega * _million + sec, :sec)
+    shift(date, [sec: mega * _million + sec])
   end
 
   @doc """
@@ -1239,25 +1239,103 @@ defmodule Date do
   @spec sub(dtz, timestamp) :: dtz
 
   def sub(date, {mega, sec, _}) do
-    shift(date, -mega * _million - sec, :sec)
+    shift(date, [sec: -mega * _million - sec])
   end
 
   @doc """
-  Shift the date by each time interval in the list in order. To achieve the
-  most accurate result, use `shift(date, list, :strict)`.
+  A single function for adjusting the date using various units: timestamp,
+  seconds, minutes, hours, days, weeks, months, years.
+
+  When shifting by timestamps, microseconds are ignored.
+
+  If the list contains `:month` and at least one other unit, an ArgumentError
+  is raised (due to ambiguity of such shifts). You can still shift by months
+  separately.
+
+  If `:year` is present, it is applied in the last turn.
+
+  The returned date is always valid. If after adding months or years the day
+  exceeds maximum number of days in the resulting month, that month's last day
+  is used.
+
+  To prevent day skew, fix up the date after shifting. For example, if you want
+  to land on the last day of the next month, do the following:
+
+      shift(date, 1, :month) |> set(:month, 31)
+
+  Since `set/3` is capping values that are out of range, you will get the
+  correct last day for each month.
 
   ## Examples
 
       date = from({{2013,3,5}, {23,23,23}})
+
+      local(shift(date, sec: 24*3600*365))
+      #=> {{2014,3,5}, {23,23,23}}
+
+      local(shift(date, sec: -24*3600*(365*2 + 1)))  # +1 day for leap year 2012
+      #=> {{2011,3,5}, {23,23,23}}
 
       local(shift(date, [sec: 13, day: -1, week: 2]))
       #=> {{2013,3,18}, {23,23,36}}
 
   """
   @spec shift(dtz, list) :: dtz
+  #@spec shift(dtz, integer, :timestamp | :sec | :min | :hour | :day | :week | :month | :year) :: dtz
+
+  def shift(date, [{_, 0}]) do
+    date
+  end
+
+  def shift(date, [timestamp: {0,0,0}]) do
+    date
+  end
+
+  def shift(date, [timestamp: timestamp]) do
+    add(date, timestamp)
+  end
+
+  def shift(date, [{type, value}]) when type in [:sec, :min, :hour] do
+    sec = to_sec(date)
+    sec = sec + case type do
+      :sec   -> value
+      :min   -> value * 60
+      :hour  -> value * 3600
+    end
+    { _, _, tz } = Date.Conversions.to_gregorian(date)
+    rawset(from(sec, :sec), :tz, tz)  # rawset for performance
+  end
+
+  def shift(date, [day: value]) do
+    days = to_days(date)
+    days = days + value
+    { _, time, tz } = Date.Conversions.to_gregorian(date)
+    set(from(days, :day), [time: time, tz: tz])  # rawset for performance
+  end
+
+  def shift(date, [week: value]) do
+    shift(date, [day: value * 7])
+  end
 
   def shift(date, [month: value]) do
-    shift(date, value, :month)
+    { {year,month,day}, time, tz } = Date.Conversions.to_gregorian(date)
+
+    month = month + value
+
+    # Calculate a valid year value
+    year = cond do
+      month == 0 -> year - 1
+      month < 0  -> year + div(month, 12) - 1
+      month > 12 -> year + div(month - 1, 12)
+      true       -> year
+    end
+
+    make_date(validate({year, round_month(month), day}), time, tz)
+  end
+
+  def shift(date, [year: value]) do
+    { {year,month,day}, time, tz } = Date.Conversions.to_gregorian(date)
+    make_date(validate({year + value, month, day}), time, tz)
   end
 
   defrecordp :shift_rec, sec: 0, day: 0, year: 0
@@ -1293,93 +1371,7 @@ defmodule Date do
 
     # The order in which we apply sec and days is not important.
     # The year shift must always go last though.
-    date |> shift(sec, :sec) |> shift(day, :day) |> shift(year, :year)
-  end
-
-  @doc """
-  A single function for adjusting the date using various units: timestamp,
-  seconds, minutes, hours, days, weeks, months, years.
-
-  When shifting by timestamps, microseconds are ignored.
-
-  The returned date is always valid. If after adding months or years the day
-  exceeds maximum number of days in the resulting month, that month's last day
-  is used.
-
-  To prevent day skew, fix up the date after shifting. For example, if you want
-  land on the last day of each successive month, do the following:
-
-      shift(date, 1, :month) |> set(:month, 31)
-
-  Since `set/3` is capping values that are out of range, you will get the
-  correct last day for each month.
-
-  ## Examples
-
-      date = from({{2013,3,5}, {23,23,23}})
-
-      local(shift(date, 24*3600*365, :sec))
-      #=> {{2014,3,5}, {23,23,23}}
-
-      local(shift(date, -24*3600*(365*2 + 1), :sec))  # +1 day for leap year 2012
-      #=> {{2011,3,5}, {23,23,23}}
-
-  """
-  @spec shift(dtz, integer, :timestamp | :sec | :min | :hour | :day | :week | :month | :year) :: dtz
-
-  def shift(date, 0, _) do
-    date
-  end
-
-  def shift(date, {0,0,0}, :timestamp) do
-    date
-  end
-
-  def shift(date, timestamp, :timestamp) do
-    add(date, timestamp)
-  end
-
-  def shift(date, value, type) when type in [:sec, :min, :hour] do
-    sec = to_sec(date)
-    sec = sec + case type do
-      :sec   -> value
-      :min   -> value * 60
-      :hour  -> value * 3600
-    end
-    { _, _, tz } = Date.Conversions.to_gregorian(date)
-    rawset(from(sec, :sec), :tz, tz)  # rawset for performance
-  end
-
-  def shift(date, value, :day) do
-    days = to_days(date)
-    days = days + value
-    { _, time, tz } = Date.Conversions.to_gregorian(date)
-    set(from(days, :day), [time: time, tz: tz])  # rawset for performance
-  end
-
-  def shift(date, value, :week) do
-    shift(date, value * 7, :day)
-  end
-
-  def shift(date, value, :month) do
-    { {year,month,day}, time, tz } = Date.Conversions.to_gregorian(date)
-
-    month = month + value
-
-    # Calculate a valid year value
-    year = cond do
-      month == 0 -> year - 1
-      month < 0  -> year + div(month, 12) - 1
-      month > 12 -> year + div(month - 1, 12)
-      true       -> year
-    end
-
-    make_date(validate({year, round_month(month), day}), time, tz)
-  end
-
-  def shift(date, value, :year) do
-    { {year,month,day}, time, tz } = Date.Conversions.to_gregorian(date)
-    make_date(validate({year + value, month, day}), time, tz)
+    date |> shift([sec: sec]) |> shift([day: day]) |> shift([year: year])
   end
 
   ### Private helper function ###
