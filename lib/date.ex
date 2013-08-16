@@ -1,10 +1,6 @@
 # Consider adding the following functions
-# is_future = diff(date, :now) > 0
-# is_past = diff(date, :now) < 0
 # next(date, type) = shift(date, 1, type)
 # prev(date, type) = shift(date, -1, type)
-# beginning_of_month
-# end_of_month
 
 defmodule Date.Helper do
   @moduledoc false
