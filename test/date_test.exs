@@ -173,59 +173,79 @@ defmodule DTest do
     #assert nil
   end
 
+  test :weekday_name do
+    assert D.weekday_name(1, :short) == "Mon"
+    assert D.weekday_name(7, :full) == "Sunday"
+    assert_raise FunctionClauseError, fn ->
+      D.weekday_name(0, :short)
+      D.weekday_name(8, :full)
+    end
+  end
+
+  test :month_name do
+    assert D.month_name(1, :short) == "Jan"
+    assert D.month_name(12, :full) == "December"
+    assert_raise FunctionClauseError, fn ->
+      D.month_name(0, :short)
+      D.month_name(13, :full)
+    end
+  end
+
   test :convert do
     date = D.now()
-    assert D.convert(date, :sec) + D.epoch(:sec) == D.to_sec(date, :zero)
-    assert D.convert(date, :days) + D.epoch(:days) == D.to_days(date, :zero)
+    assert D.convert(date, :sec) + D.epoch(:sec) === D.to_sec(date, :zero)
+    assert D.convert(date, :days) + D.epoch(:days) === D.to_days(date, :zero)
   end
 
   test :to_timestamp do
-    assert D.to_timestamp(D.epoch()) == {0,0,0}
-    assert D.to_timestamp(D.epoch(), :zero) == {62167,219200,0}
+    assert D.to_timestamp(D.epoch()) === {0,0,0}
+    assert D.to_timestamp(D.epoch(), :zero) === {62167,219200,0}
     assert Time.to_sec(D.to_timestamp(D.epoch(), :zero)) == D.epoch(:sec)
   end
 
   test :to_sec do
     date = D.now()
-    assert D.to_sec(date, :zero) == :calendar.datetime_to_gregorian_seconds(D.universal(date))
-    assert D.to_sec(date, :zero) - D.epoch(:sec) == D.to_sec(date)
-    #assert D.to_sec(D.now()) == trunc(Time.now(:sec))  bad test
+    assert D.to_sec(date, :zero) === :calendar.datetime_to_gregorian_seconds(D.universal(date))
+    assert D.to_sec(date, :zero) - D.epoch(:sec) === D.to_sec(date)
+
+    ts = Time.now()
+    assert D.to_sec(D.from(ts, :timestamp)) === trunc(Time.to_sec(ts))
 
     date = D.from({{1999,1,2}, {12,13,14}})
-    assert D.to_sec(date) == 915279194
-    assert D.to_sec(date, :zero) == 63082498394
+    assert D.to_sec(date) === 915279194
+    assert D.to_sec(date, :zero) === 63082498394
 
-    assert D.to_sec(D.epoch()) == 0
-    assert D.to_sec(D.epoch(), :zero) == 62167219200
+    assert D.to_sec(D.epoch()) === 0
+    assert D.to_sec(D.epoch(), :zero) === 62167219200
   end
 
   test :to_days do
     date = D.from({2013,3,16})
-    assert D.to_days(date) == 15780
-    assert D.to_days(date, :zero) == 735308
+    assert D.to_days(date) === 15780
+    assert D.to_days(date, :zero) === 735308
 
-    assert D.to_days(D.epoch()) == 0
-    assert D.to_days(D.epoch(), :zero) == 719528
+    assert D.to_days(D.epoch()) === 0
+    assert D.to_days(D.epoch(), :zero) === 719528
   end
 
   test :weekday do
     localdate = {{2013,3,17},{11,59,10}}
-    assert D.weekday(localdate) == 7
-    assert D.weekday(D.from(localdate)) == 7
-    assert D.weekday(D.epoch()) == 4
+    assert D.weekday(localdate) === 7
+    assert D.weekday(D.from(localdate)) === 7
+    assert D.weekday(D.epoch()) === 4
   end
 
   test :weeknum do
     localdate = {{2013,3,17},{11,59,10}}
-    assert D.weeknum(localdate) == {2013,11}
-    assert D.weeknum(D.from(localdate)) == {2013,11}
-    assert D.weeknum(D.epoch()) == {1970,1}
+    assert D.weeknum(localdate) === {2013,11}
+    assert D.weeknum(D.from(localdate)) === {2013,11}
+    assert D.weeknum(D.epoch()) === {1970,1}
   end
 
   test :iso_triplet do
     localdate = {{2013,3,17},{11,59,10}}
-    assert D.iso_triplet(D.from(localdate)) == {2013,11,7}
-    assert D.iso_triplet(D.epoch()) == {1970,1,4}
+    assert D.iso_triplet(D.from(localdate)) === {2013,11,7}
+    assert D.iso_triplet(D.epoch()) === {1970,1,4}
   end
 
   test :days_in_month do

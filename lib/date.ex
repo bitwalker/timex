@@ -476,6 +476,8 @@ defmodule Date do
     make_date(:calendar.gregorian_days_to_date(trunc(days)), {0,0,0}, make_tz(:utc))
   end
 
+  # FIXME: support custom reference date
+
   ### Formatting dates ###
 
   @doc """
@@ -565,15 +567,8 @@ defmodule Date do
 
   defp format_rfc(date, tz) do
     { {year,month,day}, {hour,min,sec} } = date
-    day_name = case weekday(date) do
-      1 -> "Mon"; 2 -> "Tue"; 3 -> "Wed"; 4 -> "Thu";
-      5 -> "Fri"; 6 -> "Sat"; 7 -> "Sun"
-    end
-    month_name = case month do
-       1 -> "Jan";  2 -> "Feb";  3 -> "Mar";  4 -> "Apr";
-       5 -> "May";  6 -> "Jun";  7 -> "Jul";  8 -> "Aug";
-       9 -> "Sep"; 10 -> "Oct"; 11 -> "Nov"; 12 -> "Dec"
-    end
+    day_name = weekday_name(weekday(date), :short)
+    month_name = month_name(month, :short)
     fstr = case tz do
       { :name, tz_name } ->
         if tz_name == "UTC" do
@@ -592,6 +587,58 @@ defmodule Date do
         [day_name, day, month_name, year, hour, min, sec]))
   end
 
+  @doc """
+  Convert a weekday number to its English name.
+
+  ## Examples
+
+      weekday_name(1, :short)  #=> "Mon"
+      weekday_name(3, :full)   #=> "Wednesday"
+
+  """
+  @spec weekday_name(weekday, :short | :full) :: String.t
+
+  def weekday_name(day, :short) when day in 1..7 do
+    case day do
+      1 -> "Mon"; 2 -> "Tue"; 3 -> "Wed"; 4 -> "Thu";
+      5 -> "Fri"; 6 -> "Sat"; 7 -> "Sun"
+    end
+  end
+
+  def weekday_name(day, :full) when day in 1..7 do
+    case day do
+      1 -> "Monday"; 2 -> "Tuesday"; 3 -> "Wednesday"; 4 -> "Thursday";
+      5 -> "Friday"; 6 -> "Saturday"; 7 -> "Sunday"
+    end
+  end
+
+  @doc """
+  Convert a month number to its English name.
+
+  ## Examples
+
+      month_name(1, :short)  #=> "Jan"
+      month_name(3, :full)   #=> "March"
+
+  """
+  @spec month_name(month, :short | :full) :: String.t
+
+  def month_name(month, :short) when month in 1..12 do
+    case month do
+      1 -> "Jan";  2 -> "Feb";  3 -> "Mar";  4 -> "Apr";
+      5 -> "May";  6 -> "Jun";  7 -> "Jul";  8 -> "Aug";
+      9 -> "Sep"; 10 -> "Oct"; 11 -> "Nov"; 12 -> "Dec"
+    end
+  end
+
+  def month_name(month, :full) when month in 1..12 do
+    case month do
+      1 -> "January";    2 -> "February";  3 -> "March";     4 -> "April";
+      5 -> "May";        6 -> "June";      7 -> "July";      8 -> "August";
+      9 -> "September"; 10 -> "October";  11 -> "November"; 12 -> "December"
+    end
+  end
+
   ### Converting dates ###
 
   @doc """
@@ -607,7 +654,7 @@ defmodule Date do
   """
   @spec convert(dtz) :: timestamp
   @spec convert(dtz, :timestamp)   :: timestamp
-  @spec convert(dtz, :sec | :days) :: timestamp
+  @spec convert(dtz, :sec | :days) :: integer
   def convert(date, type // :timestamp)
 
   def convert(date, :timestamp) do
@@ -646,6 +693,8 @@ defmodule Date do
     { div(sec, _million), rem(sec, _million), 0 }
   end
 
+  # FIXME: support reference date
+
   @doc """
   Convert the date to an integer number of seconds since Epoch or year 0.
 
@@ -670,6 +719,8 @@ defmodule Date do
     :calendar.datetime_to_gregorian_seconds({date,time})
   end
 
+  # FIXME: support reference date
+
   @doc """
   Convert the date to an integer number of days since Epoch or year 0.
 
@@ -692,6 +743,8 @@ defmodule Date do
     { date, _, _ } = Date.Conversions.to_gregorian(date)
     :calendar.date_to_gregorian_days(date)
   end
+
+  # FIXME: support reference date
 
   ### Retrieving information about a date ###
 
