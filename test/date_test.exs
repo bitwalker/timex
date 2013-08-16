@@ -68,12 +68,14 @@ defmodule DTest do
   end
 
   test :distant_past do
-    assert D.compare(D.distant_past(), D.zero()) === 1
+    #assert D.compare(D.distant_past(), D.zero()) === 1
+    assert D.is_valid(D.distant_past())
   end
 
   test :distant_future do
     # I wonder what the Earth will look like when this test fails
     assert D.compare(D.now(), D.distant_future()) === 1
+    assert D.is_valid(D.distant_future())
   end
 
   test :from_date do
@@ -250,23 +252,33 @@ defmodule DTest do
 
   test :days_in_month do
     localdate = {{2013,2,17},{11,59,10}}
-    assert D.days_in_month(D.from(localdate)) == 28
-    assert D.days_in_month(D.epoch()) == 31
-    assert D.days_in_month(2012, 2) == 29
-    assert D.days_in_month(2013, 2) == 28
+    assert D.days_in_month(D.from(localdate)) === 28
+
+    localdate = {{2000,2,17},{11,59,10}}
+    assert D.days_in_month(D.from(localdate)) === 29
+
+    assert D.days_in_month(D.epoch()) === 31
+    assert D.days_in_month(2012, 2) === 29
+    assert D.days_in_month(2013, 2) === 28
   end
 
   test :is_leap do
-    assert D.is_leap(D.epoch()) == false
-    assert D.is_leap(2012) == true
+    assert not D.is_leap(D.epoch())
+    assert D.is_leap(2012)
+    assert not D.is_leap(2100)
   end
 
   test :is_valid do
     assert D.is_valid(D.now())
     assert D.is_valid(D.from({1,1,1}))
     assert D.is_valid(D.from({{1,1,1}, {1,1,1}}))
+    assert D.is_valid(D.from({{1,1,1}, {0,0,0}}))
+    assert D.is_valid(D.from({{1,1,1}, {23,59,59}}))
+
     assert not D.is_valid(D.from({12,13,14}))
     assert not D.is_valid(D.from({12,12,34}))
+    assert not D.is_valid(D.from({1,0,1}))
+    assert not D.is_valid(D.from({1,1,0}))
     assert not D.is_valid(D.from({{12,12,12}, {24,0,0}}))
     assert not D.is_valid(D.from({{12,12,12}, {23,60,0}}))
     assert not D.is_valid(D.from({{12,12,12}, {23,59,60}}))
@@ -275,10 +287,13 @@ defmodule DTest do
 
   test :normalize do
     date = D.now()
-    assert D.normalize(date) == date
+    assert D.normalize(date) === date
 
     date = { {1,13,44}, {-8,60,61} }
-    assert D.local(D.normalize(D.from(date))) == { {1,12,31}, {0,59,59} }
+    assert D.local(D.normalize(D.from(date))) === { {1,12,31}, {0,59,59} }
+
+    assert D.local(D.normalize(D.from({2012,2,30}))) === { {2012,2,29}, {0,0,0} }
+    assert D.local(D.normalize(D.from({2013,2,30}))) === { {2013,2,28}, {0,0,0} }
   end
 
   test :replace do

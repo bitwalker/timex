@@ -356,7 +356,8 @@ defmodule Date do
     # TODO: think of use cases
     # cannot set the year to less than 0 here because Erlang functions don't
     # accept it
-    make_date({0,1,1}, {0,0,-1}, make_tz(:utc))
+    # FIXME: consider returning an atom
+    make_date({0,1,1}, {0,0,0}, make_tz(:utc))
   end
 
   @doc """
@@ -369,6 +370,7 @@ defmodule Date do
   def distant_future do
     # TODO: evaluate whether it's distant enough
     make_date({9999,12,31}, {23,59,59}, make_tz(:utc))
+    # FIXME: consider returning an atom
   end
 
   ### Constructing the date from an existing value ###
