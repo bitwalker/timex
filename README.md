@@ -21,7 +21,7 @@ end
 
 After that, run `mix deps.get` and start using `Date` functions in your project's code.
 
-    [datefmt]: https://github.com/alco/elixir-datefmt
+  [datefmt]: https://github.com/alco/elixir-datefmt
 
 ## Overview ##
 
