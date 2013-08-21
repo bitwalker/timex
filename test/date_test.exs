@@ -126,44 +126,6 @@ defmodule DTest do
     assert D.local(D.from(31, :day)) === {{1970,2,1}, {0,0,0}}
   end
 
-  test :iso_format do
-    date = {{2013,3,5},{23,25,19}}
-
-    eet = D.timezone(2, "EET")
-    assert D.format(D.from(date, eet), :iso)       == "2013-03-05T21:25:19Z"
-    assert D.format(D.from(date, eet), :iso_local) == "2013-03-05T23:25:19"
-    assert D.format(D.from(date, eet), :iso_full)  == "2013-03-05T23:25:19+0200"
-
-    pst = D.timezone(-8, "PST")
-    assert D.format(D.from(date, pst), :iso_full)  == "2013-03-05T23:25:19-0800"
-
-    assert D.format(D.from(date, :utc), :iso_full) == "2013-03-05T23:25:19+0000"
-
-    assert D.format(D.from(date), :iso_week)    == "2013-W10"
-    assert D.format(D.from(date), :iso_weekday) == "2013-W10-2"
-    assert D.format(D.from(date), :iso_ordinal) == "2013-063"
-  end
-
-  test :rfc_format do
-    date = {{2013,3,5},{23,25,19}}
-    assert D.format(D.from(date), :rfc1123)  == "Tue, 05 Mar 2013 23:25:19 GMT"
-    assert D.format(D.from(date), :rfc1123z) == "Tue, 05 Mar 2013 23:25:19 +0000"
-
-    eet = D.timezone(2, "EET")
-    date = D.from({{2013,3,5},{23,25,19}}, eet)
-    assert D.format(date, :rfc1123)  == "Tue, 05 Mar 2013 23:25:19 EET"
-    assert D.format(date, :rfc1123z) == "Tue, 05 Mar 2013 23:25:19 +0200"
-
-    pst = D.timezone(-8, "PST")
-    date = D.from({{2013,3,5},{23,25,19}}, pst)
-    assert D.format(date, :rfc1123)  == "Tue, 05 Mar 2013 23:25:19 PST"
-    assert D.format(date, :rfc1123z) == "Tue, 05 Mar 2013 23:25:19 -0800"
-  end
-
-  test :format do
-    #assert nil
-  end
-
   test :weekday_name do
     assert D.weekday_name(1, :short) == "Mon"
     assert D.weekday_name(7, :full) == "Sunday"
