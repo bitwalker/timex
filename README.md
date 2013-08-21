@@ -3,6 +3,26 @@ Date & Time modules for Elixir
 
 A draft implementation of date and time functionality based on **Idea #6** from this [proposal page](https://github.com/beamcommunity/beamcommunity.github.com/wiki/Project:-Elixir).
 
+## Status ##
+
+**This is work in progress, not suitable for production.**
+
+The API for `Date` may change slightly, but not too much. I have recently removed the `format` function. Date formatting and parsing will be provided by [this other project][datefmt].
+
+The `Time` module is pretty much in flux, please don't depend on it too much.
+
+To add this library to your project, edit your mix.exs file so that it looks similar to this:
+
+```elixir
+defp deps do
+  [{:"elixir-datetime", github: "alco/elixir-datetime"}]
+end
+```
+
+After that, run `mix deps.get` and start using `Date` functions in your project's code.
+
+    [datefmt]: https://github.com/alco/elixir-datefmt
+
 ## Overview ##
 
 This is a draft implementation of two modules for Elixir that are going to deal with all aspects of working with dates and time intervals.
