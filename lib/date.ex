@@ -981,6 +981,14 @@ defmodule Date do
   def_rawset(:sec)
   def_rawset(:tz)
 
+  def rawset(date, values) when is_list(values) do
+    greg_date = Date.Conversions.to_gregorian(date)
+    { date, time, tz } = Enum.reduce values, greg_date, fn({atom, value}, date) ->
+      rawset_priv(date, atom, value)
+    end
+    make_date(date, time, tz)
+  end
+
   defp rawset_priv({_, _, tz}, :datetime, value) do
     { date, time } = value
     { date, time, tz }
