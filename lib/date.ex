@@ -80,6 +80,7 @@ defmodule Date do
   @type year :: non_neg_integer
   @type month :: 1..12
   @type day :: 1..31
+  @type daynum :: 1..366
   @type weekday :: 1..7
   @type weeknum :: 1..53
   @type num_of_days :: 28..31
@@ -633,6 +634,17 @@ defmodule Date do
 
   def weekday(date) do
     weekday(local(date))
+  end
+
+  @doc """
+  Returns the ordinal day number of the date.
+  """
+  @spec daynum(dtz) :: daynum
+
+  def daynum(date) do
+    # rawset for more efficiency
+    start_of_year = rawset(date, [month: 1, day: 1])
+    1 + diff(start_of_year, date, :day)
   end
 
   @doc """

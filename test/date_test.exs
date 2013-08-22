@@ -188,6 +188,13 @@ defmodule DTest do
     assert D.weekday(D.epoch()) === 4
   end
 
+  test :daynum do
+    assert D.daynum(D.from({3,1,1})) === 1
+    assert D.daynum(D.from({3,2,1})) === 32
+    assert D.daynum(D.from({3,12,31})) === 365
+    assert D.daynum(D.from({2012,12,31})) === 366
+  end
+
   test :weeknum do
     localdate = {{2013,3,17},{11,59,10}}
     assert D.weeknum(localdate) === {2013,11}
