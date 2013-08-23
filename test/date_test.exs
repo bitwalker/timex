@@ -126,24 +126,6 @@ defmodule DTest do
     assert D.local(D.from(31, :day)) === {{1970,2,1}, {0,0,0}}
   end
 
-  test :weekday_name do
-    assert D.weekday_name(1, :short) == "Mon"
-    assert D.weekday_name(7, :full) == "Sunday"
-    assert_raise FunctionClauseError, fn ->
-      D.weekday_name(0, :short)
-      D.weekday_name(8, :full)
-    end
-  end
-
-  test :month_name do
-    assert D.month_name(1, :short) == "Jan"
-    assert D.month_name(12, :full) == "December"
-    assert_raise FunctionClauseError, fn ->
-      D.month_name(0, :short)
-      D.month_name(13, :full)
-    end
-  end
-
   test :convert do
     date = D.now()
     assert D.convert(date, :sec) + D.epoch(:sec) === D.to_sec(date, :zero)
