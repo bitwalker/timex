@@ -558,8 +558,8 @@ defmodule Date do
   end
 
   def to_days(date, :zero) do
-    { localdate, _ } = local(date)
-    :calendar.date_to_gregorian_days(localdate)
+    { date, _, _ } = Date.Conversions.to_gregorian(date)
+    :calendar.date_to_gregorian_days(date)
   end
 
   # FIXME: support reference date
