@@ -129,7 +129,7 @@ defmodule Date do
     #hour_offset = (:calendar.datetime_to_gregorian_seconds(local_time) - :calendar.datetime_to_gregorian_seconds(datetime)) / 3600
     #timezone(hour_offset, "TimeZoneName")
 
-    make_tz(offset, to_binary(name))
+    make_tz(offset, to_string(name))
   end
 
   def timezone(:utc) do
