@@ -278,4 +278,8 @@ Not sure yet. Erlang does not support working time zones, so we can either use O
 
 References: https://github.com/drfloob/ezic
 
+## License
+
+This software is licensed under [the MIT license](LICENSE.md).
+
   [datefmt]: https://github.com/alco/elixir-datefmt
