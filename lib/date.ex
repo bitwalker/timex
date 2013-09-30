@@ -750,9 +750,14 @@ defmodule Date do
   end
 
   defp norm_date({year,month,day}) do
+    year  = norm_year(year)
     month = norm_month(month)
     day   = norm_day(year, month, day)
     {year, month, day}
+  end
+
+  defp norm_year(year) when year < 0 do
+    0
   end
 
   defp norm_year(year) do

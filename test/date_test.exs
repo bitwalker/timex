@@ -246,10 +246,20 @@ defmodule DTest do
 
     assert to_gregorian(D.set(date, [date: {1,1,1}, hour: 13, sec: 61, tz: D.timezone(:utc)]))
            === { {1,1,1}, {13,26,59}, {0.0,"UTC"} }
+    assert to_gregorian(D.set(date, [date: {-1,-2,-3}, hour: 33, sec: 61, tz: D.timezone(:utc)]))
+           === { {0,1,1}, {23,26,59}, {0.0,"UTC"} }
   end
 
   test :rawset do
-    assert nil
+    import D.Conversions, only: [to_gregorian: 1]
+
+    date = D.from({{2013,3,17}, {17,26,5}}, {2.0,"EET"})
+    assert to_gregorian(D.rawset(date, date: {1,13,101})) === { {1,13,101}, {15,26,5}, {2.0,"EET"} }
+    assert to_gregorian(D.rawset(date, hour: -1)) === { {2013,3,17}, {-1,26,5}, {2.0,"EET"} }
+    assert to_gregorian(D.rawset(date, tz: D.timezone(-100000))) === { {2013,3,17}, {15,26,5}, {-100000,"TimeZoneName"} }
+
+    assert to_gregorian(D.rawset(date, [date: {-1,-2,-3}, hour: 33, sec: 61, tz: D.timezone(:utc)]))
+           === { {-1,-2,-3}, {33,26,61}, {0.0,"UTC"} }
   end
 
   test :compare do
