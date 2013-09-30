@@ -21,7 +21,6 @@ end
 
 After that, run `mix deps.get` and start using `Date` functions in your project's code.
 
-  [datefmt]: https://github.com/alco/elixir-datefmt
 
 ## Overview ##
 
@@ -35,15 +34,17 @@ The `Time` module supports a finer grain level of calculations over time interva
 
 ## Use cases ##
 
+In all of the examples below, [DateFmt][datefmt] is used for formatting.
+
 ### Getting current date ###
 
-Get current date in UTC or some other time zone.
+Get current date in the local time zone.
 
 ```elixir
 date = Date.now()
-Date.format(date, :iso)        #=> "2013-03-17 18:39:21Z"
-Date.format(date, :rfc)        #=> "Sun, 17 Mar 2013 18:39:21 GMT"
-Date.format(date, :rfc_local)  #=> "Sun, 17 Mar 2013 20:39:21 EET"
+DateFmt.format!(date, "{ISO}")      #=> "2013-09-30T16:40:08+0300"
+DateFmt.format!(date, "{RFC1123}")  #=> "Mon, 30 Sep 2013 16:40:08 EEST"
+DateFmt.format!(date, "{kitchen}")  #=> "4:40PM"
 ```
 
 The date value that `Date` produced encapsulates current date, time, and time zone information. This allows for great flexibility without any overhead on the user's part.
@@ -53,35 +54,36 @@ Since Erlang's native date format doesn't carry any time zone information, `Date
 ```elixir
 datetime = {{2013,3,17},{21,22,23}}
 
-date = Date.from(datetime)          # datetime is assumed to be in UTC by default
-Date.format(date, :rfc)             #=> "Sun, 17 Mar 2013 21:22:23 GMT"
+date = Date.from(datetime)           # datetime is assumed to be in UTC by default
+DateFmt.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 GMT"
 
-date = Date.from(datetime, :local)  # indicates that datetime is in local time zone
-Date.format(date, :rfc)             #=> "Sun, 17 Mar 2013 19:22:23 GMT"
-Date.format(date, :rfc_local)       #=> "Sun, 17 Mar 2013 21:22:23 EET"
+date = Date.from(datetime, :local)   # indicates that datetime is in local time zone
+DateFmt.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 EEST"
 
 Date.local(date)  # convert date to local time zone
 #=> {{2013,3,17},{21,22,23}}
 
 # Let's see what happens if we switch the time zone
-date = Date.replace(date, :tz, { -8, "PST" })
-Date.format(date, :rfc_local)
-#=> "Sun, 17 Mar 2013 11:22:23 PST"
+date = Date.set(date, tz: { -8, "PST" })
+DateFmt.format!(date, "{RFC1123}")
+#=> "Sun, 17 Mar 2013 10:22:23 PST"
 
 Date.universal(date)  # convert date to UTC
-#=> {{2013,3,17},{19,22,23}}
+#=> {{2013,3,17},{18,22,23}}
 ```
 
 ### Working with time zones ###
 
-Currently, we need to build time zones by hand. The functions in `Date` are already respecting time zone offsets when doing calculations and use time zone name in `format()`.
+Currently, we need to build time zones by hand. The functions in `Date` are already respecting time zone offsets when doing calculations. Time zone names are used by `DateFmt` during formatting.
 
 ```elixir
 date = Date.from({2013,1,1}, Date.timezone(5, "SomewhereInRussia"))
-Date.format(date, :iso)
-#=> "2012-12-31 19:00:00Z"
+DateFmt.format!(date, "{ISO}")
+#=> "2013-01-01T00:00:00+0500"
+DateFmt.format!(date, "{ISOz}")
+#=> "2012-12-31T19:00:00Z"
 
-Date.format(date, :rfc_local)
+DateFmt.format!(date, "{RFC1123}")
 #=> "Tue, 01 Jan 2013 00:00:00 SomewhereInRussia"
 
 date = Date.now()
@@ -96,17 +98,18 @@ Find out current weekday, week number, number of days in a given month, etc.
 
 ```elixir
 date = Date.now()
-Date.format(date, :rfc_local)  #=> "Sun, 17 Mar 2013 20:57:19 EET"
+DateFmt.format!(date, "{RFC1123}")
+#=> "Mon, 30 Sep 2013 16:51:02 EEST"
 
-Date.weekday(date)             #=> 7
-Date.weeknum(date)             #=> {2013,11}
-Date.iso_triplet(date)         #=> {2013,11,7}
+Date.weekday(date)           #=> 1
+Date.weeknum(date)           #=> {2013, 40}
+Date.iso_triplet(date)       #=> {2013, 40, 1}
 
-Date.days_in_month(date)       #=> 31
-Date.days_in_month(2012, 2)    #=> 29
+Date.days_in_month(date)     #=> 30
+Date.days_in_month(2012, 2)  #=> 29
 
-Date.is_leap(date)             #=> false
-Date.is_leap(2012)             #=> true
+Date.is_leap(date)           #=> false
+Date.is_leap(2012)           #=> true
 ```
 
 ### Date arithmetic ###
@@ -115,24 +118,24 @@ Date.is_leap(2012)             #=> true
 
 ```elixir
 date = Date.now()
-Date.format(date, :rfc_local)
-#=> "Sun, 17 Mar 2013 21:20:36 EET"
+DateFmt.format!(date, "{RFC1123}")
+#=> "Mon, 30 Sep 2013 16:55:02 EEST"
 
 Date.convert(date, :sec)  # seconds since Epoch
-#=> 1363548036
+#=> 1380549302
 
-Date.to_sec(date, 0)      # seconds since year 0
-#=> 63530767236
+Date.to_sec(date, :zero)  # seconds since year 0
+#=> 63547768502
 
-Date.format(Date.epoch(), :iso)
-#=> "1970-01-01 00:00:00Z"
+DateFmt.format!(Date.epoch(), "{ISO}")
+#=> "1970-01-01T00:00:00+0000"
 
 Date.epoch(:sec)  # seconds since year 0 to Epoch
 #=> 62167219200
 
-date = Date.from(Date.epoch(:sec) + 144, :sec, 0)  # 0 indicates year 0
-Date.format(date, :iso)
-#=> "1970-01-01 00:02:24Z"
+date = Date.from(Date.epoch(:sec) + 144, :sec, :zero)  # :zero indicates year 0
+DateFmt.format!(date, "{ISOz}")
+#=> "1970-01-01T00:02:24Z"
 ```
 
 ### Shifting dates ###
@@ -141,23 +144,23 @@ Shifting refers to moving by some amount of time towards past or future. `Date` 
 
 ```elixir
 date = Date.now()
-Date.format(date, :rfc_local)
-#=> "Sun, 17 Mar 2013 21:08:07 EET"
+DateFmt.format!(date, "{RFC1123}")
+#=> "Mon, 30 Sep 2013 16:58:13 EEST"
 
-Date.format( Date.shift(date, 78, :sec), :rfc_local )
-#=> "Sun, 17 Mar 2013 21:09:25 EET"
+DateFmt.format!( Date.shift(date, sec: 78), "{RFC1123}" )
+#=> "Mon, 30 Sep 2013 16:59:31 EEST"
 
-Date.format( Date.shift(date, -1078, :sec), :rfc_local )
-#=> "Sun, 17 Mar 2013 20:50:09 EET"
+DateFmt.format!( Date.shift(date, sec: -1078), "{RFC1123}" )
+#=> "Mon, 30 Sep 2013 16:40:15 EEST"
 
-Date.format( Date.shift(date, 1, :days), :rfc_local )
-#=> "Mon, 18 Mar 2013 21:08:07 EET"
+DateFmt.format!( Date.shift(date, day: 1), "{RFC1123}" )
+#=> "Tue, 01 Oct 2013 16:58:13 EEST"
 
-Date.format( Date.shift(date, 3, :weeks), :rfc_local )
-#=> "Sun, 07 Apr 2013 21:08:07 EET"
+DateFmt.format!( Date.shift(date, week: 3), "{RFC1123}" )
+#=> "Mon, 21 Oct 2013 16:58:13 EEST"
 
-Date.format( Date.shift(date, -13, :years), :rfc_local )
-#=> "Fri, 17 Mar 2000 21:08:07 EET"
+DateFmt.format!( Date.shift(date, year: -13), "{RFC1123}" )
+#=> "Sat, 30 Sep 2000 16:58:13 EEST"
 ```
 
 ## Working with Time module ##
@@ -274,3 +277,5 @@ Some inspirations may be drawn from these: https://github.com/dweldon/edate/blob
 Not sure yet. Erlang does not support working time zones, so we can either use OS-specific functions and implement this feature for each platform separately or package a time zone database with this library and write the implementation in Elixir itself.
 
 References: https://github.com/drfloob/ezic
+
+  [datefmt]: https://github.com/alco/elixir-datefmt
