@@ -5,7 +5,7 @@ A draft implementation of date and time functionality based on **Idea #6** from 
 
 ## Status ##
 
-**This is work in progress, not suitable for production.**
+**This project is open for adoption. If you'd like to become a maintainer, contact me.**
 
 The API for `Date` may change slightly, but not too much. I have recently removed the `format` function. Date formatting and parsing will be provided by [this other project][datefmt].
 
