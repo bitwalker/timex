@@ -3,7 +3,7 @@ defmodule Date.Mixfile do
 
   def project do
     [ app: :"elixir-datetime",
-      version: "0.1",
+      version: "0.1.0",
       deps: deps ]
   end
 
