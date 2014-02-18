@@ -5,6 +5,8 @@ A draft implementation of date and time functionality based on **Idea #6** from 
 
 ## Status ##
 
+[![wercker status](https://app.wercker.com/status/a77f83a04ae1006c9ee44f61a1a147a0/m/ "wercker status")](https://app.wercker.com/project/bykey/a77f83a04ae1006c9ee44f61a1a147a0)
+
 The API for `Date` may change slightly, but not too much. I have recently removed the `format` function. Date formatting and parsing will be provided by [this other project][datefmt].
 
 The `Time` module is pretty much in flux, please don't depend on it too much.
