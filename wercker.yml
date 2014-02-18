@@ -1,0 +1,25 @@
+box: bitwalker/elixir@0.0.5
+build:
+  steps:
+      - script:
+          name: set env vars
+          code: export MIX_ENV=test
+
+      # Gets the dependencies
+      - script:
+          name: mix deps.get
+          code: |
+            cd $WERCKER_SOURCE_DIR
+            mix deps.get
+
+      # Build the project
+      - script:
+          name: mix compile
+          code: |
+            mix compile
+
+      # Test the project
+      - script:
+          name: mix test
+          code: |
+            mix test
