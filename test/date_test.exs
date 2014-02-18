@@ -38,6 +38,7 @@ defmodule DTest do
     assert local === D.local(localdate)
 
     if D.timezone() !== {2.0, "UTC"} do
+      IO.inspect D.timezone()
       assert local !== D.universal(localdate)
     end
 
