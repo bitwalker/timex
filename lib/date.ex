@@ -113,7 +113,7 @@ defmodule Date do
   """
   @spec timezone() :: tz
   @spec timezone(:local | :utc | number | binary) :: tz
-  def timezone(spec // :local)
+  def timezone(spec \\ :local)
 
   def timezone(:local) do
     # FIXME: change implementation for cross-platform support
@@ -429,7 +429,7 @@ defmodule Date do
   @spec from(number, :sec | :day)  :: dtz
   @spec from(timestamp, :timestamp, :epoch | :zero) :: dtz
   @spec from(number, :sec | :day, :epoch | :zero)  :: dtz
-  def from(value, type, reference // :epoch)
+  def from(value, type, reference \\ :epoch)
 
   def from({mega, sec, _}, :timestamp, :epoch) do
     from(mega * _million + sec, :sec)
@@ -473,7 +473,7 @@ defmodule Date do
   @spec convert(dtz) :: timestamp
   @spec convert(dtz, :timestamp)   :: timestamp
   @spec convert(dtz, :sec | :day) :: integer
-  def convert(date, type // :timestamp)
+  def convert(date, type \\ :timestamp)
 
   def convert(date, :timestamp) do
     to_timestamp(date)
@@ -499,7 +499,7 @@ defmodule Date do
   """
   @spec to_timestamp(dtz) :: timestamp
   @spec to_timestamp(dtz, :epoch | :zero) :: timestamp
-  def to_timestamp(date, reference // :epoch)
+  def to_timestamp(date, reference \\ :epoch)
 
   def to_timestamp(date, :epoch) do
     sec = to_sec(date)
@@ -526,7 +526,7 @@ defmodule Date do
   """
   @spec to_sec(dtz) :: integer
   @spec to_sec(dtz, :epoch | :zero) :: integer
-  def to_sec(date, reference // :epoch)
+  def to_sec(date, reference \\ :epoch)
 
   def to_sec(date, :epoch) do
     to_sec(date, :zero) - epoch(:sec)
@@ -551,7 +551,7 @@ defmodule Date do
   """
   @spec to_days(dtz) :: integer
   @spec to_days(dtz, :epoch | :zero) :: integer
-  def to_days(date, reference // :epoch)
+  def to_days(date, reference \\ :epoch)
 
   def to_days(date, :epoch) do
     to_days(date, :zero) - epoch(:day)

@@ -174,7 +174,7 @@ defmodule Time do
   Supported units: microseconds (:usec), milliseconds (:msec), seconds (:sec),
   minutes (:min), hours (:hour), days (:day), or weeks (:week).
   """
-  def convert(timestamp, type // :timestamp)
+  def convert(timestamp, type \\ :timestamp)
   def convert(timestamp, :timestamp), do: timestamp
   def convert(timestamp, :usec), do: to_sec(timestamp) * 1000000
   def convert(timestamp, :msec), do: to_sec(timestamp) * 1000
@@ -187,7 +187,7 @@ defmodule Time do
   @doc """
   Return time interval since the first day of year 0 to Epoch.
   """
-  def epoch(type // :timestamp)
+  def epoch(type \\ :timestamp)
 
   def epoch(:timestamp) do
     seconds = :calendar.datetime_to_gregorian_seconds({ {1970,1,1}, {0,0,0} })
@@ -207,7 +207,7 @@ defmodule Time do
 
   When the argument is omitted, the return value's format is { megasecs, seconds, microsecs }.
   """
-  def now(type // :timestamp)
+  def now(type \\ :timestamp)
 
   def now(:timestamp) do
     :os.timestamp
@@ -228,7 +228,7 @@ defmodule Time do
   When the second argument is omitted, the return value's format is { megasecs,
   seconds, microsecs }.
   """
-  def elapsed(timestamp, type // :timestamp)
+  def elapsed(timestamp, type \\ :timestamp)
 
   def elapsed(timestamp, type) do
     diff(now, timestamp, type)
@@ -245,7 +245,7 @@ defmodule Time do
   When the third argument is omitted, the return value's format is { megasecs,
   seconds, microsecs }.
   """
-  def diff(t1, t2, type // :timestamp)
+  def diff(t1, t2, type \\ :timestamp)
 
   def diff({mega1,secs1,micro1}, {mega2,secs2,micro2}, :timestamp) do
     # TODO: normalize the result
