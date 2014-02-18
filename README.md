@@ -5,8 +5,6 @@ A draft implementation of date and time functionality based on **Idea #6** from 
 
 ## Status ##
 
-**This project is open for adoption. If you'd like to become a maintainer, contact me.**
-
 The API for `Date` may change slightly, but not too much. I have recently removed the `format` function. Date formatting and parsing will be provided by [this other project][datefmt].
 
 The `Time` module is pretty much in flux, please don't depend on it too much.
