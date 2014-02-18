@@ -7,9 +7,9 @@ A draft implementation of date and time functionality based on **Idea #6** from 
 
 [![wercker status](https://app.wercker.com/status/a77f83a04ae1006c9ee44f61a1a147a0/m/ "wercker status")](https://app.wercker.com/project/bykey/a77f83a04ae1006c9ee44f61a1a147a0)
 
-The API for `Date` may change slightly, but not too much. I have recently removed the `format` function. Date formatting and parsing will be provided by [elixir-datefmt][elixir-datefmt].
+The API for `Date` is relatively stable at this point.
 
-The `Time` module is pretty much in flux, please don't depend on it too much.
+The `Time` module is more prone to change, but likely won't change too drastically moving forward.
 
 To add this library to your project, edit your mix.exs file so that it looks similar to this:
 
