@@ -7,7 +7,7 @@ A draft implementation of date and time functionality based on **Idea #6** from 
 
 [![wercker status](https://app.wercker.com/status/a77f83a04ae1006c9ee44f61a1a147a0/m/ "wercker status")](https://app.wercker.com/project/bykey/a77f83a04ae1006c9ee44f61a1a147a0)
 
-The API for `Date` may change slightly, but not too much. I have recently removed the `format` function. Date formatting and parsing will be provided by [this other project][datefmt].
+The API for `Date` may change slightly, but not too much. I have recently removed the `format` function. Date formatting and parsing will be provided by [elixir-datefmt][elixir-datefmt].
 
 The `Time` module is pretty much in flux, please don't depend on it too much.
 
@@ -15,7 +15,7 @@ To add this library to your project, edit your mix.exs file so that it looks sim
 
 ```elixir
 defp deps do
-  [{:"elixir-datetime", github: "alco/elixir-datetime"}]
+  [{:"elixir-datetime", github: "bitwalker/elixir-datetime"}]
 end
 ```
 
@@ -34,7 +34,7 @@ The `Time` module supports a finer grain level of calculations over time interva
 
 ## Use cases ##
 
-In all of the examples below, [DateFmt][datefmt] is used for formatting.
+In all of the examples below, [DateFmt][elixir-datefmt] is used for formatting.
 
 ### Getting current date ###
 
@@ -282,4 +282,4 @@ References: https://github.com/drfloob/ezic
 
 This software is licensed under [the MIT license](LICENSE.md).
 
-  [datefmt]: https://github.com/alco/elixir-datefmt
+  [elixir-datefmt]: https://github.com/bitwalker/elixir-datefmt
