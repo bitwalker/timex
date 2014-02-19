@@ -634,6 +634,36 @@ defmodule Date do
   end
 
   @doc """
+  Define translations from all variations of a weekdays's name,
+  to it's corresponding position in the week.
+
+  ## Examples
+
+    day_to_num("Monday")  => 1
+    day_to_num("Mon")     => 1
+    day_to_num("monday")  => 1
+    day_to_num("mon")     => 1
+    day_to_num(:monday)   => 1
+
+  """
+  @spec day_to_num(binary) :: integer
+  [ {"Monday", 1}, {"Tuesday", 2}, {"Wednesday", 3}, {"Thursday", 4},
+    {"Friday", 5}, {"Saturday", 6}, {"Sunday", 7}
+  ] |> Enum.each fn {day_name, day_num} ->
+    lower      = day_name |> String.downcase
+    abbr_cased = day_name |> String.slice(0..2)
+    abbr_lower = lower |> String.slice(0..2)
+    symbol     = lower |> binary_to_atom
+
+    def day_to_num(unquote(day_name)),   do: unquote(day_num)
+    def day_to_num(unquote(lower)),      do: unquote(day_num)
+    def day_to_num(unquote(abbr_cased)), do: unquote(day_num)
+    def day_to_num(unquote(abbr_lower)), do: unquote(day_num)
+    def day_to_num(unquote(symbol)),     do: unquote(day_num)
+  end
+  def day_to_num(x), do: raise(:badday, x)
+
+  @doc """
   Define translations from all variations of a month's name,
   to it's corresponding month number.
 
