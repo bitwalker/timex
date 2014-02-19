@@ -634,6 +634,38 @@ defmodule Date do
   end
 
   @doc """
+  Define translations from all variations of a month's name,
+  to it's corresponding month number.
+
+  ## Examples
+
+    month_to_num("January") => 1
+    month_to_num("Jan")     => 1
+    month_to_num("january") => 1
+    month_to_num("jan")     => 1
+    month_to_num(:january)  => 1
+
+  """
+  @spec month_to_num(binary) :: integer
+  [ {"January", 1},  {"February", 2},  {"March", 3},
+    {"April", 4},    {"May", 5},       {"June", 6},
+    {"July", 7},     {"August", 8},    {"September", 9},
+    {"October", 10}, {"November", 11}, {"December", 12}
+  ] |> Enum.each fn {month_name, month_num} ->
+    lower      = month_name |> String.downcase
+    abbr_cased = month_name |> String.slice(0..2)
+    abbr_lower = lower |> String.slice(0..2)
+    symbol     = lower |> binary_to_atom
+
+    def month_to_num(unquote(month_name)), do: unquote(month_num)
+    def month_to_num(unquote(lower)),      do: unquote(month_num)
+    def month_to_num(unquote(abbr_cased)), do: unquote(month_num)
+    def month_to_num(unquote(abbr_lower)), do: unquote(month_num)
+    def month_to_num(unquote(symbol)),     do: unquote(month_num)
+  end
+  def month_to_num(x), do: raise(:badmonth, x)
+
+  @doc """
   Return a 3-tuple {year, week number, weekday} for the given date.
 
   ## Examples

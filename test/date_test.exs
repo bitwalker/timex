@@ -202,6 +202,14 @@ defmodule DTest do
     assert D.days_in_month(2013, 2) === 28
   end
 
+  test :month_to_num do
+    assert D.month_to_num("April") == 4
+    assert D.month_to_num("april") == 4
+    assert D.month_to_num("Apr") == 4
+    assert D.month_to_num("apr") == 4
+    assert D.month_to_num(:april) == 4
+  end
+
   test :is_leap do
     assert not D.is_leap(D.epoch())
     assert D.is_leap(2012)
