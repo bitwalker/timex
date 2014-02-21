@@ -15,7 +15,7 @@ To add this library to your project, edit your mix.exs file so that it looks sim
 
 ```elixir
 defp deps do
-  [{:"elixir-datetime", github: "bitwalker/elixir-datetime"}]
+  [{:timex, github: "bitwalker/timex"}]
 end
 ```
 
