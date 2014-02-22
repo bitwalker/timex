@@ -16,7 +16,7 @@ defmodule TimeFormatter do
   Note that if you'd like to format a point in time rather than time interval,
   you should use Date.format.
   """
-  def format({mega, seconds, micro}) do
+  def format({mega, seconds, _micro}) do
     components = []
     seconds = mega * 1000000 + seconds
     if seconds >= _MILLENNIUM do

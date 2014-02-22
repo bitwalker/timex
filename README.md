@@ -87,9 +87,9 @@ DateFmt.format!(date, "{RFC1123}")
 #=> "Tue, 01 Jan 2013 00:00:00 SomewhereInRussia"
 
 date = Date.now()
-Date.universal(date)                        #=> {{2013,3,17},{19,37,39}}
-Date.local(date)                            #=> {{2013,3,17},{21,37,39}}
-Date.local(date, Date.timezone(-8, "PST"))  #=> {{2013,3,17},{11,37,39}}
+Date.universal(date)                        #=> DateTime[...]
+Date.local(date)                            #=> DateTime[...]
+Date.local(date, Date.timezone("PST"))      #=> DateTime[...]
 ```
 
 ### Extracting information about dates ###
@@ -102,14 +102,14 @@ DateFmt.format!(date, "{RFC1123}")
 #=> "Mon, 30 Sep 2013 16:51:02 EEST"
 
 Date.weekday(date)           #=> 1
-Date.weeknum(date)           #=> {2013, 40}
+Date.week(date)              #=> {2013, 40}
 Date.iso_triplet(date)       #=> {2013, 40, 1}
 
 Date.days_in_month(date)     #=> 30
 Date.days_in_month(2012, 2)  #=> 29
 
-Date.is_leap(date)           #=> false
-Date.is_leap(2012)           #=> true
+Date.is_leap?(date)           #=> false
+Date.is_leap?(2012)           #=> true
 ```
 
 ### Date arithmetic ###
@@ -121,7 +121,7 @@ date = Date.now()
 DateFmt.format!(date, "{RFC1123}")
 #=> "Mon, 30 Sep 2013 16:55:02 EEST"
 
-Date.convert(date, :sec)  # seconds since Epoch
+Date.convert(date, :secs)  # seconds since Epoch
 #=> 1380549302
 
 Date.to_sec(date, :zero)  # seconds since year 0
@@ -130,10 +130,10 @@ Date.to_sec(date, :zero)  # seconds since year 0
 DateFmt.format!(Date.epoch(), "{ISO}")
 #=> "1970-01-01T00:00:00+0000"
 
-Date.epoch(:sec)  # seconds since year 0 to Epoch
+Date.epoch(:secs)  # seconds since year 0 to Epoch
 #=> 62167219200
 
-date = Date.from(Date.epoch(:sec) + 144, :sec, :zero)  # :zero indicates year 0
+date = Date.from(Date.epoch(:secs) + 144, :secs, :zero)  # :zero indicates year 0
 DateFmt.format!(date, "{ISOz}")
 #=> "1970-01-01T00:02:24Z"
 ```
@@ -147,19 +147,19 @@ date = Date.now()
 DateFmt.format!(date, "{RFC1123}")
 #=> "Mon, 30 Sep 2013 16:58:13 EEST"
 
-DateFmt.format!( Date.shift(date, sec: 78), "{RFC1123}" )
+DateFmt.format!( Date.shift(date, secs: 78), "{RFC1123}" )
 #=> "Mon, 30 Sep 2013 16:59:31 EEST"
 
-DateFmt.format!( Date.shift(date, sec: -1078), "{RFC1123}" )
+DateFmt.format!( Date.shift(date, secs: -1078), "{RFC1123}" )
 #=> "Mon, 30 Sep 2013 16:40:15 EEST"
 
-DateFmt.format!( Date.shift(date, day: 1), "{RFC1123}" )
+DateFmt.format!( Date.shift(date, days: 1), "{RFC1123}" )
 #=> "Tue, 01 Oct 2013 16:58:13 EEST"
 
-DateFmt.format!( Date.shift(date, week: 3), "{RFC1123}" )
+DateFmt.format!( Date.shift(date, weeks: 3), "{RFC1123}" )
 #=> "Mon, 21 Oct 2013 16:58:13 EEST"
 
-DateFmt.format!( Date.shift(date, year: -13), "{RFC1123}" )
+DateFmt.format!( Date.shift(date, years: -13), "{RFC1123}" )
 #=> "Sat, 30 Sep 2000 16:58:13 EEST"
 ```
 
@@ -173,10 +173,10 @@ The `Time` module already has some conversions and functionality for measuring t
 Time.now
 #=> {1362,781057,813380}
 
-Time.now(:sec)
+Time.now(:secs)
 #=> 1362781082.040016
 
-Time.now(:msec)
+Time.now(:msecs)
 #=> 1362781088623.741
 
 
@@ -185,28 +185,28 @@ Time.now(:msec)
 t = Time.now
 #=> {1362,781097,857429}
 
-Time.to_usec(t)
+Time.to_usecs(t)
 #=> 1362781097857429.0
 
-Time.to_sec(t)
+Time.to_secs(t)
 #=> 1362781097.857429
 
-Time.to_sec(13, :hour)
+Time.to_secs(13, :hours)
 #=> 46800
 
-Time.to_sec(13, :msec)
+Time.to_secs(13, :msecs)
 #=> 0.013
 
 
 ## We can also convert from timestamps to other units using a single function ##
 
-Time.convert(t, :sec)
+Time.convert(t, :secs)
 #=> 1362781097.857429
 
-Time.convert(t, :min)
+Time.convert(t, :mins)
 #=> 22713018.297623817
 
-Time.convert(t, :hour)
+Time.convert(t, :hours)
 #=> 378550.30496039696
 
 
@@ -215,7 +215,7 @@ Time.convert(t, :hour)
 Time.elapsed(t)
 #=> {0,68,-51450}
 
-Time.elapsed(t, :sec)
+Time.elapsed(t, :secs)
 #=> 72.100247
 
 t1 = Time.elapsed(t)
@@ -230,7 +230,7 @@ Time.diff(t1, t)
 Time.diff(Time.now, t)
 #=> {0,105,-300112}
 
-Time.diff(Time.now, t, :hour)
+Time.diff(Time.now, t, :hours)
 #=> 0.03031450388888889
 ```
 
@@ -238,12 +238,10 @@ Time.diff(Time.now, t, :hour)
 
 ```elixir
 dt = Time.now
-Time.convert(dt, :sec)
-Time.convert(dt, :min)
-Time.convert(dt, :hour)
-
-Time.to_timestamp(13, :sec)
-Time.to_timestamp([{13, :sec}, {1, :days}, {6, :hour}], :strict)
+Time.convert(dt, :secs)
+Time.convert(dt, :mins)
+Time.convert(dt, :hours)
+Time.to_timestamp(13, :secs)
 ```
 
 ## FAQ ##
@@ -256,26 +254,22 @@ If you need to work with time intervals down to microsecond precision, you shoul
 
 Use functions from the `Time` module for time interval arithmetic.
 
-**What is TimeDelta module for?**
-
-***this will likely not make it far; I'm going to use timestamps instead***
-
-`TimeDelta` provides functions for encapsulating a certain time interval in one value. This value can later be used to adjust multiple dates by the same amount. The delta values can be defined in terms of seconds, minutes, hours, days, weeks, months, and years.
-
 **How do I find the time interval between two dates?**
 
-Use `Date.seconds_diff()` to obtain the number of seconds between two given dates. If you'd like to know, how many days, months, weeks, and so on are between the given dates, take look at conversion functions defined in `TimeInterval` module.
+Use `Date.diff` to obtain the number of seconds, minutes, hours, days, months, weeks, or years between two dates.
 
 **What kind of operations is this lib going to support eventually?**
 
-I'd like to support most all common date and time operations. Some inspiration:
+The goal is to make it so you never have to use Erlang's calendar/time functions.
+
+Some inspirations I'm currently drawing from:
 
 - Moment.js
 - JodaTime
 
 **What is support for time zones going to look like?**
 
-Full support for retreiving local timezone configuration on OSX, *NIX, and Windows, conversion to any timezone in the Olson timezone database, shifting times based on timezone, etc. Coming soon.
+Full support for retreiving local timezone configuration on OSX, *NIX, and Windows, conversion to any timezone in the Olson timezone database, shifting times based on timezone, etc.
 
 ## License
 

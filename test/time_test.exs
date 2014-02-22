@@ -1,55 +1,53 @@
-#Code.require_file "test_helper.exs", __DIR__
-
-defmodule TimeTest do
+defmodule TimeTests do
   use ExUnit.Case, async: true
 
   test :diff do
     timestamp1 = {1362,568903,363960}
     timestamp2 = {1362,568958,951099}
     assert Time.diff(timestamp2, timestamp1) == {0, 55, 587139}
-    assert Time.diff(timestamp2, timestamp1, :usec) == 55587139
-    assert Time.diff(timestamp2, timestamp1, :msec) == 55587.139
-    assert Time.diff(timestamp2, timestamp1, :sec)  == 55.587139
-    assert Time.diff(timestamp2, timestamp1, :min)  == 55.587139 / 60
-    assert Time.diff(timestamp2, timestamp1, :hour) == 55.587139 / 3600
+    assert Time.diff(timestamp2, timestamp1, :usecs) == 55587139
+    assert Time.diff(timestamp2, timestamp1, :msecs) == 55587.139
+    assert Time.diff(timestamp2, timestamp1, :secs)  == 55.587139
+    assert Time.diff(timestamp2, timestamp1, :mins)  == 55.587139 / 60
+    assert Time.diff(timestamp2, timestamp1, :hours) == 55.587139 / 3600
   end
 
   test :convert do
     timestamp = {1362,568903,363960}
-    assert Time.convert(timestamp, :usec) == 1362568903363960
-    assert Time.convert(timestamp, :msec) == 1362568903363.960
-    assert Time.convert(timestamp, :sec)  == 1362568903.363960
-    assert Time.convert(timestamp, :min)  == 1362568903.363960 / 60
-    assert Time.convert(timestamp, :hour) == 1362568903.363960 / 3600
+    assert Time.convert(timestamp, :usecs) == 1362568903363960
+    assert Time.convert(timestamp, :msecs) == 1362568903363.960
+    assert Time.convert(timestamp, :secs)  == 1362568903.363960
+    assert Time.convert(timestamp, :mins)  == 1362568903.363960 / 60
+    assert Time.convert(timestamp, :hours) == 1362568903.363960 / 3600
   end
 
-  test :to_usec do
-    assert Time.to_usec({1362,568903,363960}) == 1362568903363960
-    assert Time.to_usec(13, :usec) == 13
-    assert Time.to_usec(13, :msec) == 13000
-    assert Time.to_usec(13, :sec)  == 13000000
-    assert Time.to_usec(13, :min)  == 13000000 * 60
-    assert Time.to_usec(13, :hour) == 13000000 * 3600
-    assert Time.to_usec({1,2,3}, :hms) == (3600 + 2 * 60 + 3) * 1000000
+  test :to_usecs do
+    assert Time.to_usecs({1362,568903,363960}) == 1362568903363960
+    assert Time.to_usecs(13, :usecs) == 13
+    assert Time.to_usecs(13, :msecs) == 13000
+    assert Time.to_usecs(13, :secs)  == 13000000
+    assert Time.to_usecs(13, :mins)  == 13000000 * 60
+    assert Time.to_usecs(13, :hours) == 13000000 * 3600
+    assert Time.to_usecs({1,2,3}, :hms) == (3600 + 2 * 60 + 3) * 1000000
   end
 
-  test :to_msec do
-    assert Time.to_msec({1362,568903,363960}) == 1362568903363.960
-    assert Time.to_msec(13, :usec) == 0.013
-    assert Time.to_msec(13, :msec) == 13
-    assert Time.to_msec(13, :sec)  == 13000
-    assert Time.to_msec(13, :min)  == 13000 * 60
-    assert Time.to_msec(13, :hour) == 13000 * 3600
-    assert Time.to_msec({1,2,3}, :hms) == (3600 + 2 * 60 + 3) * 1000
+  test :to_msecs do
+    assert Time.to_msecs({1362,568903,363960}) == 1362568903363.960
+    assert Time.to_msecs(13, :usecs) == 0.013
+    assert Time.to_msecs(13, :msecs) == 13
+    assert Time.to_msecs(13, :secs)  == 13000
+    assert Time.to_msecs(13, :mins)  == 13000 * 60
+    assert Time.to_msecs(13, :hours) == 13000 * 3600
+    assert Time.to_msecs({1,2,3}, :hms) == (3600 + 2 * 60 + 3) * 1000
   end
 
-  test :to_sec do
-    assert Time.to_sec({1362,568903,363960}) == 1362568903.363960
-    assert Time.to_sec(13, :usec) == 0.000013
-    assert Time.to_sec(13, :msec) == 0.013
-    assert Time.to_sec(13, :sec)  == 13
-    assert Time.to_sec(13, :min)  == 13 * 60
-    assert Time.to_sec(13, :hour) == 13 * 3600
-    assert Time.to_sec({1,2,3}, :hms) == 3600 + 2 * 60 + 3
+  test :to_secs do
+    assert Time.to_secs({1362,568903,363960}) == 1362568903.363960
+    assert Time.to_secs(13, :usecs) == 0.000013
+    assert Time.to_secs(13, :msecs) == 0.013
+    assert Time.to_secs(13, :secs)  == 13
+    assert Time.to_secs(13, :mins)  == 13 * 60
+    assert Time.to_secs(13, :hours) == 13 * 3600
+    assert Time.to_secs({1,2,3}, :hms) == 3600 + 2 * 60 + 3
   end
 end

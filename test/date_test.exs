@@ -1,43 +1,38 @@
-#Code.require_file "test_helper.exs", __DIR__
-
-defmodule DTest do
+defmodule DateTests do
   use ExUnit.Case, async: true
 
   alias Date, as: D
 
   test :timezone do
-    assert D.timezone(:utc) === { 0.0, "UTC" }
-    #assert D.timezone(2) === { 2.0, "EET" }
-    #assert D.timezone("EET") === { 2.0, "EET" }
-    assert D.timezone(2.0, "EET") === { 2.0, "EET" }
-    #assert_raise ArgumentError, fn ->
-      #D.timezone(3.0, "EET")
-    #end
-    assert {_, _} = D.timezone(:local)
+    assert TimezoneInfo[full_name: "UTC", gmt_offset_std: 0] = D.timezone(:utc)
+    assert TimezoneInfo[full_name: "EET", gmt_offset_std: 120] = D.timezone("EET")
+    assert TimezoneInfo[] = D.timezone(:local)
   end
 
   test :now do
     # We cannot assert matching to a specific value. However, we can still do
     # some sanity checks
-    now = D.now()
-    assert {_, _, _} = D.Conversions.to_gregorian(now)
+    now = D.now
+    assert {{_, _, _}, {_, _, _}, {_, _}} = D.Convert.to_gregorian(now)
 
-    {_, _, tz} = D.Conversions.to_gregorian(now)
-    assert tz === D.timezone(:local)
+    {_, _, tz} = D.Convert.to_gregorian(now)
+    TimezoneInfo[full_name: name, gmt_offset_std: offset_mins] = D.timezone(:utc)
+    assert tz === {offset_mins/60, name}
 
-    now_sec = D.now(:sec)
-    now_days = D.now(:day)
-    assert is_integer(now_sec)
+    now_secs = D.now(:secs)
+    now_days = D.now(:days)
+    assert is_integer(now_secs)
     assert is_integer(now_days)
-    assert now_sec > now_days
+    assert now_secs > now_days
   end
 
   test :local do
-    local = D.local()
-    localdate = D.from(local, :local)
+    local     = D.local
+    DateTime[year: y, month: m, day: d, hour: h, minute: min, second: s] = local
+    localdate = D.from({{y,m,d}, {h,min,s}}, :local)
     assert local === D.local(localdate)
 
-    if D.timezone() !== {0.0, "UTC"} do
+    if D.timezone() !== Timezone.get(:utc) do
       assert local !== D.universal(localdate)
     end
 
@@ -46,112 +41,113 @@ defmodule DTest do
   end
 
   test :universal do
-    uni = D.universal()
-    unidate = D.from(uni)
+    uni     = D.universal()
+    DateTime[year: y, month: m, day: d, hour: h, minute: min, second: s] = uni
+    unidate = D.from({{y,m,d}, {h,min,s}})
     assert uni === D.universal(unidate)
   end
 
   test :zero do
-    { date, time, tz } = D.Conversions.to_gregorian(D.zero())
+    zero = D.zero
+    { date, time, tz } = zero |> D.Convert.to_gregorian
     assert :calendar.datetime_to_gregorian_seconds({date,time}) === 0
-    assert tz === D.timezone(:utc)
+    assert tz === {zero.timezone.gmt_offset_std/60, zero.timezone.full_name}
   end
 
   test :epoch do
-    epoch = D.epoch()
-    assert D.Conversions.to_gregorian(epoch) === { {1970,1,1}, {0,0,0}, {0.0,"UTC"} }
-    assert D.to_sec(epoch) === 0
+    epoch = D.epoch
+    assert { {1970,1,1}, {0,0,0}, {0.0, "UTC"} } = D.Convert.to_gregorian(epoch)
+    assert D.to_secs(epoch) === 0
     assert D.to_days(epoch) === 0
-    assert D.to_sec(epoch, :zero) === D.epoch(:sec)
-    assert D.to_days(epoch, :zero) === D.epoch(:day)
+    assert D.to_secs(epoch, :zero) === D.epoch(:secs)
+    assert D.to_days(epoch, :zero) === D.epoch(:days)
     assert D.to_timestamp(epoch) === D.epoch(:timestamp)
   end
 
   test :from_date do
     date = {2000, 11, 11}
-    assert D.universal(D.from(date)) === {date, {0,0,0}}
+    assert DateTime[year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0] = date |> D.from
 
-    { _, _, tz } = D.Conversions.to_gregorian(D.from(date, :local))
-    assert tz === D.timezone()
-    assert D.local(D.from(date, :local)) === {date, {0,0,0}}
+    { _, _, tz } = date |> D.from(:local) |> D.Convert.to_gregorian
+    localtz = D.timezone()
+    assert tz === {localtz.gmt_offset_std/60, localtz.full_name}
+    assert DateTime[year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0, timezone: _] = date |> D.from(:local)
 
-    { date, time, tz } = D.Conversions.to_gregorian(D.from(date))
-    assert tz === D.timezone(:utc)
+    { date, time, tz } = date |> Date.from |> D.Convert.to_gregorian
+    unitz = D.timezone(:utc)
+    assert tz === {unitz.gmt_offset_std/60,unitz.full_name}
     assert {date,time} === {{2000,11,11}, {0,0,0}}
 
-    fulldate = D.from(date, D.timezone(2, "EET"))
-    { date, time, _ } = D.Conversions.to_gregorian(fulldate)
-    assert {date,time} === {{2000,11,10}, {22,0,0}}
-    assert D.local(fulldate) === {{2000,11,11}, {0,0,0}}
-
-    fulldate = D.from({2013,3,16}, D.timezone(-8, "PST"))
-    { date, time, _ } = D.Conversions.to_gregorian(fulldate)
-    assert {date,time} === {{2013,3,16}, {8,0,0}}
-    assert D.local(fulldate) === {{2013,3,16}, {0,0,0}}
+    # Converting to a datetime and back to gregorian should yield the original date
+    fulldate = date |> D.from(D.timezone("EET"))
+    { date, time, _ } = fulldate |> D.Convert.to_gregorian
+    assert {date,time} === {{2000,11,11}, {0,0,0}}
   end
 
   test :from_datetime do
     assert D.from({{1970,1,1}, {0,0,0}}) === D.from({1970,1,1})
-    assert D.to_sec(D.from({{1970,1,1}, {0,0,0}})) === 0
+    assert 0 === D.from({{1970,1,1}, {0,0,0}}) |> D.to_secs
 
     date = {{2000, 11, 11}, {1, 0, 0}}
-    assert D.universal(D.from(date)) === date
+    assert DateTime[year: 2000, month: 11, day: 11, hour: 1, minute: 0, second: 0] = date |> D.from |> D.universal
 
-    { _, _, tz } = D.Conversions.to_gregorian(D.from(date, :local))
-    assert tz === D.timezone()
+    { _, _, tz } = date |> D.from(:local) |> D.Convert.to_gregorian
+    localtz = D.timezone()
+    assert tz === {localtz.gmt_offset_std/60, localtz.full_name}
 
-    { d, time, tz } = D.Conversions.to_gregorian(D.from(date))
-    assert tz === D.timezone(:utc)
+    { d, time, tz } = date |> D.from |> D.Convert.to_gregorian
+    unitz = D.timezone(:utc)
+    assert tz === {unitz.gmt_offset_std/60,unitz.full_name}
     assert {d,time} === date
 
-    { d, time, _ } = D.Conversions.to_gregorian(D.from(date, D.timezone(2, "EET")))
-    assert {d,time} === {{2000,11,10}, {23,0,0}}
+    { d, time, _ } = date |> D.from(D.timezone("EET")) |> D.Convert.to_gregorian
+    assert {d,time} === {{2000,11,11}, {1,0,0}}
   end
 
   test :from_timestamp do
     now = Time.now
-    assert D.to_sec(D.from(now, :timestamp)) === trunc(Time.to_sec(now))
-    assert D.to_sec(D.from({0,0,0}, :timestamp)) === 0
-    assert D.to_sec(D.from({0,0,0}, :timestamp, :zero)) === -D.epoch(:sec)
+    assert trunc(Time.to_secs(now)) === now |> D.from(:timestamp) |> D.to_secs
+    assert 0 === {0,0,0} |> D.from(:timestamp) |> D.to_secs
+    assert -D.epoch(:secs) === {0,0,0} |> D.from(:timestamp, :zero) |> D.to_secs
   end
 
   test :from_sec do
-    now_sec = trunc(Time.now(:sec))
-    assert D.to_sec(D.from(now_sec, :sec)) === now_sec
-    assert D.to_sec(D.from(now_sec, :sec, :zero)) === now_sec - D.epoch(:sec)
+    now_sec = trunc(Time.now(:secs))
+    assert now_sec === now_sec |> D.from(:secs) |> D.to_secs
+    assert now_sec - D.epoch(:secs) === now_sec |> D.from(:secs, :zero) |> D.to_secs
   end
 
   test :from_days do
-    assert D.local(D.from(30, :day)) === {{1970,1,31}, {0,0,0}}
-    assert D.local(D.from(31, :day)) === {{1970,2,1}, {0,0,0}}
+    assert DateTime[year: 1970, month: 1, day: 31, hour: 0, minute: 0, second: 0] = D.from(30, :days)
+    assert DateTime[year: 1970, month: 2, day: 1, hour: 0, minute: 0, second: 0] = D.from(31, :days)
   end
 
   test :convert do
-    date = D.now()
-    assert D.convert(date, :sec) + D.epoch(:sec) === D.to_sec(date, :zero)
-    assert D.convert(date, :day) + D.epoch(:day) === D.to_days(date, :zero)
+    date = D.now
+    assert D.convert(date, :secs) + D.epoch(:secs) === D.to_secs(date, :zero)
+    assert D.convert(date, :days) + D.epoch(:days) === D.to_days(date, :zero)
   end
 
   test :to_timestamp do
-    assert D.to_timestamp(D.epoch()) === {0,0,0}
-    assert D.to_timestamp(D.epoch(), :zero) === {62167,219200,0}
-    assert Time.to_sec(D.to_timestamp(D.epoch(), :zero)) == D.epoch(:sec)
+    assert {0,0,0} === D.epoch |> D.to_timestamp
+    assert {62167,219200,0} === D.epoch |> D.to_timestamp(:zero)
+    assert D.epoch(:secs) == D.epoch |> D.to_timestamp(:zero) |> Time.to_secs
   end
 
-  test :to_sec do
+  test :to_secs do
     date = D.now()
-    assert D.to_sec(date, :zero) === :calendar.datetime_to_gregorian_seconds(D.universal(date))
-    assert D.to_sec(date, :zero) - D.epoch(:sec) === D.to_sec(date)
+    assert D.to_secs(date, :zero) === date |> D.universal |> D.Convert.to_erlang_datetime |> :calendar.datetime_to_gregorian_seconds
+    assert D.to_secs(date, :zero) - D.epoch(:secs) === D.to_secs(date)
 
     ts = Time.now()
-    assert D.to_sec(D.from(ts, :timestamp)) === trunc(Time.to_sec(ts))
+    assert trunc(Time.to_secs(ts)) === ts |> D.from(:timestamp) |> D.to_secs
 
     date = D.from({{1999,1,2}, {12,13,14}})
-    assert D.to_sec(date) === 915279194
-    assert D.to_sec(date, :zero) === 63082498394
+    assert D.to_secs(date) === 915279194
+    assert D.to_secs(date, :zero) === 63082498394
 
-    assert D.to_sec(D.epoch()) === 0
-    assert D.to_sec(D.epoch(), :zero) === 62167219200
+    assert D.to_secs(D.epoch()) === 0
+    assert D.to_secs(D.epoch(), :zero) === 62167219200
   end
 
   test :to_days do
@@ -165,23 +161,22 @@ defmodule DTest do
 
   test :weekday do
     localdate = {{2013,3,17},{11,59,10}}
-    assert D.weekday(localdate) === 7
     assert D.weekday(D.from(localdate)) === 7
     assert D.weekday(D.epoch()) === 4
   end
 
-  test :daynum do
-    assert D.daynum(D.from({3,1,1})) === 1
-    assert D.daynum(D.from({3,2,1})) === 32
-    assert D.daynum(D.from({3,12,31})) === 365
-    assert D.daynum(D.from({2012,12,31})) === 366
+  test :day do
+    assert D.day(D.from({3,1,1})) === 1
+    assert D.day(D.from({3,2,1})) === 32
+    assert D.day(D.from({3,12,31})) === 365
+    assert D.day(D.from({2012,12,31})) === 366
   end
 
-  test :weeknum do
+  test :week do
     localdate = {{2013,3,17},{11,59,10}}
-    assert D.weeknum(localdate) === {2013,11}
-    assert D.weeknum(D.from(localdate)) === {2013,11}
-    assert D.weeknum(D.epoch()) === {1970,1}
+    assert D.iso_week(localdate) === {2013,11}
+    assert D.iso_week(D.from(localdate)) === {2013,11}
+    assert D.iso_week(D.epoch()) === {1970,1}
   end
 
   test :iso_triplet do
@@ -207,7 +202,7 @@ defmodule DTest do
     assert D.month_to_num("april") == 4
     assert D.month_to_num("Apr") == 4
     assert D.month_to_num("apr") == 4
-    assert D.month_to_num(:april) == 4
+    assert D.month_to_num(:apr) == 4
   end
 
   test :day_to_num do
@@ -215,67 +210,56 @@ defmodule DTest do
     assert D.day_to_num("wednesday") == 3
     assert D.day_to_num("Wed") == 3
     assert D.day_to_num("wed") == 3
-    assert D.day_to_num(:wednesday) == 3
+    assert D.day_to_num(:wed) == 3
   end
 
   test :is_leap do
-    assert not D.is_leap(D.epoch())
-    assert D.is_leap(2012)
-    assert not D.is_leap(2100)
+    assert not D.is_leap?(D.epoch())
+    assert D.is_leap?(2012)
+    assert not D.is_leap?(2100)
   end
 
-  test :is_valid do
-    assert D.is_valid(D.now())
-    assert D.is_valid(D.from({1,1,1}))
-    assert D.is_valid(D.from({{1,1,1}, {1,1,1}}))
-    assert D.is_valid(D.from({{1,1,1}, {0,0,0}}))
-    assert D.is_valid(D.from({{1,1,1}, {23,59,59}}))
+  test :is_valid? do
+    assert D.is_valid?(D.now())
+    assert D.is_valid?(D.from({1,1,1}))
+    assert D.is_valid?(D.from({{1,1,1}, {1,1,1}}))
+    assert D.is_valid?(D.from({{1,1,1}, {0,0,0}}))
+    assert D.is_valid?(D.from({{1,1,1}, {23,59,59}}))
+    assert D.is_valid?({{1,1,1}, {1, 1, 1}, Timezone.get(:utc)})
 
-    assert not D.is_valid(D.from({12,13,14}))
-    assert not D.is_valid(D.from({12,12,34}))
-    assert not D.is_valid(D.from({1,0,1}))
-    assert not D.is_valid(D.from({1,1,0}))
-    assert not D.is_valid(D.from({{12,12,12}, {24,0,0}}))
-    assert not D.is_valid(D.from({{12,12,12}, {23,60,0}}))
-    assert not D.is_valid(D.from({{12,12,12}, {23,59,60}}))
-    assert not D.is_valid(D.from({{12,12,12}, {-1,59,59}}))
+    assert not D.is_valid?(D.from({12,13,14}))
+    assert not D.is_valid?(D.from({12,12,34}))
+    assert not D.is_valid?(D.from({1,0,1}))
+    assert not D.is_valid?(D.from({1,1,0}))
+    assert not D.is_valid?(D.from({{12,12,12}, {24,0,0}}))
+    assert not D.is_valid?(D.from({{12,12,12}, {23,60,0}}))
+    assert not D.is_valid?(D.from({{12,12,12}, {23,59,60}}))
+    assert not D.is_valid?(D.from({{12,12,12}, {-1,59,59}}))
+    assert not D.is_valid?({{12,12,12}, {1,59,59}, TimezoneInfo[]})
+    assert not D.is_valid?({{12,12,12}, {-1,59,59}, Timezone.get(:utc)})
   end
 
   test :normalize do
-    date = D.now()
-    assert D.normalize(date) === date
-
-    date = { {1,13,44}, {-8,60,61} }
-    assert D.local(D.normalize(D.from(date))) === { {1,12,31}, {0,59,59} }
-
-    assert D.local(D.normalize(D.from({2012,2,30}))) === { {2012,2,29}, {0,0,0} }
-    assert D.local(D.normalize(D.from({2013,2,30}))) === { {2013,2,28}, {0,0,0} }
+    tz = Timezone.get(:utc)
+    date = { {1,13,44}, {-8,60,61}, tz }
+    assert DateTime[year: 1, month: 12, day: 31, hour: 0, minute: 59, second: 59, timezone: _] = D.normalize(date)
   end
 
   test :set do
-    import D.Conversions, only: [to_gregorian: 1]
+    import D.Convert, only: [to_gregorian: 1]
 
-    date = D.from({{2013,3,17}, {17,26,5}}, {2.0,"EET"})
-    assert to_gregorian(D.set(date, date: {1,1,1})) === { {1,1,1}, {15,26,5}, {2.0,"EET"} }
-    assert to_gregorian(D.set(date, hour: 0)) === { {2013,3,17}, {0,26,5}, {2.0,"EET"} }
-    assert to_gregorian(D.set(date, tz: D.timezone(:utc))) === { {2013,3,17}, {15,26,5}, {0.0,"UTC"} }
+    eet = Timezone.get("EET")
+    utc = Timezone.get(:utc)
+    TimezoneInfo[full_name: eet_name, gmt_offset_std: eet_offset_min] = eet
+    TimezoneInfo[full_name: utc_name, gmt_offset_std: utc_offset_min] = utc
 
-    assert to_gregorian(D.set(date, [date: {1,1,1}, hour: 13, sec: 61, tz: D.timezone(:utc)]))
-           === { {1,1,1}, {13,26,59}, {0.0,"UTC"} }
-    assert to_gregorian(D.set(date, [date: {-1,-2,-3}, hour: 33, sec: 61, tz: D.timezone(:utc)]))
-           === { {0,1,1}, {23,26,59}, {0.0,"UTC"} }
-  end
+    date = D.from({{2013,3,17}, {17,26,5}}, eet)
+    assert to_gregorian(D.set(date, date: {1,1,1}))        === { {1,1,1}, {17,26,5}, {eet_offset_min/60, eet_name} }
+    assert to_gregorian(D.set(date, hour: 0))              === { {2013,3,17}, {0,26,5}, {eet_offset_min/60, eet_name} }
+    assert to_gregorian(D.set(date, timezone: D.timezone(:utc))) === { {2013,3,17}, {19,26,5}, {utc_offset_min/60, utc_name} }
 
-  test :rawset do
-    import D.Conversions, only: [to_gregorian: 1]
-
-    date = D.from({{2013,3,17}, {17,26,5}}, {2.0,"EET"})
-    assert to_gregorian(D.rawset(date, date: {1,13,101})) === { {1,13,101}, {15,26,5}, {2.0,"EET"} }
-    assert to_gregorian(D.rawset(date, hour: -1)) === { {2013,3,17}, {-1,26,5}, {2.0,"EET"} }
-    assert to_gregorian(D.rawset(date, tz: D.timezone(-100000))) === { {2013,3,17}, {15,26,5}, {-100000,"TimeZoneName"} }
-
-    assert to_gregorian(D.rawset(date, [date: {-1,-2,-3}, hour: 33, sec: 61, tz: D.timezone(:utc)]))
-           === { {-1,-2,-3}, {33,26,61}, {0.0,"UTC"} }
+    assert to_gregorian(D.set(date, [date: {1,1,1}, hour: 13, second: 61, timezone: utc]))    === { {1,1,1}, {15,26,59}, {utc_offset_min/60, utc_name} }
+    assert to_gregorian(D.set(date, [date: {-1,-2,-3}, hour: 33, second: 61, timezone: utc])) === { {0,1,2}, {1,26,59}, {utc_offset_min/60, utc_name} }
   end
 
   test :compare do
@@ -303,31 +287,31 @@ defmodule DTest do
     date1 = D.from({1971,1,1})
     date2 = D.from({1973,1,1})
 
-    assert D.diff(date1, date2, :sec)   === -D.diff(date2, date1, :sec)
-    #assert D.diff(date1, date2, :min)   === -D.diff(date2, date1, :min)
-    #assert D.diff(date1, date2, :hour)  === -D.diff(date2, date1, :hour)
-    assert D.diff(date1, date2, :day)   === -D.diff(date2, date1, :day)
-    assert D.diff(date1, date2, :week)  === -D.diff(date2, date1, :week)
-    assert D.diff(date1, date2, :month) === -D.diff(date2, date1, :month)
-    assert D.diff(date1, date2, :year)  === -D.diff(date2, date1, :year)
+    assert D.diff(date1, date2, :secs)   === -D.diff(date2, date1, :secs)
+    assert D.diff(date1, date2, :mins)   === -D.diff(date2, date1, :mins)
+    assert D.diff(date1, date2, :hours)  === -D.diff(date2, date1, :hours)
+    assert D.diff(date1, date2, :days)   === -D.diff(date2, date1, :days)
+    assert D.diff(date1, date2, :weeks)  === -D.diff(date2, date1, :weeks)
+    assert D.diff(date1, date2, :months) === -D.diff(date2, date1, :months)
+    assert D.diff(date1, date2, :years)  === -D.diff(date2, date1, :years)
 
-    assert D.diff(epoch, date1, :day) === 365
-    assert D.diff(epoch, date1, :sec) === 365 * 24 * 3600
-    assert D.diff(epoch, date1, :year) === 1
+    assert D.diff(epoch, date1, :days) === 365
+    assert D.diff(epoch, date1, :secs) === 365 * 24 * 3600
+    assert D.diff(epoch, date1, :years) === 1
 
     # additional day is added because 1972 was a leap year
-    assert D.diff(epoch, date2, :day) === 365*3 + 1
-    assert D.diff(epoch, date2, :sec) === (365*3 + 1) * 24 * 3600
-    assert D.diff(epoch, date2, :year) === 3
+    assert D.diff(epoch, date2, :days) === 365*3 + 1
+    assert D.diff(epoch, date2, :secs) === (365*3 + 1) * 24 * 3600
+    assert D.diff(epoch, date2, :years) === 3
 
-    assert D.diff(epoch, date1, :month) === 12
-    assert D.diff(epoch, date2, :month) === 36
-    assert D.diff(date1, date2, :month) === 24
+    assert D.diff(epoch, date1, :months) === 12
+    assert D.diff(epoch, date2, :months) === 36
+    assert D.diff(date1, date2, :months) === 24
 
     date1 = D.from({1971,3,31})
     date2 = D.from({1969,2,11})
-    assert D.diff(date1, date2, :month) === -25
-    assert D.diff(date2, date1, :month) === 25
+    assert D.diff(date1, date2, :months) === -25
+    assert D.diff(date2, date1, :months) === 25
   end
 
   test :shift_seconds do
@@ -335,29 +319,30 @@ defmodule DTest do
     time = {23,23,23}
     datetime = {date,time}
 
-    assert shift(datetime, sec: 0) === datetime
+    unchanged = datetime |> Date.from(:local)
+    assert unchanged === shift(datetime, secs: 0)
 
-    assert shift(datetime, sec: 1)           === {date, {23,23,24}}
-    assert shift(datetime, sec: 36)          === {date, {23,23,59}}
-    assert shift(datetime, sec: 37)          === {date, {23,24,0}}
-    assert shift(datetime, sec: 38)          === {date, {23,24,1}}
-    assert shift(datetime, sec: 38+60)       === {date, {23,25,1}}
-    assert shift(datetime, sec: 38+60*35+58) === {date, {23,59,59}}
-    assert shift(datetime, sec: 38+60*35+59) === {{2013,3,6}, {0,0,0}}
-    assert shift(datetime, sec: 38+60*36)    === {{2013,3,6}, {0,0,1}}
-    assert shift(datetime, sec: 24*3600)     === {{2013,3,6}, {23,23,23}}
-    assert shift(datetime, sec: 24*3600*365) === {{2014,3,5}, {23,23,23}}
+    assert DateTime[minute: 23, second: 24] = shift(datetime, secs: 1)
+    assert DateTime[minute: 23, second: 59] = shift(datetime, secs: 36)
+    assert DateTime[minute: 24, second: 0] = shift(datetime, secs: 37)
+    assert DateTime[minute: 24, second: 1] = shift(datetime, secs: 38)
+    assert DateTime[minute: 25, second: 1] = shift(datetime, secs: 38+60)
+    assert DateTime[minute: 59, second: 59] = shift(datetime, secs: 38+60*35+58)
+    assert DateTime[month: 3, day: 6, hour: 0, minute: 0, second: 0] = shift(datetime, secs: 38+60*35+59)
+    assert DateTime[month: 3, day: 6, hour: 0, minute: 0, second: 1] = shift(datetime, secs: 38+60*36)
+    assert DateTime[month: 3, day: 6, hour: 23, minute: 23, second: 23] = shift(datetime, secs: 24*3600)
+    assert DateTime[month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, secs: 24*3600*365)
 
-    assert shift(datetime, sec: -1)                 === {date, {23,23,22}}
-    assert shift(datetime, sec: -23)                === {date, {23,23,0}}
-    assert shift(datetime, sec: -24)                === {date, {23,22,59}}
-    assert shift(datetime, sec: -23*60)             === {date, {23,0,23}}
-    assert shift(datetime, sec: -24*60)             === {date, {22,59,23}}
-    assert shift(datetime, sec: -23*3600-23*60-23)  === {date, {0,0,0}}
-    assert shift(datetime, sec: -23*3600-23*60-24)  === {{2013,3,4}, {23,59,59}}
-    assert shift(datetime, sec: -24*3600)           === {{2013,3,4}, {23,23,23}}
-    assert shift(datetime, sec: -24*3600*365)       === {{2012,3,5}, {23,23,23}}
-    assert shift(datetime, sec: -24*3600*(365*2+1)) === {{2011,3,5}, {23,23,23}}   # +1 day for leap year 2012
+    assert DateTime[minute: 23, second: 22] = shift(datetime, secs: -1)
+    assert DateTime[minute: 23, second: 0] = shift(datetime, secs: -23)
+    assert DateTime[minute: 22, second: 59] = shift(datetime, secs: -24)
+    assert DateTime[hour: 23, minute: 0, second: 23] = shift(datetime, secs: -23*60)
+    assert DateTime[hour: 22, minute: 59, second: 23] = shift(datetime, secs: -24*60)
+    assert DateTime[year: 2013, month: 3, day: 5, hour: 0, minute: 0, second: 0] = shift(datetime, secs: -23*3600-23*60-23)
+    assert DateTime[year: 2013, month: 3, day: 4, hour: 23, minute: 59, second: 59] = shift(datetime, secs: -23*3600-23*60-24)
+    assert DateTime[year: 2013, month: 3, day: 4, hour: 23, minute: 23, second: 23] = shift(datetime, secs: -24*3600)
+    assert DateTime[year: 2012, month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, secs: -24*3600*365)
+    assert DateTime[year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, secs: -24*3600*(365*2+1))   # +1 day for leap year 2012
   end
 
   test :shift_minutes do
@@ -365,19 +350,20 @@ defmodule DTest do
     time = {23,23,23}
     datetime = {date,time}
 
-    assert shift(datetime, min: 0) === datetime
+    unchanged = datetime |> Date.from(:local)
+    assert unchanged === shift(datetime, mins: 0)
 
-    assert shift(datetime, min: 1)         === {date, {23,24,23}}
-    assert shift(datetime, min: 36)        === {date, {23,59,23}}
-    assert shift(datetime, min: 37)        === {{2013,3,6}, {0,0,23}}
-    assert shift(datetime, min: 38)        === {{2013,3,6}, {0,1,23}}
-    assert shift(datetime, min: 60*24*365) === {{2014,3,5}, {23,23,23}}
+    assert DateTime[hour: 23, minute: 24, second: 23] = shift(datetime, mins: 1)
+    assert DateTime[hour: 23, minute: 59, second: 23] = shift(datetime, mins: 36)
+    assert DateTime[year: 2013, month: 3, day: 6, hour: 0, minute: 0, second: 23] = shift(datetime, mins: 37)
+    assert DateTime[year: 2013, month: 3, day: 6, hour: 0, minute: 1, second: 23] = shift(datetime, mins: 38)
+    assert DateTime[year: 2014, month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, mins: 60*24*365)
 
-    assert shift(datetime, min: -1)                 === {date, {23,22,23}}
-    assert shift(datetime, min: -23)                === {date, {23,0,23}}
-    assert shift(datetime, min: -24)                === {date, {22,59,23}}
-    assert shift(datetime, min: -23*60-24)          === {{2013,3,4}, {23,59,23}}
-    assert shift(datetime, min: -60*24*(365*2 + 1)) === {{2011,3,5}, {23,23,23}}
+    assert DateTime[hour: 23, minute: 22, second: 23] = shift(datetime, mins: -1)
+    assert DateTime[hour: 23, minute: 0, second: 23] = shift(datetime, mins: -23)
+    assert DateTime[hour: 22, minute: 59, second: 23] = shift(datetime, mins: -24)
+    assert DateTime[month: 3, day: 4, hour: 23, minute: 59, second: 23] = shift(datetime, mins: -23*60-24)
+    assert DateTime[year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, mins: -60*24*(365*2 + 1))
   end
 
   test :shift_hours do
@@ -385,18 +371,19 @@ defmodule DTest do
     time = {23,23,23}
     datetime = {date,time}
 
-    assert shift(datetime, hour: 0) === datetime
+    unchanged = datetime |> Date.from(:local)
+    assert unchanged === shift(datetime, hours: 0)
 
-    assert shift(datetime, hour: 1)      === {{2013,3,6}, {0,23,23}}
-    assert shift(datetime, hour: 24)     === {{2013,3,6}, {23,23,23}}
-    assert shift(datetime, hour: 25)     === {{2013,3,7}, {0,23,23}}
-    assert shift(datetime, hour: 24*30)  === {{2013,4,4}, {23,23,23}}
-    assert shift(datetime, hour: 24*365) === {{2014,3,5}, {23,23,23}}
+    assert DateTime[month: 3, day: 6, hour: 0, minute: 23, second: 23] = shift(datetime, hours: 1)
+    assert DateTime[month: 3, day: 6, hour: 23, minute: 23, second: 23] = shift(datetime, hours: 24)
+    assert DateTime[month: 3, day: 7, hour: 0, minute: 23, second: 23] = shift(datetime, hours: 25)
+    assert DateTime[month: 4, day: 4, hour: 23, minute: 23, second: 23] = shift(datetime, hours: 24*30)
+    assert DateTime[month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, hours: 24*365)
 
-    assert shift(datetime, hour: -1)              === {date, {22,23,23}}
-    assert shift(datetime, hour: -23)             === {date, {0,23,23}}
-    assert shift(datetime, hour: -24)             === {{2013,3,4}, {23,23,23}}
-    assert shift(datetime, hour: -24*(365*2 + 1)) === {{2011,3,5}, {23,23,23}}
+    assert DateTime[month: 3, day: 5, hour: 22, minute: 23, second: 23] = shift(datetime, hours: -1)
+    assert DateTime[month: 3, day: 5, hour: 0, minute: 23, second: 23] = shift(datetime, hours: -23)
+    assert DateTime[month: 3, day: 4, hour: 23, minute: 23, second: 23] = shift(datetime, hours: -24)
+    assert DateTime[month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, hours: -24*(365*2 + 1))
   end
 
   test :shift_days do
@@ -404,16 +391,17 @@ defmodule DTest do
     time = {23,23,23}
     datetime = { date, time }
 
-    assert shift(datetime, day: 0) === datetime
+    unchanged = datetime |> Date.from(:local)
+    assert unchanged === shift(datetime, days: 0)
 
-    assert shift(datetime, day: 1)   === { {2013,3,6}, time }
-    assert shift(datetime, day: 27)  === { {2013,4,1}, time }
-    assert shift(datetime, day: 365) === { {2014,3,5}, time }
+    assert DateTime[year: 2013, month: 3, day: 6] = shift(datetime, days: 1)
+    assert DateTime[year: 2013, month: 4, day: 1] = shift(datetime, days: 27)
+    assert DateTime[year: 2014, month: 3, day: 5] = shift(datetime, days: 365)
 
-    assert shift(datetime, day: -1)       === { {2013,3,4}, time }
-    assert shift(datetime, day: -5)       === { {2013,2,28}, time }
-    assert shift(datetime, day: -365)     === { {2012,3,5}, time }
-    assert shift(datetime, day: -365*2-1) === { {2011,3,5}, time }
+    assert DateTime[year: 2013, month: 3, day: 4] = shift(datetime, days: -1)
+    assert DateTime[year: 2013, month: 2, day: 28] = shift(datetime, days: -5)
+    assert DateTime[year: 2012, month: 3, day: 5] = shift(datetime, days: -365)
+    assert DateTime[year: 2011, month: 3, day: 5] = shift(datetime, days: -365*2-1)
   end
 
   test :shift_weeks do
@@ -421,17 +409,18 @@ defmodule DTest do
     time = {23,23,23}
     datetime = { date, time }
 
-    assert shift(datetime, week: 0) === datetime
+    unchanged = datetime |> Date.from(:local)
+    assert unchanged === shift(datetime, weeks: 0)
 
-    assert shift(datetime, week: 1)   === { {2013,3,12}, time }
-    assert shift(datetime, week: 52)  === { {2014,3,4}, time }
-    assert shift(datetime, week: -1)  === { {2013,2,26}, time }
-    assert shift(datetime, week: -52) === { {2012,3,6}, time }
+    assert DateTime[year: 2013, month: 3, day: 12] = shift(datetime, weeks: 1)
+    assert DateTime[year: 2014, month: 3, day: 4]  = shift(datetime, weeks: 52)
+    assert DateTime[year: 2013, month: 2, day: 26] = shift(datetime, weeks: -1)
+    assert DateTime[year: 2012, month: 3, day: 6]  = shift(datetime, weeks: -52)
 
     date = D.from(datetime)
     weekday = D.weekday(date)
     Enum.each -53..53, fn n ->
-      assert D.shift(date, [week: n]) |> D.weekday === weekday
+      assert D.shift(date, [weeks: n]) |> D.weekday === weekday
     end
   end
 
@@ -440,16 +429,17 @@ defmodule DTest do
     time = {23,23,23}
     datetime = { date, time }
 
-    assert shift(datetime, month: 0) === datetime
+    unchanged = datetime |> Date.from(:local)
+    assert unchanged === shift(datetime, months: 0)
 
-    assert shift(datetime, month: 1)   === { {2013,4,5}, time }
-    assert shift(datetime, month: 10)  === { {2014,1,5}, time }
-    assert shift(datetime, month: -2)  === { {2013,1,5}, time }
-    assert shift(datetime, month: -12) === { {2012,3,5}, time }
+    assert DateTime[year: 2013, month: 4, day: 5] = shift(datetime, months: 1)
+    assert DateTime[year: 2014, month: 1, day: 5] = shift(datetime, months: 10)
+    assert DateTime[year: 2013, month: 1, day: 5] = shift(datetime, months: -2)
+    assert DateTime[year: 2012, month: 3, day: 5] = shift(datetime, months: -12)
 
     datetime = { {2013,3,31}, time }
-    assert shift(datetime, month: 1)  === { {2013,4,30}, time }
-    assert shift(datetime, month: -1) === { {2013,2,28}, time }
+    assert DateTime[year: 2013, month: 4, day: 30] = shift(datetime, months: 1)
+    assert DateTime[year: 2013, month: 2, day: 28] = shift(datetime, months: -1)
   end
 
   test :shift_years do
@@ -457,35 +447,36 @@ defmodule DTest do
     time = {23,23,23}
     datetime = { date, time }
 
-    assert shift(datetime, year: 0) === datetime
+    unchanged = datetime |> Date.from(:local)
+    assert unchanged === shift(datetime, years: 0)
 
-    assert shift(datetime, year: 1)  === { {2014,3,5}, time }
-    assert shift(datetime, year: -2) === { {2011,3,5}, time }
+    assert DateTime[year: 2014, month: 3, day: 5] = shift(datetime, years: 1)
+    assert DateTime[year: 2011, month: 3, day: 5] = shift(datetime, years: -2)
 
     datetime = { {2012,2,29}, time }
-    assert shift(datetime, year: 1)  === { {2013,2,28}, time }
-    assert shift(datetime, year: 4)  === { {2016,2,29}, time }
-    assert shift(datetime, year: -1) === { {2011,2,28}, time }
-    assert shift(datetime, year: -4) === { {2008,2,29}, time }
+    assert DateTime[year: 2013, month: 2, day: 28] = shift(datetime, years: 1)
+    assert DateTime[year: 2016, month: 2, day: 29] = shift(datetime, years: 4)
+    assert DateTime[year: 2011, month: 2, day: 28] = shift(datetime, years: -1)
+    assert DateTime[year: 2008, month: 2, day: 29] = shift(datetime, years: -4)
   end
 
   test :arbitrary_shifts do
     datetime = { {2013,3,5}, {23,23,23} }
-    assert shift(datetime, month: 3) === { {2013,6,5}, {23,23,23} }
+    assert DateTime[year: 2013, month: 6, day: 5] = shift(datetime, months: 3)
     assert_raise ArgumentError, fn ->
-      shift(datetime, month: 3, day: 1) === { {2013,6,6}, {23,23,23} }
+      DateTime[year: 2013, month: 6, day: 6] = shift(datetime, months: 3, days: 1)
     end
-    assert shift(datetime, sec: 13, day: -1, week: 2) === { {2013,3,18}, {23,23,36} }
+    assert DateTime[year: 2013, month: 3, day: 18, second: 36] = shift(datetime, secs: 13, days: -1, weeks: 2)
 
     datetime = { {2012,2,29}, {23,23,23} }
-    assert shift(datetime, month: 12) === { {2013,2,28}, {23,23,23} }
+    assert DateTime[year: 2013, month: 2, day: 28] = shift(datetime, months: 12)
 
-    assert shift(datetime, year: -10, day: 1) === { {2002,3,1}, {23,23,23} }
-    assert shift(datetime, min: 36, sec: 36) === { {2012,2,29}, {23,59,59} }
-    assert shift(datetime, min: 36, sec: 37) === { {2012,3,1}, {0,0,0} }
+    assert DateTime[year: 2002, month: 3, day: 1] = shift(datetime, years: -10, days: 1)
+    assert DateTime[year: 2012, month: 2, day: 29, hour: 23, minute: 59, second: 59] = shift(datetime, mins: 36, secs: 36)
+    assert DateTime[year: 2012, month: 3, day: 1, hour: 0, minute: 0, second: 0] = shift(datetime, mins: 36, secs: 37)
   end
 
   defp shift(date, spec) when is_list(spec) do
-    D.local(D.shift(D.from(date), spec))
+    date |> D.from(:local) |> D.shift(spec)
   end
 end
