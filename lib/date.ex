@@ -1,29 +1,6 @@
 # Consider adding the following functions
 # next(date, type) = shift(date, 1, type)
 # prev(date, type) = shift(date, -1, type)
-
-defmodule Date.Helper do
-  @moduledoc false
-
-  defp body(arg, name, priv) do
-    quote do
-      def unquote(name)(date, [{unquote(arg), value}]) do
-        greg_date = Date.Conversions.to_gregorian(date)
-        { date, time, tz } = unquote(priv)(greg_date, unquote(arg), value)
-        make_date(date, time, tz)
-      end
-    end
-  end
-
-  defmacro def_set(arg) do
-    body(arg, :set, :set_priv)
-  end
-
-  defmacro def_rawset(arg) do
-    body(arg, :rawset, :rawset_priv)
-  end
-end
-
 defmodule Date do
   @moduledoc """
   Module for working with dates.
@@ -909,7 +886,7 @@ defmodule Date do
 
   @spec set(dtz, [tz: tz]) :: dtz
 
-  import Date.Helper, only: [def_set: 1, def_rawset: 1]
+  import Date.Helpers, only: [def_set: 1, def_rawset: 1]
   def_set(:datetime)
   def_set(:date)
   def_set(:year)
