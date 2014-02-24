@@ -650,6 +650,13 @@ defmodule Timezone do
   # UTC is so common, we'll give it an extra shortcut
   def get(:utc), do: get("UTC")
   # Allow querying by offset
+  def get(offset) when is_number(offset) do
+    if offset > 0 do
+      get("+#{offset}")
+    else
+      get("#{offset}")
+    end
+  end
   def get(<<?+, offset :: binary>>), do: get("Etc/GMT+#{offset}")
   def get(<<?-, offset :: binary>>), do: get("Etc/GMT-#{offset}")
   @doc """
