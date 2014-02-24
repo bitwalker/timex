@@ -641,7 +641,16 @@ defmodule Timezone do
   @doc """
   Get's the current local timezone configuration.
   """
-  def local(), do: Timezone.Local.lookup() |> get
+  def local() do
+    case Process.get(:local_timezone) do
+      nil ->
+        tz = Timezone.Local.lookup() |> get
+        Process.put(:local_timezone, tz)
+        tz
+      tz ->
+        tz
+    end
+  end
 
   # Generate fast lookup functions for each timezone by their full name
   @timezones |> Enum.each fn tz ->

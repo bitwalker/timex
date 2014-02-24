@@ -136,7 +136,13 @@ defmodule Date do
 
   """
   @spec local(date :: DateTime.t, tz :: TimezoneInfo.t) :: DateTime.t
-  def local(date, tz), do: Timezone.convert(date, tz)
+  def local(DateTime[timezone: tz] = date, localtz) do
+    if tz !== localtz do
+      Timezone.convert(date, localtz)
+    else
+      date
+    end
+  end
 
   @doc """
   Get current the current datetime in UTC.
@@ -285,7 +291,7 @@ defmodule Date do
   @spec convert(DateTime.t, :secs | :days) :: integer
   def convert(date, type \\ :timestamp)
 
-  def convert(date, :timestamp), do: to_timestamp(date)
+  def convert(date, :timestamp),  do: to_timestamp(date)
   def convert(date, :secs),       do: to_secs(date)
   def convert(date, :days),       do: to_days(date)
 
@@ -678,13 +684,12 @@ defmodule Date do
             result.update(day: d)
           end
         {:timezone, tz} ->
-          # Determine if we need to convert to another timezone, or just set the timezone as is
-          difference = Timezone.diff(result.timezone, tz)
-          cond do
-            difference == 0 -> result.update(timezone: tz)
-            true ->
-              converted = Timezone.convert(result, tz)
-              converted.update(timezone: tz)
+          # Only convert timezones if they differ
+          if result.timezone !== tz do
+            converted = Timezone.convert(result, tz)
+            converted.update(timezone: tz)
+          else
+            result
           end
         {name, val} when name in [:year, :month, :hour, :minute, :second, :ms] ->
           if validate? do
@@ -712,9 +717,13 @@ defmodule Date do
   def compare(_, :distant_past),   do: -1
   def compare(_, :distant_future), do: 1
   def compare(date, date),         do: 0
-  def compare(DateTime[timezone: tz] = this, other) do
-    # Convert `other` to `this`'s timezone
-    localized  = Timezone.convert(other, tz)
+  def compare(DateTime[timezone: thistz] = this, DateTime[timezone: othertz] = other) do
+    localized = if thistz !== othertz do
+      # Convert `other` to `this`'s timezone
+      Timezone.convert(other, thistz)
+    else
+      other
+    end
     difference = diff(this, localized, :secs)
     cond do
       difference < 0  -> -1
@@ -761,8 +770,8 @@ defmodule Date do
     ((y2 - y1) * 12) + (m2 - m1)
   end
   def diff(this, other, :years) do
-    DateTime[year: y1] = local(this)
-    DateTime[year: y2] = local(other)
+    DateTime[year: y1] = universal(this)
+    DateTime[year: y2] = universal(other)
     y2 - y1
   end
 
