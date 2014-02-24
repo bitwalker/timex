@@ -269,7 +269,6 @@ defmodule DateTests do
     assert D.compare(date1, date2) === 0
 
     tz3   = Timezone.get(3)
-    date  = {2013,3,18}
     date3 = DateTime[year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz3]
     assert D.compare(date1, date3) === 1
 
