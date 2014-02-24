@@ -666,9 +666,9 @@ defmodule Timezone.Local do
         etctz = File.read!(@_ETC_TIMEZONE)
         case etctz |> String.starts_with?("TZif2") do
           false ->
-            {no_hostdefs, _} = etctz |> String.split " ", [global: false, trim: true]
-            {no_comments, _} = no_hostdefs |> String.split "#", [global: false, trim: true]
-            {:ok, no_comments |> String.replace(" ", "_")}
+            [no_hostdefs | _] = etctz |> String.split " ", [global: false, trim: true]
+            [no_comments | _] = no_hostdefs |> String.split "#", [global: false, trim: true]
+            {:ok, no_comments |> String.replace(" ", "_") |> String.strip(?\n)}
           _ ->
             nil
         end
