@@ -262,18 +262,18 @@ defmodule DateTests do
     assert D.compare(D.epoch(), D.zero()) === -1
     assert D.compare(D.zero(), D.epoch()) === 1
 
-    date  = {2013,3,18}
-    tz1   = D.timezone(2)
-    tz2   = D.timezone(-3)
-    date1 = D.from({date, {13, 44, 0}}, tz1)
-    date2 = D.from({date, {8, 44, 0}}, tz2)
+    tz1   = Timezone.get(2)
+    tz2   = Timezone.get(-3)
+    date1 = DateTime[year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz1]
+    date2 = DateTime[year: 2013, month: 3, day: 18, hour: 8, minute: 44, timezone: tz2]
     assert D.compare(date1, date2) === 0
 
-    tz3 = D.timezone(3)
-    assert D.compare(D.from({date, {13,44,0}}, tz1), D.from({date, {13,44,0}}, tz3)) === -1
+    tz3   = Timezone.get(3)
+    date  = {2013,3,18}
+    date3 = DateTime[year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz3]
+    assert D.compare(date1, date3) === 1
 
     date = D.now()
-    # Won't fail unless we go back in time
     assert D.compare(D.epoch(), date) === 1
 
     assert D.compare(date, :distant_past) === -1

@@ -704,6 +704,8 @@ defmodule Timezone do
       this_off == 0 and other_off == 0 -> 0
       this_off == 0                    -> other_off
       other_off == 0                   -> -this_off
+      this_off < 0 and other_off < 0   -> (this_off - other_off) * -1
+      this_off > 0 and other_off > 0   -> (this_off - other_off) * -1
       true                             -> this_off - other_off
     end
   end
