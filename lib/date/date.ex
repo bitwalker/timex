@@ -376,7 +376,6 @@ defmodule Date do
   @spec day(DateTime.t) :: daynum
 
   def day(date) do
-    # rawset for more efficiency
     start_of_year = date |> set([month: 1, day: 1])
     1 + diff(start_of_year, date, :days)
   end
@@ -451,12 +450,16 @@ defmodule Date do
     abbr_cased = month_name |> String.slice(0..2)
     abbr_lower = lower |> String.slice(0..2)
     symbol     = abbr_lower |> binary_to_atom
+    full_chars = month_name |> String.to_char_list!
+    abbr_chars = abbr_cased |> String.to_char_list!
 
     def month_to_num(unquote(month_name)), do: unquote(month_num)
     def month_to_num(unquote(lower)),      do: unquote(month_num)
     def month_to_num(unquote(abbr_cased)), do: unquote(month_num)
     def month_to_num(unquote(abbr_lower)), do: unquote(month_num)
     def month_to_num(unquote(symbol)),     do: unquote(month_num)
+    def month_to_num(unquote(full_chars)),      do: unquote(month_num)
+    def month_to_num(unquote(abbr_chars)),      do: unquote(month_num)
   end
   def month_to_num(x), do: raise(:badmonth, x)
 
@@ -468,6 +471,15 @@ defmodule Date do
     def month_name(unquote(month_num)), do: unquote(name)
   end
   def month_name(x), do: raise(:badmonth, x)
+
+  @doc """
+  Get the short name of the month corresponding to the provided number
+  """
+  @spec month_shortname(month) :: binary
+  @months |> Enum.each fn {name, month_num} ->
+    def month_shortname(unquote(month_num)), do: String.slice(unquote(name), 0..2)
+  end
+  def month_shortname(x), do: raise(:badmonth, x)
 
   @doc """
   Return a 3-tuple {year, week number, weekday} for the given date.

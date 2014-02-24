@@ -406,34 +406,35 @@ defmodule Timezone do
     {"Egypt", {"EET", "EET"}, :undef, 120, 0, :undef, {0, 0}, :undef, {0, 0}}, 
     {"Eire", {"GMT", "GMT"}, {"IST", "IST"}, 0, 60, {:last, :sun, :mar}, {1, 0}, {:last, :sun, :oct}, {2, 0}}, 
     {"Etc/GMT", {"GMT", "GMT"}, :undef, 0, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+0", {"GMT", "GMT"}, :undef, 0, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+1", {"GMT+1", "GMT+1"}, :undef, -1 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+10", {"GMT+10", "GMT+10"}, :undef, -10 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+11", {"GMT+11", "GMT+11"}, :undef, -11 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+12", {"GMT+12", "GMT+12"}, :undef, -12 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+2", {"GMT+2", "GMT+2"}, :undef, -2 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+3", {"GMT+3", "GMT+3"}, :undef, -3 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+4", {"GMT+4", "GMT+4"}, :undef, -4 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+5", {"GMT+5", "GMT+5"}, :undef, -5 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+6", {"GMT+6", "GMT+6"}, :undef, -6 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+7", {"GMT+7", "GMT+7"}, :undef, -7 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+8", {"GMT+8", "GMT+8"}, :undef, -8 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT+9", {"GMT+9", "GMT+9"}, :undef, -9 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
     {"Etc/GMT-0", {"GMT", "GMT"}, :undef, 0, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-1", {"GMT-1", "GMT-1"}, :undef, 1 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-10", {"GMT-10", "GMT-10"}, :undef, 10 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-11", {"GMT-11", "GMT-11"}, :undef, 11 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-12", {"GMT-12", "GMT-12"}, :undef, 12 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-13", {"GMT-13", "GMT-13"}, :undef, 13 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-14", {"GMT-14", "GMT-14"}, :undef, 14 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-2", {"GMT-2", "GMT-2"}, :undef, 2 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-3", {"GMT-3", "GMT-3"}, :undef, 3 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-4", {"GMT-4", "GMT-4"}, :undef, 4 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-5", {"GMT-5", "GMT-5"}, :undef, 5 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-6", {"GMT-6", "GMT-6"}, :undef, 6 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-7", {"GMT-7", "GMT-7"}, :undef, 7 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-8", {"GMT-8", "GMT-8"}, :undef, 8 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
-    {"Etc/GMT-9", {"GMT-9", "GMT-9"}, :undef, 9 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-1", {"GMT-1", "GMT-1"}, :undef, -1 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-10", {"GMT-10", "GMT-10"}, :undef, -10 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-11", {"GMT-11", "GMT-11"}, :undef, -11 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-12", {"GMT-12", "GMT-12"}, :undef, -12 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-2", {"GMT-2", "GMT-2"}, :undef, -2 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-3", {"GMT-3", "GMT-3"}, :undef, -3 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-4", {"GMT-4", "GMT-4"}, :undef, -4 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-5", {"GMT-5", "GMT-5"}, :undef, -5 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-6", {"GMT-6", "GMT-6"}, :undef, -6 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-7", {"GMT-7", "GMT-7"}, :undef, -7 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-8", {"GMT-8", "GMT-8"}, :undef, -8 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-9", {"GMT-9", "GMT-9"}, :undef, -9 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT-0", {"GMT", "GMT"}, :undef, 0, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+0", {"GMT", "GMT"}, :undef, 0, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+1", {"GMT+1", "GMT+1"}, :undef, 1 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+10", {"GMT+10", "GMT+10"}, :undef, 10 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+11", {"GMT+11", "GMT+11"}, :undef, 11 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+12", {"GMT+12", "GMT+12"}, :undef, 12 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+13", {"GMT+13", "GMT+13"}, :undef, 13 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+14", {"GMT+14", "GMT+14"}, :undef, 14 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+2", {"GMT+2", "GMT+2"}, :undef, 2 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+3", {"GMT+3", "GMT+3"}, :undef, 3 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+4", {"GMT+4", "GMT+4"}, :undef, 4 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+5", {"GMT+5", "GMT+5"}, :undef, 5 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+6", {"GMT+6", "GMT+6"}, :undef, 6 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+7", {"GMT+7", "GMT+7"}, :undef, 7 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+8", {"GMT+8", "GMT+8"}, :undef, 8 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
+    {"Etc/GMT+9", {"GMT+9", "GMT+9"}, :undef, 9 * 60, 0, :undef, {0, 0}, :undef, {0, 0}}, 
     {"Etc/GMT0", {"GMT", "GMT"}, :undef, 0, 0, :undef, {0, 0}, :undef, {0, 0}}, 
     {"Etc/Greenwich", {"GMT", "GMT"}, :undef, 0, 0, :undef, {0, 0}, :undef, {0, 0}}, 
     {"Etc/UCT", {"UCT", "UCT"}, :undef, 0, 0, :undef, {0, 0}, :undef, {0, 0}}, 
@@ -700,14 +701,7 @@ defmodule Timezone do
   """
   @spec diff(this :: TimezoneInfo.t, other :: TimezoneInfo.t) :: integer
   def diff(TimezoneInfo[gmt_offset_std: this_off], TimezoneInfo[gmt_offset_std: other_off]) do
-    cond do
-      this_off == 0 and other_off == 0 -> 0
-      this_off == 0                    -> other_off
-      other_off == 0                   -> -this_off
-      this_off < 0 and other_off < 0   -> (this_off - other_off) * -1
-      this_off > 0 and other_off > 0   -> (this_off - other_off) * -1
-      true                             -> this_off - other_off
-    end
+    other_off - this_off
   end
 
 end

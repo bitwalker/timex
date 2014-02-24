@@ -11,10 +11,10 @@ defmodule TimezoneTests do
     assert offset === 0
     TimezoneInfo[full_name: name, gmt_offset_std: offset] = Timezone.get(2)
     assert name === "Etc/GMT+2"
-    assert offset === -120
+    assert offset === +120
     TimezoneInfo[full_name: name, gmt_offset_std: offset] = Timezone.get(-3)
     assert name === "Etc/GMT-3"
-    assert offset === 180
+    assert offset === -180
     TimezoneInfo[standard_abbreviation: name, gmt_offset_std: offset] = Timezone.get("CST")
     assert name === "CST"
     assert offset === -360

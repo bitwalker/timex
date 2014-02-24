@@ -34,17 +34,15 @@ The `Time` module supports a finer grain level of calculations over time interva
 
 ## Use cases ##
 
-In all of the examples below, [DateFmt][elixir-datefmt] is used for formatting.
-
 ### Getting current date ###
 
 Get current date in the local time zone.
 
 ```elixir
 date = Date.now()
-DateFmt.format!(date, "{ISO}")      #=> "2013-09-30T16:40:08+0300"
-DateFmt.format!(date, "{RFC1123}")  #=> "Mon, 30 Sep 2013 16:40:08 EEST"
-DateFmt.format!(date, "{kitchen}")  #=> "4:40PM"
+DateFormat.format!(date, "{ISO}")      #=> "2013-09-30T16:40:08+0300"
+DateFormat.format!(date, "{RFC1123}")  #=> "Mon, 30 Sep 2013 16:40:08 EEST"
+DateFormat.format!(date, "{kitchen}")  #=> "4:40PM"
 ```
 
 The date value that `Date` produced encapsulates current date, time, and time zone information. This allows for great flexibility without any overhead on the user's part.
@@ -55,17 +53,17 @@ Since Erlang's native date format doesn't carry any time zone information, `Date
 datetime = {{2013,3,17},{21,22,23}}
 
 date = Date.from(datetime)           # datetime is assumed to be in UTC by default
-DateFmt.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 GMT"
+DateFormat.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 GMT"
 
 date = Date.from(datetime, :local)   # indicates that datetime is in local time zone
-DateFmt.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 EEST"
+DateFormat.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 EEST"
 
 Date.local(date)  # convert date to local time zone
 #=> {{2013,3,17},{21,22,23}}
 
 # Let's see what happens if we switch the time zone
 date = Date.set(date, tz: { -8, "PST" })
-DateFmt.format!(date, "{RFC1123}")
+DateFormat.format!(date, "{RFC1123}")
 #=> "Sun, 17 Mar 2013 10:22:23 PST"
 
 Date.universal(date)  # convert date to UTC
@@ -74,16 +72,16 @@ Date.universal(date)  # convert date to UTC
 
 ### Working with time zones ###
 
-Currently, we need to build time zones by hand. The functions in `Date` are already respecting time zone offsets when doing calculations. Time zone names are used by `DateFmt` during formatting.
+Currently, we need to build time zones by hand. The functions in `Date` are already respecting time zone offsets when doing calculations. Time zone names are used by `DateFormat` during formatting.
 
 ```elixir
 date = Date.from({2013,1,1}, Date.timezone(5, "SomewhereInRussia"))
-DateFmt.format!(date, "{ISO}")
+DateFormat.format!(date, "{ISO}")
 #=> "2013-01-01T00:00:00+0500"
-DateFmt.format!(date, "{ISOz}")
+DateFormat.format!(date, "{ISOz}")
 #=> "2012-12-31T19:00:00Z"
 
-DateFmt.format!(date, "{RFC1123}")
+DateFormat.format!(date, "{RFC1123}")
 #=> "Tue, 01 Jan 2013 00:00:00 SomewhereInRussia"
 
 date = Date.now()
@@ -98,7 +96,7 @@ Find out current weekday, week number, number of days in a given month, etc.
 
 ```elixir
 date = Date.now()
-DateFmt.format!(date, "{RFC1123}")
+DateFormat.format!(date, "{RFC1123}")
 #=> "Mon, 30 Sep 2013 16:51:02 EEST"
 
 Date.weekday(date)           #=> 1
@@ -118,7 +116,7 @@ Date.is_leap?(2012)           #=> true
 
 ```elixir
 date = Date.now()
-DateFmt.format!(date, "{RFC1123}")
+DateFormat.format!(date, "{RFC1123}")
 #=> "Mon, 30 Sep 2013 16:55:02 EEST"
 
 Date.convert(date, :secs)  # seconds since Epoch
@@ -127,14 +125,14 @@ Date.convert(date, :secs)  # seconds since Epoch
 Date.to_sec(date, :zero)  # seconds since year 0
 #=> 63547768502
 
-DateFmt.format!(Date.epoch(), "{ISO}")
+DateFormat.format!(Date.epoch(), "{ISO}")
 #=> "1970-01-01T00:00:00+0000"
 
 Date.epoch(:secs)  # seconds since year 0 to Epoch
 #=> 62167219200
 
 date = Date.from(Date.epoch(:secs) + 144, :secs, :zero)  # :zero indicates year 0
-DateFmt.format!(date, "{ISOz}")
+DateFormat.format!(date, "{ISOz}")
 #=> "1970-01-01T00:02:24Z"
 ```
 
@@ -144,22 +142,22 @@ Shifting refers to moving by some amount of time towards past or future. `Date` 
 
 ```elixir
 date = Date.now()
-DateFmt.format!(date, "{RFC1123}")
+DateFormat.format!(date, "{RFC1123}")
 #=> "Mon, 30 Sep 2013 16:58:13 EEST"
 
-DateFmt.format!( Date.shift(date, secs: 78), "{RFC1123}" )
+DateFormat.format!( Date.shift(date, secs: 78), "{RFC1123}" )
 #=> "Mon, 30 Sep 2013 16:59:31 EEST"
 
-DateFmt.format!( Date.shift(date, secs: -1078), "{RFC1123}" )
+DateFormat.format!( Date.shift(date, secs: -1078), "{RFC1123}" )
 #=> "Mon, 30 Sep 2013 16:40:15 EEST"
 
-DateFmt.format!( Date.shift(date, days: 1), "{RFC1123}" )
+DateFormat.format!( Date.shift(date, days: 1), "{RFC1123}" )
 #=> "Tue, 01 Oct 2013 16:58:13 EEST"
 
-DateFmt.format!( Date.shift(date, weeks: 3), "{RFC1123}" )
+DateFormat.format!( Date.shift(date, weeks: 3), "{RFC1123}" )
 #=> "Mon, 21 Oct 2013 16:58:13 EEST"
 
-DateFmt.format!( Date.shift(date, years: -13), "{RFC1123}" )
+DateFormat.format!( Date.shift(date, years: -13), "{RFC1123}" )
 #=> "Sat, 30 Sep 2000 16:58:13 EEST"
 ```
 
