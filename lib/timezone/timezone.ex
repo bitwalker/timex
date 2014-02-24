@@ -674,7 +674,7 @@ defmodule Timezone do
   @spec convert(date :: DateTime.t, tz :: TimezoneInfo.t) :: DateTime.t
   def convert(date, tz) do
     # Calculate the difference between `date`'s timezone, and the provided timezone
-    difference = diff(tz, date.timezone)
+    difference = diff(date.timezone, tz)
     # Offset the provided date's time by the difference
     Date.shift(date, mins: difference)
   end
@@ -683,8 +683,13 @@ defmodule Timezone do
   Determine what offset is required to convert `this` to `other` (in minutes)
   """
   @spec diff(this :: TimezoneInfo.t, other :: TimezoneInfo.t) :: integer
-  def diff(this, other) do
-    other.gmt_offset_std - this.gmt_offset_std
+  def diff(TimezoneInfo[gmt_offset_std: this_off], TimezoneInfo[gmt_offset_std: other_off]) do
+    cond do
+      this_off == 0 and other_off == 0 -> 0
+      this_off == 0                    -> other_off
+      other_off == 0                   -> -this_off
+      true                             -> this_off - other_off
+    end
   end
 
 end

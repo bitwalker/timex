@@ -32,7 +32,7 @@ defmodule DateTests do
     localdate = D.from({{y,m,d}, {h,min,s}}, :local)
     assert local === D.local(localdate)
 
-    if D.timezone() !== Timezone.get(:utc) do
+    if local.timezone !== Timezone.get(:utc) do
       assert local !== D.universal(localdate)
     end
 
@@ -256,20 +256,22 @@ defmodule DateTests do
     date = D.from({{2013,3,17}, {17,26,5}}, eet)
     assert to_gregorian(D.set(date, date: {1,1,1}))        === { {1,1,1}, {17,26,5}, {eet_offset_min/60, eet_name} }
     assert to_gregorian(D.set(date, hour: 0))              === { {2013,3,17}, {0,26,5}, {eet_offset_min/60, eet_name} }
-    assert to_gregorian(D.set(date, timezone: D.timezone(:utc))) === { {2013,3,17}, {19,26,5}, {utc_offset_min/60, utc_name} }
+    assert to_gregorian(D.set(date, timezone: D.timezone(:utc))) === { {2013,3,17}, {15,26,5}, {utc_offset_min/60, utc_name} }
 
-    assert to_gregorian(D.set(date, [date: {1,1,1}, hour: 13, second: 61, timezone: utc]))    === { {1,1,1}, {15,26,59}, {utc_offset_min/60, utc_name} }
-    assert to_gregorian(D.set(date, [date: {-1,-2,-3}, hour: 33, second: 61, timezone: utc])) === { {0,1,2}, {1,26,59}, {utc_offset_min/60, utc_name} }
+    assert to_gregorian(D.set(date, [date: {1,1,1}, hour: 13, second: 61, timezone: utc]))    === { {1,1,1}, {11,26,59}, {utc_offset_min/60, utc_name} }
+    assert to_gregorian(D.set(date, [date: {-1,-2,-3}, hour: 33, second: 61, timezone: utc])) === { {0,1,1}, {21,26,59}, {utc_offset_min/60, utc_name} }
   end
 
   test :compare do
     assert D.compare(D.epoch(), D.zero()) === -1
     assert D.compare(D.zero(), D.epoch()) === 1
 
-    date = {2013,3,18}
-    tz1 = D.timezone(2)
-    tz2 = D.timezone(-3)
-    assert D.compare(D.from({date, {13,44,0}}, tz1), D.from({date, {8,44,0}}, tz2)) === 0
+    date  = {2013,3,18}
+    tz1   = D.timezone(2)
+    tz2   = D.timezone(-3)
+    date1 = D.from({date, {13, 44, 0}}, tz1)
+    date2 = D.from({date, {8, 44, 0}}, tz2)
+    assert D.compare(date1, date2) === 0
 
     tz3 = D.timezone(3)
     assert D.compare(D.from({date, {13,44,0}}, tz1), D.from({date, {13,44,0}}, tz3)) === -1
