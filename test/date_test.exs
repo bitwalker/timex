@@ -32,10 +32,6 @@ defmodule DateTests do
     localdate = D.from({{y,m,d}, {h,min,s}}, :local)
     assert local === D.local(localdate)
 
-    if local.timezone !== Timezone.get(:utc) do
-      assert local !== D.universal(localdate)
-    end
-
     tz = D.timezone(:local)
     assert local === D.local(localdate, tz)
   end
