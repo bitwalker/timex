@@ -265,9 +265,11 @@ Some inspirations I'm currently drawing from:
 - Moment.js
 - JodaTime
 
-**What is support for time zones going to look like?**
+**What is the support for time zones?**
 
-Full support for retreiving local timezone configuration on OSX, *NIX, and Windows, conversion to any timezone in the Olson timezone database, shifting times based on timezone, etc.
+Full support for retreiving local timezone configuration on OSX, *NIX, and Windows, conversion to any timezone in the Olson timezone database, and full support for daylight savings time transitions.
+
+Timezone support is also exposed via the `Timezone`, `Timezone.Local`, and `Timezone.Dst` modules. Their functionality is exposed via the `Date` module's API, and most common use cases shouldn't need to access the `Timezone` namespace directly, but it's there if needed.
 
 ## License
 
