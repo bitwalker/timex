@@ -61,11 +61,11 @@ defmodule TimezoneTests do
   end
 
   test :parse_tzfile do
-    chicago = System.cwd |> Path.join("test/include/America/Chicago")
+    chicago = System.cwd |> Path.join("test/include/tzif/America/Chicago")
     assert {:ok, "CDT"} = chicago |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,3,24}, {0,0,0}}))
     assert {:ok, "CST"} = chicago |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,2,24}, {0,0,0}}))
 
-    new_york = System.cwd |> Path.join("test/include/America/New_York")
+    new_york = System.cwd |> Path.join("test/include/tzif/America/New_York")
     assert {:ok, "EDT"} = new_york |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,3,24}, {0,0,0}}))
     assert {:ok, "EST"} = new_york |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,2,24}, {0,0,0}}))
   end
