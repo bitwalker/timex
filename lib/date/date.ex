@@ -141,6 +141,7 @@ defmodule Date do
   def local(DateTime[timezone: tz] = date, localtz) do
     if tz !== localtz do
       Timezone.convert(date, localtz)
+      date.update(timezone: localtz)
     else
       date
     end
