@@ -861,7 +861,7 @@ defmodule Timezone.Local do
   end
   defp parse_bool({record, data}, prop) do
     {val, rest} = data |> parse_bool
-    { record.update([{prop, val == 1}]), rest }
+    { record.update([{prop, val}]), rest }
   end
   defp parse_long(<<val :: 32, rest :: binary>>), do: { val, rest }
   defp parse_uchar(<<val :: 8, rest :: binary>>), do: { val, rest }
