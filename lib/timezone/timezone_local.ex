@@ -554,46 +554,45 @@ defmodule Timezone.Local do
   Looks up the local timezone configuration. Returns the name of a timezone
   in the Olson database.
   """
-  @spec lookup() :: String.t
+  @spec lookup(DateTime.t | nil) :: String.t
 
-  def lookup() do
+  def lookup(), do: Date.universal |> lookup
+  def lookup(date) do
     case :os.type() do
-      {:unix, :darwin} -> localtz(:osx)
-      {:unix, _}       -> localtz(:unix)
-      {:nt}            -> localtz(:win)
+      {:unix, :darwin} -> localtz(:osx, date)
+      {:unix, _}       -> localtz(:unix, date)
+      {:nt}            -> localtz(:win, date)
       _                -> raise "Unsupported operating system!"
     end
   end
 
   # Get the locally configured timezone on OSX systems
-  defp localtz(:osx) do
-    # Environment variables take precedence
+  defp localtz(:osx, date) do
+    # Allow TZ environment variable to override lookup
     case System.get_env("TZ") do
-      # Not found
       nil ->
-        timezone = System.cmd("systemsetup -gettimezone")
-        |> iolist_to_binary
-        |> String.strip(?\n)
-        |> String.replace("Time Zone: ", "")
-
-        if String.length(timezone) > 0 do
-          timezone
-        else
-          case :file.read_link('/etc/localtime') do
-            {:ok, zoneinfo} ->
-              zoneinfo
-              |> iolist_to_binary
-              |> String.replace "/usr/share/zoneinfo/", ""
-            _ ->
+        # Most accurate local timezone will come from /etc/localtime,
+        # since we can lookup proper timezones for arbitrary dates
+        case read_timezone_data(nil, @_ETC_LOCALTIME, date) do
+          {:ok, tz} -> tz
+          _ ->
+            # Fallback and ask systemsetup
+            tz = System.cmd("systemsetup -gettimezone")
+            |> iolist_to_binary
+            |> String.strip(?\n)
+            |> String.replace("Time Zone: ", "")
+            if String.length(tz) > 0 do
+              tz
+            else
               raise("Unable to find local timezone.")
-          end
+            end
         end
       tz -> tz
     end
   end
 
   # Get the locally configured timezone on *NIX systems
-  defp localtz(:unix) do
+  defp localtz(:unix, date) do
     case System.get_env("TZ") do
       # Not found
       nil ->
@@ -604,11 +603,11 @@ defmodule Timezone.Local do
         # defs are set up, if we find a value, it's just passed
         # along through the pipe until we're done. If we don't,
         # this will try each fallback location in order.
-        {:ok, tz} = read_timezone_data(@_ETC_TIMEZONE)
-        |> read_timezone_data(@_ETC_SYS_CLOCK)
-        |> read_timezone_data(@_ETC_CONF_CLOCK)
-        |> read_timezone_data(@_ETC_LOCALTIME)
-        |> read_timezone_data(@_USR_ETC_LOCALTIME)
+        {:ok, tz} = read_timezone_data(@_ETC_TIMEZONE, date)
+        |> read_timezone_data(@_ETC_SYS_CLOCK, date)
+        |> read_timezone_data(@_ETC_CONF_CLOCK, date)
+        |> read_timezone_data(@_ETC_LOCALTIME, date)
+        |> read_timezone_data(@_USR_ETC_LOCALTIME, date)
         tz
       tz  -> tz
     end
@@ -617,7 +616,9 @@ defmodule Timezone.Local do
   # Get the locally configured timezone on Windows systems
   @local_tz_key 'SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation'
   @sys_tz_key   'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Time Zones'
-  defp localtz(:win) do
+  # We ignore the reference date here, since there is no way to lookup
+  # transition times for historical/future dates
+  defp localtz(:win, _date) do
     # Windows has many of it's own unique time zone names, which can
     # also be translated to the OS's language.
     {:ok, handle} = :win32reg.open(:local_machine)
@@ -666,26 +667,29 @@ defmodule Timezone.Local do
   end
 
   # Attempt to read timezone data from /etc/timezone
-  defp read_timezone_data(@_ETC_TIMEZONE) do
+  defp read_timezone_data(@_ETC_TIMEZONE, date) do
     case File.exists?(@_ETC_TIMEZONE) do
       true ->
         etctz = File.read!(@_ETC_TIMEZONE)
         case etctz |> String.starts_with?("TZif2") do
+          true ->
+            case etctz |> File.read! |> parse_tzfile(date) do
+              {:ok, tz}   -> {:ok, tz}
+              {:error, m} -> raise m
+            end
           false ->
             [no_hostdefs | _] = etctz |> String.split " ", [global: false, trim: true]
             [no_comments | _] = no_hostdefs |> String.split "#", [global: false, trim: true]
             {:ok, no_comments |> String.replace(" ", "_") |> String.strip(?\n)}
-          _ ->
-            nil
         end
       _ ->
         nil
     end
   end
   # If we've found a timezone, just keep on piping it through
-  defp read_timezone_data({:ok, _} = result, _), do: result
+  defp read_timezone_data({:ok, _} = result, _, _date), do: result
   # Otherwise, read the next fallback location
-  defp read_timezone_data(_, file) when file == @_ETC_SYS_CLOCK or file == @_ETC_CONF_CLOCK do
+  defp read_timezone_data(_, file, _date) when file == @_ETC_SYS_CLOCK or file == @_ETC_CONF_CLOCK do
     case File.exists?(file) do
       true ->
         match = file
@@ -704,10 +708,10 @@ defmodule Timezone.Local do
         nil
     end
   end
-  defp read_timezone_data(_, file) when file == @_ETC_LOCALTIME or file == @_USR_ETC_LOCALTIME do
+  defp read_timezone_data(_, file, date) when file == @_ETC_LOCALTIME or file == @_USR_ETC_LOCALTIME do
     case File.exists?(file) do
       true ->
-        case file |> File.read! |> parse_tzfile do
+        case file |> File.read! |> parse_tzfile(date) do
           {:ok, tz}   -> tz
           {:error, m} -> raise m
         end
@@ -765,7 +769,7 @@ defmodule Timezone.Local do
   """
   @spec parse_tzfile(binary, DateTime.t | nil) :: {:ok, String.t} | {:error, term}
 
-  def parse_tzfile(tzdata), do: parse_tzfile(tzdata, Date.now(:utc))
+  def parse_tzfile(tzdata), do: parse_tzfile(tzdata, Date.univeral())
   def parse_tzfile(tzdata, DateTime[] = reference_date) do
     case tzdata do
       << ?T,?Z,?i,?f, rest :: binary >> ->
