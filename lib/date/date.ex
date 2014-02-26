@@ -397,7 +397,7 @@ defmodule Date do
   def iso_week(DateTime[year: y, month: m, day: d]) do
     :calendar.iso_week_number({y, m, d})
   end
-  def iso_week(date), do: iso_week(from(date, :local))
+  def iso_week(date), do: iso_week(from(date, :utc))
 
   @doc """
   Get the day of the week corresponding to the given name.
