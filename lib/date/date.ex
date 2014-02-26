@@ -700,11 +700,16 @@ defmodule Date do
           end
         {:timezone, tz} ->
           # Only convert timezones if they differ
-          if result.timezone !== tz do
-            converted = Timezone.convert(result, tz)
-            converted.update(timezone: tz)
-          else
-            result
+          case result.timezone do
+            # Date didn't have a timezone, so use UTC
+            nil       -> result.update(timezone: timezone(:utc))
+            origin_tz ->
+              if origin_tz !== tz do
+                converted = Timezone.convert(result, tz)
+                converted.update(timezone: tz)
+              else
+                result
+              end
           end
         {name, val} when name in [:year, :month, :hour, :minute, :second, :ms] ->
           if validate? do
@@ -937,6 +942,7 @@ defmodule Date do
   end
 
   # Primary constructor for DateTime objects
+  defp construct({_,_,_} = date, {_,_,_} = time, nil), do: construct(date, time, timezone(:utc))
   defp construct({y, m, d}, {h, min, sec}, TimezoneInfo[] = tz) do
     DateTime[
       year: y, month: m, day: d,

@@ -6,5 +6,5 @@ defrecord DateTime,
   minute:   0,
   second:   0,
   ms:       0,
-  timezone: Timezone.get(:utc),
+  timezone: nil,
   calendar: :gregorian

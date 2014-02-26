@@ -30,13 +30,16 @@ defmodule TimezoneTests do
     gmt_plus_two    = Timezone.get(2)
     gmt_minus_three = Timezone.get(-3) 
     # How many minutes do I apply to UTC when shifting to CST
-    assert Timezone.diff(utc, cst) === -360
+    assert Date.from({{2014,2,24},{0,0,0}}, utc) |> Timezone.diff(cst) === -360
+    # How many minutes do I apply to UTC when shifting to CDT
+    assert Date.from({{2014,3,30},{0,0,0}}, utc) |> Timezone.diff(cst) === -300
     # And vice versa
-    assert Timezone.diff(cst, utc) === 360
+    assert Date.from({{2014,2,24},{0,0,0}}, cst) |> Timezone.diff(utc) === 360
+    assert Date.from({{2014,3,30},{0,0,0}}, cst) |> Timezone.diff(utc) === 300
     # How many minutes do I apply to gmt_plus_two when shifting to gmt_minus_three?
-    assert Timezone.diff(gmt_plus_two, gmt_minus_three) === -300
+    assert Date.from({{2014,2,24},{0,0,0}}, gmt_plus_two) |> Timezone.diff(gmt_minus_three) === -300
     # And vice versa
-    assert Timezone.diff(gmt_minus_three, gmt_plus_two) === 300
+    assert Date.from({{2014,2,24},{0,0,0}}, gmt_minus_three) |> Timezone.diff(gmt_plus_two) === 300
   end
 
   test :convert do

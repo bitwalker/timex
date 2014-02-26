@@ -695,17 +695,36 @@ defmodule Timezone do
   @spec convert(date :: DateTime.t, tz :: TimezoneInfo.t) :: DateTime.t
   def convert(date, tz) do
     # Calculate the difference between `date`'s timezone, and the provided timezone
-    difference = diff(date.timezone, tz)
+    difference = diff(date, tz)
     # Offset the provided date's time by the difference
     Date.shift(date, mins: difference)
   end
 
   @doc """
-  Determine what offset is required to convert `this` to `other` (in minutes)
+  Determine what offset is required to convert a date into a target timezone
   """
-  @spec diff(this :: TimezoneInfo.t, other :: TimezoneInfo.t) :: integer
-  def diff(TimezoneInfo[gmt_offset_std: this_off], TimezoneInfo[gmt_offset_std: other_off]) do
-    other_off - this_off
+  @spec diff(date :: DateTime.t, tz :: TimezoneInfo.t) :: integer
+  def diff(DateTime[timezone: origin] = date, TimezoneInfo[gmt_offset_std: dest_std] = destination) do
+    TimezoneInfo[gmt_offset_std: origin_std] = origin
+    # Create a copy of the date in the new time zone so we can ask about DST
+    target_date = date.update(timezone: destination)
+    # Determine DST status of origin and target
+    origin_is_dst? = date        |> Timezone.Dst.is_dst?
+    target_is_dst? = target_date |> Timezone.Dst.is_dst?
+    # Get the difference, accounting for DST offsets
+    cond do
+      # Standard Time all the way
+      !origin_is_dst? and !target_is_dst? -> dest_std - origin_std
+      # Target is in DST
+      !origin_is_dst? and  target_is_dst? -> coalesce(destination) - origin_std
+      # Origin is in DST, target is not
+       origin_is_dst? and !target_is_dst? -> dest_std - coalesce(origin)
+      # DST all the way
+      true -> coalesce(destination) - coalesce(origin)
+    end
   end
+
+  # Coalesce the standard time and daylight savings time offsets to get the proper DST offset
+  defp coalesce(TimezoneInfo[gmt_offset_std: std, gmt_offset_dst: dst]), do: std + dst
 
 end

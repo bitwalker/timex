@@ -113,14 +113,14 @@ defmodule Timezone.Dst do
     month_last_dayofweek = :calendar.day_of_the_week(month_last_date)
     case month_last_dayofweek > day_num do
       true ->
-        month_last_days - (month_last_dayofweek - day_num) - :calendar.date_to_gregorian_days({year - 1, 12, 31})
+        month_last_days - (month_last_dayofweek - day_num) - :calendar.date_to_gregorian_days(if year == 0 do 0 else year - 1 end, 12, 31)
       false ->
-        month_last_days - month_last_dayofweek - (7 - day_num) - :calendar.date_to_gregorian_days({year - 1, 12, 31})
+        month_last_days - month_last_dayofweek - (7 - day_num) - :calendar.date_to_gregorian_days(if year == 0 do 0 else year - 1 end, 12, 31)
     end
   end
 
   defp get_day_of_year({year, _, _} = date) do
-    :calendar.date_to_gregorian_days(date) - :calendar.date_to_gregorian_days({year - 1, 12, 31})
+    :calendar.date_to_gregorian_days(date) - :calendar.date_to_gregorian_days(if year == 0 do 0 else year - 1 end, 12, 31)
   end
 
   defp time_to_minutes({hours, minutes}), do: (hours * 60) + minutes
