@@ -59,4 +59,14 @@ defmodule TimezoneTests do
     # If it's noon in GMT-3, then it's 5'oclock in the evening in GMT+2
     assert DateTime[hour: 17] = DateTime[year: 2014, month: 2, day: 24, hour: 12, timezone: gmt_minus_three] |> Timezone.convert(gmt_plus_two)
   end
+
+  test :parse_tzfile do
+    chicago = System.cwd |> Path.join("test/include/America/Chicago")
+    assert {:ok, "CDT"} = chicago |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,3,24}, {0,0,0}}))
+    assert {:ok, "CST"} = chicago |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,2,24}, {0,0,0}}))
+
+    new_york = System.cwd |> Path.join("test/include/America/New_York")
+    assert {:ok, "EDT"} = new_york |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,3,24}, {0,0,0}}))
+    assert {:ok, "EST"} = new_york |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,2,24}, {0,0,0}}))
+  end
 end

@@ -550,6 +550,12 @@ defmodule Timezone.Local do
   @_ETC_LOCALTIME     "/etc/localtime"
   @_USR_ETC_LOCALTIME "/usr/local/etc/localtime"
 
+  @doc """
+  Looks up the local timezone configuration. Returns the name of a timezone
+  in the Olson database.
+  """
+  @spec lookup() :: String.t
+
   def lookup() do
     case :os.type() do
       {:unix, :darwin} -> localtz(:osx)
@@ -710,7 +716,8 @@ defmodule Timezone.Local do
     end
   end
 
-  # See http://linux.about.com/library/cmd/blcmdl5_tzfile.htm for details on the tzfile format
+  # See http://linux.about.com/library/cmd/blcmdl5_tzfile.htm or
+  # https://github.com/eggert/tz/blob/master/tzfile.h for details on the tzfile format
   # NOTE: These are defined as records, but I would've preferred to use `defrecordp` here to 
   # keep them private. The problem is that it is not possible to do the kind of manipulation
   # of records I'm doing in `parse_long`, etc. This is because unlike `defrecord`, `defrecordp`'s
@@ -751,7 +758,15 @@ defmodule Timezone.Local do
     when?:   0,
     adjust:  0
 
-  defp parse_tzfile(tzdata) do
+  @doc """
+  Given a binary representing the data from a tzfile (not the source version),
+  parses out the timezone for the provided reference date, or current UTC time
+  if one wasn't provided.
+  """
+  @spec parse_tzfile(binary, DateTime.t | nil) :: {:ok, String.t} | {:error, term}
+
+  def parse_tzfile(tzdata), do: parse_tzfile(tzdata, Date.now(:utc))
+  def parse_tzfile(tzdata, DateTime[] = reference_date) do
     case tzdata do
       << ?T,?Z,?i,?f, rest :: binary >> ->
         # Trim reserved space
@@ -834,17 +849,43 @@ defmodule Timezone.Local do
           zones   = r.zones |> List.replace_at(i - 1, updated)
           {r.update(zones: zones), rem}
         end
-        # Fetch the first standard-time zone in the list
-        # falling back to the first zone if a std one isn't found
-        result = record.zones
-          |> Enum.filter(fn zone -> zone.is_std? end)
+        # Get the zone for the current time
+        timestamp  = reference_date |> Date.to_secs
+        current_tt = record.transitions
+          |> Enum.sort(fn :transition[when?: utime1], :transition[when?: utime2] -> utime1 > utime2 end)
+          |> Enum.reject(fn :transition[when?: unix_time] -> unix_time > timestamp end)
           |> List.first
-        case result do
-          nil  -> 
-            zone = record.zones |> List.first
-            {:ok, zone.name}
-          zone ->
-            {:ok, zone.name}
+        # We'll need these handy
+        zones_available = record.zones
+        # Attempt to get the proper timezone for the current transition we're in
+        result = case current_tt do
+          :transition[zone: zone_index] ->
+            if zone_index <= Enum.count(record.zones) - 1 do
+              # Sweet, we have a matching zone, we have our result!
+              :zone[name: name] = zones_available |> Enum.fetch!(current_tt.zone)
+              {:ok, name}
+            else
+              nil # Fallback to first standard-time zone
+            end
+          _ -> # Fallback to first standard-time zone
+        end
+        cond do
+          # Success
+          result != nil -> result
+          # Damn, let's fallback to the first standard-time zone available
+          true ->
+            fallback = zones_available
+              |> Enum.filter(fn zone -> zone.is_std? end)
+              |> List.first
+            case fallback do
+              # Well, there are no standard-time zones then, just take the first zone available
+              nil  -> 
+                :zone[name: name] = zones_available |> List.first
+                {:ok, name}
+              # Found a reasonable fallback zone, success?
+              :zone[name: name] ->
+                {:ok, name}
+            end
         end
       false ->
         {:error, "Malformed time zone info!"}
