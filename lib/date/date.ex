@@ -66,11 +66,13 @@ defmodule Date do
 
   """
   @spec timezone() :: TimezoneInfo.t
-  @spec timezone(:local | :utc | number | binary) :: TimezoneInfo.t
+  @spec timezone(:local, DateTime.t | nil) :: TimezoneInfo.t
+  @spec timezone(:utc | number | binary) :: TimezoneInfo.t
 
-  def timezone(),       do: Timezone.local()
-  def timezone(:local), do: Timezone.local()
-  def timezone(name),   do: Timezone.get(name)
+  def timezone(),             do: Timezone.local()
+  def timezone(:local),       do: Timezone.local()
+  def timezone(name),         do: Timezone.get(name)
+  def timezone(:local, date), do: Timezone.local(date)
 
   @doc """
   Get current date.

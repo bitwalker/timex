@@ -641,6 +641,9 @@ defmodule Timezone do
 
   @doc """
   Get's the current local timezone configuration.
+  You can provide a reference date to get the local timezone
+  for a specific date, but the operation will not be cached
+  lik getting the local timezone for the current date
   """
   def local() do
     case Process.get(:local_timezone) do
@@ -652,6 +655,7 @@ defmodule Timezone do
         tz
     end
   end
+  def local(date), do: Timezone.Local.lookup(date) |> get
 
   # Generate fast lookup functions for each timezone by their full name
   @timezones |> Enum.each fn tz ->
