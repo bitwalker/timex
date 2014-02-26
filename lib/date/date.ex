@@ -371,7 +371,6 @@ defmodule Date do
   @spec weekday(DateTime.t) :: weekday
 
   def weekday(DateTime[year: y, month: m, day: d]), do: :calendar.day_of_the_week({y, m, d})
-  def weekday(date), do: weekday(local(date))
 
   @doc """
   Returns the ordinal day number of the date.
@@ -504,7 +503,6 @@ defmodule Date do
     { iso_year, iso_week } = iso_week(datetime)
     { iso_year, iso_week, weekday(datetime) }
   end
-  def iso_triplet(date), do: iso_triplet(local(date))
 
   @doc """
   Return the number of days in the month which the date falls on.
@@ -580,7 +578,7 @@ defmodule Date do
   @spec normalize(dtz) :: DateTime.t
   @spec normalize(atom(), term) :: DateTime.t
 
-  def normalize({date, time}), do: normalize({date, time, timezone(:local)})
+  def normalize({date, time}), do: normalize({date, time, timezone(:utc)})
   def normalize({date, time, tz}) do
     construct(normalize(:date, date), normalize(:time, time), tz)
   end
