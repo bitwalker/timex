@@ -418,11 +418,14 @@ defmodule Date do
     abbr_lower = lower |> String.slice(0..2)
     symbol     = abbr_lower |> binary_to_atom
 
-    def day_to_num(unquote(day_name)),   do: unquote(day_num)
-    def day_to_num(unquote(lower)),      do: unquote(day_num)
-    def day_to_num(unquote(abbr_cased)), do: unquote(day_num)
-    def day_to_num(unquote(abbr_lower)), do: unquote(day_num)
-    def day_to_num(unquote(symbol)),     do: unquote(day_num)
+    day_quoted = quote do
+      def day_to_num(unquote(day_name)),   do: unquote(day_num)
+      def day_to_num(unquote(lower)),      do: unquote(day_num)
+      def day_to_num(unquote(abbr_cased)), do: unquote(day_num)
+      def day_to_num(unquote(abbr_lower)), do: unquote(day_num)
+      def day_to_num(unquote(symbol)),     do: unquote(day_num)
+    end
+    Module.eval_quoted __MODULE__, day_quoted, [], __ENV__
   end
   def day_to_num(x), do: raise(:badday, x)
 
@@ -456,13 +459,16 @@ defmodule Date do
     full_chars = month_name |> String.to_char_list!
     abbr_chars = abbr_cased |> String.to_char_list!
 
-    def month_to_num(unquote(month_name)), do: unquote(month_num)
-    def month_to_num(unquote(lower)),      do: unquote(month_num)
-    def month_to_num(unquote(abbr_cased)), do: unquote(month_num)
-    def month_to_num(unquote(abbr_lower)), do: unquote(month_num)
-    def month_to_num(unquote(symbol)),     do: unquote(month_num)
-    def month_to_num(unquote(full_chars)),      do: unquote(month_num)
-    def month_to_num(unquote(abbr_chars)),      do: unquote(month_num)
+    month_quoted = quote do
+      def month_to_num(unquote(month_name)), do: unquote(month_num)
+      def month_to_num(unquote(lower)),      do: unquote(month_num)
+      def month_to_num(unquote(abbr_cased)), do: unquote(month_num)
+      def month_to_num(unquote(abbr_lower)), do: unquote(month_num)
+      def month_to_num(unquote(symbol)),     do: unquote(month_num)
+      def month_to_num(unquote(full_chars)), do: unquote(month_num)
+      def month_to_num(unquote(abbr_chars)), do: unquote(month_num)
+    end
+    Module.eval_quoted __MODULE__, month_quoted, [], __ENV__
   end
   def month_to_num(x), do: raise(:badmonth, x)
 
