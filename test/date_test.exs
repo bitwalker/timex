@@ -3,12 +3,6 @@ defmodule DateTests do
 
   alias Date, as: D
 
-  test :timezone do
-    assert TimezoneInfo[full_name: "UTC", gmt_offset_std: 0] = D.timezone(:utc)
-    assert TimezoneInfo[full_name: "EET", gmt_offset_std: 120] = D.timezone("EET")
-    assert TimezoneInfo[] = D.timezone(:local)
-  end
-
   test :now do
     # We cannot assert matching to a specific value. However, we can still do
     # some sanity checks
@@ -31,9 +25,6 @@ defmodule DateTests do
     DateTime[year: y, month: m, day: d, hour: h, minute: min, second: s] = local
     localdate = D.from({{y,m,d}, {h,min,s}}, :local)
     assert local === D.local(localdate)
-
-    tz = D.timezone(:local)
-    assert local === D.local(localdate, tz)
   end
 
   test :universal do
@@ -87,13 +78,12 @@ defmodule DateTests do
     date = {{2000, 11, 11}, {1, 0, 0}}
     assert DateTime[year: 2000, month: 11, day: 11, hour: 1, minute: 0, second: 0] = date |> D.from |> D.universal
 
-    { _, _, tz } = date |> D.from(:local) |> D.Convert.to_gregorian
-    localtz = D.timezone()
-    assert tz === {localtz.gmt_offset_std/60, localtz.standard_abbreviation}
-
     { d, time, tz } = date |> D.from |> D.Convert.to_gregorian
     unitz = D.timezone(:utc)
     assert tz === {unitz.gmt_offset_std/60,unitz.standard_abbreviation}
+    assert {d,time} === date
+
+    { d, time } = date |> D.from |> D.Convert.to_erlang_datetime
     assert {d,time} === date
 
     { d, time, _ } = date |> D.from(D.timezone("EET")) |> D.Convert.to_gregorian
@@ -316,7 +306,7 @@ defmodule DateTests do
     time = {23,23,23}
     datetime = {date,time}
 
-    unchanged = datetime |> Date.from(:local)
+    unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, secs: 0)
 
     assert DateTime[minute: 23, second: 24] = shift(datetime, secs: 1)
@@ -347,7 +337,7 @@ defmodule DateTests do
     time = {23,23,23}
     datetime = {date,time}
 
-    unchanged = datetime |> Date.from(:local)
+    unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, mins: 0)
 
     assert DateTime[hour: 23, minute: 24, second: 23] = shift(datetime, mins: 1)
@@ -368,7 +358,7 @@ defmodule DateTests do
     time = {23,23,23}
     datetime = {date,time}
 
-    unchanged = datetime |> Date.from(:local)
+    unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, hours: 0)
 
     assert DateTime[month: 3, day: 6, hour: 0, minute: 23, second: 23] = shift(datetime, hours: 1)
@@ -388,7 +378,7 @@ defmodule DateTests do
     time = {23,23,23}
     datetime = { date, time }
 
-    unchanged = datetime |> Date.from(:local)
+    unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, days: 0)
 
     assert DateTime[year: 2013, month: 3, day: 6] = shift(datetime, days: 1)
@@ -406,7 +396,7 @@ defmodule DateTests do
     time = {23,23,23}
     datetime = { date, time }
 
-    unchanged = datetime |> Date.from(:local)
+    unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, weeks: 0)
 
     assert DateTime[year: 2013, month: 3, day: 12] = shift(datetime, weeks: 1)
@@ -426,7 +416,7 @@ defmodule DateTests do
     time = {23,23,23}
     datetime = { date, time }
 
-    unchanged = datetime |> Date.from(:local)
+    unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, months: 0)
 
     assert DateTime[year: 2013, month: 4, day: 5] = shift(datetime, months: 1)
@@ -444,7 +434,7 @@ defmodule DateTests do
     time = {23,23,23}
     datetime = { date, time }
 
-    unchanged = datetime |> Date.from(:local)
+    unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, years: 0)
 
     assert DateTime[year: 2014, month: 3, day: 5] = shift(datetime, years: 1)
@@ -474,6 +464,6 @@ defmodule DateTests do
   end
 
   defp shift(date, spec) when is_list(spec) do
-    date |> D.from(:local) |> D.shift(spec)
+    date |> D.from |> D.shift(spec)
   end
 end
