@@ -7,11 +7,11 @@ A draft implementation of date and time functionality based on **Idea #6** from 
 
 [![wercker status](https://app.wercker.com/status/a77f83a04ae1006c9ee44f61a1a147a0/m/ "wercker status")](https://app.wercker.com/project/bykey/a77f83a04ae1006c9ee44f61a1a147a0)
 
-The API for `Date` is relatively stable at this point.
+Most everything is complete at this point. There are likely some edge cases around formatting/parsing of dates and times, and around handling of timezones and daylight savings time, but there is already a significant number of tests around these parts, so I feel pretty good about where we're at.
 
-The `Time` module is more prone to change, but likely won't change too drastically moving forward.
+There is still potential for a lot of API change, pre-1.0, but that should be expected while Elixir is still in a high state of flux, particularly with records potentially going away.
 
-To add this library to your project, edit your mix.exs file so that it looks similar to this:
+To use timex with your projects, edit your mix.exs file and add it as a dependency:
 
 ```elixir
 defp deps do
@@ -24,11 +24,9 @@ After that, run `mix deps.get` and start using `Date` functions in your project'
 
 ## Overview ##
 
-This is a draft implementation of two modules for Elixir that are going to deal with all aspects of working with dates and time intervals.
+This is a draft implementation of a Date/Time library for Elixir that will deal with all aspects of working with dates and time intervals.
 
-Basically, the `Date` module is for dealing with dates. It supports getting current date in any time zone, calculating time intervals between two dates, shifting a date by some amount of seconds/hours/days/years towards past and future. As Erlang provides support only for the Gregorian calendar, that's what I'm going to stick to for the time being.
-
-Support for working with time zones is not finalized. Although there is no time zone database yet, you may create time zones by manually specifying offset and name and it'll work correctly, i.e. you'll be able to convert between time zones, format dates to strings, etc.
+Basically, the `Date` module is for dealing with dates. It supports getting current date in any time zone, converting between timezones while taking Daylight Savings Time offsets into account, calculating time intervals between two dates, shifting a date by some amount of seconds/hours/days/years towards past and future, etc. As Erlang provides support only for the Gregorian calendar, that's what timex currently supports, but it is possible to add additional calendars if needed.
 
 The `Time` module supports a finer grain level of calculations over time intervals. It is going to be used for timestamps in logs, measuring code executions times, converting time units, and so forth.
 
@@ -39,7 +37,7 @@ The `Time` module supports a finer grain level of calculations over time interva
 Get current date in the local time zone.
 
 ```elixir
-date = Date.now()
+date = Date.local
 DateFormat.format!(date, "{ISO}")      #=> "2013-09-30T16:40:08+0300"
 DateFormat.format!(date, "{RFC1123}")  #=> "Mon, 30 Sep 2013 16:40:08 EEST"
 DateFormat.format!(date, "{kitchen}")  #=> "4:40PM"
@@ -56,37 +54,38 @@ date = Date.from(datetime)           # datetime is assumed to be in UTC by defau
 DateFormat.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 GMT"
 
 date = Date.from(datetime, :local)   # indicates that datetime is in local time zone
-DateFormat.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 EEST"
+DateFormat.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 CST"
 
-Date.local(date)  # convert date to local time zone
-#=> {{2013,3,17},{21,22,23}}
+Date.local(date)  # convert date to local time zone (CST for our example)
+#=> DateTime[year: 2013, month: 3, day: 17, hour: 15, minute: 22, second: 23, timezone: ...]
 
 # Let's see what happens if we switch the time zone
-date = Date.set(date, tz: { -8, "PST" })
+date = Date.set(date, tz: Timezone.get("EST"))
 DateFormat.format!(date, "{RFC1123}")
-#=> "Sun, 17 Mar 2013 10:22:23 PST"
+#=> "Sun, 17 Mar 2013 17:22:23 EST"
 
 Date.universal(date)  # convert date to UTC
-#=> {{2013,3,17},{18,22,23}}
+#=> DateTime[year: 2013, month: 3, day: 17, hour: 21, minute: 22, second: 23, timezone: ...]
 ```
 
 ### Working with time zones ###
 
-Currently, we need to build time zones by hand. The functions in `Date` are already respecting time zone offsets when doing calculations. Time zone names are used by `DateFormat` during formatting.
-
 ```elixir
-date = Date.from({2013,1,1}, Date.timezone(5, "SomewhereInRussia"))
+date = Date.from({2013,1,1}, Date.timezone("America/Chicago"))
 DateFormat.format!(date, "{ISO}")
-#=> "2013-01-01T00:00:00+0500"
+#=> "2013-01-01T00:00:00-0600"
 DateFormat.format!(date, "{ISOz}")
-#=> "2012-12-31T19:00:00Z"
+#=> "2013-01-01T06:00:00Z"
 
 DateFormat.format!(date, "{RFC1123}")
-#=> "Tue, 01 Jan 2013 00:00:00 SomewhereInRussia"
+#=> "Tue, 01 Jan 2013 00:00:00 CST"
 
-date = Date.now()
+date = Date.now
+# Convert to UTC
 Date.universal(date)                        #=> DateTime[...]
+# Convert a date to local time
 Date.local(date)                            #=> DateTime[...]
+# Convert a date to local time, and provide the local timezone
 Date.local(date, Date.timezone("PST"))      #=> DateTime[...]
 ```
 
@@ -95,19 +94,27 @@ Date.local(date, Date.timezone("PST"))      #=> DateTime[...]
 Find out current weekday, week number, number of days in a given month, etc.
 
 ```elixir
-date = Date.now()
+date = Date.now
 DateFormat.format!(date, "{RFC1123}")
-#=> "Mon, 30 Sep 2013 16:51:02 EEST"
+#=> "Wed, 26 Feb 2014 06:02:50 GMT"
 
-Date.weekday(date)           #=> 1
-Date.week(date)              #=> {2013, 40}
-Date.iso_triplet(date)       #=> {2013, 40, 1}
+Date.weekday(date)           #=> 3
+Date.iso_week(date)          #=> {2014, 9}
+Date.iso_triplet(date)       #=> {2014, 9, 3}
 
-Date.days_in_month(date)     #=> 30
+Date.days_in_month(date)     #=> 28
 Date.days_in_month(2012, 2)  #=> 29
 
 Date.is_leap?(date)           #=> false
 Date.is_leap?(2012)           #=> true
+
+Date.day_to_num(:mon)         #=> 1
+Date.day_to_num("Thursday")   #=> 4 (can use Thursday, thursday, Thu, thu, :thu)
+Date.day_name(4)              #=> "Thursday"
+
+Date.month_to_num(:apr)       #=> 4 (same as day_to_num with possible formats)
+Date.month_name(4)            #=> "April"
+
 ```
 
 ### Date arithmetic ###
@@ -115,7 +122,7 @@ Date.is_leap?(2012)           #=> true
 `Date` can convert dates to time intervals since UNIX epoch or year 0. Calculating time intervals between two dates is possible via the `diff()` function (not implemented yet).
 
 ```elixir
-date = Date.now()
+date = Date.now
 DateFormat.format!(date, "{RFC1123}")
 #=> "Mon, 30 Sep 2013 16:55:02 EEST"
 
@@ -141,7 +148,7 @@ DateFormat.format!(date, "{ISOz}")
 Shifting refers to moving by some amount of time towards past or future. `Date` supports multiple ways of doing this.
 
 ```elixir
-date = Date.now()
+date = Date.now
 DateFormat.format!(date, "{RFC1123}")
 #=> "Mon, 30 Sep 2013 16:58:13 EEST"
 
