@@ -712,7 +712,7 @@ defmodule Timezone.Local do
     case File.exists?(file) do
       true ->
         case file |> File.read! |> parse_tzfile(date) do
-          {:ok, tz}   -> tz
+          {:ok, tz}   -> {:ok, tz}
           {:error, m} -> raise m
         end
       _ ->
@@ -769,7 +769,7 @@ defmodule Timezone.Local do
   """
   @spec parse_tzfile(binary, DateTime.t | nil) :: {:ok, String.t} | {:error, term}
 
-  def parse_tzfile(tzdata), do: parse_tzfile(tzdata, Date.univeral())
+  def parse_tzfile(tzdata), do: parse_tzfile(tzdata, Date.universal())
   def parse_tzfile(tzdata, DateTime[] = reference_date) do
     case tzdata do
       << ?T,?Z,?i,?f, rest :: binary >> ->
@@ -884,7 +884,8 @@ defmodule Timezone.Local do
             case fallback do
               # Well, there are no standard-time zones then, just take the first zone available
               nil  -> 
-                :zone[name: name] = zones_available |> List.first
+                last_transition = record.transitions |> List.last
+                :zone[name: name] = zones_available |> Enum.fetch!(last_transition.zone)
                 {:ok, name}
               # Found a reasonable fallback zone, success?
               :zone[name: name] ->
