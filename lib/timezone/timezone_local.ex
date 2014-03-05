@@ -1,7 +1,9 @@
-defmodule Timezone.Local do
+defmodule Timex.Timezone.Local do
   @moduledoc """
   Contains the logic and parser for extracting local timezone configuration.
   """
+  alias Timex.DateTime, as: DateTime
+  alias Timex.Date,     as: Date
 
   # Map of Windows time zone names to Olson time zone names
   @lookup_olson [

@@ -1,4 +1,4 @@
-defmodule DateFormat.Default do
+defmodule Timex.DateFormat.Default do
   @moduledoc """
   Date formatting language used by default by the `DateFormat` module.
 

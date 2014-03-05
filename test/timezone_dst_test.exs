@@ -1,7 +1,8 @@
 defmodule TimezoneDstTests do
   use ExUnit.Case, async: true
+  use Timex
 
-  import Timezone.Dst, only: [is_dst?: 1]
+  import Timex.Timezone.Dst, only: [is_dst?: 1]
 
   test :is_dst? do
     #{"America/Chicago", {"CST", "CST"}, {"CDT", "CDT"}, -360, 60, {2, :sun, :mar}, {2, 0}, {1, :sun, :nov}, {2, 0}}, 

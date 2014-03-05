@@ -1,4 +1,4 @@
-defmodule Time do
+defmodule Timex.Time do
 
   @million 1_000_000
 

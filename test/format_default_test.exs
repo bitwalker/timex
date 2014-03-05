@@ -1,5 +1,6 @@
 defmodule DateFormatTest.FormatDefault do
   use ExUnit.Case, async: true
+  use Timex
 
   test :format_year do
     date = Date.from({2013,8,18})
@@ -363,6 +364,6 @@ defmodule DateFormatTest.ValidateDefault do
   end
 
   defp validate(fmt) do
-    DateFormat.validate(fmt)
+    Timex.DateFormat.validate(fmt)
   end
 end

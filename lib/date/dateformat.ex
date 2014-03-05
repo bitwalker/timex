@@ -1,4 +1,4 @@
-defmodule DateFormat do
+defmodule Timex.DateFormat do
   @moduledoc """
   Date formatting and parsing.
 
@@ -9,6 +9,9 @@ defmodule DateFormat do
   Multiple template formats are supported, each one provided by a separate
   module. One can also implement custom formatters for use with this module.
   """
+  alias Timex.DateTime,     as: DateTime
+  alias Timex.Date,         as: Date
+  alias Timex.Date.Convert, as: DateConvert
 
   @type formatter :: atom | {function, String.t}
 
@@ -181,18 +184,18 @@ defmodule DateFormat do
       :AM        -> if hour < 12 do "AM" else "PM" end
 
       :zname ->
-        {_,_,{_,tz_name}} = Date.Convert.to_gregorian(date)
+        {_,_,{_,tz_name}} = DateConvert.to_gregorian(date)
         tz_name
       :zoffs ->
-        {_,_,{tz_offset,_}} = Date.Convert.to_gregorian(date)
+        {_,_,{tz_offset,_}} = DateConvert.to_gregorian(date)
         { sign, hour, min, _ } = split_tz(tz_offset)
         :io_lib.format("~s~2..0B~2..0B", [sign, hour, min])
       :zoffs_colon ->
-        {_,_,{tz_offset,_}} = Date.Convert.to_gregorian(date)
+        {_,_,{tz_offset,_}} = DateConvert.to_gregorian(date)
         { sign, hour, min, _ } = split_tz(tz_offset)
         :io_lib.format("~s~2..0B:~2..0B", [sign, hour, min])
       :zoffs_sec ->
-        {_,_,{tz_offset,_}} = Date.Convert.to_gregorian(date)
+        {_,_,{tz_offset,_}} = DateConvert.to_gregorian(date)
         :io_lib.format("~s~2..0B:~2..0B:~2..0B", tuple_to_list(split_tz(tz_offset)))
     end
   end
@@ -204,7 +207,7 @@ defmodule DateFormat do
   end
 
   defp format_predefined(date, :"ISO") do
-    { _, _, {offset,_} } = Date.Convert.to_gregorian(date)
+    { _, _, {offset,_} } = DateConvert.to_gregorian(date)
 
     { sign, hrs, min, _ } = split_tz(offset)
     tz = :io_lib.format("~s~2..0B~2..0B", [sign, hrs, min])
@@ -245,12 +248,12 @@ defmodule DateFormat do
   ## RFC 1123 ##
 
   defp format_predefined(date, :"RFC1123") do
-    { _, _, {_,tz_name} } = Date.Convert.to_gregorian(date)
+    { _, _, {_,tz_name} } = DateConvert.to_gregorian(date)
     format_rfc(date, {:name, tz_name})
   end
 
   defp format_predefined(date, :"RFC1123z") do
-    { _, _, {tz_offset,_} } = Date.Convert.to_gregorian(date)
+    { _, _, {tz_offset,_} } = DateConvert.to_gregorian(date)
     format_rfc(date, {:offset, tz_offset})
   end
 
@@ -259,7 +262,7 @@ defmodule DateFormat do
   # This is similar to ISO, but using xx:xx format for time zone offset (as
   # opposed to xxxx)
   defp format_predefined(date, :"RFC3339") do
-    { _, _, {offset,_} } = Date.Convert.to_gregorian(date)
+    { _, _, {offset,_} } = DateConvert.to_gregorian(date)
     tz = if offset == 0 do
       "Z"
     else
@@ -284,7 +287,7 @@ defmodule DateFormat do
     day_name = weekday_name_short(Date.weekday(date))
     month_name = month_name_short(month)
 
-    {_,_,{_,tz_name}} = Date.Convert.to_gregorian(date)
+    {_,_,{_,tz_name}} = DateConvert.to_gregorian(date)
 
     fstr = "~s ~s ~2.. B ~2..0B:~2..0B:~2..0B #{tz_name} ~4..0B"
     :io_lib.format(fstr, [day_name, month_name, day, hour, min, sec, year])
@@ -543,11 +546,11 @@ defmodule DateFormat do
   ### Working with formatters ###
 
   defp tokenize(fmt, :default) when is_binary(fmt) do
-    do_tokenize(fmt, {&DateFormat.Default.process_directive/1, "{"})
+    do_tokenize(fmt, {&Timex.DateFormat.Default.process_directive/1, "{"})
   end
 
   defp tokenize(fmt, :strftime) when is_binary(fmt) do
-    do_tokenize(fmt, {&DateFormat.Strftime.process_directive/1, "%"})
+    do_tokenize(fmt, {&Timex.DateFormat.Strftime.process_directive/1, "%"})
   end
 
   defp tokenize(fmt, {formatter, pat})

@@ -1,5 +1,6 @@
 defmodule DateFormatTest.ParseDefault do
   use ExUnit.Case, async: true
+  use Timex
 
   test :parse_literal do
     zero = Date.zero

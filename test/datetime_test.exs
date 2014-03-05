@@ -1,5 +1,6 @@
 defmodule DateTimeTests do
   use ExUnit.Case, async: true
+  use Timex
 
   test :epoch do
     assert (Date.epoch |> Date.to_secs(:zero)) == Time.to_secs(Time.epoch)

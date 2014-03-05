@@ -1,9 +1,13 @@
-defprotocol Date.Convert do
+defprotocol Timex.Date.Convert do
   def to_gregorian(date)
   def to_erlang_datetime(date)
 end
 
-defimpl Date.Convert, for: DateTime do
+defimpl Timex.Date.Convert, for: Timex.DateTime do
+  alias Timex.DateTime,     as: DateTime
+  alias Timex.Timezone,     as: Timezone
+  alias Timex.TimezoneInfo, as: TimezoneInfo
+  
   def to_gregorian(
     DateTime[
       year: y, month: m, day: d, hour: h, minute: min, second: sec,

@@ -1,7 +1,11 @@
-defmodule Timezone.Dst do
+defmodule Timex.Timezone.Dst do
   @moduledoc """
   Rules for determining if a datetime falls within a daylight savings period.
   """
+
+  alias Timex.Date,         as: Date
+  alias Timex.DateTime,     as: DateTime
+  alias Timex.TimezoneInfo, as: TimezoneInfo
 
   @doc """
   Check if the provided datetime is in daylight savings time

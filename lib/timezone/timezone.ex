@@ -19,7 +19,7 @@
 #     - hour = integer(), 0..23
 #     - min  = integer(), 0..59
 #
-defrecord TimezoneInfo,
+defrecord Timex.TimezoneInfo,
   full_name:             "",
   standard_abbreviation: "",
   standard_name:         "",
@@ -32,11 +32,16 @@ defrecord TimezoneInfo,
   dst_end_day:           :undef,
   dst_end_time:          :undef
 
-defmodule Timezone do
+defmodule Timex.Timezone do
   @moduledoc """
   Contains all the logic around conversion, manipulation,
   and comparison of time zones.
   """
+  alias Timex.Date,           as: Date
+  alias Timex.DateTime,       as: DateTime
+  alias Timex.TimezoneInfo,   as: TimezoneInfo
+  alias Timex.Timezone.Local, as: Local
+  alias Timex.Timezone.Dst,   as: Dst
 
   @timezones_raw [
     # Automatically generated from the time zone database version 2013i for 2014-01-09.
@@ -682,14 +687,14 @@ defmodule Timezone do
   def local() do
     case Process.get(:local_timezone) do
       nil ->
-        tz = Timezone.Local.lookup() |> get
+        tz = Local.lookup() |> get
         Process.put(:local_timezone, tz)
         tz
       tz ->
         tz
     end
   end
-  def local(date), do: Timezone.Local.lookup(date) |> get
+  def local(date), do: Local.lookup(date) |> get
 
   # Generate fast lookup functions for each timezone by their full name
   @timezones |> Enum.each fn tz ->
@@ -743,8 +748,8 @@ defmodule Timezone do
     # Create a copy of the date in the new time zone so we can ask about DST
     target_date = date.update(timezone: destination)
     # Determine DST status of origin and target
-    origin_is_dst? = date        |> Timezone.Dst.is_dst?
-    target_is_dst? = target_date |> Timezone.Dst.is_dst?
+    origin_is_dst? = date        |> Dst.is_dst?
+    target_is_dst? = target_date |> Dst.is_dst?
     # Get the difference, accounting for DST offsets
     cond do
       # Standard Time all the way

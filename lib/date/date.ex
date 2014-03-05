@@ -1,4 +1,4 @@
-defmodule Date do
+defmodule Timex.Date do
   @moduledoc """
   Module for working with dates.
 
@@ -16,6 +16,9 @@ defmodule Date do
     * compare dates
     * date arithmetic
   """
+  alias Timex.DateTime,     as: DateTime
+  alias Timex.Timezone,     as: Timezone
+  alias Timex.TimezoneInfo, as: TimezoneInfo
 
   # Date types
   @type dtz :: { datetime, TimezoneInfo.t }

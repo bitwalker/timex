@@ -1,5 +1,6 @@
 defmodule TimeTests do
   use ExUnit.Case, async: true
+  use Timex
 
   test :diff do
     timestamp1 = {1362,568903,363960}

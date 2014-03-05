@@ -1,4 +1,4 @@
-defmodule DateFormat.Strftime do
+defmodule Timex.DateFormat.Strftime do
   @moduledoc """
   Date formatting language defined by the `strftime` function from the Standard
   C Library.

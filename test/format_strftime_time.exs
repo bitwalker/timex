@@ -1,5 +1,6 @@
 defmodule DateFormatTest.FormatStrftime do
   use ExUnit.Case, async: true
+  use Timex
 
   test :format_year do
     date = Date.from({2013,8,18})

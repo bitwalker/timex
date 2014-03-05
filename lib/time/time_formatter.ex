@@ -1,5 +1,5 @@
 # WIP. Nothing interesting here
-defmodule TimeFormatter do
+defmodule Timex.TimeFormatter do
   defmacrop _MINUTE, do: 60
   defmacrop _HOUR, do: _MINUTE * 60
   defmacrop _DAY, do: _HOUR * 24

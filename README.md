@@ -37,7 +37,10 @@ defp deps do
 end
 ```
 
-After that, run `mix deps.get` and start using `Date` functions in your project's code.
+After that, run `mix deps.get` to load the dependency. To use Timex modules without the Timex namespace, add
+`use Timex` to the top of each module you plan on referencing Timex from. You can then reference the modules
+directly, for example: `Date.now()`, versus `Timex.Date.now()`. This is for compatibility with other libraries
+which might define their own Date/DateTime/Time implementations.
 
 
 ## Overview ##

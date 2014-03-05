@@ -1,15 +1,16 @@
 defmodule DateTests do
   use ExUnit.Case, async: true
+  use Timex
 
-  alias Date, as: D
+  alias Timex.Date, as: D
 
   test :now do
     # We cannot assert matching to a specific value. However, we can still do
     # some sanity checks
     now = D.now
-    assert {{_, _, _}, {_, _, _}, {_, _}} = D.Convert.to_gregorian(now)
+    assert {{_, _, _}, {_, _, _}, {_, _}} = DateConvert.to_gregorian(now)
 
-    {_, _, tz} = D.Convert.to_gregorian(now)
+    {_, _, tz} = DateConvert.to_gregorian(now)
     TimezoneInfo[full_name: name, gmt_offset_std: offset_mins] = D.timezone(:utc)
     assert tz === {offset_mins/60, name}
 
@@ -36,14 +37,14 @@ defmodule DateTests do
 
   test :zero do
     zero = D.zero
-    { date, time, tz } = zero |> D.Convert.to_gregorian
+    { date, time, tz } = zero |> DateConvert.to_gregorian
     assert :calendar.datetime_to_gregorian_seconds({date,time}) === 0
     assert tz === {zero.timezone.gmt_offset_std/60, zero.timezone.full_name}
   end
 
   test :epoch do
     epoch = D.epoch
-    assert { {1970,1,1}, {0,0,0}, {0.0, "UTC"} } = D.Convert.to_gregorian(epoch)
+    assert { {1970,1,1}, {0,0,0}, {0.0, "UTC"} } = DateConvert.to_gregorian(epoch)
     assert D.to_secs(epoch) === 0
     assert D.to_days(epoch) === 0
     assert D.to_secs(epoch, :zero) === D.epoch(:secs)
@@ -55,19 +56,19 @@ defmodule DateTests do
     date = {2000, 11, 11}
     assert DateTime[year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0] = date |> D.from
 
-    { _, _, tz } = date |> D.from(:local) |> D.Convert.to_gregorian
+    { _, _, tz } = date |> D.from(:local) |> DateConvert.to_gregorian
     localtz = D.timezone()
     assert tz === {localtz.gmt_offset_std/60, localtz.standard_abbreviation}
     assert DateTime[year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0, timezone: _] = date |> D.from(:local)
 
-    { date, time, tz } = date |> Date.from |> D.Convert.to_gregorian
+    { date, time, tz } = date |> Date.from |> DateConvert.to_gregorian
     unitz = D.timezone(:utc)
     assert tz === {unitz.gmt_offset_std/60,unitz.standard_abbreviation}
     assert {date,time} === {{2000,11,11}, {0,0,0}}
 
     # Converting to a datetime and back to gregorian should yield the original date
     fulldate = date |> D.from(D.timezone("EET"))
-    { date, time, _ } = fulldate |> D.Convert.to_gregorian
+    { date, time, _ } = fulldate |> DateConvert.to_gregorian
     assert {date,time} === {{2000,11,11}, {0,0,0}}
   end
 
@@ -78,15 +79,15 @@ defmodule DateTests do
     date = {{2000, 11, 11}, {1, 0, 0}}
     assert DateTime[year: 2000, month: 11, day: 11, hour: 1, minute: 0, second: 0] = date |> D.from |> D.universal
 
-    { d, time, tz } = date |> D.from |> D.Convert.to_gregorian
+    { d, time, tz } = date |> D.from |> DateConvert.to_gregorian
     unitz = D.timezone(:utc)
     assert tz === {unitz.gmt_offset_std/60,unitz.standard_abbreviation}
     assert {d,time} === date
 
-    { d, time } = date |> D.from |> D.Convert.to_erlang_datetime
+    { d, time } = date |> D.from |> DateConvert.to_erlang_datetime
     assert {d,time} === date
 
-    { d, time, _ } = date |> D.from(D.timezone("EET")) |> D.Convert.to_gregorian
+    { d, time, _ } = date |> D.from(D.timezone("EET")) |> DateConvert.to_gregorian
     assert {d,time} === {{2000,11,11}, {1,0,0}}
   end
 
@@ -122,7 +123,7 @@ defmodule DateTests do
 
   test :to_secs do
     date = D.now()
-    assert D.to_secs(date, :zero) === date |> D.universal |> D.Convert.to_erlang_datetime |> :calendar.datetime_to_gregorian_seconds
+    assert D.to_secs(date, :zero) === date |> D.universal |> DateConvert.to_erlang_datetime |> :calendar.datetime_to_gregorian_seconds
     assert D.to_secs(date, :zero) - D.epoch(:secs) === D.to_secs(date)
 
     ts = Time.now()

@@ -1,5 +1,6 @@
 defmodule TimezoneTests do
   use ExUnit.Case, async: true
+  use Timex
 
   test :get do
     TimezoneInfo[full_name: name, standard_abbreviation: abbrev, gmt_offset_std: offset] = Timezone.get("America/Chicago")
