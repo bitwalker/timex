@@ -7,7 +7,7 @@ A draft implementation of date and time functionality based on **Idea #6** from 
 
 [![wercker status](https://app.wercker.com/status/07ebafab94a2004564366a6734d1b8bf/m/master "wercker status")](https://app.wercker.com/project/bykey/07ebafab94a2004564366a6734d1b8bf)
 
-Version 0.4.2 is stable and usable on Elixir 0.12.4 and 0.13+.
+Version 0.4.5 is stable and usable on Elixir 0.12.4 and 0.13+.
 However, future development is happening on the 0.5.0 branch, where I'm
 making a number of significant changes:
 
