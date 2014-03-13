@@ -1,8 +1,6 @@
 Date & Time modules for Elixir
 ==============================
 
-A draft implementation of date and time functionality based on **Idea #6** from this [proposal page](https://github.com/beamcommunity/beamcommunity.github.com/wiki/Project:-Elixir).
-
 ## Status ##
 
 [![wercker status](https://app.wercker.com/status/07ebafab94a2004564366a6734d1b8bf/m/master "wercker status")](https://app.wercker.com/project/bykey/07ebafab94a2004564366a6734d1b8bf)
