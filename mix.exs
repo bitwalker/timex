@@ -1,13 +1,20 @@
-defmodule Date.Mixfile do
+defmodule Timex.Mixfile do
   use Mix.Project
 
   def project do
-    [ app: :"timex",
+    [ app: :timex,
       version: "0.4.5",
-      deps: deps ]
+      description: "A date/time library for Elixir",
+      package: package,
+      deps: [] ]
   end
 
-  def deps do
-    []
+  def application, do: []
+
+  defp package do
+    [ files: ["lib", "mix.exs", "README.md", "LICENSE.md"],
+      contributors: ["Paul Schoenfelder", "Alexei Sholik"],
+      licenses: ["MIT"],
+      links: [ { "GitHub", "https://github.com/bitwalker/exirc" } ] ]
   end
 end
