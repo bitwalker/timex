@@ -17,6 +17,6 @@ defmodule Timex.Mixfile do
     [ files: ["lib", "mix.exs", "README.md", "LICENSE.md"],
       contributors: ["Paul Schoenfelder", "Alexei Sholik"],
       licenses: ["MIT"],
-      links: [ { "GitHub", "https://github.com/bitwalker/exirc" } ] ]
+      links: [ { "GitHub", "https://github.com/bitwalker/timex" } ] ]
   end
 end
