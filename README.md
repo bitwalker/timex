@@ -76,7 +76,7 @@ date = Date.from(datetime, :local)   # indicates that datetime is in local time 
 DateFormat.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 CST"
 
 Date.local(date)  # convert date to local time zone (CST for our example)
-#=> DateTime[year: 2013, month: 3, day: 17, hour: 15, minute: 22, second: 23, timezone: ...]
+#=> %DateTime{year: 2013, month: 3, day: 17, hour: 15, minute: 22, second: 23, timezone: ...}
 
 # Let's see what happens if we switch the time zone
 date = Date.set(date, tz: Timezone.get("EST"))
@@ -84,7 +84,7 @@ DateFormat.format!(date, "{RFC1123}")
 #=> "Sun, 17 Mar 2013 17:22:23 EST"
 
 Date.universal(date)  # convert date to UTC
-#=> DateTime[year: 2013, month: 3, day: 17, hour: 21, minute: 22, second: 23, timezone: ...]
+#=> %DateTime{year: 2013, month: 3, day: 17, hour: 21, minute: 22, second: 23, timezone: ...}
 ```
 
 ### Working with time zones ###
@@ -101,11 +101,11 @@ DateFormat.format!(date, "{RFC1123}")
 
 date = Date.now
 # Convert to UTC
-Date.universal(date)                        #=> DateTime[...]
+Date.universal(date)                        #=> %DateTime{...}
 # Convert a date to local time
-Date.local(date)                            #=> DateTime[...]
+Date.local(date)                            #=> %DateTime{...}
 # Convert a date to local time, and provide the local timezone
-Date.local(date, Date.timezone("PST"))      #=> DateTime[...]
+Date.local(date, Date.timezone("PST"))      #=> %DateTime{...}
 ```
 
 ### Extracting information about dates ###

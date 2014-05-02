@@ -23,14 +23,14 @@ defmodule DateTests do
 
   test :local do
     local     = D.local
-    DateTime[year: y, month: m, day: d, hour: h, minute: min, second: s] = local
+    %DateTime{year: y, month: m, day: d, hour: h, minute: min, second: s} = local
     localdate = D.from({{y,m,d}, {h,min,s}}, :local)
     assert local === D.local(localdate)
   end
 
   test :universal do
     uni     = D.universal()
-    DateTime[year: y, month: m, day: d, hour: h, minute: min, second: s] = uni
+    %DateTime{year: y, month: m, day: d, hour: h, minute: min, second: s} = uni
     unidate = D.from({{y,m,d}, {h,min,s}})
     assert uni === D.universal(unidate)
   end
@@ -54,12 +54,12 @@ defmodule DateTests do
 
   test :from_date do
     date = {2000, 11, 11}
-    assert DateTime[year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0] = date |> D.from
+    assert %DateTime{year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0} = date |> D.from
 
     { _, _, tz } = date |> D.from(:local) |> DateConvert.to_gregorian
     localtz = D.timezone()
     assert tz === {localtz.gmt_offset_std/60, localtz.standard_abbreviation}
-    assert DateTime[year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0, timezone: _] = date |> D.from(:local)
+    assert %DateTime{year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0, timezone: _} = date |> D.from(:local)
 
     { date, time, tz } = date |> Date.from |> DateConvert.to_gregorian
     unitz = D.timezone(:utc)
@@ -77,7 +77,7 @@ defmodule DateTests do
     assert 0 === D.from({{1970,1,1}, {0,0,0}}) |> D.to_secs
 
     date = {{2000, 11, 11}, {1, 0, 0}}
-    assert DateTime[year: 2000, month: 11, day: 11, hour: 1, minute: 0, second: 0] = date |> D.from |> D.universal
+    assert %DateTime{year: 2000, month: 11, day: 11, hour: 1, minute: 0, second: 0} = date |> D.from |> D.universal
 
     { d, time, tz } = date |> D.from |> DateConvert.to_gregorian
     unitz = D.timezone(:utc)
@@ -105,8 +105,8 @@ defmodule DateTests do
   end
 
   test :from_days do
-    assert DateTime[year: 1970, month: 1, day: 31, hour: 0, minute: 0, second: 0] = D.from(30, :days)
-    assert DateTime[year: 1970, month: 2, day: 1, hour: 0, minute: 0, second: 0] = D.from(31, :days)
+    assert %DateTime{year: 1970, month: 1, day: 31, hour: 0, minute: 0, second: 0} = D.from(30, :days)
+    assert %DateTime{year: 1970, month: 2, day: 1, hour: 0, minute: 0, second: 0} = D.from(31, :days)
   end
 
   test :convert do
@@ -229,7 +229,7 @@ defmodule DateTests do
   test :normalize do
     tz = Timezone.get(:utc)
     date = { {1,13,44}, {-8,60,61}, tz }
-    assert DateTime[year: 1, month: 12, day: 31, hour: 0, minute: 59, second: 59, timezone: _] = D.normalize(date)
+    assert %DateTime{year: 1, month: 12, day: 31, hour: 0, minute: 59, second: 59, timezone: _} = D.normalize(date)
   end
 
   test :set do
@@ -255,12 +255,12 @@ defmodule DateTests do
 
     tz1   = Timezone.get(2)
     tz2   = Timezone.get(-3)
-    date1 = DateTime[year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz1]
-    date2 = DateTime[year: 2013, month: 3, day: 18, hour: 8, minute: 44, timezone: tz2]
+    date1 = %DateTime{year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz1}
+    date2 = %DateTime{year: 2013, month: 3, day: 18, hour: 8, minute: 44, timezone: tz2}
     assert D.compare(date1, date2) === 0
 
     tz3   = Timezone.get(3)
-    date3 = DateTime[year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz3]
+    date3 = %DateTime{year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz3}
     assert D.compare(date1, date3) === -1
 
     date = D.now()
@@ -310,27 +310,27 @@ defmodule DateTests do
     unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, secs: 0)
 
-    assert DateTime[minute: 23, second: 24] = shift(datetime, secs: 1)
-    assert DateTime[minute: 23, second: 59] = shift(datetime, secs: 36)
-    assert DateTime[minute: 24, second: 0] = shift(datetime, secs: 37)
-    assert DateTime[minute: 24, second: 1] = shift(datetime, secs: 38)
-    assert DateTime[minute: 25, second: 1] = shift(datetime, secs: 38+60)
-    assert DateTime[minute: 59, second: 59] = shift(datetime, secs: 38+60*35+58)
-    assert DateTime[month: 3, day: 6, hour: 0, minute: 0, second: 0] = shift(datetime, secs: 38+60*35+59)
-    assert DateTime[month: 3, day: 6, hour: 0, minute: 0, second: 1] = shift(datetime, secs: 38+60*36)
-    assert DateTime[month: 3, day: 6, hour: 23, minute: 23, second: 23] = shift(datetime, secs: 24*3600)
-    assert DateTime[month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, secs: 24*3600*365)
+    assert %DateTime{minute: 23, second: 24} = shift(datetime, secs: 1)
+    assert %DateTime{minute: 23, second: 59} = shift(datetime, secs: 36)
+    assert %DateTime{minute: 24, second: 0} = shift(datetime, secs: 37)
+    assert %DateTime{minute: 24, second: 1} = shift(datetime, secs: 38)
+    assert %DateTime{minute: 25, second: 1} = shift(datetime, secs: 38+60)
+    assert %DateTime{minute: 59, second: 59} = shift(datetime, secs: 38+60*35+58)
+    assert %DateTime{month: 3, day: 6, hour: 0, minute: 0, second: 0} = shift(datetime, secs: 38+60*35+59)
+    assert %DateTime{month: 3, day: 6, hour: 0, minute: 0, second: 1} = shift(datetime, secs: 38+60*36)
+    assert %DateTime{month: 3, day: 6, hour: 23, minute: 23, second: 23} = shift(datetime, secs: 24*3600)
+    assert %DateTime{month: 3, day: 5, hour: 23, minute: 23, second: 23} = shift(datetime, secs: 24*3600*365)
 
-    assert DateTime[minute: 23, second: 22] = shift(datetime, secs: -1)
-    assert DateTime[minute: 23, second: 0] = shift(datetime, secs: -23)
-    assert DateTime[minute: 22, second: 59] = shift(datetime, secs: -24)
-    assert DateTime[hour: 23, minute: 0, second: 23] = shift(datetime, secs: -23*60)
-    assert DateTime[hour: 22, minute: 59, second: 23] = shift(datetime, secs: -24*60)
-    assert DateTime[year: 2013, month: 3, day: 5, hour: 0, minute: 0, second: 0] = shift(datetime, secs: -23*3600-23*60-23)
-    assert DateTime[year: 2013, month: 3, day: 4, hour: 23, minute: 59, second: 59] = shift(datetime, secs: -23*3600-23*60-24)
-    assert DateTime[year: 2013, month: 3, day: 4, hour: 23, minute: 23, second: 23] = shift(datetime, secs: -24*3600)
-    assert DateTime[year: 2012, month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, secs: -24*3600*365)
-    assert DateTime[year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, secs: -24*3600*(365*2+1))   # +1 day for leap year 2012
+    assert %DateTime{minute: 23, second: 22} = shift(datetime, secs: -1)
+    assert %DateTime{minute: 23, second: 0} = shift(datetime, secs: -23)
+    assert %DateTime{minute: 22, second: 59} = shift(datetime, secs: -24)
+    assert %DateTime{hour: 23, minute: 0, second: 23} = shift(datetime, secs: -23*60)
+    assert %DateTime{hour: 22, minute: 59, second: 23} = shift(datetime, secs: -24*60)
+    assert %DateTime{year: 2013, month: 3, day: 5, hour: 0, minute: 0, second: 0} = shift(datetime, secs: -23*3600-23*60-23)
+    assert %DateTime{year: 2013, month: 3, day: 4, hour: 23, minute: 59, second: 59} = shift(datetime, secs: -23*3600-23*60-24)
+    assert %DateTime{year: 2013, month: 3, day: 4, hour: 23, minute: 23, second: 23} = shift(datetime, secs: -24*3600)
+    assert %DateTime{year: 2012, month: 3, day: 5, hour: 23, minute: 23, second: 23} = shift(datetime, secs: -24*3600*365)
+    assert %DateTime{year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23} = shift(datetime, secs: -24*3600*(365*2+1))   # +1 day for leap year 2012
   end
 
   test :shift_minutes do
@@ -341,17 +341,17 @@ defmodule DateTests do
     unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, mins: 0)
 
-    assert DateTime[hour: 23, minute: 24, second: 23] = shift(datetime, mins: 1)
-    assert DateTime[hour: 23, minute: 59, second: 23] = shift(datetime, mins: 36)
-    assert DateTime[year: 2013, month: 3, day: 6, hour: 0, minute: 0, second: 23] = shift(datetime, mins: 37)
-    assert DateTime[year: 2013, month: 3, day: 6, hour: 0, minute: 1, second: 23] = shift(datetime, mins: 38)
-    assert DateTime[year: 2014, month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, mins: 60*24*365)
+    assert %DateTime{hour: 23, minute: 24, second: 23} = shift(datetime, mins: 1)
+    assert %DateTime{hour: 23, minute: 59, second: 23} = shift(datetime, mins: 36)
+    assert %DateTime{year: 2013, month: 3, day: 6, hour: 0, minute: 0, second: 23} = shift(datetime, mins: 37)
+    assert %DateTime{year: 2013, month: 3, day: 6, hour: 0, minute: 1, second: 23} = shift(datetime, mins: 38)
+    assert %DateTime{year: 2014, month: 3, day: 5, hour: 23, minute: 23, second: 23} = shift(datetime, mins: 60*24*365)
 
-    assert DateTime[hour: 23, minute: 22, second: 23] = shift(datetime, mins: -1)
-    assert DateTime[hour: 23, minute: 0, second: 23] = shift(datetime, mins: -23)
-    assert DateTime[hour: 22, minute: 59, second: 23] = shift(datetime, mins: -24)
-    assert DateTime[month: 3, day: 4, hour: 23, minute: 59, second: 23] = shift(datetime, mins: -23*60-24)
-    assert DateTime[year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, mins: -60*24*(365*2 + 1))
+    assert %DateTime{hour: 23, minute: 22, second: 23} = shift(datetime, mins: -1)
+    assert %DateTime{hour: 23, minute: 0, second: 23} = shift(datetime, mins: -23)
+    assert %DateTime{hour: 22, minute: 59, second: 23} = shift(datetime, mins: -24)
+    assert %DateTime{month: 3, day: 4, hour: 23, minute: 59, second: 23} = shift(datetime, mins: -23*60-24)
+    assert %DateTime{year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23} = shift(datetime, mins: -60*24*(365*2 + 1))
   end
 
   test :shift_hours do
@@ -362,16 +362,16 @@ defmodule DateTests do
     unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, hours: 0)
 
-    assert DateTime[month: 3, day: 6, hour: 0, minute: 23, second: 23] = shift(datetime, hours: 1)
-    assert DateTime[month: 3, day: 6, hour: 23, minute: 23, second: 23] = shift(datetime, hours: 24)
-    assert DateTime[month: 3, day: 7, hour: 0, minute: 23, second: 23] = shift(datetime, hours: 25)
-    assert DateTime[month: 4, day: 4, hour: 23, minute: 23, second: 23] = shift(datetime, hours: 24*30)
-    assert DateTime[month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, hours: 24*365)
+    assert %DateTime{month: 3, day: 6, hour: 0, minute: 23, second: 23} = shift(datetime, hours: 1)
+    assert %DateTime{month: 3, day: 6, hour: 23, minute: 23, second: 23} = shift(datetime, hours: 24)
+    assert %DateTime{month: 3, day: 7, hour: 0, minute: 23, second: 23} = shift(datetime, hours: 25)
+    assert %DateTime{month: 4, day: 4, hour: 23, minute: 23, second: 23} = shift(datetime, hours: 24*30)
+    assert %DateTime{month: 3, day: 5, hour: 23, minute: 23, second: 23} = shift(datetime, hours: 24*365)
 
-    assert DateTime[month: 3, day: 5, hour: 22, minute: 23, second: 23] = shift(datetime, hours: -1)
-    assert DateTime[month: 3, day: 5, hour: 0, minute: 23, second: 23] = shift(datetime, hours: -23)
-    assert DateTime[month: 3, day: 4, hour: 23, minute: 23, second: 23] = shift(datetime, hours: -24)
-    assert DateTime[month: 3, day: 5, hour: 23, minute: 23, second: 23] = shift(datetime, hours: -24*(365*2 + 1))
+    assert %DateTime{month: 3, day: 5, hour: 22, minute: 23, second: 23} = shift(datetime, hours: -1)
+    assert %DateTime{month: 3, day: 5, hour: 0, minute: 23, second: 23} = shift(datetime, hours: -23)
+    assert %DateTime{month: 3, day: 4, hour: 23, minute: 23, second: 23} = shift(datetime, hours: -24)
+    assert %DateTime{month: 3, day: 5, hour: 23, minute: 23, second: 23} = shift(datetime, hours: -24*(365*2 + 1))
   end
 
   test :shift_days do
@@ -382,14 +382,14 @@ defmodule DateTests do
     unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, days: 0)
 
-    assert DateTime[year: 2013, month: 3, day: 6] = shift(datetime, days: 1)
-    assert DateTime[year: 2013, month: 4, day: 1] = shift(datetime, days: 27)
-    assert DateTime[year: 2014, month: 3, day: 5] = shift(datetime, days: 365)
+    assert %DateTime{year: 2013, month: 3, day: 6} = shift(datetime, days: 1)
+    assert %DateTime{year: 2013, month: 4, day: 1} = shift(datetime, days: 27)
+    assert %DateTime{year: 2014, month: 3, day: 5} = shift(datetime, days: 365)
 
-    assert DateTime[year: 2013, month: 3, day: 4] = shift(datetime, days: -1)
-    assert DateTime[year: 2013, month: 2, day: 28] = shift(datetime, days: -5)
-    assert DateTime[year: 2012, month: 3, day: 5] = shift(datetime, days: -365)
-    assert DateTime[year: 2011, month: 3, day: 5] = shift(datetime, days: -365*2-1)
+    assert %DateTime{year: 2013, month: 3, day: 4} = shift(datetime, days: -1)
+    assert %DateTime{year: 2013, month: 2, day: 28} = shift(datetime, days: -5)
+    assert %DateTime{year: 2012, month: 3, day: 5} = shift(datetime, days: -365)
+    assert %DateTime{year: 2011, month: 3, day: 5} = shift(datetime, days: -365*2-1)
   end
 
   test :shift_weeks do
@@ -400,10 +400,10 @@ defmodule DateTests do
     unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, weeks: 0)
 
-    assert DateTime[year: 2013, month: 3, day: 12] = shift(datetime, weeks: 1)
-    assert DateTime[year: 2014, month: 3, day: 4]  = shift(datetime, weeks: 52)
-    assert DateTime[year: 2013, month: 2, day: 26] = shift(datetime, weeks: -1)
-    assert DateTime[year: 2012, month: 3, day: 6]  = shift(datetime, weeks: -52)
+    assert %DateTime{year: 2013, month: 3, day: 12} = shift(datetime, weeks: 1)
+    assert %DateTime{year: 2014, month: 3, day: 4}  = shift(datetime, weeks: 52)
+    assert %DateTime{year: 2013, month: 2, day: 26} = shift(datetime, weeks: -1)
+    assert %DateTime{year: 2012, month: 3, day: 6}  = shift(datetime, weeks: -52)
 
     date = D.from(datetime)
     weekday = D.weekday(date)
@@ -420,14 +420,14 @@ defmodule DateTests do
     unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, months: 0)
 
-    assert DateTime[year: 2013, month: 4, day: 5] = shift(datetime, months: 1)
-    assert DateTime[year: 2014, month: 1, day: 5] = shift(datetime, months: 10)
-    assert DateTime[year: 2013, month: 1, day: 5] = shift(datetime, months: -2)
-    assert DateTime[year: 2012, month: 3, day: 5] = shift(datetime, months: -12)
+    assert %DateTime{year: 2013, month: 4, day: 5} = shift(datetime, months: 1)
+    assert %DateTime{year: 2014, month: 1, day: 5} = shift(datetime, months: 10)
+    assert %DateTime{year: 2013, month: 1, day: 5} = shift(datetime, months: -2)
+    assert %DateTime{year: 2012, month: 3, day: 5} = shift(datetime, months: -12)
 
     datetime = { {2013,3,31}, time }
-    assert DateTime[year: 2013, month: 4, day: 30] = shift(datetime, months: 1)
-    assert DateTime[year: 2013, month: 2, day: 28] = shift(datetime, months: -1)
+    assert %DateTime{year: 2013, month: 4, day: 30} = shift(datetime, months: 1)
+    assert %DateTime{year: 2013, month: 2, day: 28} = shift(datetime, months: -1)
   end
 
   test :shift_years do
@@ -438,30 +438,30 @@ defmodule DateTests do
     unchanged = datetime |> Date.from
     assert unchanged === shift(datetime, years: 0)
 
-    assert DateTime[year: 2014, month: 3, day: 5] = shift(datetime, years: 1)
-    assert DateTime[year: 2011, month: 3, day: 5] = shift(datetime, years: -2)
+    assert %DateTime{year: 2014, month: 3, day: 5} = shift(datetime, years: 1)
+    assert %DateTime{year: 2011, month: 3, day: 5} = shift(datetime, years: -2)
 
     datetime = { {2012,2,29}, time }
-    assert DateTime[year: 2013, month: 2, day: 28] = shift(datetime, years: 1)
-    assert DateTime[year: 2016, month: 2, day: 29] = shift(datetime, years: 4)
-    assert DateTime[year: 2011, month: 2, day: 28] = shift(datetime, years: -1)
-    assert DateTime[year: 2008, month: 2, day: 29] = shift(datetime, years: -4)
+    assert %DateTime{year: 2013, month: 2, day: 28} = shift(datetime, years: 1)
+    assert %DateTime{year: 2016, month: 2, day: 29} = shift(datetime, years: 4)
+    assert %DateTime{year: 2011, month: 2, day: 28} = shift(datetime, years: -1)
+    assert %DateTime{year: 2008, month: 2, day: 29} = shift(datetime, years: -4)
   end
 
   test :arbitrary_shifts do
     datetime = { {2013,3,5}, {23,23,23} }
-    assert DateTime[year: 2013, month: 6, day: 5] = shift(datetime, months: 3)
+    assert %DateTime{year: 2013, month: 6, day: 5} = shift(datetime, months: 3)
     assert_raise ArgumentError, fn ->
-      DateTime[year: 2013, month: 6, day: 6] = shift(datetime, months: 3, days: 1)
+      %DateTime{year: 2013, month: 6, day: 6} = shift(datetime, months: 3, days: 1)
     end
-    assert DateTime[year: 2013, month: 3, day: 18, second: 36] = shift(datetime, secs: 13, days: -1, weeks: 2)
+    assert %DateTime{year: 2013, month: 3, day: 18, second: 36} = shift(datetime, secs: 13, days: -1, weeks: 2)
 
     datetime = { {2012,2,29}, {23,23,23} }
-    assert DateTime[year: 2013, month: 2, day: 28] = shift(datetime, months: 12)
+    assert %DateTime{year: 2013, month: 2, day: 28} = shift(datetime, months: 12)
 
-    assert DateTime[year: 2002, month: 3, day: 1] = shift(datetime, years: -10, days: 1)
-    assert DateTime[year: 2012, month: 2, day: 29, hour: 23, minute: 59, second: 59] = shift(datetime, mins: 36, secs: 36)
-    assert DateTime[year: 2012, month: 3, day: 1, hour: 0, minute: 0, second: 0] = shift(datetime, mins: 36, secs: 37)
+    assert %DateTime{year: 2002, month: 3, day: 1} = shift(datetime, years: -10, days: 1)
+    assert %DateTime{year: 2012, month: 2, day: 29, hour: 23, minute: 59, second: 59} = shift(datetime, mins: 36, secs: 36)
+    assert %DateTime{year: 2012, month: 3, day: 1, hour: 0, minute: 0, second: 0} = shift(datetime, mins: 36, secs: 37)
   end
 
   defp shift(date, spec) when is_list(spec) do

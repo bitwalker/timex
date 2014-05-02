@@ -82,7 +82,7 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.now #=> DateTime[year: 2013, month: 3, day: 16, hour: 11, minute: 1, second: 12, timezone: TimezoneInfo[...]]
+      Date.now #=> %DateTime{year: 2013, month: 3, day: 16, hour: 11, minute: 1, second: 12, timezone: %TimezoneInfo{...}}
 
   """
   @spec now() :: DateTime.t
@@ -113,7 +113,7 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.local #=> DateTime[year: 2013, month: 3, day: 16, hour: 11, minute: 1, second: 12, timezone: TimezoneInfo[...]]
+      Date.local #=> %DateTime{year: 2013, month: 3, day: 16, hour: 11, minute: 1, second: 12, timezone: %TimezoneInfo{...}}
 
   """
   @spec local() :: DateTime.t
@@ -130,7 +130,7 @@ defmodule Timex.Date do
 
   """
   @spec local(date :: DateTime.t) :: DateTime.t
-  def local(DateTime[] = date), do: local(date, timezone(:local))
+  def local(%DateTime{} = date), do: local(date, timezone(:local))
 
   @doc """
   Convert a date to a local date, using the provided timezone
@@ -141,10 +141,10 @@ defmodule Timex.Date do
 
   """
   @spec local(date :: DateTime.t, tz :: TimezoneInfo.t) :: DateTime.t
-  def local(DateTime[timezone: tz] = date, localtz) do
+  def local(%DateTime{:timezone => tz} = date, localtz) do
     if tz !== localtz do
       Timezone.convert(date, localtz)
-      date.update(timezone: localtz)
+      %{date | :timezone => localtz}
     else
       date
     end
@@ -203,7 +203,7 @@ defmodule Timex.Date do
 
   ## Examples
 
-      epoch()       #=> DateTime[year: 1970, month: 1 ...]
+      epoch()        #=> %DateTime{year: 1970, month: 1 ...}
       epoch(:secs)   #=> 62167219200
       epoch(:days)   #=> 719528
 
@@ -227,10 +227,10 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.from(:erlang.universaltime)             #=> DateTime[...]
-      Date.from(:erlang.localtime)                 #=> Datetime[...]
-      Date.from(:erlang.localtime, :local)         #=> DateTime[...]
-      Date.from({2014,3,16}, Date.timezone("PST")) #=> DateTime[...]
+      Date.from(:erlang.universaltime)             #=> %DateTime{...}
+      Date.from(:erlang.localtime)                 #=> %Datetime{...}
+      Date.from(:erlang.localtime, :local)         #=> %DateTime{...}
+      Date.from({2014,3,16}, Date.timezone("PST")) #=> %DateTime{...}
 
   """
   @spec from(date | datetime) :: dtz
@@ -253,8 +253,8 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.from(13, :secs)          #=> DateTime[...]
-      Date.from(13, :days, :zero)   #=> DateTime[...]
+      Date.from(13, :secs)          #=> %DateTime{...}
+      Date.from(13, :days, :zero)   #=> %DateTime{...}
 
       date = Date.from(Time.now, :timestamp) 
       |> Date.set(:timezone, timezone(:local))      #=> yields the same value as Date.now would
@@ -340,7 +340,7 @@ defmodule Timex.Date do
   def to_secs(date, reference \\ :epoch)
 
   def to_secs(date, :epoch), do: to_secs(date, :zero) - epoch(:secs)
-  def to_secs(DateTime[year: y, month: m, day: d, hour: h, minute: min, second: s], :zero) do
+  def to_secs(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => s}, :zero) do
     :calendar.datetime_to_gregorian_seconds({{y, m, d}, {h, min, s}})
   end
 
@@ -359,7 +359,7 @@ defmodule Timex.Date do
   def to_days(date, reference \\ :epoch)
 
   def to_days(date, :epoch), do: to_days(date, :zero) - epoch(:days)
-  def to_days(DateTime[year: y, month: m, day: d], :zero) do
+  def to_days(%DateTime{:year => y, :month => m, :day => d}, :zero) do
     :calendar.date_to_gregorian_days({y, m, d})
   end
 
@@ -373,7 +373,7 @@ defmodule Timex.Date do
   """
   @spec weekday(DateTime.t) :: weekday
 
-  def weekday(DateTime[year: y, month: m, day: d]), do: :calendar.day_of_the_week({y, m, d})
+  def weekday(%DateTime{:year => y, :month => m, :day => d}), do: :calendar.day_of_the_week({y, m, d})
 
   @doc """
   Returns the ordinal day number of the date.
@@ -396,7 +396,7 @@ defmodule Timex.Date do
   """
   @spec iso_week(DateTime.t) :: {year, weeknum}
 
-  def iso_week(DateTime[year: y, month: m, day: d]) do
+  def iso_week(%DateTime{:year => y, :month => m, :day => d}) do
     :calendar.iso_week_number({y, m, d})
   end
   def iso_week(date), do: iso_week(from(date, :utc))
@@ -502,7 +502,7 @@ defmodule Timex.Date do
   """
   @spec iso_triplet(DateTime.t) :: {year, weeknum, weekday}
 
-  def iso_triplet(DateTime[] = datetime) do
+  def iso_triplet(%DateTime{} = datetime) do
     { iso_year, iso_week } = iso_week(datetime)
     { iso_year, iso_week, weekday(datetime) }
   end
@@ -516,7 +516,7 @@ defmodule Timex.Date do
 
   """
   @spec days_in_month(DateTime.t | {year, month}) :: num_of_days
-  def days_in_month(DateTime[year: year, month: month]) do
+  def days_in_month(%DateTime{:year => year, :month => month}) do
     :calendar.last_day_of_the_month(year, month)
   end
   def days_in_month(year, month) do
@@ -536,7 +536,7 @@ defmodule Timex.Date do
   @spec is_leap?(DateTime.t | year) :: boolean
 
   def is_leap?(year) when is_integer(year), do: :calendar.is_leap_year(year)
-  def is_leap?(DateTime[year: year]),       do: is_leap?(year)
+  def is_leap?(%DateTime{:year => year}),   do: is_leap?(year)
 
   @doc """
   Return a boolean indicating whether the given date is valid.
@@ -554,7 +554,7 @@ defmodule Timex.Date do
   def is_valid?({date, time, tz}) do
     :calendar.valid_date(date) and is_valid_time?(time) and is_valid_tz?(tz)
   end
-  def is_valid?(DateTime[year: y, month: m, day: d, hour: h, minute: min, second: sec, timezone: tz] = _date) do
+  def is_valid?(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => sec, :timezone => tz}) do
     :calendar.valid_date({y,m,d}) and is_valid_time?({h,min,sec}) and is_valid_tz?(tz)
   end
 
@@ -676,53 +676,53 @@ defmodule Timex.Date do
         {:validate, _} -> result
         {:datetime, {{y, m, d}, {h, min, sec}}} ->
           if validate? do
-            result.update([
-              year:   normalize(y,   :year),
-              month:  normalize(m,   :month),
-              day:    normalize(d,   :day),
-              hour:   normalize(h,   :hour),
-              minute: normalize(min, :minute),
-              second: normalize(sec, :seonc)
-            ])
+            %{result |
+              :year =>   normalize(y,   :year),
+              :month =>  normalize(m,   :month),
+              :day =>    normalize(d,   :day),
+              :hour =>   normalize(h,   :hour),
+              :minute => normalize(min, :minute),
+              :second => normalize(sec, :second)
+            }
           else
-            result.update([year: y, month: m, day: d, hour: h, minute: min, second: sec])
+            %{result | :year => y, :month => m, :day => d, :hour => h, :minute => min, :second => sec}
           end
         {:date, {y, m, d}} ->
           if validate? do
-            result.update([year: normalize(:year, y), month: normalize(:month, m), day: normalize(:day, {y, m, d})])
+            %{result | :year => normalize(:year, y), :month => normalize(:month, m), :day => normalize(:day, {y, m, d})}
           else
-            result.update([year: y, month: m, day: d])
+            %{result | :year => y, :month => m, :day => d}
           end
         {:time, {h, m, s}} ->
           if validate? do
-            result.update([hour: normalize(:hour, h), minute: normalize(:minute, m), second: normalize(:second, s)])
+            %{result | :hour => normalize(:hour, h), :minute => normalize(:minute, m), :second => normalize(:second, s)}
           else
-            result.update([hour: h, minute: m, second: s])
+            %{result | :hour => h, :minute => m, :second => s}
           end
         {:day, d} ->
           if validate? do
-            result.update(day: normalize(:day, {result.year, result.month, d}))
+            %{result | :day => normalize(:day, {result.year, result.month, d})}
           else
-            result.update(day: d)
+            %{result | :day => d}
           end
         {:timezone, tz} ->
           # Only convert timezones if they differ
           case result.timezone do
             # Date didn't have a timezone, so use UTC
-            nil       -> result.update(timezone: timezone(:utc))
+            nil       -> %{result | :timezone => timezone(:utc)}
             origin_tz ->
               if origin_tz !== tz do
                 converted = Timezone.convert(result, tz)
-                converted.update(timezone: tz)
+                %{converted | :timezone => tz}
               else
                 result
               end
           end
         {name, val} when name in [:year, :month, :hour, :minute, :second, :ms] ->
           if validate? do
-            result.update([{name, normalize(name, val)}])
+            Map.put(result, name, normalize(name, val))
           else
-            result.update([{name, val}])
+            Map.put(result, name, val)
           end
         {option_name, _}   -> raise "Invalid option passed to Date.set: #{option_name}"
       end
@@ -744,7 +744,7 @@ defmodule Timex.Date do
   def compare(_, :distant_past),   do: -1
   def compare(_, :distant_future), do: 1
   def compare(date, date),         do: 0
-  def compare(DateTime[timezone: thistz] = this, DateTime[timezone: othertz] = other) do
+  def compare(%DateTime{:timezone => thistz} = this, %DateTime{:timezone => othertz} = other) do
     localized = if thistz !== othertz do
       # Convert `other` to `this`'s timezone
       Timezone.convert(other, thistz)
@@ -792,13 +792,13 @@ defmodule Timex.Date do
     diff(this, other, :days) |> div(7)
   end
   def diff(this, other, :months) do
-    DateTime[year: y1, month: m1] = universal(this)
-    DateTime[year: y2, month: m2] = universal(other)
+    %DateTime{:year => y1, :month => m1} = universal(this)
+    %DateTime{:year => y2, :month => m2} = universal(other)
     ((y2 - y1) * 12) + (m2 - m1)
   end
   def diff(this, other, :years) do
-    DateTime[year: y1] = universal(this)
-    DateTime[year: y2] = universal(other)
+    %DateTime{:year => y1} = universal(this)
+    %DateTime{:year => y2} = universal(other)
     y2 - y1
   end
 
@@ -865,7 +865,7 @@ defmodule Timex.Date do
   def shift(date, [{_, 0}]),               do: date
   def shift(date, [timestamp: {0,0,0}]),   do: date
   def shift(date, [timestamp: timestamp]), do: add(date, timestamp)
-  def shift(DateTime[timezone: tz] = date, [{type, value}]) when type in [:secs, :mins, :hours] do
+  def shift(%DateTime{:timezone => tz} = date, [{type, value}]) when type in [:secs, :mins, :hours] do
     secs = to_secs(date)
     secs = secs + case type do
       :secs   -> value
@@ -873,26 +873,25 @@ defmodule Timex.Date do
       :hours  -> value * 3600
     end
     shifted = from(secs, :secs)
-    shifted.update(timezone: tz)
+    %{shifted | :timezone => tz}
   end
-  def shift(DateTime[hour: h, minute: m, second: s, timezone: tz] = date, [days: value]) do
+  def shift(%DateTime{:hour => h, :minute => m, :second => s, :timezone => tz} = date, [days: value]) do
     days = to_days(date)
     days = days + value
     shifted = from(days, :days) |> set([time: {h, m, s}])
-    shifted.update(timezone: tz)
+    %{shifted | :timezone => tz}
   end
   def shift(date, [weeks: value]) do
     date |> shift([days: value * 7])
   end
   def shift(date, [months: value]) do
-    DateTime[
-      year: year, month: month, day: day,
-      hour: h, minute: m, second: s,
-      timezone: tz
-    ] = date
+    %DateTime{
+      :year => year, :month => month, :day => day,
+      :hour => h, :minute => m, :second => s,
+      :timezone => tz
+    } = date
 
     month = month + value
-
     # Calculate a valid year value
     year = cond do
       month == 0 -> year - 1
@@ -904,11 +903,11 @@ defmodule Timex.Date do
     validate({year, round_month(month), day}) |> construct({h, m, s}, tz)
   end
   def shift(date, [years: value]) do
-    DateTime[
-      year: year, month: month, day: day,
-      hour: h, minute: m, second: s,
-      timezone: tz
-    ] = date
+    %DateTime{
+      :year => year, :month => month, :day => day,
+      :hour => h, :minute => m, :second => s,
+      :timezone => tz
+    } = date
     validate({year + value, month, day}) |> construct({h, m, s}, tz)
   end
 
@@ -951,18 +950,18 @@ defmodule Timex.Date do
   # Primary constructor for DateTime objects
   defp construct({_,_,_} = date, {_,_,_} = time, nil), do: construct(date, time, timezone(:utc))
   defp construct({y, m, d}, {h, min, sec}, %TimezoneInfo{} = tz) do
-    DateTime[
+    %DateTime{
       year: y, month: m, day: d,
       hour: h, minute: min, second: sec,
       timezone: tz
-    ]
+    }
   end
   defp construct({y, m, d}, {h, min, sec}, {_, name}) do
-    DateTime[
+    %DateTime{
       year: y, month: m, day: d,
       hour: h, minute: min, second: sec,
-      timezone: Timezone.get(name),
-    ]
+      timezone: Timezone.get(name)
+    }
   end
   def construct({date, time}, tz), do: construct(date, time, tz)
 

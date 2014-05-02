@@ -709,10 +709,10 @@ defmodule Timex.Timezone do
   Determine what offset is required to convert a date into a target timezone
   """
   @spec diff(date :: DateTime.t, tz :: TimezoneInfo.t) :: integer
-  def diff(DateTime[timezone: origin] = date, %TimezoneInfo{:gmt_offset_std => dest_std} = destination) do
+  def diff(%DateTime{:timezone => origin} = date, %TimezoneInfo{:gmt_offset_std => dest_std} = destination) do
     %TimezoneInfo{:gmt_offset_std => origin_std} = origin
     # Create a copy of the date in the new time zone so we can ask about DST
-    target_date = date.update(timezone: destination)
+    target_date = %{date | :timezone => destination}
     # Determine DST status of origin and target
     origin_is_dst? = date        |> Dst.is_dst?
     target_is_dst? = target_date |> Dst.is_dst?

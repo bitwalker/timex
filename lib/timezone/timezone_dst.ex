@@ -11,8 +11,8 @@ defmodule Timex.Timezone.Dst do
   Check if the provided datetime is in daylight savings time
   """
   @spec is_dst?(DateTime.t) :: true | false | :ambiguous_time | :doesnt_exist
-  def is_dst?(DateTime[timezone: %TimezoneInfo{:dst_start_day => :undef}]), do: false
-  def is_dst?(DateTime[year: year, month: month, day: day, hour: hour, minute: min, second: sec, timezone: tz]) do
+  def is_dst?(%DateTime{:timezone => %TimezoneInfo{:dst_start_day => :undef}}), do: false
+  def is_dst?(%DateTime{:year => year, :month => month, :day => day, :hour => hour, :minute => min, :second => sec, :timezone => tz}) do
     %TimezoneInfo{
       :gmt_offset_dst => dst_shift,
       :dst_start_day => dst_start_rule, :dst_start_time => dst_start_time, 

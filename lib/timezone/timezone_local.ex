@@ -772,7 +772,7 @@ defmodule Timex.Timezone.Local do
   @spec parse_tzfile(binary, DateTime.t | nil) :: {:ok, String.t} | {:error, term}
 
   def parse_tzfile(tzdata), do: parse_tzfile(tzdata, Date.universal())
-  def parse_tzfile(tzdata, DateTime[] = reference_date) do
+  def parse_tzfile(tzdata, %DateTime{} = reference_date) do
     case tzdata do
       << ?T,?Z,?i,?f, rest :: binary >> ->
         # Trim reserved space

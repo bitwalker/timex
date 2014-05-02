@@ -20,7 +20,7 @@ defmodule Timex.DateFormat do
   """
   @spec format(DateTime.t, String.t) :: {:ok, String.t} | {:error, String.t}
 
-  def format(DateTime[] = date, fmt) when is_binary(fmt) do
+  def format(%DateTime{} = date, fmt) when is_binary(fmt) do
     format(date, fmt, :default)
   end
 
@@ -29,7 +29,7 @@ defmodule Timex.DateFormat do
   """
   @spec format(DateTime.t, String.t, formatter) :: {:ok, String.t} | {:error, String.t}
 
-  def format(DateTime[] = date, fmt, formatter) when is_binary(fmt) do
+  def format(%DateTime{} = date, fmt, formatter) when is_binary(fmt) do
     case tokenize(fmt, formatter) do
       { :ok, parts } ->
         # The following reduce() calls produces a list of date components
@@ -61,7 +61,7 @@ defmodule Timex.DateFormat do
   """
   @spec format!(DateTime.t, String.t) :: String.t | no_return
 
-  def format!(DateTime[] = date, fmt) do
+  def format!(%DateTime{} = date, fmt) do
     format!(date, fmt, :default)
   end
 
@@ -71,7 +71,7 @@ defmodule Timex.DateFormat do
   """
   @spec format!(DateTime.t, String.t, formatter) :: String.t | no_return
 
-  def format!(DateTime[] = date, fmt, formatter) do
+  def format!(%DateTime{} = date, fmt, formatter) do
     case format(date, fmt, formatter) do
       { :ok, result }    -> result
       { :error, reason } -> raise ArgumentError, message: "Bad format: #{reason}"
@@ -139,7 +139,7 @@ defmodule Timex.DateFormat do
 
   # Takes a directive (atom) and extracts the corresponding component from the
   # date
-  defp format_directive(DateTime[year: year, month: month, day: day, hour: hour, minute: min, second: sec] = date, dir) do
+  defp format_directive(%DateTime{:year => year, :month => month, :day => day, :hour => hour, :minute => min, :second => sec} = date, dir) do
     start_of_year = Date.from({year,1,1})
     {iso_year, iso_week} = Date.iso_week(date)
 
@@ -216,13 +216,13 @@ defmodule Timex.DateFormat do
   end
 
   defp format_predefined(date, :"ISOdate") do
-    DateTime[year: year, month: month, day: day] = Date.universal(date)
+    %DateTime{:year => year, :month => month, :day => day} = Date.universal(date)
     :io_lib.format("~4..0B-~2..0B-~2..0B", [year, month, day])
     |> wrap
   end
 
   defp format_predefined(date, :"ISOtime") do
-    DateTime[hour: hour, minute: min, second: sec] = Date.universal(date)
+    %DateTime{:hour => hour, :minute => min, :second => sec} = Date.universal(date)
     :io_lib.format("~2..0B:~2..0B:~2..0B", [hour, min, sec])
     |> wrap
   end
@@ -240,7 +240,7 @@ defmodule Timex.DateFormat do
   end
 
   defp format_predefined(date, :"ISOord") do
-    DateTime[year: year] = date
+    %DateTime{:year => year} = date
     day_no = date |> Date.universal |> Date.day
     :io_lib.format("~4..0B-~3..0B", [year, day_no]) |> wrap
   end
@@ -273,7 +273,7 @@ defmodule Timex.DateFormat do
   end
 
   #ANSIC       = "Mon Jan _2 15:04:05 2006"
-  defp format_predefined(DateTime[year: year, month: month, day: day, hour: hour, minute: min, second: sec] = date, :"ANSIC") do
+  defp format_predefined(%DateTime{:year => year, :month => month, :day => day, :hour => hour, :minute => min, :second => sec} = date, :"ANSIC") do
     day_name = weekday_name_short(Date.weekday(date))
     month_name = month_name_short(month)
 
@@ -283,7 +283,7 @@ defmodule Timex.DateFormat do
   end
 
   #UnixDate    = "Mon Jan _2 15:04:05 MST 2006"
-  defp format_predefined(DateTime[year: year, month: month, day: day, hour: hour, minute: min, second: sec] = date, :"UNIX") do
+  defp format_predefined(%DateTime{:year => year, :month => month, :day => day, :hour => hour, :minute => min, :second => sec} = date, :"UNIX") do
     day_name = weekday_name_short(Date.weekday(date))
     month_name = month_name_short(month)
 
@@ -295,7 +295,7 @@ defmodule Timex.DateFormat do
   end
 
   #Kitchen     = "3:04PM"
-  defp format_predefined(DateTime[hour: hour, minute: min], :"kitchen") do
+  defp format_predefined(%DateTime{:hour => hour, :minute => min}, :"kitchen") do
     am = if hour < 12 do "AM" else "PM" end
     hour = if hour in [0, 12] do 12 else rem(hour, 12) end
     :io_lib.format("~B:~2..0B~s", [hour, min, am])
@@ -304,14 +304,14 @@ defmodule Timex.DateFormat do
 
   ### Helper functions used by format_predefined ###
 
-  defp format_iso(DateTime[year: y, month: m, day: d, hour: h, minute: min, second: sec], tz) do
+  defp format_iso(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => sec}, tz) do
     :io_lib.format(
         "~4..0B-~2..0B-~2..0BT~2..0B:~2..0B:~2..0B~s",
         [y, m, d, h, min, sec, tz]
     ) |> wrap
   end
 
-  defp format_rfc(DateTime[year: year, month: month, day: day, hour: hour, minute: min, second: sec] = date, tz) do
+  defp format_rfc(%DateTime{:year => year, :month => month, :day => day, :hour => hour, :minute => min, :second => sec} = date, tz) do
     day_name = weekday_name_short(Date.weekday(date))
     month_name = month_name_short(month)
     fstr = case tz do
@@ -432,7 +432,7 @@ defmodule Timex.DateFormat do
   # Converts a formatting directive into intermediate date component (to be
   # used when building the date later)
   defp read_token(string, dir, native_fmt) do
-    DateTime[year: year] = Date.local
+    %DateTime{:year => year} = Date.local
     century = div(year, 100)
 
     case :io_lib.fread(native_fmt, string) do
