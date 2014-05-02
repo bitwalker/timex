@@ -1,4 +1,4 @@
-box: bitwalker/elixir@0.0.5
+box: bitwalker/elixir@0.0.10
 build:
   steps:
       - script:
