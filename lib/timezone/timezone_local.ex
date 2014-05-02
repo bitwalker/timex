@@ -824,7 +824,7 @@ defmodule Timex.Timezone.Local do
         leap_pairs = Range.new(1, record.leap_num)
         # We may not have any valid pairs to look for, so check our range to
         # see if this extraction should just be a no-op
-        noop?      = Range.last(leap_pairs) == 0
+        noop?      = leap_pairs.last == 0
         {record, remaining} = Enum.reduce leap_pairs, {record, remaining}, fn _, {r, d} ->
           if noop? do
             {r, d}

@@ -49,7 +49,7 @@ defmodule Timex.DateFormat do
 
           (bin, acc) when is_binary(bin) ->
             [acc, bin]
-        end) |> String.from_char_list
+        end) |> String.from_char_data
 
       error -> error
     end
@@ -98,7 +98,7 @@ defmodule Timex.DateFormat do
       { :ok, parts } ->
         case parse_with_parts(string, parts, formatter) do
           { :ok, rest, date_comps } ->
-            { :ok, date_with_comps(date_comps), String.from_char_list!(rest) }
+            { :ok, date_with_comps(date_comps), String.from_char_data!(rest) }
           error -> error
         end
 
@@ -369,7 +369,7 @@ defmodule Timex.DateFormat do
   end
 
   defp wrap(formatted) do
-    { :ok, iolist_to_binary(formatted) }
+    { :ok, iodata_to_binary(formatted) }
   end
 
   ### Private functions for parsing ###
@@ -377,7 +377,7 @@ defmodule Timex.DateFormat do
   # This is a mirror of format/3.
   defp parse_with_parts(string, parts, formatter) do
     try do
-      {rest, comps} = Enum.reduce(parts, {String.to_char_list!(string), []}, fn
+      {rest, comps} = Enum.reduce(parts, {List.from_char_data!(string), []}, fn
         ({:subfmt, sfmt}, acc) ->
           # Subformat is matched recursively
           { :ok, bin } = if is_atom(sfmt) do
@@ -395,7 +395,7 @@ defmodule Timex.DateFormat do
 
         (bin, {string, acc}) when is_binary(bin) ->
           # A binary is matched literally
-          case :io_lib.fread(String.to_char_list!(bin), string) do
+          case :io_lib.fread(List.from_char_data!(bin), string) do
             { :ok, [], rest }  -> {rest, acc}
             { :more, _, _, _ } -> throw "unexpected end of input"
             { :error, reason } -> throw reason
@@ -568,7 +568,7 @@ defmodule Timex.DateFormat do
   end
 
   defp do_tokenize("", _, _, parts, acc) do
-    { :ok, List.flatten([parts, String.from_char_list!(acc)]) }
+    { :ok, List.flatten([parts, String.from_char_data!(acc)]) }
   end
 
   defp do_tokenize(str, {formatter, pat}=fmt, pos, parts, acc) do
@@ -581,7 +581,7 @@ defmodule Timex.DateFormat do
             do_tokenize(rest, fmt, pos + length + 1, parts, [acc,skip])
 
           { :ok, dir, length } ->
-            new_parts = [parts, String.from_char_list!(acc), dir]
+            new_parts = [parts, String.from_char_data!(acc), dir]
             <<_ :: [binary, size(length)], rest :: binary>> = rest
             do_tokenize(rest, fmt, pos + length, new_parts, [])
 

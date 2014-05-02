@@ -11,7 +11,7 @@ defmodule DateTests do
     assert {{_, _, _}, {_, _, _}, {_, _}} = DateConvert.to_gregorian(now)
 
     {_, _, tz} = DateConvert.to_gregorian(now)
-    TimezoneInfo[full_name: name, gmt_offset_std: offset_mins] = D.timezone(:utc)
+    %TimezoneInfo{:full_name => name, :gmt_offset_std => offset_mins} = D.timezone(:utc)
     assert tz === {offset_mins/60, name}
 
     now_secs = D.now(:secs)
@@ -222,7 +222,7 @@ defmodule DateTests do
     assert not D.is_valid?(D.from({{12,12,12}, {23,60,0}}))
     assert not D.is_valid?(D.from({{12,12,12}, {23,59,60}}))
     assert not D.is_valid?(D.from({{12,12,12}, {-1,59,59}}))
-    assert not D.is_valid?({{12,12,12}, {1,59,59}, TimezoneInfo[]})
+    assert not D.is_valid?({{12,12,12}, {1,59,59}, %TimezoneInfo{}})
     assert not D.is_valid?({{12,12,12}, {-1,59,59}, Timezone.get(:utc)})
   end
 
@@ -237,8 +237,8 @@ defmodule DateTests do
 
     eet = Timezone.get("EET")
     utc = Timezone.get(:utc)
-    TimezoneInfo[full_name: eet_name, gmt_offset_std: eet_offset_min] = eet
-    TimezoneInfo[full_name: utc_name, gmt_offset_std: utc_offset_min] = utc
+    %TimezoneInfo{:full_name => eet_name, :gmt_offset_std => eet_offset_min} = eet
+    %TimezoneInfo{:full_name => utc_name, :gmt_offset_std => utc_offset_min} = utc
 
     date = D.from({{2013,3,17}, {17,26,5}}, eet)
     assert to_gregorian(D.set(date, date: {1,1,1}))        === { {1,1,1}, {17,26,5}, {eet_offset_min/60, eet_name} }

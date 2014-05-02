@@ -1,37 +1,3 @@
-# Complete definition of a time zone, including all name
-# variations, offsets, and daylight savings time rules if
-# they apply.
-#
-# Notes:
-# - `full_name` must be unique
-# - `standard_name`, `standard_abbreviation`: Name and abbreviation of timezone before daylight savings time
-# - `dst_name`, `dst_abbreviation`:           Name and abbreviation of timezone after daylight savings time
-# - `gmt_offset_std`:                         Integer, GMT offset in minutes, outside of daylight savings time
-# - `gmt_offset_dst`:                         Integer, GMT offset in minutes, during daylight savings time
-# - `dst_start_day`, `dst_end_day`:           Can be defined as either :none or {week_of_year, day_of_week, month_of_year} 
-#                                             When not :none, represents the daylight savings time transition rule.
-#   Spec:
-#     - week_of_year:  integer() | :last, Example: 1 = first week, 2 = second week, N = nth week, etc
-#     - day_of_week:   atom(), :sun, :mon, :tue, etc
-#     - month_of_year: atom(), :jan, :feb, :mar, etc
-# - `dst_start_time`, `dst_end_time`:         Defined as {hour, min}, represents the time of the daylight savings time transition.
-#   Spec:
-#     - hour = integer(), 0..23
-#     - min  = integer(), 0..59
-#
-defrecord Timex.TimezoneInfo,
-  full_name:             "",
-  standard_abbreviation: "",
-  standard_name:         "",
-  dst_abbreviation:      "",
-  dst_name:              "",
-  gmt_offset_std:        0,
-  gmt_offset_dst:        0,
-  dst_start_day:         :undef,
-  dst_start_time:        :undef,
-  dst_end_day:           :undef,
-  dst_end_time:          :undef
-
 defmodule Timex.Timezone do
   @moduledoc """
   Contains all the logic around conversion, manipulation,
@@ -653,23 +619,23 @@ defmodule Timex.Timezone do
         std_off, dst_off, dst_start_day, 
         dst_start_time, dst_end_day, dst_end_time
       } ->
-        record = TimezoneInfo[
-          full_name:             name,
-          standard_abbreviation: std_abbr,
-          standard_name:         std_name,
-          dst_abbreviation:      std_abbr,
-          dst_name:              std_name,
-          gmt_offset_std:        std_off,
-          gmt_offset_dst:        dst_off,
-          dst_start_day:         dst_start_day,
-          dst_start_time:        dst_start_time,
-          dst_end_day:           dst_end_day,
-          dst_end_time:          dst_end_time,
-        ]
+        record = %TimezoneInfo{
+          :full_name =>             name,
+          :standard_abbreviation => std_abbr,
+          :standard_name =>         std_name,
+          :dst_abbreviation =>      std_abbr,
+          :dst_name =>              std_name,
+          :gmt_offset_std =>        std_off,
+          :gmt_offset_dst =>        dst_off,
+          :dst_start_day =>         dst_start_day,
+          :dst_start_time =>        dst_start_time,
+          :dst_end_day =>           dst_end_day,
+          :dst_end_time =>          dst_end_time,
+        }
         # Update DST names, if not :undef
         case dst_names do
             {dst_abbr, dst_name} ->
-              record.update [dst_abbreviation: dst_abbr, dst_name: dst_name]
+              %{record | :dst_abbreviation => dst_abbr, :dst_name => dst_name}
             :undef ->
               record
         end
@@ -743,8 +709,8 @@ defmodule Timex.Timezone do
   Determine what offset is required to convert a date into a target timezone
   """
   @spec diff(date :: DateTime.t, tz :: TimezoneInfo.t) :: integer
-  def diff(DateTime[timezone: origin] = date, TimezoneInfo[gmt_offset_std: dest_std] = destination) do
-    TimezoneInfo[gmt_offset_std: origin_std] = origin
+  def diff(DateTime[timezone: origin] = date, %TimezoneInfo{:gmt_offset_std => dest_std} = destination) do
+    %TimezoneInfo{:gmt_offset_std => origin_std} = origin
     # Create a copy of the date in the new time zone so we can ask about DST
     target_date = date.update(timezone: destination)
     # Determine DST status of origin and target
@@ -764,6 +730,6 @@ defmodule Timex.Timezone do
   end
 
   # Coalesce the standard time and daylight savings time offsets to get the proper DST offset
-  defp coalesce(TimezoneInfo[gmt_offset_std: std, gmt_offset_dst: dst]), do: std + dst
+  defp coalesce(%TimezoneInfo{:gmt_offset_std => std, :gmt_offset_dst => dst}), do: std + dst
 
 end

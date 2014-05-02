@@ -3,20 +3,20 @@ defmodule TimezoneTests do
   use Timex
 
   test :get do
-    TimezoneInfo[full_name: name, standard_abbreviation: abbrev, gmt_offset_std: offset] = Timezone.get("America/Chicago")
+    %TimezoneInfo{:full_name => name, :standard_abbreviation => abbrev, :gmt_offset_std => offset} = Timezone.get("America/Chicago")
     assert name === "America/Chicago"
     assert abbrev === "CST"
     assert offset === -360
-    TimezoneInfo[full_name: name, gmt_offset_std: offset] = Timezone.get(:utc)
+    %TimezoneInfo{:full_name => name, :gmt_offset_std => offset} = Timezone.get(:utc)
     assert name === "UTC"
     assert offset === 0
-    TimezoneInfo[full_name: name, gmt_offset_std: offset] = Timezone.get(2)
+    %TimezoneInfo{:full_name => name, :gmt_offset_std => offset} = Timezone.get(2)
     assert name === "Etc/GMT+2"
     assert offset === +120
-    TimezoneInfo[full_name: name, gmt_offset_std: offset] = Timezone.get(-3)
+    %TimezoneInfo{:full_name => name, :gmt_offset_std => offset} = Timezone.get(-3)
     assert name === "Etc/GMT-3"
     assert offset === -180
-    TimezoneInfo[standard_abbreviation: name, gmt_offset_std: offset] = Timezone.get("CST")
+    %TimezoneInfo{:standard_abbreviation => name, :gmt_offset_std => offset} = Timezone.get("CST")
     assert name === "CST"
     assert offset === -360
   end

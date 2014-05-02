@@ -236,14 +236,14 @@ defmodule Timex.Date do
   @spec from(date | datetime) :: dtz
   @spec from(date | datetime, :utc | :local | TimezoneInfo.t) :: dtz
 
-  def from({_,_,_} = date),                       do: from(date, :utc)
-  def from({{_,_,_},{_,_,_}} = datetime),         do: from(datetime, :utc)
-  def from({_,_,_} = date, :utc),                 do: construct({date, {0,0,0}}, timezone(:utc))
-  def from({{_,_,_},{_,_,_}} = datetime, :utc),   do: construct(datetime, timezone(:utc))
-  def from({_,_,_} = date, :local),               do: from({date, {0,0,0}}, timezone(:local))
-  def from({{_,_,_},{_,_,_}} = datetime, :local), do: from(datetime, timezone(:local))
-  def from({_,_,_} = date, TimezoneInfo[] = tz),  do: from({date, {0,0,0}}, tz)
-  def from({{_,_,_},{_,_,_}} = datetime, TimezoneInfo[] = tz), do: construct(datetime, tz)
+  def from({_,_,_} = date),                        do: from(date, :utc)
+  def from({{_,_,_},{_,_,_}} = datetime),          do: from(datetime, :utc)
+  def from({_,_,_} = date, :utc),                  do: construct({date, {0,0,0}}, timezone(:utc))
+  def from({{_,_,_},{_,_,_}} = datetime, :utc),    do: construct(datetime, timezone(:utc))
+  def from({_,_,_} = date, :local),                do: from({date, {0,0,0}}, timezone(:local))
+  def from({{_,_,_},{_,_,_}} = datetime, :local),  do: from(datetime, timezone(:local))
+  def from({_,_,_} = date, %TimezoneInfo{} = tz),  do: from({date, {0,0,0}}, tz)
+  def from({{_,_,_},{_,_,_}} = datetime, %TimezoneInfo{} = tz), do: construct(datetime, tz)
 
   @doc """
   Construct a date from a time interval since Epoch or year 0.
@@ -458,8 +458,8 @@ defmodule Timex.Date do
     abbr_cased = month_name |> String.slice(0..2)
     abbr_lower = lower |> String.slice(0..2)
     symbol     = abbr_lower |> binary_to_atom
-    full_chars = month_name |> String.to_char_list!
-    abbr_chars = abbr_cased |> String.to_char_list!
+    full_chars = month_name |> List.from_char_data!
+    abbr_chars = abbr_cased |> List.from_char_data!
 
     month_quoted = quote do
       def month_to_num(unquote(month_name)), do: unquote(month_num)
@@ -562,8 +562,8 @@ defmodule Timex.Date do
     hour >= 0 and hour < 24 and min >= 0 and min < 60 and sec >= 0 and sec < 60
   end
 
-  defp is_valid_tz?(TimezoneInfo[] = tz) when tz == TimezoneInfo[], do: false
-  defp is_valid_tz?(TimezoneInfo[]), do: true
+  defp is_valid_tz?(%TimezoneInfo{} = tz) when tz == %TimezoneInfo{}, do: false
+  defp is_valid_tz?(%TimezoneInfo{}), do: true
   defp is_valid_tz?(_), do: false
 
   @doc """
@@ -950,7 +950,7 @@ defmodule Timex.Date do
 
   # Primary constructor for DateTime objects
   defp construct({_,_,_} = date, {_,_,_} = time, nil), do: construct(date, time, timezone(:utc))
-  defp construct({y, m, d}, {h, min, sec}, TimezoneInfo[] = tz) do
+  defp construct({y, m, d}, {h, min, sec}, %TimezoneInfo{} = tz) do
     DateTime[
       year: y, month: m, day: d,
       hour: h, minute: min, second: sec,
