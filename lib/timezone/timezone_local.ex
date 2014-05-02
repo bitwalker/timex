@@ -724,45 +724,47 @@ defmodule Timex.Timezone.Local do
 
   # See http://linux.about.com/library/cmd/blcmdl5_tzfile.htm or
   # https://github.com/eggert/tz/blob/master/tzfile.h for details on the tzfile format
-  # NOTE: These are defined as records, but I would've preferred to use `defrecordp` here to 
+  # NOTE: These are defined as structs, but I would've preferred to use `defrecordp` here to 
   # keep them private. The problem is that it is not possible to do the kind of manipulation
-  # of records I'm doing in `parse_long`, etc. This is because unlike `defrecord`, `defrecordp`'s
+  # of records I'm doing in `parse_long`, etc. This is because unlike structs, `defrecordp`'s
   # functionality is based around macros and compile time knowledge. To reflect my desire to keep
   # these private, I've given them names in the `defrecordp` format, but they are still exposed
   # publically.
-  defrecord :tzfile,
+  defmodule TzFile do
     # six big-endian 32-bit integers:
     #  number of UTC/local indicators
-    utc_local_num: 0,
-    #  number of standard/wall indicators
-    std_wall_num: 0,
-    #  number of leap seconds
-    leap_num: 0,
-    #  number of transition times
-    time_num: 0,
-    #  number of local time zones
-    zone_num: 0,
-    #  number of characters of time zone abbrev strings
-    char_num: 0,
-    # Transition times
-    transitions: [],
-    # Zone data,
-    zones: [],
-    # Leap second adjustments
-    leaps: []
-  defrecord :zone,
-    offset:       0,
-    is_dst?:      false,
-    abbrev_index: 0,
-    name:         "",
-    is_std?:      false,
-    is_utc?:      false
-  defrecord :transition,
-    when?:   0,
-    zone:    nil
-  defrecord :leap,
-    when?:   0,
-    adjust:  0
+    defstruct utc_local_num: 0,
+              #  number of standard/wall indicators
+              std_wall_num: 0,
+              #  number of leap seconds
+              leap_num: 0,
+              #  number of transition times
+              time_num: 0,
+              #  number of local time zones
+              zone_num: 0,
+              #  number of characters of time zone abbrev strings
+              char_num: 0,
+              # Transition times
+              transitions: [],
+              # Zone data,
+              zones: [],
+              # Leap second adjustments
+              leaps: []
+  end
+  defmodule Zone do
+    defstruct offset:       0,
+              is_dst?:      false,
+              abbrev_index: 0,
+              name:         "",
+              is_std?:      false,
+              is_utc?:      false
+  end
+  defmodule Transition do
+    defstruct when?: 0, zone: nil
+  end
+  defmodule Leap do
+    defstruct when?: 0, adjust: 0
+  end
 
   @doc """
   Given a binary representing the data from a tzfile (not the source version),
@@ -778,7 +780,7 @@ defmodule Timex.Timezone.Local do
         # Trim reserved space
         << _ :: [bytes, size(16)], data :: binary >> = rest
         # Num of UTC/Local indicators
-        {record, remaining} = {:tzfile[], data}
+        {record, remaining} = {%TzFile{}, data}
           |> parse_long(:utc_local_num)
           |> parse_long(:std_wall_num)
           |> parse_long(:leap_num)
@@ -788,26 +790,26 @@ defmodule Timex.Timezone.Local do
         # Extract transition times
         num_times = Range.new(1, record.time_num)
         {record, remaining} = Enum.reduce num_times, {record, remaining}, fn _, {r, d} ->
-          {transition, rem} = {:transition[], d}
+          {transition, rem} = {%Transition{}, d}
             |> parse_long(:when?)
-          {r.update(transitions: r.transitions ++ [transition]), rem}
+          {%{r | :transitions => r.transitions ++ [transition]}, rem}
         end
         # Extract transition zone indices
         {record, remaining} = Enum.reduce num_times, {record, remaining}, fn i, {r, d} ->
           {txzone, rem} = d |> parse_uchar
           transition  = r.transitions |> Enum.at(i - 1)
-          updated     = transition.update(zone: txzone)
+          updated     = %{transition | :zone => txzone}
           transitions = r.transitions |> List.replace_at(i - 1, updated)
-          {r.update(transitions: transitions), rem}
+          {%{r | :transitions => transitions}, rem}
         end
         # Extract zone data
         num_zones = Range.new(1, record.zone_num)
         {record, remaining} = Enum.reduce num_zones, {record, remaining}, fn _, {r, d} ->
-          {zone, rem} = {:zone[], d}
+          {zone, rem} = {%Zone{}, d}
             |> parse_long(:offset)
             |> parse_bool(:is_dst?)
             |> parse_uchar(:abbrev_index)
-          {r.update(zones: r.zones ++ [zone]), rem}
+          {%{r | :zones => r.zones ++ [zone]}, rem}
         end
         # Extract zone abbreviations
         {record, remaining} = Enum.reduce num_zones, {record, remaining}, fn i, {r, d} ->
@@ -816,9 +818,9 @@ defmodule Timex.Timezone.Local do
           <<abbrev :: [binary, size(3)], _ :: binary>> = str
           # Update the zone with it's extracted abbreviation
           zone    = r.zones |> Enum.at(i - 1)
-          updated = zone.update(name: abbrev)
+          updated = %{zone | :name => abbrev}
           zones   = r.zones |> List.replace_at(i - 1, updated)
-          {r.update(zones: zones), rem}
+          {%{r | :zones => zones}, rem}
         end
         # Extract leap adjustment pairs
         leap_pairs = Range.new(1, record.leap_num)
@@ -829,10 +831,10 @@ defmodule Timex.Timezone.Local do
           if noop? do
             {r, d}
           else
-            {leap, rem} = {:leap[], d}
+            {leap, rem} = {%Leap{}, d}
               |> parse_long(:when?)
               |> parse_long(:adjust)
-            {r.update(leaps: r.leaps ++ [leap]), rem}
+            {%{r | :leaps => r.leaps ++ [leap]}, rem}
           end
         end
         # Extract standard/wall indicators
@@ -841,9 +843,9 @@ defmodule Timex.Timezone.Local do
           {is_std?, rem} = d |> parse_bool
           # Update the zone with the extracted info
           zone    = r.zones |> Enum.at(i - 1)
-          updated = zone.update(is_std?: is_std?)
+          updated = %{zone | :is_std? => is_std?}
           zones   = r.zones |> List.replace_at(i - 1, updated)
-          {r.update(zones: zones), rem}
+          {%{r | :zones => zones}, rem}
         end
         # Extract UTC/local indicators
         num_utclocal = Range.new(1, record.utc_local_num)
@@ -851,24 +853,24 @@ defmodule Timex.Timezone.Local do
           {is_utc?, rem} = d |> parse_bool
           # Update the zone with the extracted info
           zone    = r.zones |> Enum.at(i - 1)
-          updated = zone.update(is_utc?: is_utc?)
+          updated = %{zone | :is_utc? => is_utc?}
           zones   = r.zones |> List.replace_at(i - 1, updated)
-          {r.update(zones: zones), rem}
+          {%{r | :zones => zones}, rem}
         end
         # Get the zone for the current time
         timestamp  = reference_date |> Date.to_secs
         current_tt = record.transitions
-          |> Enum.sort(fn :transition[when?: utime1], :transition[when?: utime2] -> utime1 > utime2 end)
-          |> Enum.reject(fn :transition[when?: unix_time] -> unix_time > timestamp end)
+          |> Enum.sort(fn %Transition{when?: utime1}, %Transition{when?: utime2} -> utime1 > utime2 end)
+          |> Enum.reject(fn %Transition{when?: unix_time} -> unix_time > timestamp end)
           |> List.first
         # We'll need these handy
         zones_available = record.zones
         # Attempt to get the proper timezone for the current transition we're in
         result = case current_tt do
-          :transition[zone: zone_index] ->
+          %Transition{zone: zone_index} ->
             if zone_index <= Enum.count(record.zones) - 1 do
               # Sweet, we have a matching zone, we have our result!
-              :zone[name: name] = zones_available |> Enum.fetch!(current_tt.zone)
+              %Zone{name: name} = zones_available |> Enum.fetch!(current_tt.zone)
               {:ok, name}
             else
               nil # Fallback to first standard-time zone
@@ -887,10 +889,10 @@ defmodule Timex.Timezone.Local do
               # Well, there are no standard-time zones then, just take the first zone available
               nil  -> 
                 last_transition = record.transitions |> List.last
-                :zone[name: name] = zones_available |> Enum.fetch!(last_transition.zone)
+                %Zone{name: name} = zones_available |> Enum.fetch!(last_transition.zone)
                 {:ok, name}
               # Found a reasonable fallback zone, success?
-              :zone[name: name] ->
+              %Zone{name: name} ->
                 {:ok, name}
             end
         end
@@ -901,15 +903,15 @@ defmodule Timex.Timezone.Local do
 
   defp parse_long({record, data}, prop) do
     {val, rest} = data |> parse_long
-    { record.update([{prop, val}]), rest }
+    { Map.put(record, prop, val), rest }
   end
   defp parse_uchar({record, data}, prop) do
     {val, rest} = data |> parse_uchar
-    { record.update([{prop, val}]), rest }
+    { Map.put(record, prop, val), rest }
   end
   defp parse_bool({record, data}, prop) do
     {val, rest} = data |> parse_bool
-    { record.update([{prop, val}]), rest }
+    { Map.put(record, prop, val), rest }
   end
   defp parse_long(<<val :: 32, rest :: binary>>), do: { val, rest }
   defp parse_uchar(<<val :: 8, rest :: binary>>), do: { val, rest }
