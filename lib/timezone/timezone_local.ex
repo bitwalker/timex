@@ -580,7 +580,7 @@ defmodule Timex.Timezone.Local do
           _ ->
             # Fallback and ask systemsetup
             tz = System.cmd("systemsetup -gettimezone")
-            |> iolist_to_binary
+            |> iodata_to_binary
             |> String.strip(?\n)
             |> String.replace("Time Zone: ", "")
             if String.length(tz) > 0 do
@@ -630,7 +630,7 @@ defmodule Timex.Timezone.Local do
       # Windows 7/Vista
       # On some systems the string value might be padded with excessive \0 bytes, trim them
       List.keyfind(values, 'TimeZoneKeyName', 0)
-      |> iolist_to_binary
+      |> iodata_to_binary
       |> String.strip ?\0
     else
       # Windows 2000 or XP
@@ -654,7 +654,7 @@ defmodule Timex.Timezone.Local do
       cond do
         tzone == nil -> raise "Could not find Windows time zone configuration!"
         tzone -> 
-          timezone = tzone |> iolist_to_binary
+          timezone = tzone |> iodata_to_binary
           case List.keyfind(@lookup_olson, timezone, 0) do
             nil ->
               # Try appending "Standard Time"
