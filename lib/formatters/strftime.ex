@@ -94,6 +94,7 @@ defmodule Timex.DateFormat.Strftime do
   * `%v` - same as `%e-%b-%Y`
 
   """
+  require Record
 
   def process_directive("%" <> _) do
     # false alarm
@@ -114,7 +115,7 @@ defmodule Timex.DateFormat.Strftime do
 
   ###
 
-  defrecordp :directive, dir: nil, flag: nil, width: -1
+  Record.defrecordp :directive, dir: nil, flag: nil, width: -1
 
   defp scan_directive(str, pos) do
     scan_directive_flag(str, pos, directive())

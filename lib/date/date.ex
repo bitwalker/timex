@@ -16,6 +16,7 @@ defmodule Timex.Date do
     * compare dates
     * date arithmetic
   """
+  require Record
   alias Timex.DateTime,     as: DateTime
   alias Timex.Timezone,     as: Timezone
   alias Timex.TimezoneInfo, as: TimezoneInfo
@@ -911,7 +912,7 @@ defmodule Timex.Date do
     validate({year + value, month, day}) |> construct({h, m, s}, tz)
   end
 
-  defrecordp :shift_rec, secs: 0, days: 0, years: 0
+  Record.defrecordp :shift_rec, secs: 0, days: 0, years: 0
 
   # This clause will match lists with at least 2 values
   def shift(date, spec) when is_list(spec) do

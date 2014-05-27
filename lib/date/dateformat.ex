@@ -9,6 +9,7 @@ defmodule Timex.DateFormat do
   Multiple template formats are supported, each one provided by a separate
   module. One can also implement custom formatters for use with this module.
   """
+  require Record
   alias Timex.DateTime,     as: DateTime
   alias Timex.Date,         as: Date
   alias Timex.Date.Convert, as: DateConvert
@@ -488,7 +489,7 @@ defmodule Timex.DateFormat do
   # Build the resulting date from the accumulated intermediate components.
   # Currently, this does not handle all input strings correctly. For instance,
   # "PM 1" won't work.
-  defrecordp :tmpdate, year: 0, month: 1, day: 1, hour: 0, min: 0, sec: 0
+  Record.defrecordp :tmpdate, year: 0, month: 1, day: 1, hour: 0, min: 0, sec: 0
   defp date_with_comps(comps) do
     # valid comps include:
     # * century
