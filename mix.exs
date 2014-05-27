@@ -1,12 +1,10 @@
-Code.ensure_loaded?(Hex) and Hex.start
-
 defmodule Timex.Mixfile do
   use Mix.Project
 
   def project do
     [ app: :timex,
-      version: "0.5.0",
-      elixir: "~> 0.13.1",
+      version: "0.6.0",
+      elixir: "~> 0.13.3",
       description: "A date/time library for Elixir",
       package: package,
       deps: [] ]
