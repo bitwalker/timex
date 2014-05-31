@@ -3,35 +3,14 @@ Date & Time modules for Elixir
 
 ## Status ##
 
-[![wercker status](https://app.wercker.com/status/07ebafab94a2004564366a6734d1b8bf/m/master "wercker status")](https://app.wercker.com/project/bykey/07ebafab94a2004564366a6734d1b8bf)
-
-Version 0.4.5 is stable and usable on Elixir 0.12.4 and 0.13+.
-However, future development is happening on the 0.5.0 branch, where I'm
-making a number of significant changes:
-
-- Requiring Elixir 0.13+
-- Moving away from records to structs/maps
-- Creating seperate Date, Time, DateTime and Timezone structs (no more
-  TimezoneInfo; Date will contain only year/month/day/calendar;
-  Time will contain hours/mins/seconds/ms/us; DateTime will be composed
-  of a Date struct, a Time struct, and a Timezone struct.
-- Moving the primary API interface from Date to DateTime
-- Removing, improving, and potentially adding new functions to work with
-  these new changes.
-
-The goal after 0.5.0 releases is for this to be a stable API with the
-goal of being merged in to the language at some future date if it turns
-out that it solves the problems needed for inclusion in the standard
-lib.
-
----
-
+[![Build
+Status](https://travis-ci.org/bitwalker/timex.svg?branch=master)](https://travis-ci.org/bitwalker/timex)
 
 To use timex with your projects, edit your mix.exs file and add it as a dependency:
 
 ```elixir
 defp deps do
-  [{:timex, github: "bitwalker/timex"}]
+  [{:timex, "~> 0.6.0"}]
 end
 ```
 
