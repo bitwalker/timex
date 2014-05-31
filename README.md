@@ -3,8 +3,8 @@ Date & Time modules for Elixir
 
 ## Status ##
 
-[![Build
-Status](https://travis-ci.org/bitwalker/timex.svg?branch=master)](https://travis-ci.org/bitwalker/timex)
+[![Master](https://travis-ci.org/bitwalker/timex.svg?branch=master)](https://travis-ci.org/bitwalker/timex)
+[![Develop](https://travis-ci.org/bitwalker/timex.svg?branch=develop)](https://travis-ci.org/bitwalker/timex)
 
 To use timex with your projects, edit your mix.exs file and add it as a dependency:
 
