@@ -419,7 +419,7 @@ defmodule Timex.Date do
     lower      = day_name |> String.downcase
     abbr_cased = day_name |> String.slice(0..2)
     abbr_lower = lower |> String.slice(0..2)
-    symbol     = abbr_lower |> binary_to_atom
+    symbol     = abbr_lower |> String.to_atom
 
     day_quoted = quote do
       def day_to_num(unquote(day_name)),   do: unquote(day_num)
@@ -458,7 +458,7 @@ defmodule Timex.Date do
     lower      = month_name |> String.downcase
     abbr_cased = month_name |> String.slice(0..2)
     abbr_lower = lower |> String.slice(0..2)
-    symbol     = abbr_lower |> binary_to_atom
+    symbol     = abbr_lower |> String.to_atom
     full_chars = month_name |> String.to_char_list
     abbr_chars = abbr_cased |> String.to_char_list
 

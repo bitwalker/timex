@@ -235,6 +235,6 @@ defmodule Timex.DateFormat.Default do
   end
 
   defp translate_compound(dir) do
-    { :subfmt, binary_to_atom(dir) }
+    { :subfmt, String.to_atom(dir) }
   end
 end

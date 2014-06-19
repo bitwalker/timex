@@ -199,7 +199,7 @@ defmodule Timex.DateFormat do
         :io_lib.format("~s~2..0B:~2..0B", [sign, hour, min])
       :zoffs_sec ->
         {_,_,{tz_offset,_}} = DateConvert.to_gregorian(date)
-        :io_lib.format("~s~2..0B:~2..0B:~2..0B", tuple_to_list(split_tz(tz_offset)))
+        :io_lib.format("~s~2..0B:~2..0B:~2..0B", Tuple.to_list(split_tz(tz_offset)))
     end
   end
 
@@ -372,7 +372,7 @@ defmodule Timex.DateFormat do
   end
 
   defp wrap(formatted) do
-    { :ok, iodata_to_binary(formatted) }
+    { :ok, IO.iodata_to_binary(formatted) }
   end
 
   ### Private functions for parsing ###
