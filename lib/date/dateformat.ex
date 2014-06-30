@@ -575,7 +575,7 @@ defmodule Timex.DateFormat do
   end
 
   defp do_tokenize(str, {formatter, pat}=fmt, pos, parts, acc) do
-    patsize = size(pat)
+    patsize = byte_size(pat)
     case str do
       <<^pat :: [binary, size(patsize)], rest :: binary>> ->
         case formatter.(rest) do

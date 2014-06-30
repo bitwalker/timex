@@ -4,7 +4,7 @@ defmodule Timex.Mixfile do
   def project do
     [ app: :timex,
       version: "0.9.0",
-      elixir: "~> 0.14.2-dev",
+      elixir: "~> 0.14.2",
       description: "A date/time library for Elixir",
       package: package,
       deps: [] ]
