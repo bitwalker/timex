@@ -2,3 +2,4 @@ docs/
 deps/
 ebin/
 _build/
+.exenv-version
