@@ -1,12 +1,11 @@
 language: erlang
 otp_release:
   - 17.0
+env:
+  - ELIXIR_VERSION=0.14.3
 before_install:
-  - git clone https://github.com/elixir-lang/elixir
-  - cd elixir
-  - git checkout v0.14.2
-  - make
-  - cd ..
+  - wget https://github.com/elixir-lang/elixir/releases/download/v$ELIXIR_VERSION/Precompiled.zip
+  - unzip -d elixir Precompiled.zip
 before_script:
   - export PATH=`pwd`/elixir/bin:$PATH
   - mix local.hex --force
