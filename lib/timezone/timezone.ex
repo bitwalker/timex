@@ -671,13 +671,25 @@ defmodule Timex.Timezone do
   # Allow querying by offset
   def get(offset) when is_number(offset) do
     if offset > 0 do
-      get("+#{offset}")
+      get("Etc/GMT+#{offset}")
     else
-      get("#{offset}")
+      get("Etc/GMT#{offset}")
     end
   end
-  def get(<<?+, offset :: binary>>), do: get("Etc/GMT+#{offset}")
-  def get(<<?-, offset :: binary>>), do: get("Etc/GMT-#{offset}")
+  def get(<<?+, offset :: binary>>) do 
+    {num, _} = Integer.parse(offset)
+    cond do
+      num > 100 -> trunc(num/100) |> get
+      true      -> get(num)
+    end
+  end
+  def get(<<?-, offset :: binary>>) do
+    {num, _} = Integer.parse(offset)
+    cond do
+      num < -100 -> trunc(num/100) |> get
+      true       -> get(num)
+    end
+  end
   @doc """
   Get the TimezoneInfo object corresponding to the given name.
   """

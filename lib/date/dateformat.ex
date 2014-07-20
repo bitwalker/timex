@@ -13,6 +13,7 @@ defmodule Timex.DateFormat do
   alias Timex.DateTime,     as: DateTime
   alias Timex.Date,         as: Date
   alias Timex.Date.Convert, as: DateConvert
+  alias Timex.Timezone,     as: Timezone
 
   @type formatter :: atom | {function, String.t}
 
@@ -163,15 +164,15 @@ defmodule Timex.DateFormat do
       :iso_year2 -> rem(iso_year, 100)
 
       :month     -> month
-      :mshort    -> month_name_short(month)
-      :mfull     -> month_name_full(month)
+      :mshort    -> month |> Date.month_shortname
+      :mfull     -> month |> Date.month_name
 
       :day       -> day
       :oday      -> daynum.(date)
       :wday_mon  -> Date.weekday(date)
       :wday_sun  -> rem(Date.weekday(date), 7)
-      :wdshort   -> weekday_name_short(Date.weekday(date))
-      :wdfull    -> weekday_name_full(Date.weekday(date))
+      :wdshort   -> Date.weekday(date) |> Date.day_shortname
+      :wdfull    -> Date.weekday(date) |> Date.day_name
 
       :iso_week  -> iso_week
       :week_mon  -> get_week_no.(Date.weekday(start_of_year) - 1)
@@ -277,8 +278,8 @@ defmodule Timex.DateFormat do
 
   #ANSIC       = "Mon Jan _2 15:04:05 2006"
   defp format_predefined(%DateTime{:year => year, :month => month, :day => day, :hour => hour, :minute => min, :second => sec} = date, :"ANSIC") do
-    day_name = weekday_name_short(Date.weekday(date))
-    month_name = month_name_short(month)
+    day_name = Date.weekday(date) |> Date.day_shortname
+    month_name = month |> Date.month_shortname
 
     fstr = "~s ~s ~2.. B ~2..0B:~2..0B:~2..0B ~4..0B"
     :io_lib.format(fstr, [day_name, month_name, day, hour, min, sec, year])
@@ -287,8 +288,8 @@ defmodule Timex.DateFormat do
 
   #UnixDate    = "Mon Jan _2 15:04:05 MST 2006"
   defp format_predefined(%DateTime{:year => year, :month => month, :day => day, :hour => hour, :minute => min, :second => sec} = date, :"UNIX") do
-    day_name = weekday_name_short(Date.weekday(date))
-    month_name = month_name_short(month)
+    day_name = Date.weekday(date) |> Date.day_shortname
+    month_name = month |> Date.month_shortname
 
     {_,_,{_,tz_name}} = DateConvert.to_gregorian(date)
 
@@ -315,8 +316,8 @@ defmodule Timex.DateFormat do
   end
 
   defp format_rfc(%DateTime{:year => year, :month => month, :day => day, :hour => hour, :minute => min, :second => sec} = date, tz) do
-    day_name = weekday_name_short(Date.weekday(date))
-    month_name = month_name_short(month)
+    day_name = Date.weekday(date) |> Date.day_shortname
+    month_name = month |> Date.month_shortname
     fstr = case tz do
       { :name, tz_name } ->
         if tz_name == "UTC" do
@@ -330,36 +331,6 @@ defmodule Timex.DateFormat do
     end
     :io_lib.format(fstr, [day_name, day, month_name, year, hour, min, sec])
     |> wrap
-  end
-
-  defp weekday_name_short(day) when day in 1..7 do
-    case day do
-      1 -> "Mon"; 2 -> "Tue"; 3 -> "Wed"; 4 -> "Thu";
-      5 -> "Fri"; 6 -> "Sat"; 7 -> "Sun"
-    end
-  end
-
-  defp weekday_name_full(day) when day in 1..7 do
-    case day do
-      1 -> "Monday"; 2 -> "Tuesday"; 3 -> "Wednesday"; 4 -> "Thursday";
-      5 -> "Friday"; 6 -> "Saturday"; 7 -> "Sunday"
-    end
-  end
-
-  defp month_name_short(month) when month in 1..12 do
-    case month do
-      1 -> "Jan";  2 -> "Feb";  3 -> "Mar";  4 -> "Apr";
-      5 -> "May";  6 -> "Jun";  7 -> "Jul";  8 -> "Aug";
-      9 -> "Sep"; 10 -> "Oct"; 11 -> "Nov"; 12 -> "Dec"
-    end
-  end
-
-  defp month_name_full(month) when month in 1..12 do
-    case month do
-      1 -> "January";    2 -> "February";  3 -> "March";     4 -> "April";
-      5 -> "May";        6 -> "June";      7 -> "July";      8 -> "August";
-      9 -> "September"; 10 -> "October";  11 -> "November"; 12 -> "December"
-    end
   end
 
   defp split_tz(offset) do
@@ -381,24 +352,26 @@ defmodule Timex.DateFormat do
   defp parse_with_parts(string, parts, formatter) do
     try do
       {rest, comps} = Enum.reduce(parts, {String.to_char_list(string), []}, fn
-        ({:subfmt, sfmt}, acc) ->
-          # Subformat is matched recursively
-          { :ok, bin } = if is_atom(sfmt) do
-            parse_predefined(string, sfmt)
-          else
-            parse(string, sfmt, formatter)
+        ({:subfmt, sfmt}, {string, acc}) ->
+          case tokenize(sfmt, formatter) do
+            { :ok, sub_parts } ->
+              case parse_with_parts("#{string}", sub_parts, formatter) do
+                { :ok, rest, date_comps } ->
+                  {rest, merge_comps(acc, date_comps)}
+                error -> raise error
+              end
+            error -> raise error
           end
-          [acc, bin]
 
         ({dir, fmt}, {string, acc}) ->
           case parse_directive(string, dir, fmt) do
             { :ok, comp, rest } -> {rest, merge_comps(acc, comp)}
-            { :error, reason }   -> throw reason
+            { :error, reason }  -> throw reason
           end
 
         (bin, {string, acc}) when is_binary(bin) ->
           # A binary is matched literally
-          case :io_lib.fread(String.to_char_list(bin), string) do
+          case fread(String.to_char_list(bin), string) do
             { :ok, [], rest }  -> {rest, acc}
             { :more, _, _, _ } -> throw "unexpected end of input"
             { :error, reason } -> throw reason
@@ -438,38 +411,46 @@ defmodule Timex.DateFormat do
     %DateTime{:year => year} = Date.local
     century = div(year, 100)
 
-    case :io_lib.fread(native_fmt, string) do
-      { :ok, [num], rest } ->
+    case fread(native_fmt, string) do
+      { :ok, [read], rest } ->
         comp = case dir do
           # FIXME: year number has to be in the range 0..9999
-          :year      -> [century: div(num,100), year2: rem(num,100)]
+          :year      -> [century: div(read,100), year2: rem(read,100)]
           :year2     ->
             # assuming current century
-            [century: century, year2: num]
-          :century   -> [century: num]
-          :iso_year  -> [iso_year: num]
+            [century: century, year2: read]
+          :century   -> [century: read]
+          :iso_year  -> [iso_year: read]
           :iso_year2 ->
             # assuming current century
-            [iso_year: century*100 + num]
-          :month     -> [month: num]
-          :mshort    -> [month: Date.month_to_num(num)]
-          :mfull     -> [month: Date.month_to_num(num)]
-          :day       -> [day: num]
-          :oday      -> [oday: num]
-          :wday_mon  -> [wday: num]
-          :wday_sun  -> [wday: if num == 0 do 7 else num end]
-          :iso_week  -> [iso_week: num]
-          :week_mon  -> [week: num]
-          :week_sun  -> [week: num]  # FIXME
-          :hour24    -> [hour: num]
-          :hour12    -> [hour: num]
-          :am        -> [am: is_am(num)]
-          :AM        -> [am: is_am(num)]
-          :pm        -> [am: is_am(num)]
-          :PM        -> [am: is_am(num)]
-          :min       -> [min: num]
-          :sec       -> [sec: num]
-          :sec_epoch -> [osec: num]
+            [iso_year: century*100 + read]
+          :month     -> [month: read]
+          :mshort    -> [month: Date.month_to_num("#{read}")]
+          :mfull     -> [month: Date.month_to_num("#{read}")]
+          :day       -> [day: read]
+          :oday      -> [oday: read]
+          :wday_mon  -> [wday: read]
+          :wday_sun  -> [wday: if read == 0 do 7 else read end]
+          :wdshort   -> [wday: Date.day_to_num("#{read}")]
+          :wdfull    -> [wday: Date.day_to_num("#{read}")]
+          :iso_week  -> [iso_week: read]
+          :week_mon  -> [week: read]
+          :week_sun  -> [week: read]  # FIXME
+          :hour24    -> [hour: read]
+          :hour12    -> [hour: read]
+          :am        -> [am: is_am(read)]
+          :AM        -> [am: is_am(read)]
+          :pm        -> [am: is_am(read)]
+          :PM        -> [am: is_am(read)]
+          :min       -> [min: read]
+          :sec       -> [sec: read]
+          :sec_epoch -> [osec: read]
+          :zname     -> [tz: Timezone.get("#{read}")]
+          :zoffs     -> [tz: Timezone.get("#{read}")]
+          :zoffs_colon ->
+            raise ArgumentError, message: "Unsupported parse directive :zoffs_colon"
+          :zoffs_sec ->
+            raise ArgumentError, message: "Unsupported parse directive :zoffs_sec"
         end
         { :ok, comp, rest }
 
@@ -483,15 +464,10 @@ defmodule Timex.DateFormat do
     Keyword.merge(c1, c2)
   end
 
-  defp parse_predefined(_string, _fmt) do
-    # FIXME: not implemented yet
-    nil
-  end
-
   # Build the resulting date from the accumulated intermediate components.
   # Currently, this does not handle all input strings correctly. For instance,
   # "PM 1" won't work.
-  Record.defrecordp :tmpdate, year: 0, month: 1, day: 1, hour: 0, min: 0, sec: 0
+  Record.defrecordp :tmpdate, year: 0, month: 1, day: 1, hour: 0, min: 0, sec: 0, tz: Timezone.get(:utc)
   defp date_with_comps(comps) do
     # valid comps include:
     # * century
@@ -508,6 +484,7 @@ defmodule Timex.DateFormat do
     # * sec
     # * osec
     # * am
+    # * tz
 
     date = Enum.reduce comps, tmpdate(), fn
       {:century, num}, tmpdate(year: y)=acc ->
@@ -523,22 +500,23 @@ defmodule Timex.DateFormat do
       {:hour, num}, tmpdate()=acc ->
         tmpdate(acc, hour: num)
       {:am, false}, tmpdate(hour: h)=acc ->
-        #IO.puts "is_am false: #{inspect acc}"
         tmpdate(acc, hour: h + 12)
       {:am, true}, tmpdate(hour: 12)=acc ->
-        #IO.puts "is_am true: #{inspect acc}"
         tmpdate(acc, hour: 0)
       {:am, true}, tmpdate()=acc ->
-        #IO.puts "is_am true: #{inspect acc}"
         acc
       {:min, num}, tmpdate()=acc ->
         tmpdate(acc, min: num)
       {:sec, num}, tmpdate()=acc ->
         tmpdate(acc, sec: num)
+      {:tz, tz}, tmpdate()=acc ->
+        tmpdate(acc, tz: tz)
+      {:wday, _}, acc ->
+        acc
     end
 
     Date.from({{tmpdate(date, :year), tmpdate(date, :month), tmpdate(date, :day)},
-               {tmpdate(date, :hour), tmpdate(date, :min), tmpdate(date, :sec)}})
+               {tmpdate(date, :hour), tmpdate(date, :min), tmpdate(date, :sec)}}, tmpdate(date, :tz))
   end
 
   defp is_am(x) when x in ['am', 'AM'], do: true
@@ -595,5 +573,16 @@ defmodule Timex.DateFormat do
         <<c :: utf8, rest :: binary>> = str
         do_tokenize(rest, fmt, pos+1, parts, [acc, c])
     end
+  end
+
+  defp fread('~s', charlist), do: fread("~s", charlist)
+  defp fread("~s", charlist) do
+    [[{start, finish}]|_] = Regex.scan(~r/\w+/u, "#{charlist}", return: :index)
+    read      = Enum.take(charlist, start + finish)
+    remainder = Enum.drop(charlist, start + finish)
+    {:ok, [read], remainder}
+  end
+  defp fread(native_fmt, charlist) do
+    :io_lib.fread(native_fmt, charlist)
   end
 end
