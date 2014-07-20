@@ -1,36 +1,30 @@
-Date & Time modules for Elixir
-==============================
-
-## Status ##
+## Timex
 
 [![Master](https://travis-ci.org/bitwalker/timex.svg?branch=master)](https://travis-ci.org/bitwalker/timex)
-[![Develop](https://travis-ci.org/bitwalker/timex.svg?branch=develop)](https://travis-ci.org/bitwalker/timex)
+
+## Getting Started
 
 To use timex with your projects, edit your mix.exs file and add it as a dependency:
 
 ```elixir
 defp deps do
-  [{:timex, "~> 0.6.0"}]
+  [{:timex, "~> 0.10.1"}]
 end
 ```
 
-After that, run `mix deps.get` to load the dependency. To use Timex modules without the Timex namespace, add
-`use Timex` to the top of each module you plan on referencing Timex from. You can then reference the modules
-directly, for example: `Date.now()`, versus `Timex.Date.now()`. This is for compatibility with other libraries
-which might define their own Date/DateTime/Time implementations.
+To use Timex modules without the Timex namespace, add `use Timex` to the top of each module you plan on referencing Timex from. You can then reference the modules directly, for example: `Date.now()`, versus `Timex.Date.now()`. This is for compatibility with other libraries which might define their own Date/DateTime/Time implementations.
 
+## Overview
 
-## Overview ##
+The goal of this project is to provide a complete set of Date/Time functionality for Elixir projects, with the hope of being eventually merged into the standard library.
 
-This is a draft implementation of a Date/Time library for Elixir that will deal with all aspects of working with dates and time intervals.
+The `Date` module is for dealing with dates, which includes time and timezone information for those dates. It supports getting current date in any time zone, converting between timezones while taking Daylight Savings Time offsets into account, calculating time intervals between two dates, shifting a date by some amount of seconds/hours/days/years towards past and future, etc. As Erlang provides support only for the Gregorian calendar, that's what timex currently supports, but it is possible to add additional calendars if needed.
 
-Basically, the `Date` module is for dealing with dates. It supports getting current date in any time zone, converting between timezones while taking Daylight Savings Time offsets into account, calculating time intervals between two dates, shifting a date by some amount of seconds/hours/days/years towards past and future, etc. As Erlang provides support only for the Gregorian calendar, that's what timex currently supports, but it is possible to add additional calendars if needed.
+The `Time` module supports a finer grained level of arithmetic over time intervals. It is intended for use as timestamps in logs, measuring code execution times, converting time units, etc.
 
-The `Time` module supports a finer grain level of calculations over time intervals. It is going to be used for timestamps in logs, measuring code executions times, converting time units, and so forth.
+## Usage
 
-## Use cases ##
-
-### Getting current date ###
+### Getting current date
 
 Get current date in the local time zone.
 
@@ -39,6 +33,7 @@ date = Date.local
 DateFormat.format!(date, "{ISO}")      #=> "2013-09-30T16:40:08+0300"
 DateFormat.format!(date, "{RFC1123}")  #=> "Mon, 30 Sep 2013 16:40:08 EEST"
 DateFormat.format!(date, "{kitchen}")  #=> "4:40PM"
+DateFormat.format!(date, "%a, %d %m %Y %T %Z", :strftime) #=> "Sun, 20 07 2014 04:14:12 CDT"
 ```
 
 The date value that `Date` produced encapsulates current date, time, and time zone information. This allows for great flexibility without any overhead on the user's part.
@@ -66,7 +61,7 @@ Date.universal(date)  # convert date to UTC
 #=> %DateTime{year: 2013, month: 3, day: 17, hour: 21, minute: 22, second: 23, timezone: ...}
 ```
 
-### Working with time zones ###
+### Working with time zones
 
 ```elixir
 date = Date.from({2013,1,1}, Date.timezone("America/Chicago"))
@@ -87,7 +82,7 @@ Date.local(date)                            #=> %DateTime{...}
 Date.local(date, Date.timezone("PST"))      #=> %DateTime{...}
 ```
 
-### Extracting information about dates ###
+### Extracting information about dates
 
 Find out current weekday, week number, number of days in a given month, etc.
 
@@ -109,13 +104,15 @@ Date.is_leap?(2012)           #=> true
 Date.day_to_num(:mon)         #=> 1
 Date.day_to_num("Thursday")   #=> 4 (can use Thursday, thursday, Thu, thu, :thu)
 Date.day_name(4)              #=> "Thursday"
+Date.day_shortname(4)         #=> "Thu"
 
 Date.month_to_num(:apr)       #=> 4 (same as day_to_num with possible formats)
 Date.month_name(4)            #=> "April"
+Date.month_shortname(4)       #=> "Apr"
 
 ```
 
-### Date arithmetic ###
+### Date arithmetic
 
 `Date` can convert dates to time intervals since UNIX epoch or year 0. Calculating time intervals between two dates is possible via the `diff()` function (not implemented yet).
 
@@ -166,12 +163,12 @@ DateFormat.format!( Date.shift(date, years: -13), "{RFC1123}" )
 #=> "Sat, 30 Sep 2000 16:58:13 EEST"
 ```
 
-## Working with Time module ##
+## Working with Time module
 
 The `Time` module already has some conversions and functionality for measuring time.
 
 ```elixir
-## Time.now returns time since UNIX epoch ##
+## Time.now returns time since UNIX epoch
 
 Time.now
 #=> {1362,781057,813380}
@@ -183,7 +180,7 @@ Time.now(:msecs)
 #=> 1362781088623.741
 
 
-## Converting units is easy ##
+## Converting units is easy
 
 t = Time.now
 #=> {1362,781097,857429}
@@ -201,7 +198,7 @@ Time.to_secs(13, :msecs)
 #=> 0.013
 
 
-## We can also convert from timestamps to other units using a single function ##
+## We can also convert from timestamps to other units using a single function
 
 Time.convert(t, :secs)
 #=> 1362781097.857429
@@ -213,7 +210,7 @@ Time.convert(t, :hours)
 #=> 378550.30496039696
 
 
-## elapsed() calculates time interval between now and t ##
+## elapsed() calculates time interval between now and t
 
 Time.elapsed(t)
 #=> {0,68,-51450}
@@ -225,7 +222,7 @@ t1 = Time.elapsed(t)
 #=> {0,90,-339935}
 
 
-## diff() calculates time interval between two timestamps ##
+## diff() calculates time interval between two timestamps
 
 Time.diff(t1, t)
 #=> {-1362,-781007,-1197364}
@@ -237,7 +234,7 @@ Time.diff(Time.now, t, :hours)
 #=> 0.03031450388888889
 ```
 
-### Converting time units ###
+### Converting time units
 
 ```elixir
 dt = Time.now
@@ -247,7 +244,7 @@ Time.convert(dt, :hours)
 Time.to_timestamp(13, :secs)
 ```
 
-## FAQ ##
+## FAQ
 
 **Which functions provide microsecond precision?**
 
@@ -279,5 +276,3 @@ Timezone support is also exposed via the `Timezone`, `Timezone.Local`, and `Time
 ## License
 
 This software is licensed under [the MIT license](LICENSE.md).
-
-  [elixir-datefmt]: https://github.com/bitwalker/elixir-datefmt
