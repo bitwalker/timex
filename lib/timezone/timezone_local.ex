@@ -675,7 +675,7 @@ defmodule Timex.Timezone.Local do
         etctz = File.read!(@_ETC_TIMEZONE)
         case etctz |> String.starts_with?("TZif2") do
           true ->
-            case etctz |> File.read! |> parse_tzfile(date) do
+            case etctz |> parse_tzfile(date) do
               {:ok, tz}   -> {:ok, tz}
               {:error, m} -> raise m
             end
