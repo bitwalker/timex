@@ -3,7 +3,7 @@ defmodule Timex.Mixfile do
 
   def project do
     [ app: :timex,
-      version: "0.10.1",
+      version: "0.10.2",
       elixir: "~> 0.14.3",
       description: "A date/time library for Elixir",
       package: package,
@@ -13,7 +13,7 @@ defmodule Timex.Mixfile do
   def application, do: []
 
   defp package do
-    [ files: ["lib", "mix.exs", "README.md", "LICENSE.md"],
+    [ files: ["lib", "priv", "mix.exs", "README.md", "LICENSE.md"],
       contributors: ["Paul Schoenfelder", "Alexei Sholik"],
       licenses: ["MIT"],
       links: [ { "GitHub", "https://github.com/bitwalker/timex" } ] ]
