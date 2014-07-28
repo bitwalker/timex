@@ -7,6 +7,10 @@ defmodule TimezoneTests do
     assert name === "America/Chicago"
     assert abbrev === "CST"
     assert offset === -360
+    %TimezoneInfo{:full_name => name, :standard_abbreviation => abbrev, :gmt_offset_std => offset} = Timezone.get("Europe/Stockholm")
+    assert name === "Europe/Stockholm"
+    assert abbrev === "CET"
+    assert offset === 60
     %TimezoneInfo{:full_name => name, :gmt_offset_std => offset} = Timezone.get(:utc)
     assert name === "UTC"
     assert offset === 0
