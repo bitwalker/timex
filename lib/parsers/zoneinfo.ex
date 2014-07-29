@@ -11,6 +11,7 @@ defmodule Timex.Parsers.ZoneInfo do
     Represents the data retreived from a binary tzfile.
     For details on the tzfile format, see: 
 
+      http://www.cstdbill.com/tzdb/tzfile-format.html
       http://linux.about.com/library/cmd/blcmdl5_tzfile.htm 
       https://github.com/eggert/tz/blob/master/tzfile.h
     """
