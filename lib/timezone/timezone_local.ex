@@ -41,7 +41,7 @@ defmodule Timex.Timezone.Local do
           {:ok, tz} -> tz
           _ ->
             # Fallback and ask systemsetup
-            tz = System.cmd("systemsetup -gettimezone")
+            tz = System.cmd("systemsetup", "-gettimezone")
             |> IO.iodata_to_binary
             |> String.strip(?\n)
             |> String.replace("Time Zone: ", "")

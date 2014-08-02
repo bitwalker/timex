@@ -555,15 +555,15 @@ defmodule Timex.DateFormat do
   defp do_tokenize(str, {formatter, pat}=fmt, pos, parts, acc) do
     patsize = byte_size(pat)
     case str do
-      <<^pat :: [binary, size(patsize)], rest :: binary>> ->
+      <<^pat :: binary-size(patsize), rest :: binary>> ->
         case formatter.(rest) do
           { :skip, length } ->
-            <<skip :: [binary, size(length)], rest :: binary>> = rest
+            <<skip :: binary-size(length), rest :: binary>> = rest
             do_tokenize(rest, fmt, pos + length + 1, parts, [acc,skip])
 
           { :ok, dir, length } ->
             new_parts = [parts, List.to_string(acc), dir]
-            <<_ :: [binary, size(length)], rest :: binary>> = rest
+            <<_ :: binary-size(length), rest :: binary>> = rest
             do_tokenize(rest, fmt, pos + length, new_parts, [])
 
           { :error, reason } ->

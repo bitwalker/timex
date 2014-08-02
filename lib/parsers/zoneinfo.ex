@@ -58,16 +58,16 @@ defmodule Timex.Parsers.ZoneInfo do
   ##############
   # Macros defining common bitstring modifier combinations in zoneinfo files
   defmacrop bytes(size) do
-    quote do: [binary, size(unquote(size)), unit(8)]
+    quote do: binary-size(unquote(size))-unit(8)
   end
   defmacrop integer_32bit_be do
-    quote do: [big, size(4), unit(8), integer]
+    quote do: big-size(4)-unit(8)-integer
   end
   defmacrop signed_char_be do
-    quote do: [big, size(1), unit(8), signed, integer]
+    quote do: big-size(1)-unit(8)-signed-integer
   end
   defmacrop unsigned_char_be do
-    quote do: [big, size(1), unit(8), unsigned, integer] 
+    quote do: big-size(1)-unit(8)-unsigned-integer
   end
 
   @doc """

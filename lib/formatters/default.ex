@@ -114,7 +114,7 @@ defmodule Timex.DateFormat.Default do
     case scan_directive(fmt, 0) do
       { :ok, pos } ->
         length = pos-1
-        <<dirstr :: [binary, size(length)], _ :: binary>> = fmt
+        <<dirstr :: binary-size(length), _ :: binary>> = fmt
         case parse_directive(dirstr) do
           { :ok, directive } -> { :ok, directive, pos }
           error              -> error
