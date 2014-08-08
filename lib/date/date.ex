@@ -387,6 +387,29 @@ defmodule Timex.Date do
   end
 
   @doc """
+  Convert an iso ordinal day number to the day it represents in the
+  current year. If no date is provided, a new one will be created, with
+  the time will be set to 0:00:00, in UTC. Otherwise, the date provided will
+  have it's month and day reset to the date represented by the ordinal day.
+
+  ## Examples
+
+      180 |> Date.from_iso_day       #=> %DateTime{year: 2014, month: 6, day: 7}
+      180 |> Date.from_iso_day(date) #=> <modified date struct where the month and day has been set appropriately>
+  """
+  @spec from_iso_day(non_neg_integer, date | nil) :: DateTime.t
+  def from_iso_day(day, date \\ nil)
+
+  def from_iso_day(day, nil) do
+    today = now |> set([month: 1, day: 1, hour: 0, minute: 0, second: 0, ms: 0])
+    shift(today, days: day)
+  end
+  def from_iso_day(day, date) do
+    reset = date |> set([month: 1, day: 1])
+    shift(reset, days: day)
+  end
+
+  @doc """
   Return a pair {year, week number} (as defined by ISO 8601) that date falls
   on.
 
@@ -640,7 +663,7 @@ defmodule Timex.Date do
       true       -> sec
     end
   end
-  defp normalize(:msec, ms) do
+  defp normalize(:ms, ms) do
     cond do
       ms < 0   -> 0
       ms > 999 -> 999
