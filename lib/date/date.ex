@@ -25,6 +25,7 @@ defmodule Timex.Date do
   @type dtz :: { datetime, TimezoneInfo.t }
   @type datetime :: { date, time }
   @type date :: { year, month, day }
+  @type iso_triplet :: { year, weeknum, weekday }
   @type year :: non_neg_integer
   @type month :: 1..12
   @type day :: 1..31
@@ -540,6 +541,31 @@ defmodule Timex.Date do
   def iso_triplet(%DateTime{} = datetime) do
     { iso_year, iso_week } = iso_week(datetime)
     { iso_year, iso_week, weekday(datetime) }
+  end
+
+  @doc """
+  Given an ISO triplet `{year, week number, weekday}`, convert it to a
+  DateTime struct.
+
+  ## Examples
+
+      {2014, 5, 2} |> Date.from_iso_triplet #=> %DateTime{year: 2014, month: 2, day: 2}
+
+  """
+  @spec from_iso_triplet(iso_triplet) :: DateTime.t
+  def from_iso_triplet({year, _, _} = triplet) do
+    DateTime.new
+    |> set([year: year, month: 1, day: 1])
+    |> do_from_iso_triplet(triplet)
+  end
+  defp do_from_iso_triplet(date, {_, week, weekday}) do
+    {year, _, first_weekday}  = date |> set([month: 1, day: 4]) |> iso_triplet
+    weekday_offset            = first_weekday + 3
+    ordinal                   = ((week * 7) + weekday) - weekday_offset
+    cond do
+      ordinal <= 0 -> do_from_iso_triplet(%{date | :year => year - 1}, {year, 53, weekday})
+      true -> date |> shift(days: ordinal)
+    end
   end
 
   @doc """
