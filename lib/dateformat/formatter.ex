@@ -67,8 +67,16 @@ defmodule Timex.DateFormat.Formatter do
       formatters |> Enum.member?(formatter) ->
         try do
           case formatter.tokenize(format_string) do
-            {:ok, _}            -> :ok
-            {:error, _} = error -> error
+            {:error, _} = error ->
+              error
+            directives when is_list(directives) ->
+              if Enum.any?(directives, fn dir -> dir.type != :char end) do
+                :ok
+              else
+                {:error, "There were no formatting directives in the provided string."}
+              end
+            _ ->
+              raise FormatError, message: "Invalid tokenization result!"
           end
         rescue
           x -> {:error, x}

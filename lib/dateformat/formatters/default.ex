@@ -97,6 +97,7 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
   These directives provide support for miscellaneous common formats:
 
   * `{RFC822}`      - e.g. `Mon, 05 Jun 14 23:20:59 UT`
+  * `{RFC822z}`     - e.g. `Mon, 05 Jun 14 23:20:59 Z`
   * `{RFC1123}`     - e.g. `Tue, 05 Mar 2013 23:25:19 GMT`
   * `{RFC1123z}`    - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
   * `{RFC3339}`     - e.g. `2013-03-05T23:25:19+02:00`
@@ -130,7 +131,11 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
       {:error, _} = error ->
         error
       directives when is_list(directives) ->
-        do_format(date, directives, <<>>)
+        if Enum.any?(directives, fn dir -> dir.type != :char end) do
+          do_format(date, directives, <<>>)
+        else
+          {:error, "There were no formatting directives in the provided string."}
+        end
     end
   end
 
@@ -144,13 +149,15 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
     formatted = format_token(token, date)
     do_format(date, dirs, <<result::binary, formatted::binary>>)
   end
-  defp do_format(date, [%Directive{token: token, type: :numeric, pad: pad, pad_type: pad_type} | dirs], result) do
+  defp do_format(date, [%Directive{token: token, type: :numeric, pad: pad, pad_type: pad_type, len: len_spec} | dirs], result) do
     formatted = format_token(token, date)
     len       = String.length(formatted)
-    padding = cond do
-      pad <= 0       -> <<>>
-      pad - len >= 0 -> pad_char(pad_type) |> String.duplicate((pad - len) + 1)
-      true           -> <<>>
+    padding   = case len_spec do
+      ^len                  -> <<>>
+      _..hi                 -> build_padding(len, hi, pad_char(pad_type), pad)
+      :word                 -> pad_char(pad_type) |> String.duplicate(pad)
+      hi when is_number(hi) -> build_padding(len, hi, pad_char(pad_type), pad)
+      _                     -> {:error, "Invalid numeric length specification: #{len_spec}"}
     end
     do_format(date, dirs, <<result::binary, padding::binary, formatted::binary>>)
   end
@@ -168,4 +175,14 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
 
   defp pad_char(:zero),  do: <<?0>>
   defp pad_char(:space), do: <<32>>
+
+  defp build_padding(len, hi, pad, padding) do
+    cond do
+      len >= hi           -> <<>>
+      hi - len == padding -> pad |> String.duplicate(hi - len)
+      hi - len > padding  -> pad |> String.duplicate(padding)
+      hi - len < padding  -> pad |> String.duplicate(padding - (hi - len))
+      true                -> <<>>
+    end
+  end
 end

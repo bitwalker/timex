@@ -37,10 +37,11 @@ defmodule Timex.Time do
     {11, :pm}
 
   """
-  def to_12hour_clock(hour) do
+  def to_12hour_clock(hour) when hour in 0..24 do
     case hour do
-      hour when hour > 12 -> {hour - 12, :pm}
-      hour when hour < 12 -> {hour, :am}
+      hour when hour > 12       -> {hour - 12, :pm}
+      hour when hour in [0, 12] -> {12, :pm}
+      hour when hour < 12       -> {hour, :am}
     end
   end
   @doc """
@@ -52,7 +53,7 @@ defmodule Timex.Time do
     19
 
   """
-  def to_24hour_clock(hour, am_or_pm) do
+  def to_24hour_clock(hour, am_or_pm) when hour in 1..12 and am_or_pm in [:am, :AM, :pm, :PM] do
     case am_or_pm do
       :am -> hour
       :pm -> hour + 12

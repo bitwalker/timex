@@ -40,7 +40,9 @@ defmodule Timex.Parsers.DateFormat.Directive do
             # the input string with.
             # Expected format:
             #     [tokenizer: <module>, format: <format string>]
-            format: false
+            format: false,
+            # The raw token
+            raw: ""
 
   @doc """
   Gets a parsing directive for the given token name, where the token name

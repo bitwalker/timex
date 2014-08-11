@@ -39,7 +39,7 @@ defmodule Timex.DateFormat.Formats do
   """
   defmacro iso_date do
     quote bind_quoted: [tokenizer: @tokenizer] do
-      [tokenizer, format: "{YYYY}-{0M}-{0D}"]
+      [tokenizer, format: "{000YYYY}-{0M}-{0D}"]
     end
   end
   @doc """
@@ -57,7 +57,7 @@ defmodule Timex.DateFormat.Formats do
   """
   defmacro iso_week do
     quote bind_quoted: [tokenizer: @tokenizer] do
-      [tokenizer, format: "{YYYY}-W{Wiso}"]
+      [tokenizer, format: "{000YYYY}-W{Wiso}"]
     end
   end
   @doc """
@@ -66,7 +66,7 @@ defmodule Timex.DateFormat.Formats do
   """
   defmacro iso_weekday do
     quote bind_quoted: [tokenizer: @tokenizer] do
-      [tokenizer, format: "{YYYY}-W{Wiso}-{WDmon}"]
+      [tokenizer, format: "{000YYYY}-W{Wiso}-{WDmon}"]
     end
   end
   @doc """
@@ -75,7 +75,7 @@ defmodule Timex.DateFormat.Formats do
   """
   defmacro iso_ordinal do
     quote bind_quoted: [tokenizer: @tokenizer] do
-      [tokenizer, format: "{YYYY}-{Dord}"]
+      [tokenizer, format: "{000YYYY}-{Dord}"]
     end
   end
   @doc """
