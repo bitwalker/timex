@@ -28,6 +28,37 @@ defmodule Timex.Time do
     def unquote(name)({hours, minutes, seconds}, :hms), do: unquote(name)(hours * 3600 + minutes * 60 + seconds, :secs)
   end
 
+  @doc """
+  Converts an hour between 0..24 to {1..12, :am/:pm}
+
+  ## Examples
+
+    iex> to_12hour_clock(23)
+    {11, :pm}
+
+  """
+  def to_12hour_clock(hour) do
+    case hour do
+      hour when hour > 12 -> {hour - 12, :pm}
+      hour when hour < 12 -> {hour, :am}
+    end
+  end
+  @doc """
+  Converts an hour between 1..12 in either am or pm, to value between 0..24
+
+  ## Examples
+
+    iex> to_24hour_clock(7, :pm)
+    19
+
+  """
+  def to_24hour_clock(hour, am_or_pm) do
+    case am_or_pm do
+      :am -> hour
+      :pm -> hour + 12
+    end
+  end
+
   def from(value, :usecs) do
     { sec, micro } = mdivmod(value)
     { mega, sec }  = mdivmod(sec)
