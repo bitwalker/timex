@@ -666,8 +666,14 @@ defmodule Timex.Timezone do
   @timezones |> Enum.each fn tz ->
     def get(unquote(tz.full_name)), do: unquote(Macro.escape(tz))
   end
-  # UTC is so common, we'll give it an extra shortcut
+  # UTC is so common, we'll give it an extra shortcut, as well as handle common shortcuts
+  def get(tz) when tz in ["Z", "UT", "GMT"], do: get(:utc)
   def get(:utc), do: get("UTC")
+  # These are shorthand for specific time zones
+  def get("A"),  do: get(-1)
+  def get("M"),  do: get(-12)
+  def get("N"),  do: get(+1)
+  def get("Y"),  do: get(+12)
   # Allow querying by offset
   def get(offset) when is_number(offset) do
     if offset > 0 do

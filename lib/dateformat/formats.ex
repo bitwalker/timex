@@ -79,6 +79,36 @@ defmodule Timex.DateFormat.Formats do
     end
   end
   @doc """
+  RFC 822 date/time format with timezone information.
+  Examples: `Mon, 05 Jun 14 23:20:59 Y`
+
+  ## From the specification (RE: timezones):
+
+  Time zone may be indicated in several ways.  "UT" is Univer-
+  sal  Time  (formerly called "Greenwich Mean Time"); "GMT" is per-
+  mitted as a reference to Universal Time.  The  military  standard
+  uses  a  single  character for each zone.  "Z" is Universal Time.
+  "A" indicates one hour earlier, and "M" indicates 12  hours  ear-
+  lier;  "N"  is  one  hour  later, and "Y" is 12 hours later.  The
+  letter "J" is not used.  The other remaining two forms are  taken
+  from ANSI standard X3.51-1975.  One allows explicit indication of
+  the amount of offset from UT; the other uses  common  3-character
+  strings for indicating time zones in North America.
+  """
+  defmacro rfc_822 do
+    quote bind_quoted: [tokenizer: @tokenizer] do
+      [tokenizer, format: "{WDshort}, {0D} {Mshort} {YY} {ISOtime} {Zname}"]
+    end
+  end
+  @doc """
+  Same as `rfc_822`, but locked to universal time.
+  """
+  defmacro rfc_822z do
+    quote bind_quoted: [tokenizer: @tokenizer] do
+      [tokenizer, format: "{WDshort}, {0D} {Mshort} {YY} {ISOtime} UT"]
+    end
+  end
+  @doc """
   RFC 1123 date/time format with timezone information.
   Example: `Tue, 05 Mar 2013 23:25:19 GMT`
   """

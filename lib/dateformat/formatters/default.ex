@@ -96,6 +96,7 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
 
   These directives provide support for miscellaneous common formats:
 
+  * `{RFC822}`      - e.g. `Mon, 05 Jun 14 23:20:59 UT`
   * `{RFC1123}`     - e.g. `Tue, 05 Mar 2013 23:25:19 GMT`
   * `{RFC1123z}`    - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
   * `{RFC3339}`     - e.g. `2013-03-05T23:25:19+02:00`

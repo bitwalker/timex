@@ -279,8 +279,11 @@ defmodule Timex.Parsers.DateFormat.Parser do
       am_pm when am_pm in [:am, :AM] ->
         %{date | :hour => Time.to_12hour_clock(date.hour)}
       # Timezones
-      tz when tz in [:zname, :zoffs] ->
+      :zoffs ->
         %{date | :timezone => Timezone.get(value)}
+      :zname ->
+        tz = Timezone.get(value)
+        Date.set(date, timezone: tz)
       tz when tz in [:zoffs_colon, :zoffs_sec] ->
         case value do
           <<?-, h1::utf8, h2::utf8, _::binary>> ->

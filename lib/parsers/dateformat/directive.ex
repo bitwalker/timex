@@ -86,7 +86,7 @@ defmodule Timex.Parsers.DateFormat.Directive do
   def get(:am),          do: %Directive{token: :am, len: 2, type: :match, match: ["am", "pm"]}
   def get(:AM),          do: %Directive{token: :AM, len: 2, type: :match, match: ["AM", "PM"]}
   # Timezones
-  def get(:zname),       do: %Directive{token: :zname, len: 3..4, type: :word}
+  def get(:zname),       do: %Directive{token: :zname, len: 1..4, type: :word}
   def get(:zoffs),       do: %Directive{token: :zoffs, len: 5, type: :word, validate: ~r/^[-+]\d{4}$/}
   def get(:zoffs_colon), do: %Directive{token: :zoffs_colon, len: 6, type: :word, validate: ~r/^[-+]\d{2}:\d{2}$/}
   def get(:zoffs_sec),   do: %Directive{token: :zoffs_sec, len: 9, type: :word, validate: ~r/^[-+]\d{2}:\d{2}\d{2}$/}
@@ -98,6 +98,8 @@ defmodule Timex.Parsers.DateFormat.Directive do
   def get(:iso_week),    do: %Directive{token: :iso_week, type: :format, format: Formats.iso_week}
   def get(:iso_weekday), do: %Directive{token: :iso_weekday, type: :format, format: Formats.iso_weekday}
   def get(:iso_ordinal), do: %Directive{token: :iso_ordinal, type: :format, format: Formats.iso_ordinal}
+  def get(:rfc_822),     do: %Directive{token: :rfc_822, type: :format, format: Formats.rfc_822}
+  def get(:rfc_822z),    do: %Directive{token: :rfc_822z, type: :format, format: Formats.rfc_822z}
   def get(:rfc_1123),    do: %Directive{token: :rfc_1123, type: :format, format: Formats.rfc_1123}
   def get(:rfc_1123z),   do: %Directive{token: :rfc_1123z, type: :format, format: Formats.rfc_1123z}
   def get(:rfc_3339),    do: %Directive{token: :rfc_3339, type: :format, format: Formats.rfc_3339}
