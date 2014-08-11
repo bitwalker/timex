@@ -109,7 +109,9 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
   """
   use Timex.DateFormat.Formatter
 
+  alias Timex.Date
   alias Timex.DateTime
+  alias Timex.Timezone
   alias Timex.DateFormat.FormatError
   alias Timex.Parsers.DateFormat.Directive
   alias Timex.Parsers.DateFormat.Tokenizers.Default, as: Tokenizer
@@ -161,10 +163,18 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
     end
     do_format(date, dirs, <<result::binary, padding::binary, formatted::binary>>)
   end
-  defp do_format(date, [%Directive{type: :format, format: [tokenizer: _, format: fmt]} | dirs], result) do
+  defp do_format(date, [%Directive{token: token, type: :format, format: [tokenizer: _, format: fmt]} | dirs], result) do
+    # Shift the date if this format is in Zulu time
+    date = case token do
+      token when token in [:iso_8601z, :rfc_822z, :rfc3339z, :rfc_1123z] ->
+        Date.set(date, timezone: Timezone.get(:utc))
+      _ ->
+        date
+    end
     case format(date, fmt) do
       {:error, _} = error -> error
-      {:ok, formatted}    -> do_format(date, dirs, <<result::binary, formatted::binary>>)
+      {:ok, formatted}    ->
+        do_format(date, dirs, <<result::binary, formatted::binary>>)
     end
   end
   defp do_format(date, [%Directive{token: token} | dirs], result) do
