@@ -107,7 +107,7 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
   * `{kitchen}`     - e.g. `3:25PM`
 
   """
-  use Timex.DateFormat.Formatter
+  use Timex.DateFormat.Formatters.Formatter
 
   alias Timex.Date
   alias Timex.DateTime

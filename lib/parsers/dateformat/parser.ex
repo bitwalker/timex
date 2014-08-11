@@ -14,6 +14,8 @@ defmodule Timex.Parsers.DateFormat.Parser do
   defcallback tokenize(format_string :: binary) :: [%Directive{}] | {:error, term}
   defcallback parse_directive(date::binary, directive::%Directive{}) :: {token::atom, {value::term, date_rest::binary} | {:error, term}}
 
+  def parsers, do: Timex.Utils.get_plugins(__MODULE__)
+
   @doc false
   defmacro __using__(_opts) do
     quote do
@@ -68,7 +70,12 @@ defmodule Timex.Parsers.DateFormat.Parser do
               case date_string do
                 nil -> {:error, "Input string cannot be null"}
                 ""  -> {:error, "Input string cannot be empty"}
-                _   -> do_parse(date_string, directives, parser)
+                _   -> 
+                  if Enum.any?(directives, fn dir -> dir.type != :char end) do
+                    do_parse(date_string, directives, parser)
+                  else
+                    {:error, "There were no parsing directives in the provided string."}
+                  end
               end
           end
         true ->
@@ -90,7 +97,8 @@ defmodule Timex.Parsers.DateFormat.Parser do
   end
 
   defp do_parse(date_string, directives, parser), do: do_parse(date_string, directives, parser, DateTime.new)
-  defp do_parse(_, [], _, %DateTime{} = date),    do: {:ok, date}
+  defp do_parse(<<>>, [], _, %DateTime{} = date), do: {:ok, date}
+  defp do_parse(rest, [], _, _),                  do: {:error, "Unexpected end of string! Starts at: #{rest}"}
   # Ignore :char directives when parsing
   defp do_parse(date_string, [%Directive{type: :char}|rest], parser, date) do
     do_parse(date_string, rest, parser, date)
@@ -108,20 +116,27 @@ defmodule Timex.Parsers.DateFormat.Parser do
     end
   end
   defp do_parse(date_string, [%Directive{} = directive|rest], parser, %DateTime{} = date) do
+    case parse_directive(date_string, directive, parser, date) do
+      {:error, _} = error -> error
+      {date_string, date} -> do_parse(date_string, rest, parser, date)
+    end
+  end
+  defp do_parse(_date_string, [directive|_rest], _parser, %DateTime{} = _date) do
+    {:error, "#{directive} not implemented"}
+  end
+
+  defp parse_directive(date_string, %Directive{} = directive, parser, %DateTime{} = date) do
     case parser.parse_directive(date_string, directive) do
       {_, {:error, reason}} ->
         {:error, reason}
       {token, {value, date_string}} ->
         case update_date(date, token, value) do
           {:error, _} = error -> error
-          date                -> do_parse(date_string, rest, parser, date)
+          date                -> {date_string, date}
         end
       result ->
         {:error, "Invalid return value from parse_directive: #{result |> Macro.to_string}"}
     end
-  end
-  defp do_parse(_date_string, [directive|_rest], _parser, %DateTime{} = _date) do
-    {:error, "#{directive} not implemented"}
   end
 
   @doc """
@@ -233,7 +248,15 @@ defmodule Timex.Parsers.DateFormat.Parser do
   defp update_date(%DateTime{year: year} = date, token, value) when is_atom(token) do
     case token do
       # Years
-      :century   -> %{date | :year => year + (value * 100)}
+      :century   ->
+        base_century = div(year, 100)
+        years_past   = rem(year, 100)
+        current_century = cond do
+          base_century == (base_century - years_past) -> base_century
+          true -> base_century + 1
+        end
+        year_shifted = year + ((value - current_century) * 100)
+        %{date | :year => year_shifted}
       :year2     ->
         %DateTime{year: current_year} = Date.now
         %{date | :year => (current_year - rem(current_year, 100)) + value}
@@ -293,35 +316,6 @@ defmodule Timex.Parsers.DateFormat.Parser do
           _ ->
             {:error, "#{token} not implemented"}
         end
-    end
-  end
-
-  @doc """
-  Loads all parsers in all code paths.
-  """
-  @spec parsers() :: [] | [atom]
-  def parsers, do: parsers(:code.get_path)
-
-  @doc """
-  Loads all parsers in the given `paths`.
-  """
-  @spec parsers([binary]) :: [] | [atom]
-  def parsers(paths) do
-    Enum.reduce(paths, [], fn(path, matches) ->
-      {:ok, files} = :erl_prim_loader.list_dir(path)
-      Enum.reduce(files, matches, &match_parsers/2)
-    end)
-  end
-
-  @re_pattern Regex.re_pattern(~r/Elixir\.Timex\.Parsers\.DateFormat\..+Parser\.beam$/)
-
-  @spec match_parsers(char_list, [atom]) :: [atom]
-  defp match_parsers(filename, modules) do
-    if :re.run(filename, @re_pattern, [capture: :none]) == :match do
-      mod = :filename.rootname(filename, '.beam') |> List.to_atom
-      if Code.ensure_loaded?(mod), do: [mod | modules], else: modules
-    else
-      modules
     end
   end
 

@@ -10,7 +10,7 @@ defmodule Timex.DateFormat do
   module. One can also implement custom formatters for use with this module.
   """
   alias Timex.DateTime
-  alias Timex.DateFormat.Formatter
+  alias Timex.DateFormat.Formatters.Formatter
   alias Timex.Parsers.DateFormat.Parser
 
   @doc """
@@ -76,6 +76,6 @@ defmodule Timex.DateFormat do
 
   Returns `:ok` if the format string is clean, `{ :error, <reason> }` otherwise.
   """
-  @spec validate(String.t, Timex.DateFormat.Formatter) :: :ok | {:error, term}
+  @spec validate(String.t, Formatter) :: :ok | {:error, term}
   defdelegate validate(format_string, formatter), to: Formatter
 end

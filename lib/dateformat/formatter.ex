@@ -1,4 +1,4 @@
-defmodule Timex.DateFormat.Formatter do
+defmodule Timex.DateFormat.Formatters.Formatter do
   use Behaviour
 
   alias Timex.Date
@@ -13,12 +13,14 @@ defmodule Timex.DateFormat.Formatter do
   defcallback format(date :: %DateTime{}, format_string :: String.t)  :: {:ok, String.t} | {:error, term}
   defcallback format!(date :: %DateTime{}, format_string :: String.t) :: String.t | no_return
 
+  def formatters, do: Timex.Utils.get_plugins(__MODULE__)
+
   @doc false
   defmacro __using__(_opts) do
     quote do
-      @behaviour Timex.DateFormat.Formatter
+      @behaviour Timex.DateFormat.Formatters.Formatter
 
-      import Timex.DateFormat.Formatter, only: [format_token: 2]
+      import Timex.DateFormat.Formatters.Formatter, only: [format_token: 2]
     end
   end
 
@@ -29,7 +31,7 @@ defmodule Timex.DateFormat.Formatter do
 
   If an error is encountered during formatting, `format!` will raise.
   """
-  @spec format!(%DateTime{}, String.t, Timex.DateFormat.Formatter | nil) :: String.t | no_return
+  @spec format!(%DateTime{}, String.t, __MODULE__ | nil) :: String.t | no_return
   def format!(%DateTime{} = date, format_string, formatter \\ DefaultFormatter)
     when is_binary(format_string) and is_atom(formatter)
     do
@@ -44,7 +46,7 @@ defmodule Timex.DateFormat.Formatter do
   string and formatter. If a formatter is not provided, the formatter
   used is `Timex.DateFormat.Formatters.DefaultFormatter`.
   """
-  @spec format(%DateTime{}, String.t, Timex.DateFormat.Formatter | nil) :: {:ok, String.t} | {:error, term}
+  @spec format(%DateTime{}, String.t, __MODULE__ | nil) :: {:ok, String.t} | {:error, term}
   def format(%DateTime{} = date, format_string, formatter \\ DefaultFormatter)
     when is_binary(format_string) and is_atom(formatter)
     do
@@ -52,7 +54,7 @@ defmodule Timex.DateFormat.Formatter do
         formatters |> Enum.member?(formatter) ->
           formatter.format(date, format_string)
         true ->
-          {:error, "The formatter provided does not implement the `Timex.DateFormat.Formatter` behaviour!"}
+          {:error, "The formatter provided does not implement the `Timex.DateFormat.Formatters.Formatter` behaviour!"}
       end
   end
 
@@ -61,7 +63,7 @@ defmodule Timex.DateFormat.Formatter do
   or if none is provided, the default formatter. Returns `:ok` when valid, 
   or `{:error, reason}` if not valid.
   """
-  @spec validate(String.t, Timex.DateFormat.Formatter | nil) :: :ok | {:error, term}
+  @spec validate(String.t, __MODULE__ | nil) :: :ok | {:error, term}
   def validate(format_string, formatter \\ DefaultFormatter) when is_binary(format_string) do
     cond do
       formatters |> Enum.member?(formatter) ->
@@ -82,7 +84,7 @@ defmodule Timex.DateFormat.Formatter do
           x -> {:error, x}
         end
       true ->
-        {:error, "The formatter provided does not implement the `Timex.DateFormat.Formatter` behaviour!"}
+        {:error, "The formatter provided does not implement the `Timex.DateFormat.Formatters.Formatter` behaviour!"}
     end
   end
 
@@ -166,35 +168,5 @@ defmodule Timex.DateFormat.Formatter do
   end
   def format_token(_, _) do
     {:error, "Date provided to format_token must be of type %Timex.DateTime{}!"}
-  end
-
-
-  @doc """
-  Loads all formatters in all code paths.
-  """
-  @spec formatters() :: [] | [atom]
-  def formatters, do: formatters(:code.get_path)
-
-  @doc """
-  Loads all formatters in the given `paths`.
-  """
-  @spec formatters([binary]) :: [] | [atom]
-  def formatters(paths) do
-    Enum.reduce(paths, [], fn(path, matches) ->
-      {:ok, files} = :erl_prim_loader.list_dir(path)
-      Enum.reduce(files, matches, &match_formatters/2)
-    end)
-  end
-
-  @re_pattern Regex.re_pattern(~r/Elixir\.Timex\.DateFormat\.Formatters\..+Formatter\.beam$/)
-
-  @spec match_formatters(char_list, [atom]) :: [atom]
-  defp match_formatters(filename, modules) do
-    if :re.run(filename, @re_pattern, [capture: :none]) == :match do
-      mod = :filename.rootname(filename, '.beam') |> List.to_atom
-      if Code.ensure_loaded?(mod), do: [mod | modules], else: modules
-    else
-      modules
-    end
   end
 end
