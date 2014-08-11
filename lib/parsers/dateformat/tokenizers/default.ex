@@ -101,15 +101,7 @@ defmodule Timex.Parsers.DateFormat.Tokenizers.Default do
           :col     => state.col + 1,
           :padding => 0,
           :token   => "",
-          :tokens  => [%{directive | :pad => directive.pad && pad || false} | tokens]
-        }
-        do_tokenize(format, state, :next)
-      {_, directive} when is_atom(directive) ->
-        state = %{state | 
-          :col     => state.col + 1,
-          :padding => 0,
-          :token   => "",
-          :tokens  => [directive | tokens]
+          :tokens  => [%{directive | :pad => pad || false} | tokens]
         }
         do_tokenize(format, state, :next)
     end
@@ -125,9 +117,11 @@ defmodule Timex.Parsers.DateFormat.Tokenizers.Default do
     state = %{state | :col => state.col + 1, :token => token <> <<c>>}
     do_tokenize(format, state, :token)
   end
-  # Skip non-token characters
-  defp do_tokenize(<<_ :: utf8, format :: binary>>, %State{col: col} = state, status) do
-    do_tokenize(format, %{state | :col => col + 1}, status)
+  # Handle non-token characters
+  defp do_tokenize(<<char :: utf8, format :: binary>>, %State{col: col, tokens: tokens} = state, status) do
+    directive = %Directive{type: :char, token: char}
+    state     = %{state | :col => col + 1, :tokens => [directive | tokens]}
+    do_tokenize(format, state, status)
   end
 
   defp pad_type(?0), do: :zero

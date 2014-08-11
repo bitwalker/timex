@@ -349,7 +349,7 @@ defmodule DateFormatTest.ValidateDefault do
   use ExUnit.Case
 
   test :validate do
-    assert :ok = validate ""
+    assert {:error, "Format string cannot be nil or empty!"} = validate ""
     assert :ok = validate "abc"
     assert :ok = validate "Use {{ as oft{{en as you like{{"
     assert :ok = validate "Same go}}es for }}"

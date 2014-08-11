@@ -1,4 +1,4 @@
-defmodule Timex.DateFormat.Default do
+defmodule Timex.DateFormat.Formatters.DefaultFormatter do
   @moduledoc """
   Date formatting language used by default by the `DateFormat` module.
 
@@ -99,142 +99,72 @@ defmodule Timex.DateFormat.Default do
   * `{RFC1123}`     - e.g. `Tue, 05 Mar 2013 23:25:19 GMT`
   * `{RFC1123z}`    - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
   * `{RFC3339}`     - e.g. `2013-03-05T23:25:19+02:00`
+  * `{RFC3339z}`    - e.g. `2013-03-05T23:25:19Z`
   * `{ANSIC}`       - e.g. `Tue Mar  5 23:25:19 2013`
   * `{UNIX}`        - e.g. `Tue Mar  5 23:25:19 PST 2013`
   * `{kitchen}`     - e.g. `3:25PM`
 
   """
+  use Timex.DateFormat.Formatter
 
-  def process_directive("{" <> _) do
-    # false alarm
-    { :skip, 1 }
-  end
+  alias Timex.DateTime
+  alias Timex.DateFormat.FormatError
+  alias Timex.Parsers.DateFormat.Directive
+  alias Timex.Parsers.DateFormat.Tokenizers.Default, as: Tokenizer
 
-  def process_directive(fmt) when is_binary(fmt) do
-    case scan_directive(fmt, 0) do
-      { :ok, pos } ->
-        length = pos-1
-        <<dirstr :: binary-size(length), _ :: binary>> = fmt
-        case parse_directive(dirstr) do
-          { :ok, directive } -> { :ok, directive, pos }
-          error              -> error
-        end
+  @spec tokenize(String.t) :: {:ok, [%Directive{}]} | {:error, term}
+  defdelegate tokenize(format_string), to: Tokenizer
 
-      error -> error
+  @spec format!(%DateTime{}, String.t) :: String.t | no_return
+  def format!(%DateTime{} = date, format_string) do
+    case format(date, format_string) do
+      {:ok, result}    -> result
+      {:error, reason} -> raise FormatError, message: reason
     end
   end
 
-  ###
-
-  defp scan_directive("{" <> _, _) do
-    { :error, "extraneous { in directive" }
-  end
-
-  defp scan_directive("", _) do
-    { :error, "missing }" }
-  end
-
-  defp scan_directive("}" <> _, pos) do
-    { :ok, pos+1 }
-  end
-
-  defp scan_directive(<<_ :: utf8>> <> rest, pos) do
-    scan_directive(rest, pos+1)
-  end
-
-  ###
-
-  # Sanity check on the modifier
-  defp parse_directive("0" <> dir) do
-    parse_directive(dir, "0")
-  end
-
-  defp parse_directive("_" <> dir) do
-    parse_directive(dir, " ")
-  end
-
-  defp parse_directive(dir) do
-    parse_directive(dir, nil)
-  end
-
-  # Actual parsing
-  defp parse_directive(dir, nil)
-        when dir in ["Mshort", "Mfull",
-                     "WDmon", "WDsun", "WDshort", "WDfull",
-                     "am", "AM",
-                     "Zname", "Z", "Z:", "Z::"] do
-   { :ok, translate_directive(dir) }
-  end
-
-  defp parse_directive(dir, nil)
-        when dir in ["ISO", "ISOz",
-                     "ISOdate", "ISOtime",
-                     "ISOweek", "ISOweek-day", "ISOord",
-
-                     "RFC1123", "RFC1123z", "RFC3339",
-                     "ANSIC", "UNIX", "kitchen"] do
-    { :ok, translate_compound(dir) }
-  end
-
-  defp parse_directive(dir, modifier)
-        when dir in ["YYYY", "YY", "C", "WYYYY", "WYY",
-                     "M",
-                     "D", "Dord",
-                     "Wiso", "Wmon", "Wsun",
-                     "h24", "h12", "m", "s", "s-epoch"] do
-    { :ok, translate_directive(dir, modifier) }
-  end
-
-  defp parse_directive(_, _), do: { :error, "bad directive" }
-
-  defp translate_directive(dir) do
-    tag = case dir do
-      "Mshort"  -> :mshort
-      "Mfull"   -> :mfull
-
-      "WDmon"   -> :wday_mon
-      "WDsun"   -> :wday_sun
-      "WDshort" -> :wdshort
-      "WDfull"  -> :wdfull
-
-      "am"      -> :am
-      "AM"      -> :AM
-
-      "Zname"   -> :zname
-      "Z"       -> :zoffs
-      "Z:"      -> :zoffs_colon
-      "Z::"     -> :zoffs_sec
+  @spec format(%DateTime{}, String.t) :: {:ok, String.t} | {:error, term}
+  def format(%DateTime{} = date, format_string) do
+    case Tokenizer.tokenize(format_string) do
+      {:error, _} = error ->
+        error
+      directives when is_list(directives) ->
+        do_format(date, directives, <<>>)
     end
-    { tag, if tag in [:wday_mon, :wday_sun] do "~B" else "~s" end }
   end
 
-  defp translate_directive(dir, mod) do
-    { tag, width } = case dir do
-      "YYYY"    -> { :year,      4 }
-      "YY"      -> { :year2,     2 }
-      "C"       -> { :century,   2 }
-      "WYYYY"   -> { :iso_year,  4 }
-      "WYY"     -> { :iso_year2, 2 }
 
-      "M"       -> { :month,     2 }
-
-      "D"       -> { :day,       2 }
-      "Dord"    -> { :oday,      3 }
-
-      "Wiso"    -> { :iso_week,  2 }
-      "Wmon"    -> { :week_mon,  2 }
-      "Wsun"    -> { :week_sun,  2 }
-
-      "h24"     -> { :hour24,    2 }
-      "h12"     -> { :hour12,    2 }
-      "m"       -> { :min,       2 }
-      "s"       -> { :sec,       2 }
-      "s-epoch" -> { :sec_epoch, 10 }
+  defp do_format(_date, [], result),             do: {:ok, result}
+  defp do_format(_date, _, {:error, _} = error), do: error
+  defp do_format(date, [%Directive{type: :char, token: char} | dirs], result) do
+    do_format(date, dirs, <<result::binary, char :: utf8>>)
+  end
+  defp do_format(date, [%Directive{token: token, type: :numeric, pad: false} | dirs], result) do
+    formatted = format_token(token, date)
+    do_format(date, dirs, <<result::binary, formatted::binary>>)
+  end
+  defp do_format(date, [%Directive{token: token, type: :numeric, pad: pad, pad_type: pad_type} | dirs], result) do
+    formatted = format_token(token, date)
+    len       = String.length(formatted)
+    padding = cond do
+      pad <= 0       -> <<>>
+      pad - len >= 0 -> pad_char(pad_type) |> String.duplicate((pad - len) + 1)
+      true           -> <<>>
     end
-    { tag, mod && "~#{width}..#{mod}B" || "~B" }
+    do_format(date, dirs, <<result::binary, padding::binary, formatted::binary>>)
   end
+  defp do_format(date, [%Directive{type: :format, format: [tokenizer: _, format: fmt]} | dirs], result) do
+    case format(date, fmt) do
+      {:error, _} = error -> error
+      {:ok, formatted}    -> do_format(date, dirs, <<result::binary, formatted::binary>>)
+    end
+  end
+  defp do_format(date, [%Directive{token: token} | dirs], result) do
+    formatted = format_token(token, date)
+    do_format(date, dirs, <<result::binary, formatted::binary>>)
+  end
+  defp do_format(_, dirs, _), do: {:error, "Unexpected directive type: #{dirs |> Macro.to_string}"}
 
-  defp translate_compound(dir) do
-    { :subfmt, String.to_atom(dir) }
-  end
+  defp pad_char(:zero),  do: <<?0>>
+  defp pad_char(:space), do: <<32>>
 end

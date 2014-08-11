@@ -23,7 +23,7 @@ defmodule Timex.Parsers.DateFormat.Directive do
             min: false,
             # The maximum value of a numeric directive
             max: false,
-            # Allows :numeric, :alpha, :match, :format
+            # Allows :numeric, :alpha, :match, :format, :char
             type: :undefined, 
             # Either false, or a number representing the amount of padding
             pad: false, 

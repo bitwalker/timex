@@ -5,8 +5,10 @@ defmodule Timex.Parsers.DateFormat.Parser do
   use Behaviour
 
   alias Timex.Date
+  alias Timex.Time
   alias Timex.DateTime
   alias Timex.Timezone
+  alias Timex.Parsers.ParseError
   alias Timex.Parsers.DateFormat.Directive
 
   defcallback tokenize(format_string :: binary) :: [%Directive{}] | {:error, term}
@@ -39,7 +41,7 @@ defmodule Timex.Parsers.DateFormat.Parser do
     %Date{year: 2014, month: 7, day: 29, hour: 0, minute: 20, second: 41, ms: 196, tz: %Timezone{name: "CST"}}
 
   """
-  @spec parse(binary, binary) :: %DateTime{} | {:error, term}
+  @spec parse(binary, binary) :: {:ok, %DateTime{}} | {:error, term}
   def parse(date_string, format_string)
     when is_binary(date_string) and is_binary(format_string),
     do: parse(date_string, format_string, Timex.Parsers.DateFormat.DefaultParser)
@@ -54,7 +56,7 @@ defmodule Timex.Parsers.DateFormat.Parser do
     %Date{year: 2014, month: 7, day: 29, hour: 0, minute: 20, second: 41, ms: 196, tz: %Timezone{name: "CST"}}
 
   """
-  @spec parse(binary, binary, Timex.Parsers.DateFormat.Parser) :: %DateTime{} | {:error, term}
+  @spec parse(binary, binary, Timex.Parsers.DateFormat.Parser) :: {:ok, %DateTime{}} | {:error, term}
   def parse(date_string, format_string, parser)
     when is_binary(date_string) and is_binary(format_string)
     do
@@ -74,8 +76,26 @@ defmodule Timex.Parsers.DateFormat.Parser do
       end
   end
 
-  defp do_parse(date_string, directives, parser),   do: do_parse(date_string, directives, parser, DateTime.new)
-  defp do_parse(_, [], _, %DateTime{} = date), do: date
+  @doc """
+  Same as `parse/2` and `parse/3`, but raises on error.
+  """
+  @spec parse!(String.t, String.t, Timex.Parsers.DateFormat.Parser | nil) :: %DateTime{} | no_return
+  def parse!(date_string, format_string, parser \\ Timex.Parsers.DateFormat.DefaultParser)
+    when is_binary(date_string) and is_binary(format_string)
+    do
+      case parse(date_string, format_string, parser) do
+        {:ok, result}    -> result
+        {:error, reason} -> raise ParseError, message: reason
+      end
+  end
+
+  defp do_parse(date_string, directives, parser), do: do_parse(date_string, directives, parser, DateTime.new)
+  defp do_parse(_, [], _, %DateTime{} = date),    do: {:ok, date}
+  # Ignore :char directives when parsing
+  defp do_parse(date_string, [%Directive{type: :char}|rest], parser, date) do
+    do_parse(date_string, rest, parser, date)
+  end
+  # Inject component directives of pre-formatted directives.
   defp do_parse(date_string, [%Directive{type: :format, format: format}|rest], parser, %DateTime{} = date) do
     case format do
       [tokenizer: tokenizer, format: format_string] ->
@@ -257,7 +277,7 @@ defmodule Timex.Parsers.DateFormat.Parser do
       :sec       -> %{date | :second => value}
       :sec_epoch -> Date.from(value, :secs, :epoch)
       am_pm when am_pm in [:am, :AM] ->
-        %{date | :hour => to_12hour_clock(date.hour, value)}
+        %{date | :hour => Time.to_12hour_clock(date.hour)}
       # Timezones
       tz when tz in [:zname, :zoffs] ->
         %{date | :timezone => Timezone.get(value)}
@@ -270,19 +290,6 @@ defmodule Timex.Parsers.DateFormat.Parser do
           _ ->
             {:error, "#{token} not implemented"}
         end
-    end
-  end
-
-  defp to_12hour_clock(hour, am_pm) when is_number(hour) and am_pm in ["AM", "am"] do
-    case hour do
-      hour when hour > 12 -> hour - 12
-      hour when hour < 12 -> hour
-    end
-  end
-  defp to_12hour_clock(hour, am_pm) when is_number(hour) and am_pm in ["PM", "pm"] do
-    case hour do
-      hour when hour > 12 -> hour
-      hour when hour < 12 -> hour + 12
     end
   end
 
