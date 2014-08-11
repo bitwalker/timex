@@ -94,7 +94,7 @@ defmodule Timex.Parsers.DateFormat.Directive do
   def get(:zoffs_sec),   do: %Directive{token: :zoffs_sec, len: 9, type: :word, validate: ~r/^[-+]\d{2}:\d{2}\d{2}$/}
   # Preformatted Directives
   def get(:iso_8601),    do: %Directive{token: :iso_8601, type: :format, format: Formats.iso_8601}
-  def get(:iso_8601z),   do: %Directive{token: :iso_8601_zulu, type: :format, format: Formats.iso_8601z}
+  def get(:iso_8601z),   do: %Directive{token: :iso_8601z, type: :format, format: Formats.iso_8601z}
   def get(:iso_date),    do: %Directive{token: :iso_date, type: :format, format: Formats.iso_date}
   def get(:iso_time),    do: %Directive{token: :iso_time, type: :format, format: Formats.iso_time}
   def get(:iso_week),    do: %Directive{token: :iso_week, type: :format, format: Formats.iso_week}
