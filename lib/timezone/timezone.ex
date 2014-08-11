@@ -686,8 +686,8 @@ defmodule Timex.Timezone do
   def get(<<?-, offset :: binary>>) do
     {num, _} = Integer.parse(offset)
     cond do
-      num < -100 -> trunc(num/100) |> get
-      true       -> get(num)
+      num > 100 -> get(trunc(num/100) * -1)
+      true      -> get(num)
     end
   end
   @doc """
