@@ -53,6 +53,7 @@ defmodule Timex.Parsers.DateFormat.Tokenizers.Default do
     {"RFC1123",     Directive.get(:rfc_1123)},
     {"RFC1123z",    Directive.get(:rfc_1123z)},
     {"RFC3339",     Directive.get(:rfc_3339)},
+    {"RFC3339z",    Directive.get(:rfc_3339z)},
     {"ANSIC",       Directive.get(:ansic)},
     {"UNIX",        Directive.get(:unix)},
     {"kitchen",     Directive.get(:kitchen)}

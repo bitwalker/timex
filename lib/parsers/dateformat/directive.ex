@@ -101,6 +101,7 @@ defmodule Timex.Parsers.DateFormat.Directive do
   def get(:rfc_1123),    do: %Directive{token: :rfc_1123, type: :format, format: Formats.rfc_1123}
   def get(:rfc_1123z),   do: %Directive{token: :rfc_1123z, type: :format, format: Formats.rfc_1123z}
   def get(:rfc_3339),    do: %Directive{token: :rfc_3339, type: :format, format: Formats.rfc_3339}
+  def get(:rfc_3339z),   do: %Directive{token: :rfc_3339z, type: :format, format: Formats.rfc_3339z}
   def get(:ansic),       do: %Directive{token: :ansic, type: :format, format: Formats.ansic}
   def get(:unix),        do: %Directive{token: :unix, type: :format, format: Formats.unix}
   def get(:kitchen),     do: %Directive{token: :kitchen, type: :format, format: Formats.kitchen}

@@ -106,6 +106,15 @@ defmodule Timex.DateFormat.Formats do
     end
   end
   @doc """
+  RFC 3339 date/time format, assumes UTC/Zulu timezone.
+  Example: `2013-03-05T23:25:19Z`
+  """
+  defmacro rfc_3339z do
+    quote bind_quoted: [tokenizer: @tokenizer] do
+      [tokenizer, format: "{ISOdate}T{ISOtime}Z"]
+    end
+  end
+  @doc """
   ANSI C standard date/time format.
   Example: `Tue Mar  5 23:25:19 2013`
   """
