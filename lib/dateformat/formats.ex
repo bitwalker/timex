@@ -21,7 +21,7 @@ defmodule Timex.DateFormat.Formats do
   """
   defmacro iso_8601 do
     quote bind_quoted: [tokenizer: @tokenizer] do
-      [tokenizer, format: "{ISOdate}T{ISOtime} {Z}"]
+      [tokenizer, format: "{ISOdate}T{ISOtime}{Z}"]
     end
   end
   @doc """
