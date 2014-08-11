@@ -48,7 +48,7 @@ defmodule Timex.DateFormat.Formats do
   """
   defmacro iso_time do
     quote bind_quoted: [tokenizer: @tokenizer] do
-      [tokenizer, format: "{h24}:{0m}:{0s}"]
+      [tokenizer, format: "{0h24}:{0m}:{0s}"]
     end
   end
   @doc """
