@@ -1,13 +1,15 @@
 defmodule Timex do
   defmacro __using__(_) do
     quote do
-      alias Timex.DateTime,     as: DateTime
-      alias Timex.Date,         as: Date
-      alias Timex.Date.Convert, as: DateConvert
-      alias Timex.DateFormat,   as: DateFormat
-      alias Timex.Time,         as: Time
-      alias Timex.TimezoneInfo, as: TimezoneInfo
-      alias Timex.Timezone,     as: Timezone
+      alias Timex.DateTime
+      alias Timex.Date
+      alias Timex.DateFormat
+      alias Timex.Time
+      alias Timex.TimezoneInfo
+      alias Timex.Timezone
+      alias Timex.Date.Convert,          as: DateConvert
+      alias Timex.DateFormat.Formatters, as: TimexFormatters
+      alias Timex.Parsers.DateFormat,    as: TimexParsers
     end
   end
 end
