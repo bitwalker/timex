@@ -109,6 +109,11 @@ defmodule Timex.Parsers.DateFormat.Directive do
   def get(:ansic),       do: %Directive{token: :ansic, type: :format, format: Formats.ansic}
   def get(:unix),        do: %Directive{token: :unix, type: :format, format: Formats.unix}
   def get(:kitchen),     do: %Directive{token: :kitchen, type: :format, format: Formats.kitchen}
+  def get(:slashed),     do: %Directive{token: :slashed, type: :format, format: Formats.slashed_date}
+  def get(:strftime_iso_date),  do: %Directive{token: :strftime_iso_date, type: :format, format: Formats.strftime_iso_date}
+  def get(:strftime_clock),     do: %Directive{token: :strftime_clock, type: :format, format: Formats.strftime_clock}
+  def get(:strftime_kitchen),   do: %Directive{token: :strftime_kitchen, type: :format, format: Formats.strftime_kitchen}
+  def get(:strftime_shortdate), do: %Directive{token: :strftime_shortdate, type: :format, format: Formats.strftime_shortdate}
   # Catch-all
   def get(directive),    do: {:error, "Unrecognized directive: #{directive}"}
 end

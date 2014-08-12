@@ -11,9 +11,11 @@ defmodule Timex.DateFormat.Formats do
   format, then parsing the datetime string using those tokens.
   """
   alias Timex.Parsers.DateFormat.Tokenizers.Default
+  alias Timex.Parsers.DateFormat.Tokenizers.Strftime
 
   # For now, all preformatted strings will be tokenized using the Default tokenizer.
   @tokenizer {:tokenizer, Default}
+  @strftime  {:tokenizer, Strftime}
 
   @doc """
   ISO 8601 date/time format with timezone information.
@@ -169,6 +171,51 @@ defmodule Timex.DateFormat.Formats do
   defmacro kitchen do
     quote bind_quoted: [tokenizer: @tokenizer] do
       [tokenizer, format: "{h12}:{0m}{AM}"]
+    end
+  end
+  @doc """
+  Month, day, and year, in slashed style.
+  Example: `04/12/1987`
+  """
+  defmacro slashed_date do
+    quote bind_quoted: [tokenizer: @strftime] do
+      [tokenizer, format: "%m/%d/%y"]
+    end
+  end
+  @doc """
+  ISO date, in strftime format.
+  Example: `1987-04-12`
+  """
+  defmacro strftime_iso_date do
+    quote bind_quoted: [tokenizer: @strftime] do
+      [tokenizer, format: "%Y-%m-%d"]
+    end
+  end
+  @doc """
+  Wall clock in strftime format.
+  Example: `23:30`
+  """
+  defmacro strftime_clock do
+    quote bind_quoted: [tokenizer: @strftime] do
+      [tokenizer, format: "%H:%M"]
+    end
+  end
+  @doc """
+  Kitchen clock in strftime format.
+  Example: `4:30:01 PM`
+  """
+  defmacro strftime_kitchen do
+    quote bind_quoted: [tokenizer: @strftime] do
+      [tokenizer, format: "%I:%M:%S %p"]
+    end
+  end
+  @doc """
+  Friendly short date format. Uses spaces for padding on the day.
+  Example: ` 5-Jan-2014`
+  """
+  defmacro strftime_shortdate do
+    quote bind_quoted: [tokenizer: @strftime] do
+      [tokenizer, format: "%e-%b-%Y"]
     end
   end
 end

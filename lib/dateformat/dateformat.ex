@@ -11,7 +11,9 @@ defmodule Timex.DateFormat do
   """
   alias Timex.DateTime
   alias Timex.DateFormat.Formatters.Formatter
+  alias Timex.DateFormat.Formatters.StrftimeFormatter
   alias Timex.Parsers.DateFormat.Parser
+  alias Timex.Parsers.DateFormat.StrftimeParser
 
   @doc """
   Converts date values to strings according to the given template (aka format string).
@@ -55,7 +57,9 @@ defmodule Timex.DateFormat do
   Parses the date encoded in `string` according to the template by using the
   provided formatter.
   """
-  @spec parse(String.t, String.t, Parser) :: {:ok, %DateTime{}} | {:error, term}
+  @spec parse(String.t, String.t, atom) :: {:ok, %DateTime{}} | {:error, term}
+  def parse(date_string, format_string, :default),  do: Parser.parse(date_string, format_string)
+  def parse(date_string, format_string, :strftime), do: Parser.parse(date_string, format_string, StrftimeParser)
   defdelegate parse(date_string, format_string, parser), to: Parser
 
   @doc """
@@ -67,7 +71,9 @@ defmodule Timex.DateFormat do
   @doc """
   Raising version of `parse/3`. Returns a DateTime struct, or raises a `ParseError`.
   """
-  @spec parse!(String.t, String.t, Parser) :: %DateTime{} | no_return
+  @spec parse!(String.t, String.t, atom) :: %DateTime{} | no_return
+  def parse!(date_string, format_string, :default),  do: Parser.parse!(date_string, format_string)
+  def parse!(date_string, format_string, :strftime), do: Parser.parse!(date_string, format_string, StrftimeParser)
   defdelegate parse!(date_string, format_string, parser), to: Parser
 
   @doc """
@@ -84,6 +90,8 @@ defmodule Timex.DateFormat do
 
   Returns `:ok` if the format string is clean, `{ :error, <reason> }` otherwise.
   """
-  @spec validate(String.t, Formatter) :: :ok | {:error, term}
+  @spec validate(String.t, atom) :: :ok | {:error, term}
+  def validate(format_string, :default),  do: Formatter.validate(format_string)
+  def validate(format_string, :strftime), do: Formatter.validate(format_string, StrftimeFormatter)
   defdelegate validate(format_string, formatter), to: Formatter
 end

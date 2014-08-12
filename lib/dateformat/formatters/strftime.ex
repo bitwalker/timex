@@ -1,4 +1,4 @@
-defmodule Timex.DateFormat.Strftime do
+defmodule Timex.DateFormat.Formatters.StrftimeFormatter do
   @moduledoc """
   Date formatting language defined by the `strftime` function from the Standard
   C Library.
@@ -28,7 +28,8 @@ defmodule Timex.DateFormat.Strftime do
   `<width>` is a non-negative decimal number specifying the minimum field
   width.
 
-  `<modifier>` is `E` or `O`. It is ignored by this implementation.
+  `<modifier>` can be `E` or `O`. These are locale-sensitive modifiers, and as
+  such they are currently ignored by this implementation.
 
   ## List of all directives
 
@@ -39,8 +40,8 @@ defmodule Timex.DateFormat.Strftime do
   * `%Y` - full year number (0000..9999)
   * `%y` - the last two digits of the year number (00.99)
   * `%C` - century number (00..99)
-  * `%G` - year number corresponding to the ISO week (0000..9999)
-  * `%g` - the last two digits of the ISO week year (00..99)
+  * `%G` - year number corresponding to the ISO year (0000..9999)
+  * `%g` - the last two digits of the ISO year (00..99)
 
   ### Months
 
@@ -94,176 +95,26 @@ defmodule Timex.DateFormat.Strftime do
   * `%v` - same as `%e-%b-%Y`
 
   """
-  require Record
+  use Timex.DateFormat.Formatters.Formatter
 
-  def process_directive("%" <> _) do
-    # false alarm
-    { :skip, 1 }
-  end
+  alias Timex.DateTime
+  alias Timex.Parsers.DateFormat.Directive
+  alias Timex.DateFormat.Formatters.DefaultFormatter
+  alias Timex.Parsers.DateFormat.Tokenizers.Strftime, as: Tokenizer
 
-  def process_directive(fmt) when is_binary(fmt) do
-    case scan_directive(fmt, 0) do
-      { :ok, dir, length } ->
-        case translate_directive(dir) do
-          { :ok, directive } -> { :ok, directive, length }
-          error              -> error
-        end
+  @spec tokenize(String.t) :: {:ok, [%Directive{}]} | {:error, term}
+  defdelegate tokenize(format_string), to: Tokenizer
 
-      error -> error
+  @spec format!(%DateTime{}, String.t) :: String.t | no_return
+  def format!(%DateTime{} = date, format_string) do
+    case format(date, format_string) do
+      {:ok, result}    -> result
+      {:error, reason} -> raise FormatError, message: reason
     end
   end
 
-  ###
-
-  Record.defrecordp :directive, dir: nil, flag: nil, width: -1
-
-  defp scan_directive(str, pos) do
-    scan_directive_flag(str, pos, directive())
-  end
-
-  ###
-
-  defp scan_directive_flag("::" <> rest, pos, dir) do
-    scan_directive_width(rest, pos+2, directive(dir, flag: "::"))
-  end
-
-  defp scan_directive_flag(<<flag :: utf8>> <> rest, pos, dir)
-        when flag in [?-, ?0, ?_, ?:] do
-    scan_directive_width(rest, pos+1, directive(dir, flag: flag))
-  end
-
-  defp scan_directive_flag(str, pos, dir) do
-    scan_directive_width(str, pos, dir)
-  end
-
-  ###
-
-  defp scan_directive_width(<<digit :: utf8>> <> rest, pos, directive(width: width)=dir)
-        when digit in ?0..?9 do
-    new_width = width*10 + digit-?0
-    scan_directive_width(rest, pos+1, directive(dir, width: new_width))
-  end
-
-  defp scan_directive_width(str, pos, dir) do
-    scan_directive_modifier(str, pos, dir)
-  end
-
-  ###
-
-  defp scan_directive_modifier(<<mod :: utf8>> <> rest, pos, dir)
-        when mod in [?E, ?O] do
-    # ignore these modifiers
-    scan_directive_final(rest, pos+1, dir)
-  end
-
-  defp scan_directive_modifier(str, pos, dir) do
-    scan_directive_final(str, pos, dir)
-  end
-
-  ###
-
-  defp scan_directive_final(<<char :: utf8>> <> _, pos, dir) do
-    { :ok, directive(dir, dir: char), pos+1 }
-  end
-
-  defp scan_directive_final("", _, _) do
-    { :error, "bad directive" }
-  end
-
-  ###
-
-  defp translate_directive(directive(flag: flag, width: width, dir: dir)) do
-    val = case dir do
-      ?Y -> { :year,      4 }
-      ?y -> { :year2,     2 }
-      ?C -> { :century,   2 }
-      ?G -> { :iso_year,  4 }
-      ?g -> { :iso_year2, 2 }
-
-      ?m -> { :month,     2 }
-      ?b -> :mshort
-      ?h -> :mshort
-      ?B -> :mfull
-
-      ?d -> { :day,       2 }
-      ?e -> { :day,       2 }
-      ?j -> { :oday,      3 }
-      ?u -> { :wday_mon,  1 }
-      ?w -> { :wday_sun,  1 }
-      ?a -> :wdshort
-      ?A -> :wdfull
-
-      ?V -> { :iso_week,  2 }
-      ?W -> { :week_mon,  2 }
-      ?U -> { :week_sun,  2 }
-
-      ?H -> { :hour24,    2 }
-      ?k -> { :hour24,    2 }
-      ?I -> { :hour12,    2 }
-      ?l -> { :hour12,    2 }
-      ?M -> { :min,       2 }
-      ?S -> { :sec,       2 }
-      ?s -> { :sec_epoch, 10 }
-      ?P -> :am
-      ?p -> :AM
-
-      ?Z -> :zname
-      ?z -> :zoffs
-
-      # compound directives
-      ?D -> { :subfmt, "%m/%d/%y" }
-      ?F -> { :subfmt, "%Y-%m-%d" }
-      ?R -> { :subfmt, "%H:%M" }
-      ?r -> { :subfmt, "%I:%M:%S %p" }
-      ?T -> { :subfmt, "%H:%M:%S" }
-      ?v -> { :subfmt, "%e-%b-%Y" }
-
-      _ -> nil
-    end
-
-    case val do
-      nil -> { :error, "bad directive %#{<<dir::utf8>>}" }
-
-      { :subfmt, _ }=result ->
-        { :ok, result }
-
-      { tag, w } ->
-        width = max(w, width)
-        pad = translate_pad(flag, dir)
-        { :ok, {tag, pad && "~#{width}..#{pad}B" || "~B"} }
-
-      :zoffs when flag in [nil, ?:, "::"] ->
-        { :ok, translate_zoffs(flag) }
-
-      :zoffs ->
-        { :error, "invalid flag for directive %z" }
-
-      tag when nil?(flag) ->
-        { :ok, {tag, "~s"} }
-
-      _ ->
-        { :error, "invalid flag for directive %#{<<dir::utf8>>}" }
-    end
-  end
-
-  defp translate_pad(nil, dir) when dir in [?e, ?k, ?l] do
-    " "
-  end
-
-  defp translate_pad(flag, _) do
-    case flag do
-      ?-    -> nil
-      ?_    -> " "
-      nil   -> "0"
-      other -> <<other :: utf8>>
-    end
-  end
-
-  defp translate_zoffs(flag) do
-    { case flag do
-      nil  -> :zoffs
-      ?:   -> :zoffs_colon
-      "::" -> :zoffs_sec
-    end, "~s" }
+  @spec format(%DateTime{}, String.t) :: {:ok, String.t} | {:error, term}
+  def format(%DateTime{} = date, format_string) do
+    DefaultFormatter.format(date, format_string, Tokenizer)
   end
 end

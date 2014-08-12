@@ -3,7 +3,7 @@ defmodule Timex.Parsers.DateFormat.DefaultParser do
   This module is responsible for parsing date strings using
   the default timex formatting syntax.
 
-  See `Timex.DateFormat.Default` for more info.
+  See `Timex.DateFormat.Formatters.DefaultFormatter` for more info.
   """
   use Timex.Parsers.DateFormat.Parser
 
