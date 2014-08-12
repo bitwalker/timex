@@ -141,11 +141,32 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
     end
   end
 
+  @doc """
+  If one wants to use the default formatting semantics with a different
+  tokenizer, this is the way.
+  """
+  @spec format(%DateTime{}, String.t, atom) :: {:ok, String.t} | {:error, term}
+  def format(%DateTime{} = date, format_string, tokenizer) do
+    case tokenizer.tokenize(format_string) do
+      {:error, _} = error ->
+        error
+      directives when is_list(directives) ->
+        if Enum.any?(directives, fn dir -> dir.type != :char end) do
+          do_format(date, directives, <<>>)
+        else
+          {:error, "There were no formatting directives in the provided string."}
+        end
+    end
+  end
+
 
   defp do_format(_date, [], result),             do: {:ok, result}
   defp do_format(_date, _, {:error, _} = error), do: error
+  defp do_format(date, [%Directive{type: :char, token: char} | dirs], result) when is_binary(char) do
+    do_format(date, dirs, <<result::binary, char::binary>>)
+  end
   defp do_format(date, [%Directive{type: :char, token: char} | dirs], result) do
-    do_format(date, dirs, <<result::binary, char :: utf8>>)
+    do_format(date, dirs, <<result::binary, char::utf8>>)
   end
   defp do_format(date, [%Directive{token: token, type: :numeric, pad: false} | dirs], result) do
     formatted = format_token(token, date)
@@ -163,7 +184,7 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
     end
     do_format(date, dirs, <<result::binary, padding::binary, formatted::binary>>)
   end
-  defp do_format(date, [%Directive{token: token, type: :format, format: [tokenizer: _, format: fmt]} | dirs], result) do
+  defp do_format(date, [%Directive{token: token, type: :format, format: [tokenizer: tokenizer, format: fmt]} | dirs], result) do
     # Shift the date if this format is in Zulu time
     date = case token do
       token when token in [:iso_8601z, :rfc_822z, :rfc3339z, :rfc_1123z] ->
@@ -171,7 +192,7 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
       _ ->
         date
     end
-    case format(date, fmt) do
+    case format(date, fmt, tokenizer) do
       {:error, _} = error -> error
       {:ok, formatted}    ->
         do_format(date, dirs, <<result::binary, formatted::binary>>)

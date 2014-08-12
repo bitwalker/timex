@@ -22,7 +22,11 @@ defmodule Timex.DateFormat do
   @doc """
   Same as `format/2`, but takes a custom formatter.
   """
-  @spec format(%DateTime{}, String.t, Formatter) :: {:ok, String.t} | {:error, String.t}
+  @spec format(%DateTime{}, String.t, atom) :: {:ok, String.t} | {:error, String.t}
+  def format(%DateTime{} = date, format_string, :default),
+    do: Formatter.format(date, format_string)
+  def format(%DateTime{} = date, format_string, :strftime),
+    do: Formatter.format(date, format_string, StrftimeFormatter)
   defdelegate format(%DateTime{} = date, format_string, formatter), to: Formatter
 
   @doc """
@@ -34,7 +38,11 @@ defmodule Timex.DateFormat do
   @doc """
   Raising version of `format/3`. Returns a string with formatted date or raises a `FormatError`.
   """
-  @spec format!(%DateTime{}, String.t, Formatter) :: String.t | no_return
+  @spec format!(%DateTime{}, String.t, atom) :: String.t | no_return
+  def format!(%DateTime{} = date, format_string, :default),
+    do: Formatter.format!(date, format_string)
+  def format!(%DateTime{} = date, format_string, :strftime),
+    do: Formatter.format!(date, format_string, StrftimeFormatter)
   defdelegate format!(%DateTime{} = date, format_string, formatter), to: Formatter
 
   @doc """
