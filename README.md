@@ -8,7 +8,7 @@ To use timex with your projects, edit your mix.exs file and add it as a dependen
 
 ```elixir
 defp deps do
-  [{:timex, "~> 0.11.0"}]
+  [{:timex, "~> 0.12.0"}]
 end
 ```
 
@@ -32,8 +32,8 @@ Get current date in the local time zone.
 date = Date.local
 DateFormat.format!(date, "{ISO}")      #=> "2013-09-30T16:40:08+0300"
 DateFormat.format!(date, "{RFC1123}")  #=> "Mon, 30 Sep 2013 16:40:08 EEST"
-DateFormat.format!(date, "{kitchen}")  #=> "4:40PM"
-DateFormat.format!(date, "%a, %d %m %Y %T %Z", :strftime) #=> "Sun, 20 07 2014 04:14:12 CDT"
+DateFormat.format!(date, "%a, %d %m %Y %T %Z", :strftime) #=> "Mon, 30 09 2013 08:40:08 CDT"
+DateFormat.format!(date, "%Y", TimexFormatters.Strftime)  #=> "2013"
 ```
 
 The date value that `Date` produced encapsulates current date, time, and time zone information. This allows for great flexibility without any overhead on the user's part.
@@ -163,6 +163,72 @@ DateFormat.format!( Date.shift(date, years: -13), "{RFC1123}" )
 #=> "Sat, 30 Sep 2000 16:58:13 EEST"
 ```
 
+## Formatting Dates
+
+Formatting dates is pretty straightforward using the `DateFormat` module:
+
+```elixir
+date = Date.local
+
+# Format the date using the default formatter `TimexFormatters.Default`
+DateFormat.format!(date, "{ISO}")      #=> "2013-09-30T16:40:08+0300"
+
+# There are many different preformatted directives, see the formatter docs to get
+# a full breakdown of all options and directives available.
+DateFormat.format!(date, "{RFC1123}")  #=> "Mon, 30 Sep 2013 16:40:08 EEST"
+
+# Format the date using the strftime formatter `TimexFormatters.Strftime`
+DateFormat.format!(date, "%a, %d %m %Y %T %Z", :strftime) #=> "Mon, 30 09 2013 08:40:08 CDT"
+
+# There are shortcuts for timex's formatters (:default and :strftime), but under
+# the covers, those shorthand names are being converted to module names. You can
+# provide your own formatter implementation by creating a module with the name:
+# `Timex.DateFormat.Formatters.<ModuleName>Formatter`, with
+# `use Timex.DateFormat.Formatters.Formatter` which extends the `Formatter` behaviour.
+# See the docs for `Formatter` for more information.
+DateFormat.format!(date, "%Y", TimexFormatters.Strftime)  #=> "2013"
+```
+
+## Parsing Dates
+
+Parsing dates is also a breeze with `DateFormat`:
+
+```elixir
+# Parse a date using the default parser
+gmt   = Date.timezone("GMT")
+date  = Date.from({{2013,3,5},{23,25,19}}, gmt)
+{:ok, ^date} = DateFormat.parse("Tue, 05 Mar 2013 23:25:19 GMT", "{RFC1123}")
+
+# Any preformatted directive ending in `z` will shift the date to UTC/Zulu
+gmt   = Date.timezone("EET")
+date  = Date.from({{2013,3,5},{23,25,19}})
+{:ok, ^date} = DateFormat.parse("Tue, 05 Mar 2013 23:25:19 +0200", "{RFC1123z}")
+
+# Simple date format, default parser
+date = Date.from({2013, 3, 5})
+{:ok, ^date} = DateFormat.parse("2013-03-05", "{YYYY}-{0M}-{0D}")
+
+# Simple date format, strftime parser
+date = Date.from({2013, 3, 5})
+{:ok, ^date} = DateFormat.parse("2013-03-05", "%Y-%m-%d")
+
+# Pluggable architecture, just provide your own parser module
+# named like `Timex.Parsers.DateFormat.<Name>Parser`, and which
+# contains `use Timex.Parsers.DateFormat.Parser` at the top. This
+# extends the `Parser` behavior, and will be validated by timex.
+date   = Date.from({2013, 3, 5})
+phrase = "two days after the third of march, 2013"
+format = "{shift} {direction} {day}, {year}"
+{:ok, ^date} = DateFormat.parse(phrase, format, MyHumanizedParser)
+```
+
+As seen above, like formatting, parsing also offers a plugin architecture. By extending
+`Parser`, and giving your custom parser the same namespace as the other parsers, timex
+will know that your parser can be used. Parsing is a complex topic, so if you have questions
+about it, please open an issue, or take a look at the Default and Strftime parsers. I hope to
+cover this topic in more detail in the future, so if you aren't seeing anything, please ping
+me!
+
 ## Working with Time module
 
 The `Time` module already has some conversions and functionality for measuring time.
@@ -257,15 +323,6 @@ Use functions from the `Time` module for time interval arithmetic.
 **How do I find the time interval between two dates?**
 
 Use `Date.diff` to obtain the number of seconds, minutes, hours, days, months, weeks, or years between two dates.
-
-**What kind of operations is this lib going to support eventually?**
-
-The goal is to make it so you never have to use Erlang's calendar/time functions.
-
-Some inspirations I'm currently drawing from:
-
-- Moment.js
-- JodaTime
 
 **What is the support for time zones?**
 
