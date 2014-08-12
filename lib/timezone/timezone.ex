@@ -669,6 +669,7 @@ defmodule Timex.Timezone do
   # UTC is so common, we'll give it an extra shortcut, as well as handle common shortcuts
   def get(tz) when tz in ["Z", "UT", "GMT"], do: get(:utc)
   def get(:utc), do: get("UTC")
+  def get(0),    do: get("UTC")
   # These are shorthand for specific time zones
   def get("A"),  do: get(-1)
   def get("M"),  do: get(-12)

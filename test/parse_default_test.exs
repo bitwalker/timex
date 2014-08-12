@@ -290,21 +290,21 @@ defmodule DateFormatTest.ParseDefault do
     #assert { :ok, "2007-323" }   = format(date, "{0YYYY}-{0Dord}")
   #end
 
-  #test :format_compound_rfc1123 do
-    #date = Date.from({{2013,3,5},{23,25,19}})
-    #assert { :ok, "Tue, 05 Mar 2013 23:25:19 GMT" } = format(date, "{RFC1123}")
-    #assert { :ok, "Tue, 05 Mar 2013 23:25:19 +0000" } = format(date, "{RFC1123z}")
+  test :format_compound_rfc1123 do
+    gmt  = Date.timezone("GMT")
+    date = Date.from({{2013,3,5},{23,25,19}}, gmt)
+    assert { :ok, ^date } = parse("Tue, 05 Mar 2013 23:25:19 GMT", "{RFC1123}")
 
-    #eet = Date.timezone(2, "EET")
-    #date = Date.from({{2013,3,5},{23,25,19}}, eet)
-    #assert { :ok, "Tue, 05 Mar 2013 23:25:19 EET" } = format(date, "{RFC1123}")
-    #assert { :ok, "Tue, 05 Mar 2013 23:25:19 +0200" } = format(date, "{RFC1123z}")
+    date = Date.from({{2013,3,5},{23,25,19}})
+    assert { :ok, ^date } = parse("Tue, 05 Mar 2013 23:25:19 +0000", "{RFC1123z}")
 
-    #pst = Date.timezone(-8, "PST")
-    #date = Date.from({{2013,3,5},{23,25,19}}, pst)
-    #assert { :ok, "Tue, 05 Mar 2013 23:25:19 PST" } = format(date, "{RFC1123}")
-    #assert { :ok, "Tue, 05 Mar 2013 23:25:19 -0800" } = format(date, "{RFC1123z}")
-  #end
+    eet  = Date.timezone("EET")
+    date = Date.from({{2013,3,5},{23,25,19}}, eet)
+    assert { :ok, ^date } = parse("Tue, 05 Mar 2013 23:25:19 EET", "{RFC1123}")
+
+    date = Date.from({{2013,3,5},{23,25,19}})
+    assert { :ok, ^date } = parse("Tue, 05 Mar 2013 23:25:19 +0200", "{RFC1123z}")
+  end
 
   #test :format_compound_rfc3339 do
     #local = {{2013,3,5},{23,25,19}}

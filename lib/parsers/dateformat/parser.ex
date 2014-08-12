@@ -96,17 +96,27 @@ defmodule Timex.Parsers.DateFormat.Parser do
       end
   end
 
-  defp do_parse(date_string, directives, parser), do: do_parse(date_string, directives, parser, DateTime.new)
-  defp do_parse(<<>>, [], _, %DateTime{} = date), do: {:ok, date}
+  defp do_parse(date_string, directives, parser), do: do_parse(date_string, directives, parser, %DateTime{})
+  defp do_parse(<<>>, [], _, %DateTime{timezone: nil} = date), do: {:ok, %{date | :timezone => Timezone.get(:utc)}}
+  defp do_parse(<<>>, [], _, %DateTime{} = date),              do: {:ok, date}
   defp do_parse(rest, [], _, _),                  do: {:error, "Unexpected end of string! Starts at: #{rest}"}
   # Ignore :char directives when parsing
   defp do_parse(date_string, [%Directive{type: :char}|rest], parser, date) do
     do_parse(date_string, rest, parser, date)
   end
   # Inject component directives of pre-formatted directives.
-  defp do_parse(date_string, [%Directive{type: :format, format: format}|rest], parser, %DateTime{} = date) do
+  defp do_parse(date_string, [%Directive{token: token, type: :format, format: format}|rest], parser, %DateTime{} = date) do
     case format do
       [tokenizer: tokenizer, format: format_string] ->
+        # When parsing a date string with one of the zulu directives,
+        # shift the date to UTC/Zulu
+        date = case token do
+          token when token in [:iso_8601z, :rfc_822z, :rfc3339z, :rfc_1123z] ->
+            Date.set(date, timezone: Timezone.get(:utc))
+          _ ->
+            date
+        end
+        # Tokenize the nested directives and continue parsing
         case tokenizer.tokenize(format_string) do
           {:error, _} = error -> error
           directives -> do_parse(date_string, directives ++ rest, parser, date)
@@ -303,10 +313,19 @@ defmodule Timex.Parsers.DateFormat.Parser do
         %{date | :hour => Time.to_12hour_clock(date.hour)}
       # Timezones
       :zoffs ->
-        %{date | :timezone => Timezone.get(value)}
+        # If timezone is not nil, then we know it was set
+        # by a preformatted directive, so do not overrule that value
+        case date.timezone do
+          nil -> %{date | :timezone => Timezone.get(value)}
+          _   -> date
+        end
       :zname ->
-        tz = Timezone.get(value)
-        Date.set(date, timezone: tz)
+        # If timezone is not nil, then we know it was set
+        # by a preformatted directive, so do not overrule that value
+        case date.timezone do
+          nil -> %{date | :timezone => Timezone.get(value)}
+          _   -> date
+        end
       tz when tz in [:zoffs_colon, :zoffs_sec] ->
         case value do
           <<?-, h1::utf8, h2::utf8, _::binary>> ->
