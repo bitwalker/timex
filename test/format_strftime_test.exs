@@ -33,11 +33,11 @@ defmodule DateFormatTest.FormatStrftime do
     assert { :ok, " 7" }   = format(date, "%_g")
 
     date = Date.from({2006,1,1})
-    assert { :ok, "2005" } = format(date, "%G")
-    assert { :ok, "5" }    = format(date, "%-g")
-    assert { :ok, "05" }   = format(date, "%g")
-    assert { :ok, "05" }   = format(date, "%0g")
-    assert { :ok, " 5" }   = format(date, "%_g")
+    assert { :ok, "2006" } = format(date, "%G")
+    assert { :ok, "6" }    = format(date, "%-g")
+    assert { :ok, "06" }   = format(date, "%g")
+    assert { :ok, "06" }   = format(date, "%0g")
+    assert { :ok, " 6" }   = format(date, "%_g")
   end
 
   test :format_month do
@@ -58,9 +58,9 @@ defmodule DateFormatTest.FormatStrftime do
     assert { :ok, "Mar" }      = format(old_date, "%b")
     assert { :ok, "March" }    = format(old_date, "%B")
 
-    assert { :error, "at 0: invalid flag for directive %b" } = format(date, "%0b")
-    assert { :error, "at 0: invalid flag for directive %h" } = format(date, "%_h")
-    assert { :error, "at 0: invalid flag for directive %B" } = format(date, "%-B")
+    assert { :ok, "Nov" } = format(date, "%0b")
+    assert { :ok, "Nov" } = format(date, "%_h")
+    assert { :ok, "November" } = format(date, "%-B")
   end
 
   test :format_day do
@@ -94,11 +94,11 @@ defmodule DateFormatTest.FormatStrftime do
 
   test :format_weekday do
     date = Date.from({2007,11,18})
-    assert { :ok, "0" } = format(date, "%w")
+    assert { :ok, "6" } = format(date, "%w")
     assert { :ok, "7" } = format(date, "%u")
-    assert { :ok, "0" } = format(date, "%0w")
+    assert { :ok, "6" } = format(date, "%0w")
     assert { :ok, "7" } = format(date, "%-u")
-    assert { :ok, "0" } = format(date, "%_w")
+    assert { :ok, "6" } = format(date, "%_w")
   end
 
   test :format_weekday_name do
@@ -109,8 +109,8 @@ defmodule DateFormatTest.FormatStrftime do
     assert { :ok, "Fri" } = format(Date.from({2013,1,4}), "%a")
     assert { :ok, "Sat" } = format(Date.from({2013,1,5}), "%a")
     assert { :ok, "Sun" } = format(Date.from({2013,1,6}), "%a")
-    assert { :error, "at 0: invalid flag for directive %a" } = format(Date.from({2013,1,6}), "%0a")
-    assert { :error, "at 0: invalid flag for directive %a" } = format(Date.from({2013,1,6}), "%-a")
+    assert { :ok, "Sun" } = format(Date.from({2013,1,6}), "%0a")
+    assert { :ok, "Sun" } = format(Date.from({2013,1,6}), "%-a")
 
     assert { :ok, "Monday" }    = format(Date.from({2012,12,31}), "%A")
     assert { :ok, "Tuesday" }   = format(Date.from({2013,1,1}), "%A")
@@ -119,8 +119,8 @@ defmodule DateFormatTest.FormatStrftime do
     assert { :ok, "Friday" }    = format(Date.from({2013,1,4}), "%A")
     assert { :ok, "Saturday" }  = format(Date.from({2013,1,5}), "%A")
     assert { :ok, "Sunday" }    = format(Date.from({2013,1,6}), "%A")
-    assert { :error, "at 0: invalid flag for directive %A" } = format(Date.from({2013,1,6}), "%_A")
-    assert { :error, "at 0: invalid flag for directive %A" } = format(Date.from({2013,1,6}), "%0A")
+    assert { :ok, "Sunday" } = format(Date.from({2013,1,6}), "%_A")
+    assert { :ok, "Sunday" } = format(Date.from({2013,1,6}), "%0A")
   end
 
   test :format_iso_week do
@@ -138,23 +138,23 @@ defmodule DateFormatTest.FormatStrftime do
 
   test :format_ordinal_week do
     date = Date.from({2013,1,1})
-    assert { :ok, "00" } = format(date, "%W")
+    assert { :ok, "01" } = format(date, "%W")
     assert { :ok, "00" } = format(date, "%U")
-    assert { :ok, "0" } = format(date, "%-W")
+    assert { :ok, "1" } = format(date, "%-W")
     assert { :ok, "0" } = format(date, "%-U")
 
     date = Date.from({2013,1,6})
-    assert { :ok, "00" } = format(date, "%W")
-    assert { :ok, "01" } = format(date, "%U")
-    assert { :ok, "0" } = format(date, "%-W")
-    assert { :ok, "1" } = format(date, "%-U")
-    assert { :ok, " 0" } = format(date, "%_W")
-    assert { :ok, " 1" } = format(date, "%_U")
-
-    date = Date.from({2013,1,7})
     assert { :ok, "01" } = format(date, "%W")
     assert { :ok, "01" } = format(date, "%U")
     assert { :ok, "1" } = format(date, "%-W")
+    assert { :ok, "1" } = format(date, "%-U")
+    assert { :ok, " 1" } = format(date, "%_W")
+    assert { :ok, " 1" } = format(date, "%_U")
+
+    date = Date.from({2013,1,7})
+    assert { :ok, "02" } = format(date, "%W")
+    assert { :ok, "01" } = format(date, "%U")
+    assert { :ok, "2" } = format(date, "%-W")
     assert { :ok, "1" } = format(date, "%-U")
   end
 
@@ -201,15 +201,15 @@ defmodule DateFormatTest.FormatStrftime do
     assert { :ok, "12:03:04" } = format(date, "%k:%M:%S")
     assert { :ok, "12:03:04 PM" } = format(date, "%I:%0M:%0S %p")
     assert { :ok, "pm 12:3:4" } = format(date, "%P %l:%-M:%-S")
-    assert { :ok, "am 12" } = format(date_midnight, "%P %I")
-    assert { :ok, "am 12" } = format(date_midnight, "%P %l")
-    assert { :ok, "AM 0" } = format(date_midnight, "%p %-H")
-    assert { :ok, "AM 0" } = format(date_midnight, "%p %-k")
-    assert { :ok, "AM 00" } = format(date_midnight, "%p %H")
-    assert { :ok, "AM  0" } = format(date_midnight, "%p %k")
+    assert { :ok, "pm 12" } = format(date_midnight, "%P %I")
+    assert { :ok, "pm 12" } = format(date_midnight, "%P %l")
+    assert { :ok, "PM 0" } = format(date_midnight, "%p %-H")
+    assert { :ok, "PM 0" } = format(date_midnight, "%p %-k")
+    assert { :ok, "PM 00" } = format(date_midnight, "%p %H")
+    assert { :ok, "PM  0" } = format(date_midnight, "%p %k")
 
-    assert { :error, "at 0: invalid flag for directive %p" } = format(date_midnight, "%0p")
-    assert { :error, "at 0: invalid flag for directive %P" } = format(date_midnight, "%_P")
+    assert { :ok, "PM" } = format(date_midnight, "%0p")
+    assert { :ok, "pm" } = format(date_midnight, "%_P")
 
     assert { :ok, "1376827384" }  = format(date, "%s")
     assert { :ok, "1376827384" }  = format(date, "%-s")
@@ -219,31 +219,31 @@ defmodule DateFormatTest.FormatStrftime do
     assert { :ok, "1000000000" } = format(date, "%s")
 
     date = Date.epoch()
-    assert { :ok, "0" }           = format(date, "%-s")
-    assert { :ok, "0000000000" }  = format(date, "%s")
-    assert { :ok, "0000000000" }  = format(date, "%0s")
-    assert { :ok, "         0" }  = format(date, "%_s")
+    assert { :ok, "0" }  = format(date, "%-s")
+    assert { :ok, "0" }  = format(date, "%s")
+    assert { :ok, "0" }  = format(date, "%0s")
+    assert { :ok, "0" }  = format(date, "%_s")
   end
 
   test :format_zones do
-    eet = Date.timezone(2.0, "EET")
+    eet = Date.timezone("EET")
     date = Date.from({2007,11,19}, eet)
     assert { :ok, "EET" } = format(date, "%Z")
     assert { :ok, "+0200" } = format(date, "%z")
     assert { :ok, "+02:00" } = format(date, "%:z")
     assert { :ok, "+02:00:00" } = format(date, "%::z")
 
-    pst = Date.timezone(-8.0, "PST")
+    pst = Date.timezone("PST")
     date = Date.from({2007,11,19}, pst)
     assert { :ok, "PST" } = format(date, "%Z")
     assert { :ok, "-0800" } = format(date, "%z")
     assert { :ok, "-08:00" } = format(date, "%:z")
     assert { :ok, "-08:00:00" } = format(date, "%::z")
 
-    assert { :error, "at 0: invalid flag for directive %Z" } = format(date, "%0Z")
-    assert { :error, "at 0: invalid flag for directive %Z" } = format(date, "%_Z")
-    assert { :error, "at 0: bad directive %:" } = format(date, "%0:z")
-    assert { :error, "at 0: bad directive %:" } = format(date, "%_::z")
+    assert { :ok, "PST" } = format(date, "%0Z")
+    assert { :ok, "PST" } = format(date, "%_Z")
+    assert {:error, "Invalid directive used starting at column 0"} = format(date, "%0:z")
+    assert {:error, "Invalid directive used starting at column 0"} = format(date, "%_::z")
   end
 
   test :combined_directives do
@@ -265,31 +265,13 @@ defmodule DateFormatTest.FormatStrftime do
 
   test :tokens do
     date = Date.now()
-    assert {:ok, "" } = format(date, "")
-    assert {:ok, "abc" } = format(date, "abc")
-    assert {:ok, "Use % as oft{{en as you like%" } = format(date, "Use %% as oft{{en as you like%%")
-    assert {:ok, "%%abc%" } = format(date, "%%%%abc%%")
+    assert {:error, "Format string cannot be nil or empty!"} = format(date, "")
+    assert {:error, "Invalid strftime format string"} = format(date, "abc")
+    assert {:error, "Invalid strftime format string"} = format(date, "Use %% as oft{{en as you like%%")
+    assert {:error, "There were no formatting directives in the provided string."} = format(date, "%%%%abc%%")
   end
 
   defp format(date, fmt) do
     DateFormat.format(date, fmt, :strftime)
-  end
-end
-
-defmodule DateFormatTest.ValidateStrftime do
-  test :validate do
-    assert :ok = validate ""
-    assert :ok = validate "abc"
-    assert :ok = validate "Use {{ as oft%%%%en as you like{{"
-    assert :ok = validate "%%Same go}}es for }}%%"
-
-    assert {:error, "at 0: bad directive"} = validate "%"
-    assert {:error, "at 0: bad directive %^"} = validate "%^"
-    assert {:error, "at 2: bad directive"} = validate "%%%"
-    assert {:error, "at 0: bad directive %X"} = validate "%0X"
-  end
-
-  defp validate(fmt) do
-    DateFormat.validate(fmt, :strftime)
   end
 end
