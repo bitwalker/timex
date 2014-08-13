@@ -255,10 +255,11 @@ defmodule Timex.Date do
       Date.from(:erlang.localtime)                 #=> %Datetime{...}
       Date.from(:erlang.localtime, :local)         #=> %DateTime{...}
       Date.from({2014,3,16}, Date.timezone("PST")) #=> %DateTime{...}
+      Date.from({2014,3,16}, "PST")                #=> %DateTime{...}
 
   """
   @spec from(date | datetime) :: dtz
-  @spec from(date | datetime, :utc | :local | TimezoneInfo.t) :: dtz
+  @spec from(date | datetime, :utc | :local | TimezoneInfo.t | binary) :: dtz
 
   def from({_,_,_} = date),                        do: from(date, :utc)
   def from({{_,_,_},{_,_,_}} = datetime),          do: from(datetime, :utc)
@@ -268,6 +269,15 @@ defmodule Timex.Date do
   def from({{_,_,_},{_,_,_}} = datetime, :local),  do: from(datetime, timezone(:local))
   def from({_,_,_} = date, %TimezoneInfo{} = tz),  do: from({date, {0,0,0}}, tz)
   def from({{_,_,_},{_,_,_}} = datetime, %TimezoneInfo{} = tz), do: construct(datetime, tz)
+  def from({_,_,_} = date, tz) when is_binary(tz), do: from({date, {0, 0, 0}}, tz)
+  def from({{_,_,_},{_,_,_}} = datetime, tz) when is_binary(tz) do
+    case timezone(tz) do
+      %TimezoneInfo{} = tzinfo ->
+        construct(datetime, tzinfo)
+      {:error, _} = error ->
+        error
+    end
+  end
 
   @doc """
   Construct a date from a time interval since Epoch or year 0.
