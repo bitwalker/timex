@@ -93,6 +93,28 @@ defmodule Timex.Date do
   end
 
   @doc """
+  Get the current date, in a specific timezone.
+
+  ## Examples
+
+    > Date.now("America/Chicago")
+    %DateTime{
+      year: 2013, month: 3, day: 16, ..,
+      timezone: %TimezoneInfo{standard_abbreviation: "CST", ...}
+    }
+  """
+  @spec now(binary) :: DateTime.t
+  def now(tz) when is_binary(tz) do
+    case timezone(tz) do
+      %TimezoneInfo{} = tzinfo ->
+        construct(:calendar.universal_time(), timezone(:utc))
+        |> set(timezone: tzinfo)
+      {:error, _} = error ->
+        error
+    end
+  end
+
+  @doc """
   Get representation of the current date in seconds or days since Epoch.
 
   See convert/2 for converting arbitrary dates to various time units.
