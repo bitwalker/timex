@@ -46,6 +46,8 @@ datetime = {{2013,3,17},{21,22,23}}
 date = Date.from(datetime)           # datetime is assumed to be in UTC by default
 DateFormat.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 GMT"
 
+date = Date.from(datetime, "CST")    # With a provided timezone
+
 date = Date.from(datetime, :local)   # indicates that datetime is in local time zone
 DateFormat.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 CST"
 
@@ -64,7 +66,7 @@ Date.universal(date)  # convert date to UTC
 ### Working with time zones
 
 ```elixir
-date = Date.from({2013,1,1}, Date.timezone("America/Chicago"))
+date = Date.from({2013,1,1}, "America/Chicago")
 DateFormat.format!(date, "{ISO}")
 #=> "2013-01-01T00:00:00-0600"
 DateFormat.format!(date, "{ISOz}")
