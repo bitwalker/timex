@@ -14,8 +14,6 @@ defmodule Timex.Parsers.DateFormat.Parser do
   defcallback tokenize(format_string :: binary) :: [%Directive{}] | {:error, term}
   defcallback parse_directive(date::binary, directive::%Directive{}) :: {token::atom, {value::term, date_rest::binary} | {:error, term}}
 
-  def parsers, do: Timex.Utils.get_plugins(__MODULE__)
-
   @doc false
   defmacro __using__(_opts) do
     quote do
@@ -62,24 +60,19 @@ defmodule Timex.Parsers.DateFormat.Parser do
   def parse(date_string, format_string, parser)
     when is_binary(date_string) and is_binary(format_string)
     do
-      cond do
-        parsers |> Enum.member?(parser) ->
-          case parser.tokenize(format_string) do
-            {:error, reason} -> {:error, reason}
-            directives ->
-              case date_string do
-                nil -> {:error, "Input string cannot be null"}
-                ""  -> {:error, "Input string cannot be empty"}
-                _   -> 
-                  if Enum.any?(directives, fn dir -> dir.type != :char end) do
-                    do_parse(date_string, directives, parser)
-                  else
-                    {:error, "There were no parsing directives in the provided string."}
-                  end
+      case parser.tokenize(format_string) do
+        {:error, reason} -> {:error, reason}
+        directives ->
+          case date_string do
+            nil -> {:error, "Input string cannot be null"}
+            ""  -> {:error, "Input string cannot be empty"}
+            _   -> 
+              if Enum.any?(directives, fn dir -> dir.type != :char end) do
+                do_parse(date_string, directives, parser)
+              else
+                {:error, "There were no parsing directives in the provided string."}
               end
           end
-        true ->
-          {:error, "The parser provided does not implement the `Timex.Parsers.Parser` behaviour!"}
       end
   end
 

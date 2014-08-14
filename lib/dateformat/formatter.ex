@@ -13,8 +13,6 @@ defmodule Timex.DateFormat.Formatters.Formatter do
   defcallback format(date :: %DateTime{}, format_string :: String.t)  :: {:ok, String.t} | {:error, term}
   defcallback format!(date :: %DateTime{}, format_string :: String.t) :: String.t | no_return
 
-  def formatters, do: Timex.Utils.get_plugins(__MODULE__)
-
   @doc false
   defmacro __using__(_opts) do
     quote do
@@ -48,15 +46,8 @@ defmodule Timex.DateFormat.Formatters.Formatter do
   """
   @spec format(%DateTime{}, String.t, __MODULE__ | nil) :: {:ok, String.t} | {:error, term}
   def format(%DateTime{} = date, format_string, formatter \\ DefaultFormatter)
-    when is_binary(format_string) and is_atom(formatter)
-    do
-      cond do
-        formatters |> Enum.member?(formatter) ->
-          formatter.format(date, format_string)
-        true ->
-          {:error, "The formatter provided does not implement the `Timex.DateFormat.Formatters.Formatter` behaviour!"}
-      end
-  end
+    when is_binary(format_string) and is_atom(formatter),
+    do: formatter.format(date, format_string)
 
   @doc """
   Validates the provided format string, using the provided formatter,
@@ -65,26 +56,21 @@ defmodule Timex.DateFormat.Formatters.Formatter do
   """
   @spec validate(String.t, __MODULE__ | nil) :: :ok | {:error, term}
   def validate(format_string, formatter \\ DefaultFormatter) when is_binary(format_string) do
-    cond do
-      formatters |> Enum.member?(formatter) ->
-        try do
-          case formatter.tokenize(format_string) do
-            {:error, _} = error ->
-              error
-            directives when is_list(directives) ->
-              if Enum.any?(directives, fn dir -> dir.type != :char end) do
-                :ok
-              else
-                {:error, "There were no formatting directives in the provided string."}
-              end
-            _ ->
-              raise FormatError, message: "Invalid tokenization result!"
+    try do
+      case formatter.tokenize(format_string) do
+        {:error, _} = error ->
+          error
+        directives when is_list(directives) ->
+          if Enum.any?(directives, fn dir -> dir.type != :char end) do
+            :ok
+          else
+            {:error, "There were no formatting directives in the provided string."}
           end
-        rescue
-          x -> {:error, x}
-        end
-      true ->
-        {:error, "The formatter provided does not implement the `Timex.DateFormat.Formatters.Formatter` behaviour!"}
+        _ ->
+          raise FormatError, message: "Invalid tokenization result!"
+      end
+    rescue
+      x -> {:error, x}
     end
   end
 
