@@ -487,7 +487,7 @@ defmodule Timex.Date do
     Module.eval_quoted __MODULE__, day_quoted, [], __ENV__
   end
   # Make an attempt at cleaning up the provided string
-  def day_to_num(x), do: raise(ArgumentError, message: "Invalid day name: #{x}")
+  def day_to_num(x), do: {:error, "Invalid day name: #{x}"}
 
   @doc """
   Get the name of the day corresponding to the provided number
@@ -496,7 +496,7 @@ defmodule Timex.Date do
   @weekdays |> Enum.each fn {name, day_num} ->
     def day_name(unquote(day_num)), do: unquote(name)
   end
-  def day_name(x), do: raise(ArgumentError, message: "Invalid day num: #{x}")
+  def day_name(x), do: {:error, "Invalid day num: #{x}"}
 
   @doc """
   Get the short name of the day corresponding to the provided number
@@ -505,7 +505,7 @@ defmodule Timex.Date do
   @weekdays |> Enum.each fn {name, day_num} ->
     def day_shortname(unquote(day_num)), do: String.slice(unquote(name), 0..2)
   end
-  def day_shortname(x), do: raise(ArgumentError, message: "Invalid day num: #{x}")
+  def day_shortname(x), do: {:error, "Invalid day num: #{x}"}
 
   @doc """
   Get the number of the month corresponding to the given name.
@@ -540,7 +540,7 @@ defmodule Timex.Date do
     Module.eval_quoted __MODULE__, month_quoted, [], __ENV__
   end
   # Make an attempt at cleaning up the provided string
-  def month_to_num(x), do: raise(ArgumentError, message: "Invalid month name: #{x}")
+  def month_to_num(x), do: {:error, "Invalid month name: #{x}"}
 
   @doc """
   Get the name of the month corresponding to the provided number
@@ -549,7 +549,7 @@ defmodule Timex.Date do
   @months |> Enum.each fn {name, month_num} ->
     def month_name(unquote(month_num)), do: unquote(name)
   end
-  def month_name(x), do: raise(ArgumentError, message: "Invalid month num: #{x}")
+  def month_name(x), do: {:error, "Invalid month num: #{x}"}
 
   @doc """
   Get the short name of the month corresponding to the provided number
@@ -558,7 +558,7 @@ defmodule Timex.Date do
   @months |> Enum.each fn {name, month_num} ->
     def month_shortname(unquote(month_num)), do: String.slice(unquote(name), 0..2)
   end
-  def month_shortname(x), do: raise(ArgumentError, message: "Invalid month num: #{x}")
+  def month_shortname(x), do: {:error, "Invalid month num: #{x}"}
 
   @doc """
   Return a 3-tuple {year, week number, weekday} for the given date.
