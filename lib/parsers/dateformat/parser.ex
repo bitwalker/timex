@@ -300,7 +300,15 @@ defmodule Timex.Parsers.DateFormat.Parser do
       :sec       -> %{date | :second => value}
       :sec_epoch -> Date.from(value, :secs, :epoch)
       am_pm when am_pm in [:am, :AM] ->
-        %{date | :hour => Time.to_12hour_clock(date.hour)}
+        {converted, hemisphere} = Time.to_12hour_clock(date.hour)
+        case value do
+          am when am in ["am", "AM"]->
+            %{date | :hour => converted}
+          pm when pm in ["pm", "PM"] and hemisphere == :am ->
+            %{date | :hour => converted + 12}
+          _ ->
+            %{date | :hour => converted}
+        end
       # Timezones
       :zoffs ->
         # If timezone is not nil, then we know it was set
