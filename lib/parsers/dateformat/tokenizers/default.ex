@@ -51,6 +51,8 @@ defmodule Timex.Parsers.DateFormat.Tokenizers.Default do
     {"ISOweek",     Directive.get(:iso_week)},
     {"ISOweek-day", Directive.get(:iso_weekday)},
     {"ISOord",      Directive.get(:iso_ordinal)},
+    {"RFC822",      Directive.get(:rfc_822)},
+    {"RFC822z",     Directive.get(:rfc_822z)},
     {"RFC1123",     Directive.get(:rfc_1123)},
     {"RFC1123z",    Directive.get(:rfc_1123z)},
     {"RFC3339",     Directive.get(:rfc_3339)},
