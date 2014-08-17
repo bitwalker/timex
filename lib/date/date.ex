@@ -398,6 +398,27 @@ defmodule Timex.Date do
   end
 
   @doc """
+  Given a date, get the century this date is in.
+
+  ## Example
+
+    iex> Date.century(Date.now)
+    21
+
+  """
+  @spec century(DateTime.t | nil) :: non_neg_integer
+  def century(datetime \\ Date.now)
+
+  def century(%DateTime{:year => y}) do
+    base_century = div(y, 100)
+    years_past   = rem(y, 100)
+    current_century = cond do
+      base_century == (base_century - years_past) -> base_century
+      true -> base_century + 1
+    end
+  end
+
+  @doc """
   Return weekday number (as defined by ISO 8601) of the specified date.
 
   ## Examples
