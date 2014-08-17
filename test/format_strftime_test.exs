@@ -33,11 +33,11 @@ defmodule DateFormatTest.FormatStrftime do
     assert { :ok, " 7" }   = format(date, "%_g")
 
     date = Date.from({2006,1,1})
-    assert { :ok, "2006" } = format(date, "%G")
-    assert { :ok, "6" }    = format(date, "%-g")
-    assert { :ok, "06" }   = format(date, "%g")
-    assert { :ok, "06" }   = format(date, "%0g")
-    assert { :ok, " 6" }   = format(date, "%_g")
+    assert { :ok, "2005" } = format(date, "%G")
+    assert { :ok, "5" }    = format(date, "%-g")
+    assert { :ok, "05" }   = format(date, "%g")
+    assert { :ok, "05" }   = format(date, "%0g")
+    assert { :ok, " 5" }   = format(date, "%_g")
   end
 
   test :format_month do

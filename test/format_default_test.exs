@@ -31,10 +31,10 @@ defmodule DateFormatTest.FormatDefault do
     assert { :ok, " 7" }   = format(date, "{_WYY}")
 
     date = Date.from({2006,1,1})
-    assert { :ok, "2006" } = format(date, "{WYYYY}")
-    assert { :ok, "6" }    = format(date, "{WYY}")
-    assert { :ok, "06" }   = format(date, "{0WYY}")
-    assert { :ok, " 6" }   = format(date, "{_WYY}")
+    assert { :ok, "2005" } = format(date, "{WYYYY}")
+    assert { :ok, "5" }    = format(date, "{WYY}")
+    assert { :ok, "05" }   = format(date, "{0WYY}")
+    assert { :ok, " 5" }   = format(date, "{_WYY}")
   end
 
   test :format_month do

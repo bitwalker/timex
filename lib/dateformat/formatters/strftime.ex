@@ -40,8 +40,8 @@ defmodule Timex.DateFormat.Formatters.StrftimeFormatter do
   * `%Y` - full year number (0000..9999)
   * `%y` - the last two digits of the year number (00.99)
   * `%C` - century number (00..99)
-  * `%G` - year number corresponding to the ISO year (0000..9999)
-  * `%g` - the last two digits of the ISO year (00..99)
+  * `%G` - year number corresponding to the date's ISO week (0..9999)
+  * `%g` - year number (2 digits) corresponding to the date's ISO week (0.99)
 
   ### Months
 

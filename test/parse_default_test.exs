@@ -77,21 +77,16 @@ defmodule DateFormatTest.ParseDefault do
     assert { :ok, ^date2013_11 } = parse("20131108", "{0YYYY}{0M}{0D}")
   end
 
-  #test :format_iso_year do
-    #date = Date.from({2007,11,19})
-    #assert { :ok, ^date, "" } = parse("2007", "{WYYYY}")
-    #assert { :ok, ^date, "" } = parse("7"   , "{WYY}")
-    #assert { :ok, ^date, "" } = parse("07"  , "{0WYY}")
-    #assert { :ok, ^date, "" } = parse(" 7"  , "{_WYY}")
+  test :parse_iso_year do
+    date = Date.from({2007,1,1})
+    year = date.year
+    assert { :ok, %DateTime{year: ^year} } = parse("2007", "{WYYYY}")
+    assert { :ok, %DateTime{year: ^year} } = parse("7"   , "{WYY}")
+    assert { :ok, %DateTime{year: ^year} } = parse("07"  , "{0WYY}")
+    assert { :ok, %DateTime{year: ^year} } = parse(" 7"  , "{_WYY}")
+  end
 
-    #date = Date.from({2006,1,1})
-    #assert { :ok, ^date, "" } = parse("2005", "{WYYYY}")
-    #assert { :ok, ^date, "" } = parse("5"   , "{WYY}")
-    #assert { :ok, ^date, "" } = parse("05"  , "{0WYY}")
-    #assert { :ok, ^date, "" } = parse(" 5"  , "{_WYY}")
-  #end
-
-  test :format_month_name do
+  test :parse_month_name do
     date_nov = Date.from({0,11,1})
     assert { :ok, ^date_nov } = parse("Nov", "{Mshort}")
     assert { :ok, ^date_nov } = parse("November", "{Mfull}")

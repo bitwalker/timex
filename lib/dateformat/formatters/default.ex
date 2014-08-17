@@ -26,8 +26,8 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
   * `{YYYY}`    - full year number (0..9999)
   * `{YY}`      - the last two digits of the year number (0.99)
   * `{C}`       - century number (0..99)
-  * `{WYYYY}`   - year number corresponding to the ISO week (0..9999)
-  * `{WYY}`     - the last two digits of the ISO week year (0..99)
+  * `{WYYYY}`   - year number corresponding to the date's ISO week (0..9999)
+  * `{WYY}`     - year number (2 digits) corresponding to the date's ISO week (0.99)
 
   ### Months
 

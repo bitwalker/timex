@@ -253,18 +253,14 @@ defmodule Timex.Parsers.DateFormat.Parser do
     case token do
       # Years
       :century   ->
-        base_century = div(year, 100)
-        years_past   = rem(year, 100)
-        current_century = cond do
-          base_century == (base_century - years_past) -> base_century
-          true -> base_century + 1
-        end
-        year_shifted = year + ((value - current_century) * 100)
+        century = Date.century(%{date | :year => year})
+        year_shifted = year + ((value - century) * 100)
         %{date | :year => year_shifted}
-      :year2     ->
-        %DateTime{year: current_year} = Date.now
-        %{date | :year => (current_year - rem(current_year, 100)) + value}
-      year when year in [:year4, :iso_year4, :iso_year2] ->
+      y when y in [:year2, :iso_year2] ->
+        current_century = Date.century(Date.now)
+        year_shifted    = value + ((current_century - 1) * 100)
+        %{date | :year => year_shifted}
+      y when y in [:year4, :iso_year4] ->
         %{date | :year => value}
       # Months
       :month  -> %{date | :month => value}

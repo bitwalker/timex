@@ -85,8 +85,14 @@ defmodule Timex.DateFormat.Formatters.Formatter do
   def format_token(:year4,      %DateTime{year: year}), do: "#{year}"
   def format_token(:year2,      %DateTime{year: year}), do: "#{rem(year, 100)}"
   def format_token(:century,    %DateTime{year: year}), do: "#{div(year, 100)}"
-  def format_token(:iso_year4,  %DateTime{year: year}), do: "#{year}"
-  def format_token(:iso_year2,  %DateTime{year: year}), do: "#{rem(year, 100)}"
+  def format_token(:iso_year4,  %DateTime{} = date) do
+    {iso_year, _} = date |> Date.iso_week
+    "#{iso_year}"
+  end
+  def format_token(:iso_year2,  %DateTime{} = date) do
+    {iso_year, _} = date |> Date.iso_week
+    "#{rem(iso_year, 100)}"
+  end
   # Months
   def format_token(:month,      %DateTime{month: month}), do: "#{month}"
   def format_token(:mshort,     %DateTime{month: month}), do: Date.month_shortname(month)
