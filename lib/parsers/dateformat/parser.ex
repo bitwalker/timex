@@ -94,7 +94,7 @@ defmodule Timex.Parsers.DateFormat.Parser do
   defp do_parse(<<>>, [], _, %DateTime{} = date),              do: {:ok, date}
   defp do_parse(rest, [], _, _),                  do: {:error, "Unexpected end of string! Starts at: #{rest}"}
   # Ignore :char directives when parsing
-  defp do_parse(date_string, [%Directive{type: :char}|rest], parser, date) do
+  defp do_parse(<<_::utf8, date_string::binary>>, [%Directive{type: :char}|rest], parser, date) do
     do_parse(date_string, rest, parser, date)
   end
   # Inject component directives of pre-formatted directives.
@@ -112,7 +112,8 @@ defmodule Timex.Parsers.DateFormat.Parser do
         # Tokenize the nested directives and continue parsing
         case tokenizer.tokenize(format_string) do
           {:error, _} = error -> error
-          directives -> do_parse(date_string, directives ++ rest, parser, date)
+          directives ->
+            do_parse(date_string, directives ++ rest, parser, date)
         end
       {:error, _} = error ->
         error
