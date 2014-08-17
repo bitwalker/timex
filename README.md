@@ -126,7 +126,7 @@ DateFormat.format!(date, "{RFC1123}")
 Date.convert(date, :secs)  # seconds since Epoch
 #=> 1380549302
 
-Date.to_sec(date, :zero)  # seconds since year 0
+Date.to_secs(date, :zero)  # seconds since year 0
 #=> 63547768502
 
 DateFormat.format!(Date.epoch(), "{ISO}")
