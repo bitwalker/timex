@@ -114,13 +114,20 @@ defmodule Timex.DateFormat.Formatters.Formatter do
   def format_token(:wdshort, %DateTime{} = date),  do: "#{Date.weekday(date) |> Date.day_shortname}"
   def format_token(:wdfull, %DateTime{} = date),   do: "#{Date.weekday(date) |> Date.day_name}"
   # Hours
-  def format_token(:hour24, %DateTime{hour: hour}),  do: "#{hour}"
-  def format_token(:hour12, %DateTime{hour: hour}),  do: "#{{h, _} = Time.to_12hour_clock(hour); h}"
-  def format_token(:min, %DateTime{minute: min}),    do: "#{min}"
-  def format_token(:sec, %DateTime{second: sec}),    do: "#{sec}"
-  def format_token(:sec_epoch, %DateTime{} = date),  do: "#{Date.to_secs(date, :epoch)}"
-  def format_token(:am, %DateTime{hour: hour}),      do: "#{{_, am_pm} = Time.to_12hour_clock(hour); Atom.to_string(am_pm)}"
-  def format_token(:AM, %DateTime{} = date),         do: format_token(:am, date) |> String.upcase
+  def format_token(:hour24, %DateTime{hour: hour}),     do: "#{hour}"
+  def format_token(:hour12, %DateTime{hour: hour}),     do: "#{{h, _} = Time.to_12hour_clock(hour); h}"
+  def format_token(:min, %DateTime{minute: min}),       do: "#{min}"
+  def format_token(:sec, %DateTime{second: sec}),       do: "#{sec}"
+  def format_token(:sec_fractional, %DateTime{ms: 0}),  do: <<>>
+  def format_token(:sec_fractional, %DateTime{ms: ms})
+    when ms < 10, do: ".00#{ms}"
+  def format_token(:sec_fractional, %DateTime{ms: ms})
+    when ms < 100, do: ".0#{ms}"
+  def format_token(:sec_fractional, %DateTime{ms: ms}),
+    do: ".#{ms}"
+  def format_token(:sec_epoch, %DateTime{} = date),     do: "#{Date.to_secs(date, :epoch)}"
+  def format_token(:am, %DateTime{hour: hour}),         do: "#{{_, am_pm} = Time.to_12hour_clock(hour); Atom.to_string(am_pm)}"
+  def format_token(:AM, %DateTime{} = date),            do: format_token(:am, date) |> String.upcase
   # Timezones
   def format_token(:zname, %DateTime{timezone: tz} = date) do
     case Timezone.Dst.is_dst?(date) do

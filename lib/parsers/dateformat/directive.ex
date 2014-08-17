@@ -41,6 +41,8 @@ defmodule Timex.Parsers.DateFormat.Directive do
             # Expected format:
             #     [tokenizer: <module>, format: <format string>]
             format: false,
+            # If this token is not required in the source string
+            optional: false,
             # The raw token
             raw: ""
 
@@ -84,6 +86,7 @@ defmodule Timex.Parsers.DateFormat.Directive do
   def get(:hour12),      do: %Directive{token: :hour12, len: 1..2, min: 1, max: 12, type: :numeric, pad: 0}
   def get(:min),         do: %Directive{token: :min, len: 1..2, min: 0, max: 59, type: :numeric, pad: 0}
   def get(:sec),         do: %Directive{token: :sec, len: 1..2, min: 0, max: 59, type: :numeric, pad: 0}
+  def get(:sec_fractional), do: %Directive{token: :sec_fractional, len: 1..3, min: 0, max: 999, type: :numeric, pad: 0, optional: true}
   def get(:sec_epoch),   do: %Directive{token: :sec_epoch, len: :word, type: :numeric, pad: 0}
   def get(:am),          do: %Directive{token: :am, len: 2, type: :match, match: ["am", "pm"]}
   def get(:AM),          do: %Directive{token: :AM, len: 2, type: :match, match: ["AM", "PM"]}

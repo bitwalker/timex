@@ -298,6 +298,11 @@ defmodule Timex.Parsers.DateFormat.Parser do
         %{date | :hour => value}
       :min       -> %{date | :minute => value}
       :sec       -> %{date | :second => value}
+      :sec_fractional ->
+        case value do
+          "" -> date
+          n when is_number(n) -> %{date | :ms => n}
+        end
       :sec_epoch -> Date.from(value, :secs, :epoch)
       am_pm when am_pm in [:am, :AM] ->
         {converted, hemisphere} = Time.to_12hour_clock(date.hour)

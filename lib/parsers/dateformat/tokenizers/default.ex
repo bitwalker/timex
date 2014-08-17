@@ -34,6 +34,7 @@ defmodule Timex.Parsers.DateFormat.Tokenizers.Default do
     {"h12",         Directive.get(:hour12)},
     {"m",           Directive.get(:min)},
     {"s",           Directive.get(:sec)},
+    {"ss",          Directive.get(:sec_fractional)},
     {"s-epoch",     Directive.get(:sec_epoch)},
     {"am",          Directive.get(:am)},
     {"AM",          Directive.get(:AM)},

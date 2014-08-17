@@ -22,7 +22,18 @@ defmodule Timex.Parsers.DateFormat.DefaultParser do
     {token, do_parse_directive(date_string, directive)}
   end
 
-  # Numeric directive
+
+  # Special handling for fractional seconds
+  defp do_parse_directive(<<?., date_string::binary>>, %Directive{token: :sec_fractional} = dir) do
+    do_parse_directive(date_string, dir)
+  end
+  # If we attempt to parse the next character and it's not a number, return an empty string since
+  # fractional seconds are optional
+  defp do_parse_directive(<<c::utf8, _::binary>>=date_string, %Directive{token: :sec_fractional})
+    when not c in ?0..?9 do
+      {"", date_string}
+  end
+  # Numeric directives
   defp do_parse_directive(date_string, %Directive{token: token, type: :numeric, pad: pad} = dir) do
     date_chars = date_string |> String.to_char_list
     # Drop non-numeric characters
