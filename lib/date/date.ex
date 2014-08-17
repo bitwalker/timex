@@ -412,7 +412,7 @@ defmodule Timex.Date do
   def century(%DateTime{:year => y}) do
     base_century = div(y, 100)
     years_past   = rem(y, 100)
-    current_century = cond do
+    cond do
       base_century == (base_century - years_past) -> base_century
       true -> base_century + 1
     end
