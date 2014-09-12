@@ -3,7 +3,7 @@ otp_release:
   - 17.0
   - 17.1
 env:
-  - ELIXIR_VERSION=1.0.0-rc1
+  - ELIXIR_VERSION=1.0.0
 before_install:
   - wget https://github.com/elixir-lang/elixir/releases/download/v$ELIXIR_VERSION/Precompiled.zip
   - unzip -d elixir Precompiled.zip
