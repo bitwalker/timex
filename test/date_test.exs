@@ -250,8 +250,8 @@ defmodule DateTests do
   end
 
   test :compare do
-    assert D.compare(D.epoch(), D.zero()) === -1
-    assert D.compare(D.zero(), D.epoch()) === 1
+    assert D.compare(D.epoch(), D.zero()) === 1
+    assert D.compare(D.zero(), D.epoch()) === -1
 
     tz1   = Timezone.get(2)
     tz2   = Timezone.get(-3)
@@ -261,13 +261,13 @@ defmodule DateTests do
 
     tz3   = Timezone.get(3)
     date3 = %DateTime{year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz3}
-    assert D.compare(date1, date3) === -1
+    assert D.compare(date1, date3) === +1
 
     date = D.now()
-    assert D.compare(D.epoch(), date) === 1
+    assert D.compare(D.epoch(), date) === -1
 
-    assert D.compare(date, :distant_past) === -1
-    assert D.compare(date, :distant_future) === 1
+    assert D.compare(date, :distant_past) === +1
+    assert D.compare(date, :distant_future) === -1
   end
 
   test :diff do

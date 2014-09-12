@@ -855,8 +855,8 @@ defmodule Timex.Date do
 
   def compare(date, :epoch),       do: compare(date, epoch())
   def compare(date, :zero),        do: compare(date, zero())
-  def compare(_, :distant_past),   do: -1
-  def compare(_, :distant_future), do: 1
+  def compare(_, :distant_past),   do: +1
+  def compare(_, :distant_future), do: -1
   def compare(date, date),         do: 0
   def compare(%DateTime{:timezone => thistz} = this, %DateTime{:timezone => othertz} = other) do
     localized = if thistz !== othertz do
@@ -867,9 +867,9 @@ defmodule Timex.Date do
     end
     difference = diff(this, localized, :secs)
     cond do
-      difference < 0  -> -1
+      difference < 0  -> +1
       difference == 0 -> 0
-      difference > 0  -> 1
+      difference > 0  -> -1
     end
   end
 
