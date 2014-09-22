@@ -167,8 +167,8 @@ defmodule Timex.Date do
   @spec local(date :: DateTime.t, tz :: TimezoneInfo.t) :: DateTime.t
   def local(%DateTime{:timezone => tz} = date, localtz) do
     if tz !== localtz do
-      Timezone.convert(date, localtz)
-      %{date | :timezone => localtz}
+      new_date = Timezone.convert(date, localtz)
+      %{new_date | :timezone => localtz}
     else
       date
     end
