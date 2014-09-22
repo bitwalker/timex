@@ -8,7 +8,7 @@ To use timex with your projects, edit your mix.exs file and add it as a dependen
 
 ```elixir
 defp deps do
-  [{:timex, "~> 0.12.6"}]
+  [{:timex, "~> 0.12.8"}]
 end
 ```
 
