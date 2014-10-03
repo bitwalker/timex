@@ -18,6 +18,7 @@ defmodule Timex.Date do
   """
   require Record
   alias Timex.DateTime,     as: DateTime
+  alias Timex.Time,         as: Time
   alias Timex.Timezone,     as: Timezone
   alias Timex.TimezoneInfo, as: TimezoneInfo
 
@@ -887,7 +888,7 @@ defmodule Timex.Date do
   @spec diff(DateTime.t, DateTime.t, :secs | :days | :weeks | :months | :years) :: integer
 
   def diff(this, other, :timestamp) do
-    diff(this, other, :secs) |> Time.from_sec
+    diff(this, other, :secs) |> Time.from(:secs)
   end
   def diff(this, other, :secs) do
     to_secs(other, :zero) - to_secs(this, :zero)

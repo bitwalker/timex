@@ -295,6 +295,8 @@ defmodule DateTests do
     assert D.diff(date1, date2, :months) === -D.diff(date2, date1, :months)
     assert D.diff(date1, date2, :years)  === -D.diff(date2, date1, :years)
 
+    assert D.diff(date1, date2, :timestamp) === {0, 63, 158400}
+
     assert D.diff(epoch, date1, :days) === 365
     assert D.diff(epoch, date1, :secs) === 365 * 24 * 3600
     assert D.diff(epoch, date1, :years) === 1
