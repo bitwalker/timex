@@ -52,7 +52,9 @@ defmodule TimezoneTests do
     cst = Timezone.get("America/Chicago")
     est = Timezone.get("America/New_York")
     gmt_plus_two    = Timezone.get(2)
-    gmt_minus_three = Timezone.get(-3) 
+    gmt_minus_three = Timezone.get(-3)
+
+    assert %DateTime{hour: 18, timezone: utc} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, timezone: cst} |> Timezone.convert(utc) 
 
     # If it's noon in CST, then it's 6'oclock in the evening in UTC
     assert %DateTime{hour: 18} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, timezone: cst} |> Timezone.convert(utc)

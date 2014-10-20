@@ -255,10 +255,10 @@ defmodule DateTests do
     date = D.from({{2013,3,17}, {17,26,5}}, eet)
     assert to_gregorian(D.set(date, date: {1,1,1}))        === { {1,1,1}, {17,26,5}, {eet_offset_min/60, eet_name} }
     assert to_gregorian(D.set(date, hour: 0))              === { {2013,3,17}, {0,26,5}, {eet_offset_min/60, eet_name} }
-    assert to_gregorian(D.set(date, timezone: D.timezone(:utc))) === { {2013,3,17}, {15,26,5}, {utc_offset_min/60, utc_name} }
+    assert to_gregorian(D.set(date, timezone: D.timezone(:utc))) === { {2013,3,17}, {17,26,5}, {utc_offset_min/60, utc_name} }
 
-    assert to_gregorian(D.set(date, [date: {1,1,1}, hour: 13, second: 61, timezone: utc]))    === { {1,1,1}, {11,26,59}, {utc_offset_min/60, utc_name} }
-    assert to_gregorian(D.set(date, [date: {-1,-2,-3}, hour: 33, second: 61, timezone: utc])) === { {0,1,1}, {21,26,59}, {utc_offset_min/60, utc_name} }
+    assert to_gregorian(D.set(date, [date: {1,1,1}, hour: 13, second: 61, timezone: utc]))    === { {1,1,1}, {13,26,59}, {utc_offset_min/60, utc_name} }
+    assert to_gregorian(D.set(date, [date: {-1,-2,-3}, hour: 33, second: 61, timezone: utc])) === { {0,1,1}, {23,26,59}, {utc_offset_min/60, utc_name} }
   end
 
   test :compare do

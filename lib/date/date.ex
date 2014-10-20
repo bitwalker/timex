@@ -168,8 +168,7 @@ defmodule Timex.Date do
   @spec local(date :: DateTime.t, tz :: TimezoneInfo.t) :: DateTime.t
   def local(%DateTime{:timezone => tz} = date, localtz) do
     if tz !== localtz do
-      new_date = Timezone.convert(date, localtz)
-      %{new_date | :timezone => localtz}
+      Timezone.convert(date, localtz)
     else
       date
     end
@@ -821,17 +820,11 @@ defmodule Timex.Date do
             %{result | :day => d}
           end
         {:timezone, tz} ->
-          # Only convert timezones if they differ
-          case result.timezone do
-            # Date didn't have a timezone, so use UTC
-            nil       -> %{result | :timezone => timezone(:utc)}
-            origin_tz ->
-              if origin_tz !== tz do
-                converted = Timezone.convert(result, tz)
-                %{converted | :timezone => tz}
-              else
-                result
-              end
+          case tz do
+            %TimezoneInfo{} ->
+              %{result | :timezone => tz}
+            _ ->
+              %{result | :timezone => Timezone.get(tz)}
           end
         {name, val} when name in [:year, :month, :hour, :minute, :second, :ms] ->
           if validate? do
