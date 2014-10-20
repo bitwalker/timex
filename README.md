@@ -55,7 +55,7 @@ Date.local(date)  # convert date to local time zone (CST for our example)
 #=> %DateTime{year: 2013, month: 3, day: 17, hour: 15, minute: 22, second: 23, timezone: ...}
 
 # Let's see what happens if we switch the time zone
-date = Date.set(date, tz: Timezone.get("EST"))
+date = Timezone.convert(date, Timezone.get("EST"))
 DateFormat.format!(date, "{RFC1123}")
 #=> "Sun, 17 Mar 2013 17:22:23 EST"
 
