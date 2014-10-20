@@ -846,26 +846,30 @@ defmodule Timex.Date do
 
   """
   @spec compare(DateTime.t, DateTime.t | :epoch | :zero | :distant_past | :distant_future) :: -1 | 0 | 1
+  @spec compare(DateTime.t, DateTime.t, :years | :months | :weeks | :days | :hours | :mins | :secs | :timestamp) :: -1 | 0 | 1
 
   def compare(date, :epoch),       do: compare(date, epoch())
   def compare(date, :zero),        do: compare(date, zero())
   def compare(_, :distant_past),   do: +1
   def compare(_, :distant_future), do: -1
   def compare(date, date),         do: 0
-  def compare(%DateTime{:timezone => thistz} = this, %DateTime{:timezone => othertz} = other) do
+  def compare(a, b),               do: compare(a, b, :secs)
+  def compare(%DateTime{:timezone => thistz} = this, %DateTime{:timezone => othertz} = other, granularity)
+    when granularity in [:years, :months, :weeks, :days, :hours, :mins, :secs, :timestamp] do
     localized = if thistz !== othertz do
       # Convert `other` to `this`'s timezone
       Timezone.convert(other, thistz)
     else
       other
     end
-    difference = diff(this, localized, :secs)
+    difference = diff(this, localized, granularity)
     cond do
       difference < 0  -> +1
       difference == 0 -> 0
       difference > 0  -> -1
     end
   end
+  def compare(_, _, _), do: {:error, "Invalid comparison granularity."}
 
   @doc """
   Determine if two dates represent the same point in time

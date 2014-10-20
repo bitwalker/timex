@@ -282,6 +282,26 @@ defmodule DateTests do
     assert D.compare(date, :distant_future) === -1
   end
 
+  test :compare_with_granularity do
+    tz1   = Timezone.get(2)
+    tz2   = Timezone.get(-3)
+    date1 = %DateTime{year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz1}
+    date2 = %DateTime{year: 2013, month: 3, day: 18, hour: 8, minute: 44, timezone: tz2}
+    date3 = %DateTime{year: 2013, month: 4, day: 18, hour: 8, minute: 44, second: 10, timezone: tz2}
+    date4 = %DateTime{year: 2013, month: 4, day: 18, hour: 8, minute: 44, second: 23, timezone: tz2}
+
+    assert D.compare(date1, date2, :years) === 0
+    assert D.compare(date1, date2, :months) === 0
+    assert D.compare(date1, date3, :months) === -1
+    assert D.compare(date3, date1, :months) === +1
+    assert D.compare(date1, date3, :weeks) === -1 
+    assert D.compare(date1, date2, :days) === 0
+    assert D.compare(date1, date3, :days) === -1
+    assert D.compare(date1, date2, :hours) === 0
+    assert D.compare(date3, date4, :mins) === 0
+    assert D.compare(date3, date4, :secs) === -1
+  end
+
   test :diff do
     epoch = D.epoch()
     date1 = D.from({1971,1,1})
