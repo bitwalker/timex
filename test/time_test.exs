@@ -51,4 +51,19 @@ defmodule TimeTests do
     assert Time.to_secs(13, :hours) == 13 * 3600
     assert Time.to_secs({1,2,3}, :hms) == 3600 + 2 * 60 + 3
   end
+
+  test :elapsed do
+    now = {1362,568902,363960}
+    time = {1362,568903,363960}
+    time_in_millis = Time.to_msecs(time)
+
+    assert Time.elapsed(time, now, :usecs) == 1000000
+    assert Time.elapsed(time, now, :msecs) == 1000
+    assert Time.elapsed(time, now, :secs) == 1
+    assert Time.elapsed(time, now, :mins) == 0.016666666666666666
+    assert Time.elapsed(time, now, :hours) == 0.0002777777777777778
+    assert_raise FunctionClauseError, fn ->
+      Time.elapsed(time_in_millis, :msecs)
+    end
+  end
 end
