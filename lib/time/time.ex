@@ -222,8 +222,7 @@ defmodule Timex.Time do
   end
 
   def elapsed(timestamp = {_,_,_}, reference_time = {_,_,_}, type) do
-    diff = diff(timestamp, reference_time)
-    convert(diff, type)
+    diff(reference_time, timestamp) |> convert(type)
   end
 
   @doc """
