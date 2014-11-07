@@ -205,7 +205,8 @@ defmodule Timex.Time do
 
   @doc """
   Time interval between timestamp and now. If timestamp is after now in time, the
-  return value will be negative.
+  return value will be negative. Timestamp must be in format { megasecs, seconds,
+  microseconds }.
 
   The second argument is an atom indicating the type of time units to return:
   microseconds (:usec), milliseconds (:msec), seconds (:sec), minutes (:min),
@@ -216,13 +217,19 @@ defmodule Timex.Time do
   """
   def elapsed(timestamp, type \\ :timestamp)
 
-  def elapsed(timestamp, type) do
-    diff(now, timestamp, type)
+  def elapsed(timestamp = {_,_,_}, type) do
+    elapsed(timestamp, now, type)
+  end
+
+  def elapsed(timestamp = {_,_,_}, reference_time = {_,_,_}, type) do
+    diff = diff(timestamp, reference_time)
+    convert(diff, type)
   end
 
   @doc """
   Time interval between two timestamps. If the first timestamp comes before the
-  second one in time, the return value will be negative.
+  second one in time, the return value will be negative. Timestamp must be in format
+  { megasecs, seconds, microseconds }.
 
   The third argument is an atom indicating the type of time units to return:
   microseconds (:usec), milliseconds (:msec), seconds (:sec), minutes (:min),
@@ -238,7 +245,7 @@ defmodule Timex.Time do
     {mega1 - mega2, secs1 - secs2, micro1 - micro2}
   end
 
-  def diff(t1, t2, type) do
+  def diff(t1 = {_,_,_}, t2 = {_,_,_}, type) do
     convert(diff(t1, t2), type)
   end
 
