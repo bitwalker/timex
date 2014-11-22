@@ -2,6 +2,21 @@ defmodule TimeTests do
   use ExUnit.Case, async: true
   use Timex
 
+  test :to_12hour_clock do
+    assert Time.to_12hour_clock(0) == {12, :am}
+    assert Time.to_12hour_clock(2) == {2, :am}
+    assert Time.to_12hour_clock(12) == {12, :pm}
+    assert Time.to_12hour_clock(17) == {5, :pm}
+    assert Time.to_12hour_clock(24) == {12, :am}
+  end
+
+  test :to_24hour_clock do
+    assert Time.to_24hour_clock(12, :am) == 0
+    assert Time.to_24hour_clock(3, :am) == 3
+    assert Time.to_24hour_clock(12, :pm) == 12
+    assert Time.to_24hour_clock(1, :pm) == 13
+  end
+
   test :diff do
     timestamp1 = {1362,568903,363960}
     timestamp2 = {1362,568958,951099}
