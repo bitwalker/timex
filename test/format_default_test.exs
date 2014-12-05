@@ -184,11 +184,11 @@ defmodule DateFormatTest.FormatDefault do
     assert { :ok, "12:03:04" }    = format(date, "{h12}:{0m}:{0s}")
     assert { :ok, "12:03:04 PM" } = format(date, "{h12}:{0m}:{0s} {AM}")
     assert { :ok, "pm 12:3:4" }   = format(date, "{am} {h24}:{m}:{s}")
-    assert { :ok, "pm 12" }       = format(date_midnight, "{am} {h12}")
-    assert { :ok, "PM 00" }       = format(date_midnight, "{AM} {0h24}")
+    assert { :ok, "am 12" }       = format(date_midnight, "{am} {h12}")
+    assert { :ok, "AM 00" }       = format(date_midnight, "{AM} {0h24}")
 
-    assert { :ok, "pm" } = format(date_midnight, "{0am}")
-    assert { :ok, "PM" } = format(date_midnight, "{_AM}")
+    assert { :ok, "am" } = format(date_midnight, "{0am}")
+    assert { :ok, "AM" } = format(date_midnight, "{_AM}")
 
     assert { :ok, "1376827384" }  = format(date, "{s-epoch}")
     assert { :ok, "01376827384" }  = format(date, "{0s-epoch}")
