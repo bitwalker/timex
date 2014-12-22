@@ -158,7 +158,7 @@ defmodule Timex.Timezone.Local do
       true ->
         match = file
         |> File.stream!
-        |> Stream.filter fn line -> Regex.match?(~r/(^ZONE=)|(^TIMEZONE=)/, line) end
+        |> Stream.filter(fn line -> Regex.match?(~r/(^ZONE=)|(^TIMEZONE=)/, line) end)
         |> Enum.to_list
         |> List.first
         case match do
