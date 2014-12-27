@@ -23,15 +23,15 @@ defmodule DateTests do
 
   test :local do
     local     = D.local
-    %DateTime{year: y, month: m, day: d, hour: h, minute: min, second: s} = local
-    localdate = D.from({{y,m,d}, {h,min,s}}, :local)
+    %DateTime{year: y, month: m, day: d, hour: h, minute: min, second: s, ms: ms} = local
+    localdate = D.from({{y,m,d}, {h,min,s,ms}}, :local)
     assert local === D.local(localdate)
   end
 
   test :universal do
     uni     = D.universal()
-    %DateTime{year: y, month: m, day: d, hour: h, minute: min, second: s} = uni
-    unidate = D.from({{y,m,d}, {h,min,s}})
+    %DateTime{year: y, month: m, day: d, hour: h, minute: min, second: s, ms: ms} = uni
+    unidate = D.from({{y,m,d}, {h,min,s,ms}})
     assert uni === D.universal(unidate)
   end
 

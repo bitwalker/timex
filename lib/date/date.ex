@@ -90,7 +90,7 @@ defmodule Timex.Date do
   """
   @spec now() :: DateTime.t
   def now do
-    construct(:calendar.universal_time(), timezone(:utc))
+    construct(calendar_universal_time(), timezone(:utc))
   end
 
   @doc """
@@ -108,7 +108,7 @@ defmodule Timex.Date do
   def now(tz) when is_binary(tz) do
     case timezone(tz) do
       %TimezoneInfo{} = tzinfo ->
-        construct(:calendar.universal_time(), timezone(:utc))
+        construct(calendar_universal_time(), timezone(:utc))
         |> set(timezone: tzinfo)
       {:error, _} = error ->
         error
@@ -142,7 +142,7 @@ defmodule Timex.Date do
 
   """
   @spec local() :: DateTime.t
-  def local, do: construct(:calendar.local_time(), timezone(:local))
+  def local, do: construct(calendar_local_time(), timezone(:local))
 
   @doc """
   Convert a date to your local timezone.
@@ -180,7 +180,7 @@ defmodule Timex.Date do
   See also `local/0`.
   """
   @spec universal() :: DateTime.t
-  def universal, do: construct(:calendar.universal_time(), timezone(:utc))
+  def universal, do: construct(calendar_universal_time(), timezone(:utc))
 
   @doc """
   Convert a date to UTC
@@ -263,14 +263,19 @@ defmodule Timex.Date do
 
   def from({_,_,_} = date),                        do: from(date, :utc)
   def from({{_,_,_},{_,_,_}} = datetime),          do: from(datetime, :utc)
+  def from({{_,_,_},{_,_,_,_}} = datetime),        do: from(datetime, :utc)
   def from({_,_,_} = date, :utc),                  do: construct({date, {0,0,0}}, timezone(:utc))
   def from({{_,_,_},{_,_,_}} = datetime, :utc),    do: construct(datetime, timezone(:utc))
+  def from({{_,_,_},{_,_,_,_}} = datetime, :utc),  do: construct(datetime, timezone(:utc))
   def from({_,_,_} = date, :local),                do: from({date, {0,0,0}}, timezone(:local))
   def from({{_,_,_},{_,_,_}} = datetime, :local),  do: from(datetime, timezone(:local))
+  def from({{_,_,_},{_,_,_,_}} = datetime, :local),do: from(datetime, timezone(:local))
   def from({_,_,_} = date, %TimezoneInfo{} = tz),  do: from({date, {0,0,0}}, tz)
   def from({{_,_,_},{_,_,_}} = datetime, %TimezoneInfo{} = tz), do: construct(datetime, tz)
+  def from({{_,_,_},{_,_,_,_}} = datetime, %TimezoneInfo{} = tz), do: construct(datetime, tz)
   def from({_,_,_} = date, tz) when is_binary(tz), do: from({date, {0, 0, 0}}, tz)
-  def from({{_,_,_},{_,_,_}} = datetime, tz) when is_binary(tz) do
+  def from({{_,_,_}=d,{h,m,s}}, tz) when is_binary(tz), do: from({d,{h,m,s,0}},tz)
+  def from({{_,_,_},{_,_,_,_}} = datetime, tz) when is_binary(tz) do
     case timezone(tz) do
       %TimezoneInfo{} = tzinfo ->
         construct(datetime, tzinfo)
@@ -300,8 +305,16 @@ defmodule Timex.Date do
   @spec from(number, :secs | :days, :epoch | :zero)  :: DateTime.t
   def from(value, type, reference \\ :epoch)
 
-  def from({mega, sec, _}, :timestamp, :epoch), do: from(mega * @million + sec, :secs)
-  def from({mega, sec, _}, :timestamp, :zero),  do: from(mega * @million + sec, :secs, :zero)
+  def from({mega, sec, us}, :timestamp, :epoch), do: from((mega * @million + sec) * @million + us, :us)
+  def from({mega, sec, us}, :timestamp, :zero) do
+    from((mega * @million + sec) * @million + us, :us, :zero)
+  end
+  def from(us, :us,   :epoch) do
+    construct(calendar_gregorian_microseconds_to_datetime(us, epoch(:secs)), timezone(:utc))
+  end  
+  def from(us, :us,   :zero) do
+    construct(calendar_gregorian_microseconds_to_datetime(us, 0), timezone(:utc))
+  end  
   def from(sec, :secs, :epoch) do
     construct(:calendar.gregorian_seconds_to_datetime(trunc(sec) + epoch(:secs)), timezone(:utc))
   end
@@ -1061,20 +1074,25 @@ defmodule Timex.Date do
 
   # Primary constructor for DateTime objects
   defp construct({_,_,_} = date, {_,_,_} = time, nil), do: construct(date, time, timezone(:utc))
-  defp construct({y, m, d}, {h, min, sec}, %TimezoneInfo{} = tz) do
+  defp construct({_,_,_} = date, {_,_,_,_} = time, nil), do: construct(date, time, timezone(:utc))
+  defp construct(date, {h, min, sec}, %TimezoneInfo{} = tz), do: construct(date, {h, min, sec, 0}, tz)
+  defp construct({y, m, d}, {h, min, sec, ms}, %TimezoneInfo{} = tz) do
     %DateTime{
       year: y, month: m, day: d,
       hour: h, minute: min, second: sec,
+      ms: ms,
       timezone: tz
     }
   end
-  defp construct({y, m, d}, {h, min, sec}, {_, name}) do
+  defp construct({y, m, d}, {h, min, sec, ms}, {_, name}) do
     %DateTime{
       year: y, month: m, day: d,
       hour: h, minute: min, second: sec,
+      ms: ms,
       timezone: Timezone.get(name)
     }
   end
+  defp construct(date, {h, min, sec}, tz), do: construct(date, {h, min, sec, 0}, tz)
   def construct({date, time}, tz), do: construct(date, time, tz)
 
   defp validate({year, month, day}) do
@@ -1095,6 +1113,25 @@ defmodule Timex.Date do
       0     -> 12
       other -> other
     end
+  end
+
+  defp calendar_universal_time() do
+    {_, _, us} = ts = :os.timestamp
+    {d,{h,min,sec}} = :calendar.now_to_universal_time(ts)
+    {d,{h,min,sec,round(us/1000)}}
+  end  
+
+  defp calendar_local_time() do
+    {_, _, us} = ts = :os.timestamp
+    {d,{h,min,sec}} = :calendar.now_to_local_time(ts)
+    {d,{h,min,sec,round(us/1000)}}
+  end
+
+  defp calendar_gregorian_microseconds_to_datetime(us, addseconds) do
+    sec = div(us, @million)
+    u = rem(us, @million)
+    {d,{h,m,s}} = :calendar.gregorian_seconds_to_datetime(sec + addseconds)
+    {d,{h,m,s,round(u/1000)}}
   end
 
 end
