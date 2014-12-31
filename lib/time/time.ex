@@ -43,7 +43,7 @@ defmodule Timex.Time do
       hour when hour < 12       -> {hour, :am}
       hour when hour === 12     -> {12, :pm}
       hour when hour > 12       -> {hour - 12, :pm}
-      
+
     end
   end
   @doc """
@@ -265,7 +265,7 @@ defmodule Timex.Time do
   end
 
   defp measure_result({micro, ret}) do
-    { to_timestamp(micro, :usec), ret }
+    { to_timestamp(micro, :usecs), ret }
   end
 
   defp normalize({mega, sec, micro}) do
