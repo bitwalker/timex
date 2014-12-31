@@ -53,7 +53,7 @@ defmodule Timex.Time do
       hour when hour < 12       -> {hour, :am}
       hour when hour === 12     -> {12, :pm}
       hour when hour > 12       -> {hour - 12, :pm}
-      
+
     end
   end
   @doc """

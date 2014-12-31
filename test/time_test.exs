@@ -28,6 +28,17 @@ defmodule TimeTests do
     assert Time.diff(timestamp2, timestamp1, :hours) == 55.587139 / 3600
   end
 
+  test :measure do
+    {{_, _, _}, result} = Time.measure(fn -> :nothing end)
+    assert result == :nothing
+
+    {{_, _, _}, result} = Time.measure(fn x -> x end, [:nothing])
+    assert result == :nothing
+
+    {{_, _, _}, result} = Time.measure(__MODULE__, :something_to_measure, [:nothing])
+    assert result == :nothing
+  end
+
   test :convert do
     timestamp = {1362,568903,363960}
     assert Time.convert(timestamp, :usecs) == 1362568903363960
@@ -99,4 +110,6 @@ defmodule TimeTests do
     assert { {mega, secs, micro}, ^reversed_list } = Time.measure(fn -> Enum.reverse(1..100) end)
     assert mega + secs + micro > 0
   end
+
+  def something_to_measure(x), do: x
 end
