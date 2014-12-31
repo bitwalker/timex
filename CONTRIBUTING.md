@@ -2,7 +2,7 @@
 
 I've thrown together some guidelines around how to contribute to timex so it's smooth
 sailing for everyone. Please take some time and read through this before creating
-a pull request. Your contributions are hugely important to the success of timex, 
+a pull request. Your contributions are hugely important to the success of timex,
 and I appreciate all your help!
 
 - [Issues Tracker](#issues-tracker)
@@ -21,7 +21,7 @@ I use the issues tracker to do the following things:
   create issues that fit that definition, and I'll give them the RFC label.
 * **[bug reports](#bug-reports)** - Anything you encounter with timex that is broken or
   is generally bad behavior, create an issue for it, and I'll label it appropriately.
-* **[submitting pull requests](#pull-requests)** - If you found and fixed a bug in exrm,
+* **[submitting pull requests](#pull-requests)** - If you found and fixed a bug in timex,
   please submit a PR with your changes! See the link for guidelines on PRs.
 
 All issues are given a difficulty classification between `starter` and `advanced`. This
@@ -58,7 +58,7 @@ Guidelines for bug reports:
 
 Please try to be as detailed as possible in your report. Include information about
 your operating system, your Erlang and Elixir versions (i.e. 17.1.2, or 1.0.2).
-Provide steps to reproduce the issue as well as the outcome you were expecting. All 
+Provide steps to reproduce the issue as well as the outcome you were expecting. All
 these details will help other developers to find and fix the bug.
 
 Example:
@@ -138,8 +138,8 @@ With tests running and passing, and your [documentation](#contributing-documenta
 
 Please make sure all modules are well documented with a `@moduledoc`, any relevant
 `@typedoc`s and all public functions documented with `@doc` and `@spec`. Use examples
-where possible (especially in doctest format if it's possible). There may be legacy 
-code still in there without these, so if you see them, feel free to make a pull request 
+where possible (especially in doctest format if it's possible). There may be legacy
+code still in there without these, so if you see them, feel free to make a pull request
 to add more docs!
 
 Example:
@@ -181,11 +181,11 @@ in order to craft an excellent pull request:
 
    ```bash
    # Clone your fork of the repo into the current directory
-   git clone https://github.com/<your-username>/exrm
+   git clone https://github.com/<your-username>/timex
    # Navigate to the newly cloned directory
-   cd exrm
+   cd timex
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream https://github.com/bitwalker/exrm
+   git remote add upstream https://github.com/bitwalker/timex
    ```
 
 2. If you cloned a while ago, get the latest changes from upstream:
