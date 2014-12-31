@@ -252,14 +252,32 @@ defmodule Timex.Time do
     convert(diff(t1, t2), type)
   end
 
+  @doc """
+  Evaluates fun() and measures the elapsed time as reported by :os.timestamp/0. Returns {time, value}, where time is { megasecs, seconds, microsecs } and value is what is returned from the function evaluation.
+
+  ## Example
+
+    iex> Time.measure(fn -> 2 * 2 end)
+    {{0, 0, 10}, 4}
+
+  """
+  @spec measure((() -> any)) :: { Date.timestamp, any }
   def measure(fun) do
     measure_result(:timer.tc(fun))
   end
 
+  @doc """
+  Evaluates apply(fun, args). Otherwise works like measure/1
+  """
+  @spec measure(fun, [any]) :: { Date.timestamp, any }
   def measure(fun, args) do
     measure_result(:timer.tc(fun, args))
   end
 
+  @doc """
+  Evaluates apply(module, fun, args). Otherwise works like measure/1
+  """
+  @spec measure(module, atom, [any]) :: { Date.timestamp, any }
   def measure(module, fun, args) do
     measure_result(:timer.tc(module, fun, args))
   end
