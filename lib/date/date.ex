@@ -853,9 +853,9 @@ defmodule Timex.Date do
   @doc """
   Compare two dates returning one of the following values:
 
-   * `-1` -- `this` comes after `other`
-   * `0`  -- Both arguments represent the same date when coalesced to the same timezone.
-   * `1`  -- `this` comes before `other`
+   * `-1` -- the first date comes before the second one
+   * `0`  -- both arguments represent the same date when coalesced to the same timezone.
+   * `1`  -- the first date comes after the second one
 
   """
   @spec compare(DateTime.t, DateTime.t | :epoch | :zero | :distant_past | :distant_future) :: -1 | 0 | 1
