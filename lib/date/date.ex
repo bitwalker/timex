@@ -387,9 +387,23 @@ defmodule Timex.Date do
   def to_secs(date, reference \\ :epoch)
 
   def to_secs(date, :epoch), do: to_secs(date, :zero) - epoch(:secs)
-  def to_secs(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => s}, :zero) do
+
+  def to_secs(date, :zero) do
+    offset = Timex.Timezone.diff(date,timezone(:utc))
+    case offset do
+      0 -> utc_to_secs(date)
+      _ -> utc_to_secs(date) - ( 60 * offset )
+    end
+  end
+
+  # def to_secs(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => s}, :zero) do
+  #   :calendar.datetime_to_gregorian_seconds({{y, m, d}, {h, min, s}})
+  # end
+
+  defp utc_to_secs(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => s}) do
     :calendar.datetime_to_gregorian_seconds({{y, m, d}, {h, min, s}})
   end
+
 
   @doc """
   Convert the date to an integer number of days since Epoch or year 0.
