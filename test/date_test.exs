@@ -147,6 +147,10 @@ defmodule DateTests do
 
     assert D.to_secs(D.epoch()) === 0
     assert D.to_secs(D.epoch(), :zero) === 62167219200
+
+    date = D.from({2014,11,17}, "CST")
+    ndate = D.from({2014,11,17})
+    refute D.to_secs(date) === D.to_secs(ndate)
   end
 
   test :to_days do
