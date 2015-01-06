@@ -881,15 +881,9 @@ defmodule Timex.Date do
   def compare(_, :distant_future), do: -1
   def compare(date, date),         do: 0
   def compare(a, b),               do: compare(a, b, :secs)
-  def compare(%DateTime{:timezone => thistz} = this, %DateTime{:timezone => othertz} = other, granularity)
+  def compare( this, other, granularity)
     when granularity in [:years, :months, :weeks, :days, :hours, :mins, :secs, :timestamp] do
-    localized = if thistz !== othertz do
-      # Convert `other` to `this`'s timezone
-      Timezone.convert(other, thistz)
-    else
-      other
-    end
-    difference = diff(this, localized, granularity)
+    difference = diff(this, other, granularity)
     cond do
       difference < 0  -> +1
       difference == 0 -> 0
