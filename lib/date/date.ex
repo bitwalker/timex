@@ -392,7 +392,7 @@ defmodule Timex.Date do
     offset = Timex.Timezone.diff(date,timezone(:utc))
     case offset do
       0 -> utc_to_secs(date)
-      _ -> utc_to_secs(date) - ( 60 * offset )
+      _ -> utc_to_secs(date) + ( 60 * offset )
     end
   end
 
