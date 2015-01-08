@@ -871,6 +871,17 @@ defmodule Timex.Date do
    * `0`  -- both arguments represent the same date when coalesced to the same timezone.
    * `1`  -- the first date comes after the second one
 
+  You can optionality specify a granularity of any of
+
+  :years :months :weeks :days :hours :mins :secs :timestamp 
+
+  and the dates will be compared with the cooresponding accuracy. 
+  The default granularity is :secs.
+
+  ## Examples
+
+    Date.compare(date1,date2,:years)
+
   """
   @spec compare(DateTime.t, DateTime.t | :epoch | :zero | :distant_past | :distant_future) :: -1 | 0 | 1
   @spec compare(DateTime.t, DateTime.t, :years | :months | :weeks | :days | :hours | :mins | :secs | :timestamp) :: -1 | 0 | 1
@@ -901,6 +912,11 @@ defmodule Timex.Date do
   @doc """
   Calculate time interval between two dates. If the second date comes after the
   first one in time, return value will be positive; and negative otherwise.
+  You must specify a granularity of any of
+
+  :years :months :weeks :days :hours :mins :secs :timestamp 
+
+  and the result will be an integer value of those units or a timestamp. 
   """
   @spec diff(DateTime.t, DateTime.t, :timestamp) :: timestamp
   @spec diff(DateTime.t, DateTime.t, :secs | :days | :weeks | :months | :years) :: integer
