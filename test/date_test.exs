@@ -374,6 +374,17 @@ defmodule DateTests do
     assert %DateTime{year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23} = shift(datetime, secs: -24*3600*(365*2+1))   # +1 day for leap year 2012
   end
 
+  test :shift_seconds_with_timezone do
+    utc = Timezone.get(:utc)
+    cst = Timezone.get("America/Chicago")
+
+    date1 = %DateTime{year: 2013, month: 3, day: 18, hour: 1, minute: 44, timezone: utc }
+    date2 = %DateTime{year: 2013, month: 3, day: 18, hour: 8, minute: 44, timezone: cst }
+    assert %DateTime{minute: 49 , second: 0} = shift(date1, secs: 5*60 )
+    assert %DateTime{minute: 49 , second: 0} = shift(date2, secs: 5*60 )
+
+  end 
+
   test :shift_minutes do
     date = {2013,3,5}
     time = {23,23,23}

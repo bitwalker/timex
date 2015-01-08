@@ -1,5 +1,7 @@
-docs/
+doc/
+doc
 deps/
 ebin/
 _build/
 .exenv-version
+mix.lock
