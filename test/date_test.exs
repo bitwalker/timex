@@ -380,8 +380,9 @@ defmodule DateTests do
 
     date1 = %DateTime{year: 2013, month: 3, day: 18, hour: 1, minute: 44, timezone: utc }
     date2 = %DateTime{year: 2013, month: 3, day: 18, hour: 8, minute: 44, timezone: cst }
-    assert %DateTime{minute: 49 , second: 0} = shift(date1, secs: 5*60 )
-    assert %DateTime{minute: 49 , second: 0} = shift(date2, secs: 5*60 )
+    assert %DateTime{minute: 49 , second: 0} = D.shift(date1, secs: 5*60 )
+    assert %DateTime{minute: 49 , second: 0} = D.shift(date2, secs: 5*60 )
+
 
   end 
 
@@ -405,6 +406,17 @@ defmodule DateTests do
     assert %DateTime{month: 3, day: 4, hour: 23, minute: 59, second: 23} = shift(datetime, mins: -23*60-24)
     assert %DateTime{year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23} = shift(datetime, mins: -60*24*(365*2 + 1))
   end
+
+  test :shift_minutes_with_timezone do
+    utc = Timezone.get(:utc)
+    cst = Timezone.get("America/Chicago")
+    
+    chicago_noon = %Timex.DateTime{calendar: :gregorian, day: 24, hour: 12, minute: 0, month: 2, ms: 0, second: 0,timezone: cst , year: 2014}
+    utc_dinner = %Timex.DateTime{calendar: :gregorian, day: 24, hour: 18, minute: 0, month: 2, ms: 0, second: 0,timezone: utc , year: 2014}
+    
+    assert %DateTime{ hour: 18, minute: 0 } = D.shift(chicago_noon, mins: 360 )
+    assert %DateTime{ hour: 12, minute: 0} = D.shift(utc_dinner, mins: -360 )
+  end 
 
   test :shift_hours do
     date = {2013,3,5}

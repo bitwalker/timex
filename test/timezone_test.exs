@@ -54,8 +54,10 @@ defmodule TimezoneTests do
     gmt_plus_two    = Timezone.get(2)
     gmt_minus_three = Timezone.get(-3)
 
+    chicago_noon = %Timex.DateTime{calendar: :gregorian, day: 24, hour: 12, minute: 0, month: 2, ms: 0, second: 0,timezone: cst , year: 2014}
    
-    dinnertime = %DateTime{year: 2014, month: 2, day: 24, hour: 12, timezone: cst} |> Timezone.convert(utc) 
+    dinnertime = Timezone.convert(chicago_noon,utc) 
+
     assert %DateTime{hour: 18, timezone: utc} = dinnertime
     # If it's noon in CST, then it's 6'oclock in the evening in UTC
     assert %DateTime{hour: 18} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, timezone: cst} |> Timezone.convert(utc)

@@ -1022,7 +1022,8 @@ defmodule Timex.Date do
       :hours  -> value * 3600
     end
     shifted = from(secs, :secs)
-    %{shifted | :timezone => tz}
+    # convert back to original tz 
+    Timezone.convert(shifted,tz)
   end
   def shift(%DateTime{:hour => h, :minute => m, :second => s, :timezone => tz} = date, [days: value]) do
     days = to_days(date)
