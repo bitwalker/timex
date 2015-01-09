@@ -2,29 +2,61 @@ defmodule Timex.Time do
 
   @million 1_000_000
 
+  @type units :: :usecs | :msecs | :secs | :mins | :hours | :days | :weeks | :hms
+  @type quantity :: float
+
+
   Enum.each [usecs: @million, msecs: 1_000], fn {type, coef} ->
+    @spec to_usecs(quantity, unquote(type)) :: quantity
     def to_usecs(value, unquote(type)), do: value * @million / unquote(coef)
+
+    @spec to_msecs(quantity, unquote(type)) :: quantity
     def to_msecs(value, unquote(type)), do: value * 1000 / unquote(coef)
+
+    @spec to_secs(quantity, unquote(type)) :: quantity
     def to_secs(value, unquote(type)),  do: value / unquote(coef)
+
+    @spec to_mins(quantity, unquote(type)) :: quantity
     def to_mins(value, unquote(type)),  do: value / unquote(coef) / 60
+
+    @spec to_hours(quantity, unquote(type)) :: quantity
     def to_hours(value, unquote(type)), do: value / unquote(coef) / 3600
+
+    @spec to_days(quantity, unquote(type)) :: quantity
     def to_days(value, unquote(type)),  do: value / unquote(coef) / (3600 * 24)
+
+    @spec to_weeks(quantity, unquote(type)) :: quantity
     def to_weeks(value, unquote(type)), do: value / unquote(coef) / (3600 * 24 * 7)
   end
 
   Enum.each [secs: 1, mins: 60, hours: 3600, days: 3600 * 24, weeks: 3600 * 24 * 7], fn {type, coef} ->
+    @spec unquote(type)(quantity) :: quantity
     def unquote(type)(value), do: value * unquote(coef)
+
+    @spec to_usecs(quantity, unquote(type)) :: quantity
     def to_usecs(value, unquote(type)), do: value * unquote(coef) * @million
+
+    @spec to_msecs(quantity, unquote(type)) :: quantity
     def to_msecs(value, unquote(type)), do: value * unquote(coef) * 1000
+
+    @spec to_secs(quantity, unquote(type)) :: quantity
     def to_secs(value, unquote(type)),  do: value * unquote(coef)
+
+    @spec to_mins(quantity, unquote(type)) :: quantity
     def to_mins(value, unquote(type)),  do: value * unquote(coef) / 60
+
+    @spec to_hours(quantity, unquote(type)) :: quantity
     def to_hours(value, unquote(type)), do: value * unquote(coef) / 3600
+
+    @spec to_days(quantity, unquote(type)) :: quantity
     def to_days(value, unquote(type)),  do: value * unquote(coef) / (3600 * 24)
+
+    @spec to_weeks(quantity, unquote(type)) :: quantity
     def to_weeks(value, unquote(type)), do: value * unquote(coef) / (3600 * 24 * 7)
   end
 
-
   Enum.each [:to_usecs, :to_msecs, :to_secs, :to_mins, :to_hours, :to_days, :to_weeks], fn name ->
+    @spec unquote(name)({quantity, quantity, quantity}, :hms) :: quantity
     def unquote(name)({hours, minutes, seconds}, :hms), do: unquote(name)(hours * 3600 + minutes * 60 + seconds, :secs)
   end
 
@@ -46,6 +78,7 @@ defmodule Timex.Time do
 
     end
   end
+
   @doc """
   Converts an hour between 1..12 in either am or pm, to value between 0..24
 
@@ -84,12 +117,25 @@ defmodule Timex.Time do
     { mega, sec, micro }
   end
 
+  @spec to_usecs({quantity, quantity, quantity}) :: quantity
   def to_usecs({mega, sec, micro}), do: (mega * @million + sec) * @million + micro
+
+  @spec to_msecs({quantity, quantity, quantity}) :: quantity
   def to_msecs({mega, sec, micro}), do: (mega * @million + sec) * 1000 + micro / 1000
+
+  @spec to_secs({quantity, quantity, quantity}) :: quantity
   def to_secs({mega, sec, micro}),  do: mega * @million + sec + micro / @million
+
+  @spec to_mins({quantity, quantity, quantity}) :: quantity
   def to_mins(timestamp),           do: to_secs(timestamp) / 60
+
+  @spec to_hours({quantity, quantity, quantity}) :: quantity
   def to_hours(timestamp),          do: to_secs(timestamp) / 3600
+
+  @spec to_days({quantity, quantity, quantity}) :: quantity
   def to_days(timestamp),           do: to_secs(timestamp) / (3600 * 24)
+
+  @spec to_weeks({quantity, quantity, quantity}) :: quantity
   def to_weeks(timestamp),          do: to_secs(timestamp) / (3600 * 24 * 7)
 
   def to_timestamp(value, :usecs) do
