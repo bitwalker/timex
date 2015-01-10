@@ -387,9 +387,23 @@ defmodule Timex.Date do
   def to_secs(date, reference \\ :epoch)
 
   def to_secs(date, :epoch), do: to_secs(date, :zero) - epoch(:secs)
-  def to_secs(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => s}, :zero) do
+
+  def to_secs(date, :zero) do
+    offset = Timex.Timezone.diff(date,timezone(:utc))
+    case offset do
+      0 -> utc_to_secs(date)
+      _ -> utc_to_secs(date) + ( 60 * offset )
+    end
+  end
+
+  # def to_secs(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => s}, :zero) do
+  #   :calendar.datetime_to_gregorian_seconds({{y, m, d}, {h, min, s}})
+  # end
+
+  defp utc_to_secs(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => s}) do
     :calendar.datetime_to_gregorian_seconds({{y, m, d}, {h, min, s}})
   end
+
 
   @doc """
   Convert the date to an integer number of days since Epoch or year 0.
@@ -857,6 +871,17 @@ defmodule Timex.Date do
    * `0`  -- both arguments represent the same date when coalesced to the same timezone.
    * `1`  -- the first date comes after the second one
 
+  You can optionality specify a granularity of any of
+
+  :years :months :weeks :days :hours :mins :secs :timestamp 
+
+  and the dates will be compared with the cooresponding accuracy. 
+  The default granularity is :secs.
+
+  ## Examples
+
+    Date.compare(date1,date2,:years)
+
   """
   @spec compare(DateTime.t, DateTime.t | :epoch | :zero | :distant_past | :distant_future) :: -1 | 0 | 1
   @spec compare(DateTime.t, DateTime.t, :years | :months | :weeks | :days | :hours | :mins | :secs | :timestamp) :: -1 | 0 | 1
@@ -867,15 +892,9 @@ defmodule Timex.Date do
   def compare(_, :distant_future), do: -1
   def compare(date, date),         do: 0
   def compare(a, b),               do: compare(a, b, :secs)
-  def compare(%DateTime{:timezone => thistz} = this, %DateTime{:timezone => othertz} = other, granularity)
+  def compare( this, other, granularity)
     when granularity in [:years, :months, :weeks, :days, :hours, :mins, :secs, :timestamp] do
-    localized = if thistz !== othertz do
-      # Convert `other` to `this`'s timezone
-      Timezone.convert(other, thistz)
-    else
-      other
-    end
-    difference = diff(this, localized, granularity)
+    difference = diff(this, other, granularity)
     cond do
       difference < 0  -> +1
       difference == 0 -> 0
@@ -893,6 +912,11 @@ defmodule Timex.Date do
   @doc """
   Calculate time interval between two dates. If the second date comes after the
   first one in time, return value will be positive; and negative otherwise.
+  You must specify a granularity of any of
+
+  :years :months :weeks :days :hours :mins :secs :timestamp 
+
+  and the result will be an integer value of those units or a timestamp. 
   """
   @spec diff(DateTime.t, DateTime.t, :timestamp) :: timestamp
   @spec diff(DateTime.t, DateTime.t, :secs | :days | :weeks | :months | :years) :: integer
@@ -998,7 +1022,8 @@ defmodule Timex.Date do
       :hours  -> value * 3600
     end
     shifted = from(secs, :secs)
-    %{shifted | :timezone => tz}
+    # convert back to original tz 
+    Timezone.convert(shifted,tz)
   end
   def shift(%DateTime{:hour => h, :minute => m, :second => s, :timezone => tz} = date, [days: value]) do
     days = to_days(date)

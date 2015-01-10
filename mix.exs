@@ -7,7 +7,7 @@ defmodule Timex.Mixfile do
       elixir: "~> 1.0.0",
       description: "A date/time library for Elixir",
       package: package,
-      deps: [] ]
+      deps: deps ]
 
   end
   def application, do: []
@@ -18,4 +18,10 @@ defmodule Timex.Mixfile do
       licenses: ["MIT"],
       links: %{ "GitHub": "https://github.com/bitwalker/timex" } ]
   end
+
+  def deps do 
+  [{:earmark, "~> 0.1", only: :dev},
+     {:ex_doc, "~> 0.5", only: :dev}]
+  end 
+
 end
