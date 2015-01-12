@@ -147,7 +147,7 @@ defmodule Timex.Time do
   @doc """
   Return a timestamp representing a time lapse of length 0.
 
-    Time.convert(Time.zero, :sec)
+    Time.convert(Time.zero, :secs)
     #=> 0
 
   Can be useful for operations on collections of timestamps. For instance,
@@ -161,8 +161,8 @@ defmodule Timex.Time do
   Convert timestamp in the form { megasecs, seconds, microsecs } to the
   specified time units.
 
-  Supported units: microseconds (:usec), milliseconds (:msec), seconds (:sec),
-  minutes (:min), hours (:hour), days (:day), or weeks (:week).
+  Supported units: microseconds (:usecs), milliseconds (:msecs), seconds (:secs),
+  minutes (:mins), hours (:hours), days (:days), or weeks (:weeks).
   """
   def convert(timestamp, type \\ :timestamp)
   def convert(timestamp, :timestamp), do: timestamp
@@ -213,8 +213,8 @@ defmodule Timex.Time do
   microseconds }.
 
   The second argument is an atom indicating the type of time units to return:
-  microseconds (:usec), milliseconds (:msec), seconds (:sec), minutes (:min),
-  or hours (:hour).
+  microseconds (:usecs), milliseconds (:msecs), seconds (:secs), minutes (:mins),
+  or hours (:hours).
 
   When the second argument is omitted, the return value's format is { megasecs,
   seconds, microsecs }.
@@ -235,8 +235,8 @@ defmodule Timex.Time do
   { megasecs, seconds, microseconds }.
 
   The third argument is an atom indicating the type of time units to return:
-  microseconds (:usec), milliseconds (:msec), seconds (:sec), minutes (:min),
-  or hours (:hour).
+  microseconds (:usecs), milliseconds (:msecs), seconds (:secs), minutes (:mins),
+  or hours (:hours).
 
   When the third argument is omitted, the return value's format is { megasecs,
   seconds, microsecs }.
@@ -265,7 +265,7 @@ defmodule Timex.Time do
   end
 
   defp measure_result({micro, ret}) do
-    { to_timestamp(micro, :usec), ret }
+    { to_timestamp(micro, :usecs), ret }
   end
 
   defp normalize({mega, sec, micro}) do
