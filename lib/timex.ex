@@ -12,4 +12,5 @@ defmodule Timex do
       alias Timex.Parsers.DateFormat,    as: TimexParsers
     end
   end
+  @moduledoc File.read!("README.md")
 end
