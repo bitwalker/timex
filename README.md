@@ -213,7 +213,7 @@ date = Date.from({2013, 3, 5})
 
 # Simple date format, strftime parser
 date = Date.from({2013, 3, 5})
-{:ok, ^date} = DateFormat.parse("2013-03-05", "%Y-%m-%d")
+{:ok, ^date} = DateFormat.parse("2013-03-05", "%Y-%m-%d", :strftime)
 
 # Pluggable architecture, just provide your own parser module
 # named like `Timex.Parsers.DateFormat.<Name>Parser`, and which
