@@ -6,7 +6,7 @@ defmodule Timex.DateFormat.FormatError do
 
   defexception message: "Invalid format!"
 
-  def exception(message) do
+  def exception([message: message]) do
     %FormatError{message: message}
   end
 end
