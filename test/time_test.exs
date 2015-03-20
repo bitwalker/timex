@@ -67,6 +67,17 @@ defmodule TimeTests do
     assert Time.to_secs({1,2,3}, :hms) == 3600 + 2 * 60 + 3
   end
 
+  test :to_timestamp_from do
+    assert Time.to_timestamp(1, :usecs) == {0, 0, 1}
+    assert Time.to_timestamp(1, :msecs) == {0, 0, 1000}
+    assert Time.to_timestamp(1, :secs) == {0, 1, 0}
+    assert Time.to_timestamp(1, :mins) == {0, 60, 0}
+    assert Time.to_timestamp(1, :hours) == {0, 3600, 0}
+    assert Time.to_timestamp(1, :days) == {0, 86400, 0}
+    assert Time.to_timestamp(1, :weeks) == {0, 604800, 0}
+    assert Time.to_timestamp({1, 1, 1}, :hms) == {0, 3661, 0}
+  end
+
   test :elapsed do
     previous_time = {1362,568902,363960}
     now = {1362,568903,363960}
