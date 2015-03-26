@@ -26,6 +26,8 @@ defmodule Timex.Timezone.Local do
       {:unix, :darwin} -> localtz(:osx, date)
       {:unix, _}       -> localtz(:unix, date)
       {:nt}            -> localtz(:win, date)
+      {:win32, :nt}    -> localtz(:win, date)
+      
       _                -> raise "Unsupported operating system!"
     end
   end
@@ -80,22 +82,26 @@ defmodule Timex.Timezone.Local do
   # Get the locally configured timezone on Windows systems
   @local_tz_key 'SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation'
   @sys_tz_key   'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Time Zones'
+  @tz_key_name  'TimeZoneKeyName'
   # We ignore the reference date here, since there is no way to lookup
   # transition times for historical/future dates
   defp localtz(:win, _date) do
     # Windows has many of it's own unique time zone names, which can
     # also be translated to the OS's language.
-    {:ok, handle} = :win32reg.open(:local_machine)
-    :ok           = :win32reg.change_key(handle, @local_tz_key)
+    {:ok, handle} = :win32reg.open([:read])
+    :ok           = :win32reg.change_key(handle, '\\local_machine\\#{@local_tz_key}')
     {:ok, values} = :win32reg.values(handle)
-    if List.keymember?(values, 'TimeZoneKeyName', 0) do
+    if List.keymember?(values, @tz_key_name, 0) do
+      #Extract the time zone name that windows has recorded
+      {@tz_key_name,time_zone_name} = List.keyfind(values, @tz_key_name, 0)
       # Windows 7/Vista
       # On some systems the string value might be padded with excessive \0 bytes, trim them
-      List.keyfind(values, 'TimeZoneKeyName', 0)
+      time_zone_name
       |> IO.iodata_to_binary
       |> String.strip ?\0
+      |> ZoneDatabase.to_olson
     else
-      # Windows 2000 or XP
+     # Windows 2000 or XP
       # This is the localized name:
       localized = List.keyfind(values, 'StandardName', 0)
       # Open the list of timezones to look up the real name:
