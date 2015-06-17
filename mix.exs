@@ -3,7 +3,7 @@ defmodule Timex.Mixfile do
 
   def project do
     [ app: :timex,
-      version: "0.13.4",
+      version: "0.13.5",
       elixir: "~> 1.0.0",
       description: "A date/time library for Elixir",
       package: package,
@@ -20,7 +20,7 @@ defmodule Timex.Mixfile do
   end
 
   def deps do 
-  [{:earmark, "~> 0.1", only: :dev},
+    [{:earmark, "~> 0.1", only: :dev},
      {:ex_doc, "~> 0.5", only: :dev}]
   end 
 
