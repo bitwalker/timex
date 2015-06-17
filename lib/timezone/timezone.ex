@@ -721,7 +721,9 @@ defmodule Timex.Timezone do
     # Calculate the difference between `date`'s timezone, and the provided timezone
     difference = diff(date, tz)
     # Offset the provided date's time by the difference
-    Date.shift(date, mins: difference) |> Map.put(:timezone, tz)
+    Date.shift(date, mins: difference) 
+    |> Map.put(:timezone, tz) 
+    |> Map.put(:ms, date.ms)
   end
 
   @doc """

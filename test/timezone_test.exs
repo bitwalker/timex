@@ -54,23 +54,27 @@ defmodule TimezoneTests do
     gmt_plus_two    = Timezone.get(2)
     gmt_minus_three = Timezone.get(-3)
 
-    chicago_noon = %Timex.DateTime{calendar: :gregorian, day: 24, hour: 12, minute: 0, month: 2, ms: 0, second: 0,timezone: cst , year: 2014}
+    chicago_noon = %Timex.DateTime{calendar: :gregorian, day: 24, hour: 12, minute: 0, month: 2, ms: 123, second: 0,timezone: cst , year: 2014}
    
     dinnertime = Timezone.convert(chicago_noon,utc) 
 
-    assert %DateTime{hour: 18, timezone: utc} = dinnertime
+
+    # convert to same timezone should result in same datetime
+    assert ^chicago_noon = chicago_noon |> Timezone.convert(cst)
+
+    assert %DateTime{hour: 18, timezone: utc, ms: 123} = dinnertime
     # If it's noon in CST, then it's 6'oclock in the evening in UTC
-    assert %DateTime{hour: 18} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, timezone: cst} |> Timezone.convert(utc)
+    assert %DateTime{hour: 18, ms: 123} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, ms: 123, timezone: cst} |> Timezone.convert(utc)
     # If it's noon in UTC, then it's 6'oclock in the morning in CST
-    assert %DateTime{hour: 6} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, timezone: utc} |> Timezone.convert(cst)
+    assert %DateTime{hour: 6, ms: 123} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, ms: 123, timezone: utc} |> Timezone.convert(cst)
     # If it's noon in CST, then it's 1'oclock in the afternoon in EST
-    assert %DateTime{hour: 13} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, timezone: cst} |> Timezone.convert(est)
+    assert %DateTime{hour: 13, ms: 123} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, ms: 123, timezone: cst} |> Timezone.convert(est)
     # If it's noon in EST, then it's 11'oclock in the morning in CST
-    assert %DateTime{hour: 11} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, timezone: est} |> Timezone.convert(cst)
+    assert %DateTime{hour: 11, ms: 123} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, ms: 123, timezone: est} |> Timezone.convert(cst)
     # If it's noon in GMT+2, then it's 7'oclock in the morning in GMT-3
-    assert %DateTime{hour: 7} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, timezone: gmt_plus_two} |> Timezone.convert(gmt_minus_three)
+    assert %DateTime{hour: 7, ms: 123} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, ms: 123, timezone: gmt_plus_two} |> Timezone.convert(gmt_minus_three)
     # If it's noon in GMT-3, then it's 5'oclock in the evening in GMT+2
-    assert %DateTime{hour: 17} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, timezone: gmt_minus_three} |> Timezone.convert(gmt_plus_two)
+    assert %DateTime{hour: 17, ms: 123} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, ms: 123, timezone: gmt_minus_three} |> Timezone.convert(gmt_plus_two)
   end
 
   test :parse_tzfile do
