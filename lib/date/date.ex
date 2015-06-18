@@ -64,21 +64,17 @@ defmodule Timex.Date do
 
   ## Examples
 
-      timezone()       #=> <local time zone>
-      timezone(:utc)   #=> { 0.0, "UTC" }
-      timezone(2)      #=> { 2.0, "EET" }
-      timezone("+2")   #=> { 2.0, "EET" }
-      timezone("EET")  #=> { 2.0, "EET" }
+      timezone(2, Date.now)      #=> { 2.0, "EET" }
+      timezone("+2", Date.now)   #=> { 2.0, "EET" }
+      timezone("EET", Date.now)  #=> { 2.0, "EET" }
 
   """
-  @spec timezone() :: TimezoneInfo.t
-  @spec timezone(:local, DateTime.t | nil) :: TimezoneInfo.t
-  @spec timezone(:utc | number | binary) :: TimezoneInfo.t
+  @spec timezone(:local | :utc | number | binary, DateTime.t | nil) :: TimezoneInfo.t
 
-  def timezone(),             do: Timezone.local()
-  def timezone(:local),       do: Timezone.local()
-  def timezone(name),         do: Timezone.get(name)
+  def timezone(:local, {{_,_,_},{_,_,_}}=datetime), do: Timezone.local(construct(datetime))
   def timezone(:local, date), do: Timezone.local(date)
+  def timezone(:utc, _),      do: %TimezoneInfo{}
+  def timezone(name, date),   do: Timezone.get(name, date)
 
   @doc """
   Get current date.
@@ -90,7 +86,7 @@ defmodule Timex.Date do
   """
   @spec now() :: DateTime.t
   def now do
-    construct(calendar_universal_time(), timezone(:utc))
+    construct(calendar_universal_time(), %TimezoneInfo{})
   end
 
   @doc """
@@ -106,10 +102,10 @@ defmodule Timex.Date do
   """
   @spec now(binary) :: DateTime.t
   def now(tz) when is_binary(tz) do
-    case timezone(tz) do
+    now_tuple = calendar_universal_time()
+    case Timezone.get(tz, now_tuple) do
       %TimezoneInfo{} = tzinfo ->
-        construct(calendar_universal_time(), timezone(:utc))
-        |> set(timezone: tzinfo)
+        construct(now_tuple, %TimezoneInfo{}) |> set(timezone: tzinfo)
       {:error, _} = error ->
         error
     end
@@ -142,7 +138,11 @@ defmodule Timex.Date do
 
   """
   @spec local() :: DateTime.t
-  def local, do: construct(calendar_local_time(), timezone(:local))
+  def local do
+    date = construct(calendar_local_time())
+    tz   = Timezone.local(date)
+    %{date | :timezone => tz}
+  end
 
   @doc """
   Convert a date to your local timezone.
@@ -155,14 +155,19 @@ defmodule Timex.Date do
 
   """
   @spec local(date :: DateTime.t) :: DateTime.t
-  def local(%DateTime{} = date), do: local(date, timezone(:local))
+  def local(%DateTime{:timezone => tz} = date) do
+    case Timezone.local(date) do
+      ^tz      -> date
+      new_zone -> Timezone.convert(date, new_zone)
+    end
+  end
 
   @doc """
   Convert a date to a local date, using the provided timezone
 
   ## Examples
 
-      Date.now |> Date.local(timezone(:utc))
+      Date.now |> Date.local(%TimezoneInfo{})
 
   """
   @spec local(date :: DateTime.t, tz :: TimezoneInfo.t) :: DateTime.t
@@ -180,7 +185,7 @@ defmodule Timex.Date do
   See also `local/0`.
   """
   @spec universal() :: DateTime.t
-  def universal, do: construct(calendar_universal_time(), timezone(:utc))
+  def universal, do: construct(calendar_universal_time(), %TimezoneInfo{})
 
   @doc """
   Convert a date to UTC
@@ -193,7 +198,7 @@ defmodule Timex.Date do
 
   """
   @spec universal(DateTime.t) :: DateTime.t
-  def universal(date), do: Timezone.convert(date, timezone(:utc))
+  def universal(date), do: Timezone.convert(date, %TimezoneInfo{})
 
   @doc """
   The first day of year zero (calendar module's default reference date).
@@ -206,7 +211,7 @@ defmodule Timex.Date do
 
   """
   @spec zero() :: DateTime.t
-  def zero, do: construct({0, 1, 1}, {0, 0, 0}, timezone(:utc))
+  def zero, do: construct({0, 1, 1}, {0, 0, 0}, %TimezoneInfo{})
 
   @doc """
   The date of Epoch, used as default reference date by this module
@@ -220,7 +225,7 @@ defmodule Timex.Date do
 
   """
   @spec epoch() :: DateTime.t
-  def epoch, do: construct({1970, 1, 1}, {0, 0, 0}, timezone(:utc))
+  def epoch, do: construct({1970, 1, 1}, {0, 0, 0}, %TimezoneInfo{})
 
   @doc """
   Time interval since year 0 of Epoch expressed in the specified units.
@@ -264,19 +269,19 @@ defmodule Timex.Date do
   def from({_,_,_} = date),                        do: from(date, :utc)
   def from({{_,_,_},{_,_,_}} = datetime),          do: from(datetime, :utc)
   def from({{_,_,_},{_,_,_,_}} = datetime),        do: from(datetime, :utc)
-  def from({_,_,_} = date, :utc),                  do: construct({date, {0,0,0}}, timezone(:utc))
-  def from({{_,_,_},{_,_,_}} = datetime, :utc),    do: construct(datetime, timezone(:utc))
-  def from({{_,_,_},{_,_,_,_}} = datetime, :utc),  do: construct(datetime, timezone(:utc))
-  def from({_,_,_} = date, :local),                do: from({date, {0,0,0}}, timezone(:local))
-  def from({{_,_,_},{_,_,_}} = datetime, :local),  do: from(datetime, timezone(:local))
-  def from({{_,_,_},{_,_,_,_}} = datetime, :local),do: from(datetime, timezone(:local))
+  def from({_,_,_} = date, :utc),                  do: construct({date, {0,0,0}}, %TimezoneInfo{})
+  def from({{_,_,_},{_,_,_}} = datetime, :utc),    do: construct(datetime, %TimezoneInfo{})
+  def from({{_,_,_},{_,_,_,_}} = datetime, :utc),  do: construct(datetime, %TimezoneInfo{})
+  def from({_,_,_} = date, :local),                do: from({date, {0,0,0}}, timezone(:local, {date, {0,0,0}}))
+  def from({{_,_,_},{_,_,_}} = datetime, :local),  do: from(datetime, timezone(:local, datetime))
+  def from({{_,_,_}=date,{h,min,sec,_}} = datetime, :local),do: from(datetime, timezone(:local, {date,{h, min, sec}}))
   def from({_,_,_} = date, %TimezoneInfo{} = tz),  do: from({date, {0,0,0}}, tz)
   def from({{_,_,_},{_,_,_}} = datetime, %TimezoneInfo{} = tz), do: construct(datetime, tz)
   def from({{_,_,_},{_,_,_,_}} = datetime, %TimezoneInfo{} = tz), do: construct(datetime, tz)
   def from({_,_,_} = date, tz) when is_binary(tz), do: from({date, {0, 0, 0}}, tz)
   def from({{_,_,_}=d,{h,m,s}}, tz) when is_binary(tz), do: from({d,{h,m,s,0}},tz)
-  def from({{_,_,_},{_,_,_,_}} = datetime, tz) when is_binary(tz) do
-    case timezone(tz) do
+  def from({{_,_,_}=date,{h,min,sec,_}} = datetime, tz) when is_binary(tz) do
+    case timezone(tz, {date, {h,min,sec}}) do
       %TimezoneInfo{} = tzinfo ->
         construct(datetime, tzinfo)
       {:error, _} = error ->
@@ -310,22 +315,22 @@ defmodule Timex.Date do
     from((mega * @million + sec) * @million + us, :us, :zero)
   end
   def from(us, :us,   :epoch) do
-    construct(calendar_gregorian_microseconds_to_datetime(us, epoch(:secs)), timezone(:utc))
+    construct(calendar_gregorian_microseconds_to_datetime(us, epoch(:secs)), %TimezoneInfo{})
   end  
   def from(us, :us,   :zero) do
-    construct(calendar_gregorian_microseconds_to_datetime(us, 0), timezone(:utc))
+    construct(calendar_gregorian_microseconds_to_datetime(us, 0), %TimezoneInfo{})
   end  
   def from(sec, :secs, :epoch) do
-    construct(:calendar.gregorian_seconds_to_datetime(trunc(sec) + epoch(:secs)), timezone(:utc))
+    construct(:calendar.gregorian_seconds_to_datetime(trunc(sec) + epoch(:secs)), %TimezoneInfo{})
   end
   def from(sec, :secs, :zero) do
-    construct(:calendar.gregorian_seconds_to_datetime(trunc(sec)), timezone(:utc))
+    construct(:calendar.gregorian_seconds_to_datetime(trunc(sec)), %TimezoneInfo{})
   end
   def from(days, :days, :epoch) do
-    construct(:calendar.gregorian_days_to_date(trunc(days) + epoch(:days)), {0,0,0}, timezone(:utc))
+    construct(:calendar.gregorian_days_to_date(trunc(days) + epoch(:days)), {0,0,0}, %TimezoneInfo{})
   end
   def from(days, :days, :zero) do
-    construct(:calendar.gregorian_days_to_date(trunc(days)), {0,0,0}, timezone(:utc))
+    construct(:calendar.gregorian_days_to_date(trunc(days)), {0,0,0}, %TimezoneInfo{})
   end
 
   @doc """
@@ -389,7 +394,7 @@ defmodule Timex.Date do
   def to_secs(date, :epoch), do: to_secs(date, :zero) - epoch(:secs)
 
   def to_secs(date, :zero) do
-    offset = Timex.Timezone.diff(date,timezone(:utc))
+    offset = Timex.Timezone.diff(date, %TimezoneInfo{})
     case offset do
       0 -> utc_to_secs(date)
       _ -> utc_to_secs(date) + ( 60 * offset )
@@ -703,8 +708,7 @@ defmodule Timex.Date do
     hour >= 0 and hour < 24 and min >= 0 and min < 60 and sec >= 0 and sec < 60
   end
 
-  defp is_valid_tz?(%TimezoneInfo{} = tz) when tz == %TimezoneInfo{}, do: false
-  defp is_valid_tz?(%TimezoneInfo{}), do: true
+  defp is_valid_tz?(%TimezoneInfo{:full_name => tzname}), do: Tzdata.zone_exists?(tzname)
   defp is_valid_tz?(_), do: false
 
   @doc """
@@ -722,7 +726,7 @@ defmodule Timex.Date do
   @spec normalize(dtz) :: DateTime.t
   @spec normalize(atom(), term) :: DateTime.t
 
-  def normalize({date, time}), do: normalize({date, time, timezone(:utc)})
+  def normalize({date, time}), do: normalize({date, time, %TimezoneInfo{}})
   def normalize({date, time, tz}) do
     construct(normalize(:date, date), normalize(:time, time), tz)
   end
@@ -1098,8 +1102,10 @@ defmodule Timex.Date do
   end
 
   # Primary constructor for DateTime objects
-  defp construct({_,_,_} = date, {_,_,_} = time, nil), do: construct(date, time, timezone(:utc))
-  defp construct({_,_,_} = date, {_,_,_,_} = time, nil), do: construct(date, time, timezone(:utc))
+  defp construct({{_, _, _} = date, {_, _, _} = time}),      do: construct(date, time, %TimezoneInfo{})
+  defp construct({{_, _, _} = date, {_, _, _, _} = time}),   do: construct(date, time, %TimezoneInfo{})
+  defp construct({_,_,_} = date, {_,_,_} = time, nil),       do: construct(date, time, %TimezoneInfo{})
+  defp construct({_,_,_} = date, {_,_,_,_} = time, nil),     do: construct(date, time, %TimezoneInfo{})
   defp construct(date, {h, min, sec}, %TimezoneInfo{} = tz), do: construct(date, {h, min, sec, 0}, tz)
   defp construct({y, m, d}, {h, min, sec, ms}, %TimezoneInfo{} = tz) do
     %DateTime{

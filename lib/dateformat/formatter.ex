@@ -4,7 +4,6 @@ defmodule Timex.DateFormat.Formatters.Formatter do
   alias Timex.Date
   alias Timex.Time
   alias Timex.DateTime
-  alias Timex.Timezone
   alias Timex.DateFormat.FormatError
   alias Timex.DateFormat.Formatters.DefaultFormatter
   alias Timex.Parsers.DateFormat.Directive
@@ -129,17 +128,9 @@ defmodule Timex.DateFormat.Formatters.Formatter do
   def format_token(:am, %DateTime{hour: hour}),         do: "#{{_, am_pm} = Time.to_12hour_clock(hour); Atom.to_string(am_pm)}"
   def format_token(:AM, %DateTime{} = date),            do: format_token(:am, date) |> String.upcase
   # Timezones
-  def format_token(:zname, %DateTime{timezone: tz} = date) do
-    case Timezone.Dst.is_dst?(date) do
-      true -> tz.dst_abbreviation
-      _    -> tz.standard_abbreviation
-    end
-  end
-  def format_token(:zoffs, %DateTime{timezone: tz} = date) do
-    offset = case Timezone.Dst.is_dst?(date) do
-      true -> ((tz.gmt_offset_std + tz.gmt_offset_dst) / 60) |> trunc
-      _    -> (tz.gmt_offset_std / 60) |> trunc
-    end
+  def format_token(:zname, %DateTime{timezone: tz}), do: tz.abbreviation
+  def format_token(:zoffs, %DateTime{timezone: tz}) do
+    offset = ((tz.offset_std + tz.offset_utc) / 60) |> trunc
     cond do
       offset < 0 and offset > -10   -> "-0#{offset * -1}00"
       offset < 0 and offset > -100  -> "-#{offset * -1}00"

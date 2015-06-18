@@ -11,7 +11,7 @@ defmodule DateTests do
     assert {{_, _, _}, {_, _, _}, {_, _}} = DateConvert.to_gregorian(now)
 
     {_, _, tz} = DateConvert.to_gregorian(now)
-    %TimezoneInfo{:full_name => name, :gmt_offset_std => offset_mins} = D.timezone(:utc)
+    %TimezoneInfo{:full_name => name, :offset_std => offset_mins} = %TimezoneInfo{}
     assert tz === {offset_mins/60, name}
 
     now_secs = D.now(:secs)
@@ -36,22 +36,23 @@ defmodule DateTests do
   end
 
   test "local/2" do
-    uni_dt = D.from({{2014, 9, 22}, {12, 0, 0}})
+    date = {{2014,9,22}, {12,0,0}}
+    uni_dt = D.from(date)
     assert uni_dt.hour === 12
     assert uni_dt.minute === 0
-    assert uni_dt.timezone === D.timezone("UTC")
+    assert uni_dt.timezone === D.timezone("UTC", date)
 
-    local_dt = D.local(uni_dt, D.timezone("JST"))
+    local_dt = D.local(uni_dt, D.timezone("Asia/Tokyo", date))
     assert local_dt.hour === 21
     assert local_dt.minute === 0
-    assert local_dt.timezone === D.timezone("JST")
+    assert local_dt.timezone === D.timezone("Asia/Tokyo", date)
   end
 
   test :zero do
     zero = D.zero
     { date, time, tz } = zero |> DateConvert.to_gregorian
     assert :calendar.datetime_to_gregorian_seconds({date,time}) === 0
-    assert tz === {zero.timezone.gmt_offset_std/60, zero.timezone.full_name}
+    assert tz === {zero.timezone.offset_std/60, zero.timezone.full_name}
   end
 
   test :epoch do
@@ -69,17 +70,17 @@ defmodule DateTests do
     assert %DateTime{year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0} = date |> D.from
 
     { _, _, tz } = date |> D.from(:local) |> DateConvert.to_gregorian
-    localtz = D.timezone()
-    assert tz === {localtz.gmt_offset_std/60, localtz.standard_abbreviation}
+    localtz = Timezone.local(date)
+    assert tz === {localtz.offset_std/60, localtz.abbreviation}
     assert %DateTime{year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0, timezone: _} = date |> D.from(:local)
 
     { date, time, tz } = date |> Date.from |> DateConvert.to_gregorian
-    unitz = D.timezone(:utc)
-    assert tz === {unitz.gmt_offset_std/60,unitz.standard_abbreviation}
+    unitz = D.timezone(:utc, date)
+    assert tz === {unitz.offset_std/60,unitz.abbreviation}
     assert {date,time} === {{2000,11,11}, {0,0,0}}
 
     # Converting to a datetime and back to gregorian should yield the original date
-    fulldate = date |> D.from(D.timezone("EET"))
+    fulldate = date |> D.from(D.timezone("Europe/Athens"))
     { date, time, _ } = fulldate |> DateConvert.to_gregorian
     assert {date,time} === {{2000,11,11}, {0,0,0}}
   end
@@ -92,14 +93,14 @@ defmodule DateTests do
     assert %DateTime{year: 2000, month: 11, day: 11, hour: 1, minute: 0, second: 0} = date |> D.from |> D.universal
 
     { d, time, tz } = date |> D.from |> DateConvert.to_gregorian
-    unitz = D.timezone(:utc)
-    assert tz === {unitz.gmt_offset_std/60,unitz.standard_abbreviation}
+    unitz = D.timezone(:utc, date)
+    assert tz === {unitz.offset_std/60,unitz.abbreviation}
     assert {d,time} === date
 
     { d, time } = date |> D.from |> DateConvert.to_erlang_datetime
     assert {d,time} === date
 
-    { d, time, _ } = date |> D.from(D.timezone("EET")) |> DateConvert.to_gregorian
+    { d, time, _ } = date |> D.from(D.timezone("Europe/Athens", date)) |> DateConvert.to_gregorian
     assert {d,time} === {{2000,11,11}, {1,0,0}}
   end
 
@@ -135,8 +136,7 @@ defmodule DateTests do
 
   test :to_secs do
     date = D.now()
-    assert D.to_secs(date, :zero) === date |> D.universal |> DateConvert.to_erlang_datetime |> :calendar.datetime_to_gregorian_seconds
-    assert D.to_secs(date, :zero) - D.epoch(:secs) === D.to_secs(date)
+    assert D.to_secs(date, :zero) === date |> DateConvert.to_erlang_datetime |> :calendar.datetime_to_gregorian_seconds
 
     ts = Time.now()
     assert trunc(Time.to_secs(ts)) === ts |> D.from(:timestamp) |> D.to_secs
@@ -148,7 +148,7 @@ defmodule DateTests do
     assert D.to_secs(D.epoch()) === 0
     assert D.to_secs(D.epoch(), :zero) === 62167219200
 
-    date = D.from({{2014,11,17},{0,0,0}}, "PST")
+    date = D.from({{2014,11,17},{0,0,0}}, "America/Los_Angeles")
     assert D.to_secs(date) == 1416211200
 
     ndate = D.from({2014,11,17})
@@ -254,15 +254,16 @@ defmodule DateTests do
   test :set do
     import D.Convert, only: [to_gregorian: 1]
 
-    eet = Timezone.get("EET")
+    eet = Timezone.get("Europe/Athens", Date.from({{2013,3,17}, {17,26,5}}))
     utc = Timezone.get(:utc)
-    %TimezoneInfo{:full_name => eet_name, :gmt_offset_std => eet_offset_min} = eet
-    %TimezoneInfo{:full_name => utc_name, :gmt_offset_std => utc_offset_min} = utc
+    %TimezoneInfo{:abbreviation => eet_name, :offset_std => eet_offset_min} = eet
+    %TimezoneInfo{:abbreviation => utc_name, :offset_std => utc_offset_min} = utc
 
-    date = D.from({{2013,3,17}, {17,26,5}}, eet)
+    tuple = {{2013,3,17}, {17,26,5}}
+    date = D.from(tuple, "Europe/Athens")
     assert to_gregorian(D.set(date, date: {1,1,1}))        === { {1,1,1}, {17,26,5}, {eet_offset_min/60, eet_name} }
     assert to_gregorian(D.set(date, hour: 0))              === { {2013,3,17}, {0,26,5}, {eet_offset_min/60, eet_name} }
-    assert to_gregorian(D.set(date, timezone: D.timezone(:utc))) === { {2013,3,17}, {17,26,5}, {utc_offset_min/60, utc_name} }
+    assert to_gregorian(D.set(date, timezone: D.timezone(:utc, tuple))) === { {2013,3,17}, {17,26,5}, {utc_offset_min/60, utc_name} }
 
     assert to_gregorian(D.set(date, [date: {1,1,1}, hour: 13, second: 61, timezone: utc]))    === { {1,1,1}, {13,26,59}, {utc_offset_min/60, utc_name} }
     assert to_gregorian(D.set(date, [date: {-1,-2,-3}, hour: 33, second: 61, timezone: utc])) === { {0,1,1}, {23,26,59}, {utc_offset_min/60, utc_name} }
@@ -276,11 +277,11 @@ defmodule DateTests do
     tz2   = Timezone.get(-3)
     date1 = %DateTime{year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz1}
     date2 = %DateTime{year: 2013, month: 3, day: 18, hour: 8, minute: 44, timezone: tz2}
-    assert D.compare(date1, date2) === 0
+    assert D.compare(date1, date2) === 1
 
     tz3   = Timezone.get(3)
     date3 = %DateTime{year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz3}
-    assert D.compare(date1, date3) === +1
+    assert D.compare(date1, date3) === -1
 
     date = D.now()
     assert D.compare(D.epoch(), date) === -1
@@ -304,7 +305,7 @@ defmodule DateTests do
     assert D.compare(date1, date3, :weeks) === -1 
     assert D.compare(date1, date2, :days) === 0
     assert D.compare(date1, date3, :days) === -1
-    assert D.compare(date1, date2, :hours) === 0
+    assert D.compare(date1, date2, :hours) === 1
     assert D.compare(date3, date4, :mins) === 0
     assert D.compare(date3, date4, :secs) === -1
   end

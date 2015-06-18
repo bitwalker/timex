@@ -20,7 +20,7 @@ defmodule Timex.Timezone.Local do
   """
   @spec lookup(DateTime.t | nil) :: String.t
 
-  def lookup(), do: Date.universal |> lookup
+  def lookup(), do: Date.now |> lookup
   def lookup(date) do
     case :os.type() do
       {:unix, :darwin} -> localtz(:osx, date)
@@ -43,7 +43,7 @@ defmodule Timex.Timezone.Local do
           {:ok, tz} -> tz
           _ ->
             # Fallback and ask systemsetup
-            tz = System.cmd("systemsetup", "-gettimezone")
+            tz = System.cmd("systemsetup", ["-gettimezone"])
             |> IO.iodata_to_binary
             |> String.strip(?\n)
             |> String.replace("Time Zone: ", "")
@@ -182,11 +182,34 @@ defmodule Timex.Timezone.Local do
     case File.exists?(file) do
       true ->
         case file |> File.read! |> parse_tzfile(date) do
-          {:ok, tz}   -> {:ok, tz}
-          {:error, m} -> raise m
+          {:ok, tz}   ->
+            # We have a valid timezone, so get symlinked zone name, since `tz` here is an abbreviation
+            zone_file = get_real_path(file) |> String.replace(~r(^.*/zoneinfo/), "")
+            cond do
+              zone_file == "" -> {:ok, tz}
+              true            -> {:ok, zone_file}
+            end
+          {:error, m} ->
+            raise m
         end
       _ ->
         nil
+    end
+  end
+
+  defp get_real_path(path) do
+    case path |> String.to_char_list |> :file.read_link_info do
+      {:ok, {:file_info, _, :regular, _, _, _, _, _, _, _, _, _, _, _}} ->
+        path
+      {:ok, {:file_info, _, :symlink, _, _, _, _, _, _, _, _, _, _, _}} ->
+        {:ok, sym} = path |> String.to_char_list |> :file.read_link
+        case sym |> :filename.pathtype do
+          :absolute ->
+            sym |> IO.iodata_to_binary
+          :relative ->
+            symlink = sym |> IO.iodata_to_binary
+            path |> Path.dirname |> Path.join(symlink) |> Path.expand
+        end
     end
   end
 
@@ -197,7 +220,7 @@ defmodule Timex.Timezone.Local do
   """
   @spec parse_tzfile(binary, DateTime.t | nil) :: {:ok, String.t} | {:error, term}
 
-  def parse_tzfile(tzdata), do: parse_tzfile(tzdata, Date.universal())
+  def parse_tzfile(tzdata), do: parse_tzfile(tzdata, Date.now)
   def parse_tzfile(tzdata, %DateTime{} = reference_date) when tzdata != nil do
     # Parse file to Zone{}
     {:ok, zone} = ZoneParser.parse(tzdata)

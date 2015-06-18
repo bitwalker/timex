@@ -226,15 +226,13 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test :format_zones do
-    eet = Date.timezone("EET")
-    date = Date.from({2007,11,19}, eet)
+    date = Date.from({2007,11,19}, "Europe/Athens")
     assert { :ok, "EET" } = format(date, "%Z")
     assert { :ok, "+0200" } = format(date, "%z")
     assert { :ok, "+02:00" } = format(date, "%:z")
     assert { :ok, "+02:00:00" } = format(date, "%::z")
 
-    pst = Date.timezone("PST")
-    date = Date.from({2007,11,19}, pst)
+    date = Date.from({2007,11,19}, "America/Los_Angeles")
     assert { :ok, "PST" } = format(date, "%Z")
     assert { :ok, "-0800" } = format(date, "%z")
     assert { :ok, "-08:00" } = format(date, "%:z")
