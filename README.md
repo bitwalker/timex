@@ -9,7 +9,7 @@ To use timex with your projects, edit your mix.exs file and add it as a dependen
 
 ```elixir
 defp deps do
-  [{:timex, "~> 0.13.4"}]
+  [{:timex, "~> 0.14.0"}]
 end
 ```
 
@@ -19,7 +19,7 @@ To use Timex modules without the Timex namespace, add `use Timex` to the top of 
 
 The goal of this project is to provide a complete set of Date/Time functionality for Elixir projects, with the hope of being eventually merged into the standard library.
 
-The `Date` module is for dealing with dates, which includes time and timezone information for those dates. It supports getting current date in any time zone, converting between timezones while taking Daylight Savings Time offsets into account, calculating time intervals between two dates, shifting a date by some amount of seconds/hours/days/years towards past and future, etc. As Erlang provides support only for the Gregorian calendar, that's what timex currently supports, but it is possible to add additional calendars if needed.
+The `Date` module is for dealing with dates, which includes time and timezone information for those dates. It supports getting current date in any time zone, converting between timezones while taking zone offset changes into account, calculating time intervals between two dates, shifting a date by some amount of seconds/hours/days/years towards past and future, etc. As Erlang provides support only for the Gregorian calendar, that's what timex currently supports, but it is possible to add additional calendars if needed.
 
 The `Time` module supports a finer grained level of arithmetic over time intervals. It is intended for use as timestamps in logs, measuring code execution times, converting time units, etc.
 
@@ -44,7 +44,7 @@ Since Erlang's native date format doesn't carry any time zone information, `Date
 ```elixir
 datetime = {{2013,3,17},{21,22,23}}
 
-date = Date.from(datetime)           # datetime is assumed to be in UTC by default
+date = Date.from(datetime)              # datetime is assumed to be in UTC by default
 DateFormat.format!(date, "{RFC1123}")   #=> "Sun, 17 Mar 2013 21:22:23 GMT"
 
 date = Date.from(datetime, "CST")    # With a provided timezone
@@ -56,7 +56,11 @@ Date.local(date)  # convert date to local time zone (CST for our example)
 #=> %DateTime{year: 2013, month: 3, day: 17, hour: 15, minute: 22, second: 23, timezone: ...}
 
 # Let's see what happens if we switch the time zone
-date = Timezone.convert(date, Timezone.get("EST"))
+
+# You must provide a DateTime or Erlang datetime tuple when getting a Timezone,
+# this is to ensure that the right period for that zone is retrieved, if you omit
+# the date, `Date.now` is used, which is not guaranteed to be correct.
+converted = Timezone.convert(date, "America/New_York")
 DateFormat.format!(date, "{RFC1123}")
 #=> "Sun, 17 Mar 2013 17:22:23 EST"
 
@@ -81,8 +85,6 @@ date = Date.now
 Date.universal(date)                        #=> %DateTime{...}
 # Convert a date to local time
 Date.local(date)                            #=> %DateTime{...}
-# Convert a date to local time, and provide the local timezone
-Date.local(date, Date.timezone("PST"))      #=> %DateTime{...}
 ```
 
 ### Extracting information about dates
@@ -198,13 +200,11 @@ Parsing dates is also a breeze with `DateFormat`:
 
 ```elixir
 # Parse a date using the default parser
-gmt   = Date.timezone("GMT")
-date  = Date.from({{2013,3,5},{23,25,19}}, gmt)
+date  = Date.from({{2013,3,5},{23,25,19}}, "GMT")
 {:ok, ^date} = DateFormat.parse("Tue, 05 Mar 2013 23:25:19 GMT", "{RFC1123}")
 
 # Any preformatted directive ending in `z` will shift the date to UTC/Zulu
-gmt   = Date.timezone("EET")
-date  = Date.from({{2013,3,5},{23,25,19}})
+date  = Date.from({{2013,3,5},{23,25,19}}, "Europe/Athens")
 {:ok, ^date} = DateFormat.parse("Tue, 05 Mar 2013 23:25:19 +0200", "{RFC1123z}")
 
 # Simple date format, default parser
@@ -331,7 +331,7 @@ Use `Date.diff` to obtain the number of seconds, minutes, hours, days, months, w
 
 Full support for retreiving local timezone configuration on OSX, *NIX, and Windows, conversion to any timezone in the Olson timezone database, and full support for daylight savings time transitions.
 
-Timezone support is also exposed via the `Timezone`, `Timezone.Local`, and `Timezone.Dst` modules. Their functionality is exposed via the `Date` module's API, and most common use cases shouldn't need to access the `Timezone` namespace directly, but it's there if needed.
+Timezone support is also exposed via the `Timezone`, `Timezone.Local` modules. Their functionality is exposed via the `Date` module's API, and most common use cases shouldn't need to access the `Timezone` namespace directly, but it's there if needed.
 
 ## License
 
