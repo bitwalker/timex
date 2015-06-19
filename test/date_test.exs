@@ -69,8 +69,8 @@ defmodule DateTests do
     date = {2000, 11, 11}
     assert %DateTime{year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0} = date |> D.from
 
-    { _, _, tz } = date |> D.from(:local) |> DateConvert.to_gregorian
-    localtz = Timezone.local(date)
+    { d, t, tz } = date |> D.from(:local) |> DateConvert.to_gregorian
+    localtz = Timezone.local({d, t})
     assert tz === {localtz.offset_std/60, localtz.abbreviation}
     assert %DateTime{year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0, timezone: _} = date |> D.from(:local)
 
@@ -80,7 +80,7 @@ defmodule DateTests do
     assert {date,time} === {{2000,11,11}, {0,0,0}}
 
     # Converting to a datetime and back to gregorian should yield the original date
-    fulldate = date |> D.from(D.timezone("Europe/Athens"))
+    fulldate = date |> D.from(D.timezone("Europe/Athens", {date, {0,0,0}}))
     { date, time, _ } = fulldate |> DateConvert.to_gregorian
     assert {date,time} === {{2000,11,11}, {0,0,0}}
   end
@@ -241,7 +241,7 @@ defmodule DateTests do
     assert not D.is_valid?(D.from({{12,12,12}, {23,60,0}}))
     assert not D.is_valid?(D.from({{12,12,12}, {23,59,60}}))
     assert not D.is_valid?(D.from({{12,12,12}, {-1,59,59}}))
-    assert not D.is_valid?({{12,12,12}, {1,59,59}, %TimezoneInfo{}})
+    assert D.is_valid?({{12,12,12}, {1,59,59}, %TimezoneInfo{}})
     assert not D.is_valid?({{12,12,12}, {-1,59,59}, Timezone.get(:utc)})
   end
 
@@ -277,11 +277,11 @@ defmodule DateTests do
     tz2   = Timezone.get(-3)
     date1 = %DateTime{year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz1}
     date2 = %DateTime{year: 2013, month: 3, day: 18, hour: 8, minute: 44, timezone: tz2}
-    assert D.compare(date1, date2) === 1
+    assert D.compare(date1, date2) === 0
 
     tz3   = Timezone.get(3)
     date3 = %DateTime{year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz3}
-    assert D.compare(date1, date3) === -1
+    assert D.compare(date1, date3) === 1
 
     date = D.now()
     assert D.compare(D.epoch(), date) === -1
@@ -305,7 +305,7 @@ defmodule DateTests do
     assert D.compare(date1, date3, :weeks) === -1 
     assert D.compare(date1, date2, :days) === 0
     assert D.compare(date1, date3, :days) === -1
-    assert D.compare(date1, date2, :hours) === 1
+    assert D.compare(date1, date2, :hours) === 0
     assert D.compare(date3, date4, :mins) === 0
     assert D.compare(date3, date4, :secs) === -1
   end

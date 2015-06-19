@@ -21,7 +21,7 @@ defmodule Timex.Timezone.Local do
   @spec lookup(DateTime.t | nil) :: String.t
 
   def lookup(), do: Date.now |> lookup
-  def lookup(date) do
+  def lookup(%DateTime{} = date) do
     case :os.type() do
       {:unix, :darwin} -> localtz(:osx, date)
       {:unix, _}       -> localtz(:unix, date)

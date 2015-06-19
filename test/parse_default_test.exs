@@ -153,7 +153,7 @@ defmodule DateFormatTest.ParseDefault do
   test :parse_compound_directives do
     date_gmt = Date.from({{2013,3,5},{23,25,19}}, "GMT")
     date_utc = Date.from({{2013,3,5},{23,25,19}}, "UTC")
-    date_eet = Date.from({{2013,3,5},{23,25,19}}, "Europe/Athens")
+    date_eet = Date.from({{2013,3,5},{23,25,19}}, "EEST")
 
     # * `{RFC1123}`     - e.g. `Tue, 05 Mar 2013 23:25:19 GMT`
     assert { :ok, ^date_gmt } = parse("Tue, 05 Mar 2013 23:25:19 GMT", "{RFC1123}")
@@ -172,7 +172,7 @@ defmodule DateFormatTest.ParseDefault do
     assert { :ok, ^date } = parse("Mon, 05 Jun 14 23:20:59 Z", "{RFC822}")
 
     # * `{RFC3339}`     - e.g. `2013-03-05T23:25:19+02:00`
-    date = Date.from({{2013, 3, 5}, {23, 25, 19}}, "GMT+2")
+    date = Date.from({{2013, 3, 5}, {23, 25, 19}}, "GMT-2")
     assert { :ok, ^date } = parse("2013-03-05T23:25:19+02:00", "{RFC3339}")
 
     # * `{RFC3339z}`    - e.g. `2013-03-05T23:25:19Z`
@@ -184,7 +184,7 @@ defmodule DateFormatTest.ParseDefault do
     assert { :ok, ^date } = parse("Tue Mar  5 23:25:19 2013", "{ANSIC}")
 
     # * `{UNIX}`        - e.g. `Tue Mar  5 23:25:19 EET 2013`
-    date = Date.from({{2013, 3, 5}, {23, 25, 19}}, "Europe/Athens")
+    date = Date.from({{2013, 3, 5}, {23, 25, 19}}, "EET")
     assert { :ok, ^date } = parse("Tue Mar  5 23:25:19 EET 2013", "{UNIX}")
 
     # * `{kitchen}`     - e.g. `3:25PM`

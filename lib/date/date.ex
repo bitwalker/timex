@@ -708,7 +708,7 @@ defmodule Timex.Date do
     hour >= 0 and hour < 24 and min >= 0 and min < 60 and sec >= 0 and sec < 60
   end
 
-  defp is_valid_tz?(%TimezoneInfo{:full_name => tzname}), do: Tzdata.zone_exists?(tzname)
+  defp is_valid_tz?(%TimezoneInfo{:full_name => tzname}), do: Timezone.exists?(tzname)
   defp is_valid_tz?(_), do: false
 
   @doc """

@@ -261,7 +261,15 @@ defmodule Timex.Parsers.DateFormat.Parser do
         year_shifted    = value + ((current_century - 1) * 100)
         %{date | :year => year_shifted}
       y when y in [:year4, :iso_year4] ->
-        %{date | :year => value}
+        # Special case for UNIX format dates, where the year is parsed after the timezone,
+        # so we must lookup the timezone again to ensure it's properly set
+        case date.timezone do
+          %Timex.TimezoneInfo{:full_name => tzname} ->
+            zone_date = {{value, date.month, date.day}, {date.hour, date.minute, date.second}}
+            %{date | :year => value, :timezone => Timezone.get(tzname, zone_date)}
+          nil ->
+            %{date | :year => value}
+        end
       # Months
       :month  -> %{date | :month => value}
       month when month in [:mshort, :mfull] ->
@@ -319,22 +327,30 @@ defmodule Timex.Parsers.DateFormat.Parser do
         # If timezone is not nil, then we know it was set
         # by a preformatted directive, so do not overrule that value
         case date.timezone do
-          nil -> %{date | :timezone => Timezone.get(value)}
-          _   -> date
+          nil ->
+            zone_date = {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
+            %{date | :timezone => Timezone.get(value, zone_date)}
+          _   ->
+            date
         end
       :zname ->
         # If timezone is not nil, then we know it was set
         # by a preformatted directive, so do not overrule that value
         case date.timezone do
-          nil -> %{date | :timezone => Timezone.get(value)}
-          _   -> date
+          nil ->
+            zone_date = {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
+            %{date | :timezone => Timezone.get(value, zone_date)}
+          _   ->
+            date
         end
       tz when tz in [:zoffs_colon, :zoffs_sec] ->
         case value do
           <<?-, h1::utf8, h2::utf8, _::binary>> ->
-            %{date | :timezone => Timezone.get(<<?-, h1::utf8, h2::utf8>>)}
+            zone_date = {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
+            %{date | :timezone => Timezone.get(<<?-, h1::utf8, h2::utf8>>, zone_date)}
           <<?+, h1::utf8, h2::utf8, _::binary>> ->
-            %{date | :timezone => Timezone.get(<<?+, h1::utf8, h2::utf8>>)}
+            zone_date = {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
+            %{date | :timezone => Timezone.get(<<?+, h1::utf8, h2::utf8>>, zone_date)}
           _ ->
             {:error, "#{token} not implemented"}
         end
