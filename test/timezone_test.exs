@@ -59,6 +59,9 @@ defmodule TimezoneTests do
    
     dinnertime = Timezone.convert(chicago_noon,utc) 
 
+    gmt = Date.from({{1960, 10, 14}, {13, 45, 0}}, "Europe/London")
+    gmt_to_utc = gmt |> Date.universal
+    assert gmt.hour == gmt_to_utc.hour
 
     # convert to same timezone should result in same datetime
     assert ^chicago_noon = chicago_noon |> Timezone.convert(cst)
