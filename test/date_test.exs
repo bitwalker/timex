@@ -34,20 +34,7 @@ defmodule DateTests do
     unidate = D.from({{y,m,d}, {h,min,s,ms}})
     assert uni === D.universal(unidate)
   end
-
-  test "local/2" do
-    date = {{2014,9,22}, {12,0,0}}
-    uni_dt = D.from(date)
-    assert uni_dt.hour === 12
-    assert uni_dt.minute === 0
-    assert uni_dt.timezone === D.timezone("UTC", date)
-
-    local_dt = D.local(uni_dt, D.timezone("Asia/Tokyo", date))
-    assert local_dt.hour === 21
-    assert local_dt.minute === 0
-    assert local_dt.timezone === D.timezone("Asia/Tokyo", date)
-  end
-
+  
   test :zero do
     zero = D.zero
     { date, time, tz } = zero |> DateConvert.to_gregorian

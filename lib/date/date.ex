@@ -163,23 +163,6 @@ defmodule Timex.Date do
   end
 
   @doc """
-  Convert a date to a local date, using the provided timezone
-
-  ## Examples
-
-      Date.now |> Date.local(%TimezoneInfo{})
-
-  """
-  @spec local(date :: DateTime.t, tz :: TimezoneInfo.t) :: DateTime.t
-  def local(%DateTime{:timezone => tz} = date, localtz) do
-    if tz !== localtz do
-      Timezone.convert(date, localtz)
-    else
-      date
-    end
-  end
-
-  @doc """
   Get current the current datetime in UTC.
 
   See also `local/0`.
