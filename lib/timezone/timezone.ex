@@ -110,16 +110,24 @@ defmodule Timex.Timezone do
   end
 
   @doc """
-  Convert a date to the given timezone.
+  Convert a date to the given timezone (either TimezoneInfo or a timezone name)
   """
-  @spec convert(date :: DateTime.t, tz :: TimezoneInfo.t) :: DateTime.t
-  def convert(date, tz) do
+  @spec convert(date :: DateTime.t, tz :: TimezoneInfo.t | String.t) :: DateTime.t
+
+  def convert(date, %TimezoneInfo{} = tz) do
     # Calculate the difference between `date`'s timezone, and the provided timezone
     difference = diff(date, tz)
     # Offset the provided date's time by the difference
     Date.shift(date, mins: difference) 
     |> Map.put(:timezone, tz) 
     |> Map.put(:ms, date.ms)
+  end
+
+  def convert(date, tz) when is_binary(tz) do
+    case get(tz, date) do
+      {:error, e} -> {:error, e}
+      timezone    -> convert(date, timezone)
+    end
   end
 
   @doc """
