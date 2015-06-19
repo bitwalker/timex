@@ -1,7 +1,6 @@
 defmodule Timex.Timezone do
   @moduledoc """
-  Contains all the logic around conversion, manipulation,
-  and comparison of time zones.
+  Handles timezone lookups, conversion, diffing, and comparison.
   """
   alias Timex.Date,           as: Date
   alias Timex.DateTime,       as: DateTime
@@ -17,16 +16,31 @@ defmodule Timex.Timezone do
   @doc """
   Determines if a given zone name exists
   """
+  @spec exists?(String.t) :: boolean
   def exists?(zone), do: Tzdata.zone_exists?(zone) || Enum.member?(@abbreviations, zone)
 
   @doc """
-  Get's the current local timezone configuration.
+  Gets the local timezone configuration for the current date and time.
   """
-  def local(),                     do: local(Date.now)
+  @spec local() :: %TimezoneInfo{}
+  def local(), do: local(Date.now)
+
+  @doc """
+  Gets the local timezone configuration for the provided date and time.
+  The provided date and time can either be an Erlang datetime tuple, or a DateTime struct.
+  """
+  @spec local(Date.datetime | %DateTime{}) :: %TimezoneInfo{}
+  def local(date)
+
   def local({{y,m,d}, {h,min,s}}), do: %DateTime{year: y, month: m, day: d, hour: h, minute: min, second: s, timezone: %TimezoneInfo{}} |> local
   def local(%DateTime{} = for),    do: get(Local.lookup(for), for)
 
-  # UTC is so common, we'll give it an extra shortcut, as well as handle common shortcuts
+  @doc """
+  Gets timezone info for a given zone name and date. The date provided
+  can either be an Erlang datetime tuple, or a DateTime struct, and if one
+  is not provided, then the current date and time is returned.
+  """
+  @spec get(String.t, Date.datetime | %DateTime{} | nil) :: %TimezoneInfo{} | {:error, String.t}
   def get(tz, for \\ Date.now)
 
   def get(tz, for) when tz in ["Z", "UT", "GMT"], do: get(:utc, for)
@@ -60,9 +74,7 @@ defmodule Timex.Timezone do
     end
   end
 
-  @doc """
-  Gets the TimezoneInfo for an Erlang datetime tuple
-  """
+  # Gets a timezone for an Erlang datetime tuple
   def get(timezone, {{_,_,_}, {_,_,_}} = datetime) do
      case Tzdata.zone_exists?(timezone) do
       false ->
@@ -84,11 +96,8 @@ defmodule Timex.Timezone do
     end
   end
 
-  @doc """
-  Get the TimezoneInfo object corresponding to the given name.
-  """
-  # Fallback lookup by Standard/Daylight Savings time names/abbreviations
-  def get(timezone, for) do
+  # Gets a timezone for a DateTime struct
+  def get(timezone, %DateTime{} = for) do
     case Tzdata.zone_exists?(timezone) do
       false ->
         case @abbreviations |> Enum.member?(timezone) do

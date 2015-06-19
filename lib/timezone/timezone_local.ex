@@ -1,6 +1,6 @@
 defmodule Timex.Timezone.Local do
   @moduledoc """
-  Contains the logic and parser for extracting local timezone configuration.
+  Handles looking up the local timezone configuration for the current machine.
   """
   alias Timex.DateTime,              as: DateTime
   alias Timex.Date,                  as: Date

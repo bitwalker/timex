@@ -3,18 +3,15 @@ defmodule Timex.TimezoneInfo do
   Complete definition of a time zone for a given period
   
   Notes:
-    - `full_name` must be unique
-    - `abbreviation`:  Abbreviation of timezone
-    - `offset_std`:    Integer, offset in minutes from standard for this period
-    - `offset_utc`:    Integer, offset in minutes from UTC for this period
+    - `full_name` is the name of the zone, but does not indicate anything about the current period (i.e. CST vs CDT)
+    - `abbreviation` is the abbreviated name for the zone in the current period, i.e. "America/Chicago" on 3/30/15 is "CDT"
+    - `offset_std` is the offset in minutes from standard time for this period
+    - `offset_utc` is the offset in minutes from UTC for this period
   Spec:
-    - week_of_year:  integer() | :last, Example: 1 = first week, 2 = second week, N = nth week, etc
-    - day_of_week:   atom(), :sun, :mon, :tue, etc
-    - month_of_year: atom(), :jan, :feb, :mar, etc
-    - `dst_start_time`, `dst_end_time`:         Defined as {hour, min}, represents the time of the daylight savings time transition.
-  Spec:
-    - hour = integer(), 0..23
-    - min  = integer(), 0..59
+    - day_of_week: :sunday, :monday, :tuesday, etc
+    - datetime:    {{year, month, day}, {hour, minute, second}}
+    - `from`:      :min | :max | {day_of_week, datetime}, when this zone starts
+    - `until`:     :min | :max | {day_of_week, datetime}, when this zone ends
   """
  
   defstruct full_name:        "UTC",

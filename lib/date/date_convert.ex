@@ -7,6 +7,13 @@ defimpl Timex.Date.Convert, for: Timex.DateTime do
   alias Timex.DateTime,     as: DateTime
   alias Timex.TimezoneInfo, as: TimezoneInfo
   
+  @doc """
+  Converts a DateTime struct to an Erlang datetime tuple + timezone tuple
+  Example:
+      date = {{2015, 3, 5}, {12, 0, 0}} |> Date.from("America/Chicago")
+      date |> to_gregorian
+      #=> {{2015, 3, 5}, {12, 0, 0}, {5, "CDT"}}
+  """
   def to_gregorian(
     %DateTime{
       :year => y, :month => m, :day => d, :hour => h, :minute => min, :second => sec,
@@ -15,6 +22,10 @@ defimpl Timex.Date.Convert, for: Timex.DateTime do
     # Use the correct abbreviation depending on whether we're in DST or not
     { {y, m, d}, {h, min, sec}, {std / 60, abbrev}}
   end
+
+  @doc """
+  Converts a DateTime struct to an Erlang datetime tuple
+  """
   def to_erlang_datetime(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => sec}) do
     { {y, m, d}, {h, min, sec} }
   end
