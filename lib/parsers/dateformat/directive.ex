@@ -92,7 +92,7 @@ defmodule Timex.Parsers.DateFormat.Directive do
   def get(:AM),          do: %Directive{token: :AM, len: 2, type: :match, match: ["AM", "PM"]}
   # Timezones
   def get(:zname),       do: %Directive{token: :zname, len: 1..4, type: :word}
-  def get(:zoffs),       do: %Directive{token: :zoffs, len: 5..6, type: :word, validate: ~r/^[-+]\d{2}[:]?\d{2}$/}
+  def get(:zoffs),       do: %Directive{token: :zoffs, len: 3..6, type: :word, validate: ~r/^[-+]\d{2}([:]?\d{2})?$/}
   def get(:zoffs_colon), do: %Directive{token: :zoffs_colon, len: 6, type: :word, validate: ~r/^[-+]\d{2}:\d{2}$/}
   def get(:zoffs_sec),   do: %Directive{token: :zoffs_sec, len: 9, type: :word, validate: ~r/^[-+]\d{2}:\d{2}\d{2}$/}
   # Preformatted Directives
