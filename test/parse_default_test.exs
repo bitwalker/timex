@@ -197,9 +197,14 @@ defmodule DateFormatTest.ParseDefault do
     assert { :ok, ^date1 } = parse("2014-08-14T12:34:33+00:00", "{ISO}")
     assert { :ok, ^date1 } = parse("2014-08-14T12:34:33+0000", "{ISO}")
     assert { :ok, ^date1 } = parse("2014-08-14T12:34:33+00", "{ISO}")
-
     assert { :ok, ^date1 } = parse("2014-08-14T12:34:33Z", "{ISOz}")
     assert { :ok, ^date2 } = parse("2014-08-14T12:34:33.199Z", "{ISOz}")
+
+    date3 = Date.from({{2014, 8, 14}, {12, 34, 33}}, "Etc/GMT+5")
+    assert { :ok, ^date3 } = parse("2014-08-14T12:34:33-05:00", "{ISO}")
+    assert { :ok, ^date3 } = parse("2014-08-14T12:34:33-0500", "{ISO}")
+    assert { :ok, ^date3 } = parse("2014-08-14T12:34:33-05", "{ISO}")
+
   end
 
 

@@ -70,7 +70,7 @@ defmodule Timex.Timezone do
     {num, _} = Integer.parse(offset)
     cond do
       num > 100 -> get(trunc(num/100) * -1, for)
-      true      -> get(num, for)
+      true      -> get(num * -1, for)
     end
   end
 
