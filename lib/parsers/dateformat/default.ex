@@ -33,17 +33,24 @@ defmodule Timex.Parsers.DateFormat.DefaultParser do
     when not c in ?0..?9 do
       {"", date_string}
   end
+  # Validate that intermediate characters match, but return an empty string since we do not care
+  # about the parse result from these directives.
+  defp do_parse_directive(date_string, %Directive{type: :char, raw: char}) do
+    char_size = byte_size(char)
+    case date_string do
+      <<^char :: binary-size(char_size), rest ::binary>> -> {"", rest}
+      _     -> {:error, @invalid_input}
+    end
+  end
   # Numeric directives
   defp do_parse_directive(date_string, %Directive{token: token, type: :numeric, pad: pad} = dir) do
     date_chars = date_string |> String.to_char_list
-    # Drop non-numeric characters
-    date_chars = date_chars |> Enum.drop_while(fn c -> (c in @numerics) == false end)
     # Parse padding first
     padding_stripped = date_chars |> strip_padding(pad, dir.pad_type)
-    # Parse value
     case padding_stripped do
       {:error, _} = error -> error
       []                  -> {:error, @invalid_input}
+      [h|_] when h in @numerics == false -> {:error, @invalid_input}
       padding_stripped    ->
         # Extract a numeric value up to the maximum length allowed by dir.len
         chars = extract_value(padding_stripped, dir.len, @numerics)
@@ -63,8 +70,6 @@ defmodule Timex.Parsers.DateFormat.DefaultParser do
   end
   defp do_parse_directive(date_string, %Directive{token: token, type: :word} = dir) do
     date_chars = date_string |> String.to_char_list
-    # Drop leading non-alpha characters.
-    date_chars = date_chars |> Enum.drop_while(&(Enum.member?(@allowed_chars, &1) == false))
     # Extract a word value up to the maximum length allowed by dir.len
     chars      = extract_value(date_chars, dir.len, @allowed_chars)
     len        = length(chars)

@@ -838,7 +838,7 @@ defmodule Timex.Date do
             %TimezoneInfo{} ->
               %{result | :timezone => tz}
             _ ->
-              %{result | :timezone => Timezone.get(tz)}
+              %{result | :timezone => Timezone.get(tz, result)}
           end
         {name, val} when name in [:year, :month, :hour, :minute, :second, :ms] ->
           if validate? do

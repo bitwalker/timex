@@ -29,29 +29,29 @@ defmodule DateFormatTest.ParseDefault do
 
     assert { :ok, ^date0003 } = parse("3", "{YYYY}")
     assert { :ok, ^date0003 } = parse("0003", "{YYYY}")
-    assert { :ok, ^date0003 } = parse("   3", "{YYYY}")
+    assert { :error, "Input string does not match format!" } = parse("   3", "{YYYY}")
     assert { :ok, ^date0003 } = parse("0003", "{0YYYY}")
-    assert { :ok, ^date0003 } = parse("   3", "{_YYYY}")
+    assert { :error, "Input string does not match format!" } = parse("   3", "{_YYYY}")
     assert { :ok, ^date2003 } = parse("3", "{YY}")
     assert { :ok, ^date2003 } = parse("03", "{YY}")
-    assert { :ok, ^date2003 } = parse(" 3", "{YY}")
+    assert { :error, "Input string does not match format!" } = parse(" 3", "{YY}")
     assert { :ok, ^date2003 } = parse("03", "{0YY}")
     assert { :ok, ^date2003 } = parse(" 3", "{_YY}")
 
     assert { :ok, ^date2013 } = parse("20 13", "{C} {YY}")
-    assert { :ok, ^date2013 } = parse("20    13", "{C} {YY}")
+    assert { :error, "Input string does not match format!" } = parse("20    13", "{C} {YY}")
     assert { :ok, ^date1913 } = parse("13 20", "{YY} {C}")
-    assert { :ok, ^date1913 } = parse("13    20", "{YY} {C}")
-    assert {:error, "Unexpected end of string! Starts at:  20"} = parse("0013 20", "{YY} {C}")
-    assert {:error, "Unexpected end of string! Starts at:  00020"} = parse("0013 00020", "{YY} {C}")
-    assert {:error, "Unexpected end of string! Starts at:     20"} = parse("0013    20", "{YY} {C}")
+    assert { :error, "Input string does not match format!" } = parse("13    20", "{YY} {C}")
+    assert { :error, "Input string does not match format!" } = parse("0013 20", "{YY} {C}")
+    assert { :error, "Input string does not match format!"} = parse("0013 00020", "{YY} {C}")
+    assert { :error, "Input string does not match format!"} = parse("0013    20", "{YY} {C}")
   end
 
   test :parse_month do
     date = Date.from({0,3,1})
     assert { :ok, ^date } = parse("3", "{M}")
     assert { :ok, ^date } = parse("03", "{M}")
-    assert { :ok, ^date } = parse(" 3", "{M}")
+    assert { :error, "Input string does not match format!" } = parse(" 3", "{M}")
     assert { :ok, ^date } = parse("03", "{0M}")
     assert { :ok, ^date } = parse(" 3", "{_M}")
   end
@@ -70,10 +70,9 @@ defmodule DateFormatTest.ParseDefault do
 
   test :parse_year_month_day do
     date2013_11 = Date.from({2013,11,8})
-    date2013_01 = Date.from({2013,1,8})
 
     assert { :ok, ^date2013_11 } = parse("2013-11-08", "{YYYY}-{M}-{D}")
-    assert { :ok, ^date2013_01 } = parse("2013- 1- 8", "{YYYY}-{0M}-{0D}")
+    assert { :error, "Input string does not match format!" } = parse("2013- 1- 8", "{YYYY}-{0M}-{0D}")
     assert { :ok, ^date2013_11 } = parse("20131108", "{0YYYY}{0M}{0D}")
   end
 
@@ -98,7 +97,7 @@ defmodule DateFormatTest.ParseDefault do
     assert {:error, "Input string cannot be empty"} = parse("", "{0Mfull}")
     assert {:error, "Input string cannot be empty"} = parse("", " {_Mshort}")
     assert { :ok, %DateTime{month: 4} } = parse("Apr", "{Mfull}")
-    assert {:error, "Unexpected end of string! Starts at: ary"} = parse("January", " {Mshort}")
+    assert {:error, "Input string does not match format!"} = parse("January", " {Mshort}")
   end
 
   test :parse_dates do
@@ -147,7 +146,8 @@ defmodule DateFormatTest.ParseDefault do
     date = Date.epoch()
     assert { :ok, ^date } = parse("0", "{s-epoch}")
     assert { :ok, ^date } = parse("0000000000", "{0s-epoch}")
-    assert { :ok, ^date } = parse("         0", "{_s-epoch}")
+    assert { :error, "Input string does not match format!"} = parse("  0", "{_s-epoch}")
+    assert { :ok, ^date } = parse("  0", "{__s-epoch}")
   end
 
   test :parse_compound_directives do

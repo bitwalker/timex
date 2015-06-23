@@ -90,13 +90,9 @@ defmodule Timex.Parsers.DateFormat.Parser do
   end
 
   defp do_parse(date_string, directives, parser), do: do_parse(date_string, directives, parser, %DateTime{})
-  defp do_parse(<<>>, [], _, %DateTime{timezone: nil} = date), do: {:ok, %{date | :timezone => Timezone.get(:utc)}}
+  defp do_parse(<<>>, [], _, %DateTime{timezone: nil} = date), do: {:ok, %{date | :timezone => Timezone.get(:utc, date)}}
   defp do_parse(<<>>, [], _, %DateTime{} = date),              do: {:ok, date}
   defp do_parse(rest, [], _, _),                  do: {:error, "Unexpected end of string! Starts at: #{rest}"}
-  # Ignore :char directives when parsing
-  defp do_parse(<<_::utf8, date_string::binary>>, [%Directive{type: :char}|rest], parser, date) do
-    do_parse(date_string, rest, parser, date)
-  end
   # Inject component directives of pre-formatted directives.
   defp do_parse(date_string, [%Directive{token: token, type: :format, format: format}|rest], parser, %DateTime{} = date) do
     case format do
@@ -133,6 +129,10 @@ defmodule Timex.Parsers.DateFormat.Parser do
     case parser.parse_directive(date_string, directive) do
       {_, {:error, reason}} ->
         {:error, reason}
+      {_token, {"", date_string}} ->
+        # In cases where the parse result is empty, but no error was produced, this is
+        # taken to mean that the token was required but that the result can be ignored
+        {date_string, date}
       {token, {value, date_string}} ->
         case update_date(date, token, value) do
           {:error, _} = error -> error
