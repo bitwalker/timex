@@ -187,7 +187,7 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
     # Shift the date if this format is in Zulu time
     date = case token do
       token when token in [:iso_8601z, :rfc_822z, :rfc3339z, :rfc_1123z] ->
-        Timezone.convert(date, Timezone.get(:utc))
+        Timezone.convert(date, "UTC")
       _ ->
         date
     end
