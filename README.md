@@ -204,8 +204,8 @@ date  = Date.from({{2013,3,5},{23,25,19}}, "GMT")
 {:ok, ^date} = DateFormat.parse("Tue, 05 Mar 2013 23:25:19 GMT", "{RFC1123}")
 
 # Any preformatted directive ending in `z` will shift the date to UTC/Zulu
-date  = Date.from({{2013,3,5},{23,25,19}}, "Europe/Athens")
-{:ok, ^date} = DateFormat.parse("Tue, 05 Mar 2013 23:25:19 +0200", "{RFC1123z}")
+date  = Date.from({{2013,3,5},{23,25,19}}, "UTC")
+{:ok, ^date} = DateFormat.parse("Tue, 06 Mar 2013 01:25:19 +0200", "{RFC1123z}")
 
 # Simple date format, default parser
 date = Date.from({2013, 3, 5})

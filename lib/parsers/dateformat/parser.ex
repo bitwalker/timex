@@ -97,19 +97,15 @@ defmodule Timex.Parsers.DateFormat.Parser do
   defp do_parse(date_string, [%Directive{token: token, type: :format, format: format}|rest], parser, %DateTime{} = date) do
     case format do
       [tokenizer: tokenizer, format: format_string] ->
-        # When parsing a date string with one of the zulu directives,
-        # shift the date to UTC/Zulu
-        date = case token do
-          token when token in [:iso_8601z, :rfc_822z, :rfc3339z, :rfc_1123z] ->
-            Date.set(date, timezone: Timezone.get(:utc))
-          _ ->
-            date
-        end
         # Tokenize the nested directives and continue parsing
         case tokenizer.tokenize(format_string) do
           {:error, _} = error -> error
           directives ->
-            do_parse(date_string, directives ++ rest, parser, date)
+            case do_parse(date_string, directives ++ rest, parser, date) do
+              # When parsing a date string with one of the zulu directives, shift the date to UTC/Zulu
+              {:ok, result} when token in [:iso8601z, :rfc_822z, :rfc3339z, :rfc_1123z] -> {:ok, Timezone.convert(result, "UTC")}
+              other -> other
+            end
         end
       {:error, _} = error ->
         error

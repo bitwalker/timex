@@ -161,7 +161,7 @@ defmodule DateFormatTest.ParseDefault do
 
     # * `{RFC1123z}`    - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
     assert { :ok, ^date_utc } = parse("Tue, 05 Mar 2013 23:25:19 +0000", "{RFC1123z}")
-    assert { :ok, ^date_utc } = parse("Tue, 05 Mar 2013 23:25:19 +0200", "{RFC1123z}")
+    assert { :ok, ^date_utc } = parse("Tue, 06 Mar 2013 01:25:19 +0200", "{RFC1123z}")
 
     # * `{RFC822}`      - e.g. `Mon, 05 Jun 14 23:20:59 UT`
     date = Date.from({{2014, 6, 5}, {23, 20, 59}}, "UTC")
