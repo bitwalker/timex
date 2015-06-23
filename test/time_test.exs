@@ -105,8 +105,8 @@ defmodule TimeTests do
 
   # Just make sure that Timex.Time.measure is called at least once in the tests
   test :"measure/1" do
-    reversed_list = Enum.to_list(100..1)
-    assert { {mega, secs, micro}, ^reversed_list } = Time.measure(fn -> Enum.reverse(1..100) end)
+    reversed_list = Enum.to_list(100000..1)
+    assert { {mega, secs, micro}, ^reversed_list } = Time.measure(fn -> Enum.reverse(1..100000) end)
     assert mega + secs + micro > 0
   end
 

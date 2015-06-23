@@ -27,7 +27,6 @@ defmodule Timex.Timezone.Local do
       {:unix, _}       -> localtz(:unix, date)
       {:nt}            -> localtz(:win, date)
       {:win32, :nt}    -> localtz(:win, date)
-      
       _                -> raise "Unsupported operating system!"
     end
   end
@@ -98,7 +97,7 @@ defmodule Timex.Timezone.Local do
       # On some systems the string value might be padded with excessive \0 bytes, trim them
       time_zone_name
       |> IO.iodata_to_binary
-      |> String.strip ?\0
+      |> String.strip(?\0)
       |> ZoneDatabase.to_olson
     else
      # Windows 2000 or XP
@@ -121,7 +120,7 @@ defmodule Timex.Timezone.Local do
       # in the dictionary of unique Windows timezone names
       cond do
         tzone == nil -> raise "Could not find Windows time zone configuration!"
-        tzone -> 
+        tzone ->
           timezone = tzone |> IO.iodata_to_binary
           case ZoneDatabase.to_olson(timezone) do
             nil ->
@@ -242,7 +241,7 @@ defmodule Timex.Timezone.Local do
           |> List.last
         case fallback do
           # Well, there are no standard-time zones then, just take the first zone available
-          nil  -> 
+          nil  ->
             last_transition = zone.transitions |> List.last
             {:ok, last_transition.abbreviation}
           # Found a reasonable fallback zone, success?

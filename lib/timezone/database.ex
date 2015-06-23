@@ -3,8 +3,8 @@ defmodule Timex.Timezone.Database do
   This module provides access to the database of timezones.
   """
 
-  {_, olson_mappings}   = Path.join("priv", "standard_to_olson.exs") |> Code.eval_file
-  {_, windows_mappings} = Path.join("priv", "olson_to_win.exs") |> Code.eval_file
+  {olson_mappings, _}   = Path.join("priv", "standard_to_olson.exs") |> Code.eval_file
+  {windows_mappings, _} = Path.join("priv", "olson_to_win.exs") |> Code.eval_file
 
 
   @doc """
