@@ -28,13 +28,12 @@ defmodule TimeTests do
     assert Time.diff(timestamp2, timestamp1, :hours) == 55.587139 / 3600
   end
 
-  test :measure do
-    {{_, _, _}, result} = Time.measure(fn -> :nothing end)
-    assert result == :nothing
-
+  test :"measure/2" do
     {{_, _, _}, result} = Time.measure(fn x -> x end, [:nothing])
     assert result == :nothing
+  end
 
+  test :"measure/3" do
     {{_, _, _}, result} = Time.measure(__MODULE__, :something_to_measure, [:nothing])
     assert result == :nothing
   end
@@ -105,7 +104,7 @@ defmodule TimeTests do
   end
 
   # Just make sure that Timex.Time.measure is called at least once in the tests
-  test :measure do
+  test :"measure/1" do
     reversed_list = Enum.to_list(100..1)
     assert { {mega, secs, micro}, ^reversed_list } = Time.measure(fn -> Enum.reverse(1..100) end)
     assert mega + secs + micro > 0
