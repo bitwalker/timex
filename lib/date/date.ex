@@ -102,10 +102,10 @@ defmodule Timex.Date do
   """
   @spec now(binary) :: DateTime.t
   def now(tz) when is_binary(tz) do
-    now_tuple = calendar_universal_time()
-    case Timezone.get(tz, now_tuple) do
+    {{_,_,_}=date, {h,m,s,ms}} = calendar_universal_time()
+    case Timezone.get(tz, {date, {h,m,s}}) do
       %TimezoneInfo{} = tzinfo ->
-        construct(now_tuple, %TimezoneInfo{}) |> set(timezone: tzinfo)
+        construct({date, {h,m,s,ms}}, %TimezoneInfo{}) |> set(timezone: tzinfo)
       {:error, _} = error ->
         error
     end
