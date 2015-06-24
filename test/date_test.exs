@@ -4,6 +4,30 @@ defmodule DateTests do
 
   alias Timex.Date, as: D
 
+  test :add do
+    date     = Date.from({{2015, 6, 24}, {14, 27, 52}})
+    expected = Date.from({{2015, 7, 2}, {14, 27, 52}})
+    result   = date |> Date.add(Time.to_timestamp(8, :days))
+    assert expected === result
+  end
+
+  test :subtract do
+    date     = Date.from({{2015, 6, 24}, {14, 27, 52}})
+    expected = Date.from({{2015, 6, 16}, {14, 27, 52}})
+    result   = date |> Date.subtract(Time.to_timestamp(8, :days))
+    assert expected === result
+  end
+
+  test :"century/0" do
+    assert 21 === Date.century
+  end
+
+  test :"century/1" do
+    date = Date.from({{2015, 6, 24}, {14, 27, 52}})
+    c = date |> Date.century
+    assert 21 === c
+  end
+
   test :now do
     # We cannot assert matching to a specific value. However, we can still do
     # some sanity checks
