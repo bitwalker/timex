@@ -17,6 +17,7 @@ defmodule Timex.Date do
     * date arithmetic
   """
   require Record
+  alias __MODULE__,         as: Date
   alias Timex.DateTime,     as: DateTime
   alias Timex.Time,         as: Time
   alias Timex.Timezone,     as: Timezone
@@ -413,6 +414,18 @@ defmodule Timex.Date do
   end
 
   @doc """
+  Gets the current century
+
+  ## Example
+
+    iex> Date.century
+    21
+    
+  """
+  @spec century() :: non_neg_integer
+  def century(), do: Date.now |> century
+
+  @doc """
   Given a date, get the century this date is in.
 
   ## Example
@@ -421,9 +434,7 @@ defmodule Timex.Date do
     21
 
   """
-  @spec century(DateTime.t | nil) :: non_neg_integer
-  def century(datetime \\ Date.now)
-
+  @spec century(DateTime.t) :: non_neg_integer
   def century(%DateTime{:year => y}) do
     base_century = div(y, 100)
     years_past   = rem(y, 100)
