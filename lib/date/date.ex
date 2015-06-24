@@ -216,9 +216,9 @@ defmodule Timex.Date do
 
   ## Examples
 
-      epoch()        #=> %DateTime{year: 1970, month: 1 ...}
-      epoch(:secs)   #=> 62167219200
-      epoch(:days)   #=> 719528
+      epoch()           #=> %DateTime{year: 1970, month: 1 ...}
+      epoch(:timestamp) #=> {0,0,0}
+      epoch(:secs)      #=> 62167219200
 
   """
   @spec epoch(:timestamp)   :: timestamp
@@ -226,7 +226,6 @@ defmodule Timex.Date do
 
   def epoch(:timestamp), do: to_timestamp(epoch())
   def epoch(:secs),      do: to_secs(epoch(), :zero)
-  def epoch(:days),      do: to_days(epoch(), :zero)
 
   @doc """
   Construct a date from Erlang's date or datetime value.
@@ -311,7 +310,7 @@ defmodule Timex.Date do
     construct(:calendar.gregorian_seconds_to_datetime(trunc(sec)), %TimezoneInfo{})
   end
   def from(days, :days, :epoch) do
-    construct(:calendar.gregorian_days_to_date(trunc(days) + epoch(:days)), {0,0,0}, %TimezoneInfo{})
+    construct(:calendar.gregorian_days_to_date(trunc(days) + to_days(epoch(), :zero)), {0,0,0}, %TimezoneInfo{})
   end
   def from(days, :days, :zero) do
     construct(:calendar.gregorian_days_to_date(trunc(days)), {0,0,0}, %TimezoneInfo{})
@@ -388,7 +387,7 @@ defmodule Timex.Date do
   @spec to_days(DateTime.t, :epoch | :zero) :: integer
   def to_days(date, reference \\ :epoch)
 
-  def to_days(date, :epoch), do: to_days(date, :zero) - epoch(:days)
+  def to_days(date, :epoch), do: to_days(date, :zero) - to_days(epoch(), :zero)
   def to_days(%DateTime{:year => y, :month => m, :day => d}, :zero) do
     :calendar.date_to_gregorian_days({y, m, d})
   end
