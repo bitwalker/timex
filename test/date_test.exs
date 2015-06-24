@@ -72,7 +72,6 @@ defmodule DateTests do
     assert D.to_secs(epoch) === 0
     assert D.to_days(epoch) === 0
     assert D.to_secs(epoch, :zero) === D.epoch(:secs)
-    assert D.to_days(epoch, :zero) === D.epoch(:days)
     assert D.to_timestamp(epoch) === D.epoch(:timestamp)
   end
 
