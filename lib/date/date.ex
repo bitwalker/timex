@@ -318,26 +318,6 @@ defmodule Timex.Date do
   end
 
   @doc """
-  Multi-purpose conversion function. Converts a date to the specified time
-  interval since Epoch. If you'd like to specify year 0 as a reference date,
-  use one of the to_* functions.
-
-  ## Examples
-
-      date = Date.now
-      Date.convert(date, :secs) + Date.epoch(:secs) == Date.to_secs(date, :zero)  #=> true
-
-  """
-  @spec convert(DateTime.t) :: timestamp
-  @spec convert(DateTime.t, :timestamp)   :: timestamp
-  @spec convert(DateTime.t, :secs | :days) :: integer
-  def convert(date, type \\ :timestamp)
-
-  def convert(date, :timestamp),  do: to_timestamp(date)
-  def convert(date, :secs),       do: to_secs(date)
-  def convert(date, :days),       do: to_days(date)
-
-  @doc """
   Convert a date to a timestamp value consumable by the Time module.
 
   See also `diff/2` if you want to specify an arbitrary reference date.
