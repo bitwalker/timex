@@ -889,14 +889,14 @@ defmodule Timex.Date do
   @doc """
   Calculate time interval between two dates. If the second date comes after the
   first one in time, return value will be positive; and negative otherwise.
-  You must specify a granularity of any of
+  You must specify one of the following units:
 
   :years :months :weeks :days :hours :mins :secs :timestamp 
 
   and the result will be an integer value of those units or a timestamp. 
   """
   @spec diff(DateTime.t, DateTime.t, :timestamp) :: timestamp
-  @spec diff(DateTime.t, DateTime.t, :secs | :days | :weeks | :months | :years) :: integer
+  @spec diff(DateTime.t, DateTime.t, :secs | :mins | :hours | :days | :weeks | :months | :years) :: integer
 
   def diff(this, other, :timestamp) do
     diff(this, other, :secs) |> Time.from(:secs)
