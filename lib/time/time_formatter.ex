@@ -1,63 +1,52 @@
-# WIP. Nothing interesting here
 defmodule Timex.TimeFormatter do
-  defmacrop _MINUTE, do: 60
-  defmacrop _HOUR, do: _MINUTE * 60
-  defmacrop _DAY, do: _HOUR * 24
-  defmacrop _WEEK, do: _DAY * 7
-  defmacrop _MONTH, do: _DAY * 30
-  defmacrop _YEAR, do: _DAY * 365
-  defmacrop _DECADE, do: _YEAR * 10
-  defmacrop _CENTURY, do: _DECADE * 10
-  defmacrop _MILLENNIUM, do: _CENTURY * 10
+  @moduledoc """
+  Handles formatting timestamp values as human readable strings.
+  For formatting timestamps as points in time rather than intervals,
+  use `DateFormat`
+  """
+  alias Timex.Time
+
+  @minute 60
+  @hour   @minute * 60
+  @day    @hour * 24
+  @week   @day * 7
+  @month  @day * 30
+  @year   @day * 365
 
   @doc """
-  Return a binary containing human readable representation of the time interval.
+  Return a human readable string representing the time interval.
 
-  Note that if you'd like to format a point in time rather than time interval,
-  you should use Date.format.
+  # Example
+
+    iex> {1435, 180354, 590264} |> TimeFormatter.format
+    "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds"
+
+
   """
-  def format({mega, seconds, _micro}) do
-    components = []
-    seconds = mega * 1000000 + seconds
-    if seconds >= _MILLENNIUM do
-      components = [{div(seconds, _MILLENNIUM), :millennium}|components]
-      seconds = rem(seconds, _MILLENNIUM)
+  @spec format(Date.timestamp) :: String.t
+  def format({_,_,_} = timestamp), do: timestamp |> deconstruct |> do_format
+
+  defp do_format(components), do: do_format(components, <<>>)
+  defp do_format([], str),    do: str
+  defp do_format([{unit, value}|rest], str) do
+    case str do
+      <<>> -> do_format(rest, "#{value} #{Atom.to_string(unit)}")
+      _    -> do_format(rest, str <> ", #{value} #{Atom.to_string(unit)}")
     end
-    if seconds >= _CENTURY do
-      components = [{div(seconds, _CENTURY), :century}|components]
-      seconds = rem(seconds, _CENTURY)
-    end
-    if seconds >= _DECADE do
-      components = [{div(seconds, _DECADE), :decade}|components]
-      seconds = rem(seconds, _DECADE)
-    end
-    if seconds >= _YEAR do
-      components = [{div(seconds, _YEAR), :year}|components]
-      seconds = rem(seconds, _YEAR)
-    end
-    if seconds >= _MONTH do
-      components = [{div(seconds, _MONTH), :month}|components]
-      seconds = rem(seconds, _MONTH)
-    end
-    if seconds >= _WEEK do
-      components = [{div(seconds, _WEEK), :week}|components]
-      seconds = rem(seconds, _WEEK)
-    end
-    if seconds >= _DAY do
-      components = [{div(seconds, _DAY), :day}|components]
-      seconds = rem(seconds, _DAY)
-    end
-    if seconds >= _HOUR do
-      components = [{div(seconds, _HOUR), :hour}|components]
-      seconds = rem(seconds, _HOUR)
-    end
-    if seconds >= _MINUTE do
-      components = [{div(seconds, _MINUTE), :minute}|components]
-      seconds = rem(seconds, _MINUTE)
-    end
-    if seconds > 0 do
-      components = [{seconds, :second}|components]
-    end
-    components
   end
+
+  defp deconstruct({_, _, _} = ts), do: deconstruct(ts |> Time.to_secs |> trunc, [])
+  defp deconstruct(seconds, components) when seconds > 0 do
+    cond do
+      seconds >= @year  -> deconstruct(rem(seconds, @year), [{:years, div(seconds, @year)} | components])
+      seconds >= @month -> deconstruct(rem(seconds, @month), [{:months, div(seconds, @month)} | components])
+      seconds >= @week  -> deconstruct(rem(seconds, @week), [{:weeks, div(seconds, @week)} | components])
+      seconds >= @day   -> deconstruct(rem(seconds, @day), [{:days, div(seconds, @day)} | components])
+      seconds >= @hour  -> deconstruct(rem(seconds, @hour), [{:hours, div(seconds, @hour)} | components])
+      seconds >= @minute -> deconstruct(rem(seconds, @minute), [{:minutes, div(seconds, @minute)} | components])
+      true -> deconstruct(0, [{:seconds, seconds} | components])
+    end
+  end
+  defp deconstruct(seconds, components) when seconds < 0, do: deconstruct(seconds * -1, components)
+  defp deconstruct(0, components), do: components |> Enum.reverse
 end
