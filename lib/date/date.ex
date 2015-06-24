@@ -420,7 +420,7 @@ defmodule Timex.Date do
 
     iex> Date.century
     21
-    
+
   """
   @spec century() :: non_neg_integer
   def century(), do: Date.now |> century
@@ -1118,7 +1118,7 @@ defmodule Timex.Date do
     }
   end
   defp construct(date, {h, min, sec}, tz), do: construct(date, {h, min, sec, 0}, tz)
-  def construct({date, time}, tz), do: construct(date, time, tz)
+  defp construct({date, time}, tz), do: construct(date, time, tz)
 
   defp validate({year, month, day}) do
     # Check if we got past the last day of the month
