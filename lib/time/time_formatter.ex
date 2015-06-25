@@ -35,18 +35,25 @@ defmodule Timex.TimeFormatter do
     end
   end
 
-  defp deconstruct({_, _, _} = ts), do: deconstruct(ts |> Time.to_secs |> trunc, [])
-  defp deconstruct(seconds, components) when seconds > 0 do
+  defp deconstruct({_, _, micro} = ts), do: deconstruct({ts |> Time.to_secs |> trunc, micro}, [])
+  defp deconstruct({0, 0}, components), do: components |> Enum.reverse
+  defp deconstruct({seconds, us}, components) when seconds > 0 do
     cond do
-      seconds >= @year  -> deconstruct(rem(seconds, @year), [{:years, div(seconds, @year)} | components])
-      seconds >= @month -> deconstruct(rem(seconds, @month), [{:months, div(seconds, @month)} | components])
-      seconds >= @week  -> deconstruct(rem(seconds, @week), [{:weeks, div(seconds, @week)} | components])
-      seconds >= @day   -> deconstruct(rem(seconds, @day), [{:days, div(seconds, @day)} | components])
-      seconds >= @hour  -> deconstruct(rem(seconds, @hour), [{:hours, div(seconds, @hour)} | components])
-      seconds >= @minute -> deconstruct(rem(seconds, @minute), [{:minutes, div(seconds, @minute)} | components])
-      true -> deconstruct(0, [{:seconds, seconds} | components])
+      seconds >= @year   -> deconstruct({rem(seconds, @year), us}, [{:years, div(seconds, @year)} | components])
+      seconds >= @month  -> deconstruct({rem(seconds, @month), us}, [{:months, div(seconds, @month)} | components])
+      seconds >= @week   -> deconstruct({rem(seconds, @week), us}, [{:weeks, div(seconds, @week)} | components])
+      seconds >= @day    -> deconstruct({rem(seconds, @day), us}, [{:days, div(seconds, @day)} | components])
+      seconds >= @hour   -> deconstruct({rem(seconds, @hour), us}, [{:hours, div(seconds, @hour)} | components])
+      seconds >= @minute -> deconstruct({rem(seconds, @minute), us}, [{:minutes, div(seconds, @minute)} | components])
+      true -> deconstruct({0, us}, [{:seconds, seconds} | components])
     end
   end
-  defp deconstruct(seconds, components) when seconds < 0, do: deconstruct(seconds * -1, components)
-  defp deconstruct(0, components), do: components |> Enum.reverse
+  defp deconstruct({seconds, micro}, components) when seconds < 0, do: deconstruct({seconds * -1, micro}, components)
+  defp deconstruct({0, micro}, components) when micro > 0 do
+    msecs = {0, 0, micro} |> Time.abs |> Time.to_msecs
+    cond do
+      msecs >= 1.0 -> deconstruct({0, 0}, [{:milliseconds, msecs} | components])
+      true         -> deconstruct({0, 0}, [{:microseconds, micro} | components])
+    end
+  end
 end
