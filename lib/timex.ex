@@ -8,6 +8,7 @@ defmodule Timex do
       alias Timex.TimezoneInfo
       alias Timex.Timezone
       alias Timex.Date.Convert,          as: DateConvert
+      alias Timex.TimeFormatter,         as: TimeFormat
       alias Timex.DateFormat.Formatters, as: TimexFormatters
       alias Timex.Parsers.DateFormat,    as: TimexParsers
     end
