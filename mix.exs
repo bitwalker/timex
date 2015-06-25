@@ -10,7 +10,10 @@ defmodule Timex.Mixfile do
       deps: deps ]
 
   end
-  def application, do: []
+
+  def application do
+    [included_applications: [:tzdata]]
+  end
 
   defp package do
     [ files: ["lib", "priv", "mix.exs", "README.md", "LICENSE.md"],
@@ -19,10 +22,10 @@ defmodule Timex.Mixfile do
       links: %{ "GitHub": "https://github.com/bitwalker/timex" } ]
   end
 
-  def deps do 
+  def deps do
     [{:tzdata, "~> 0.1.6"},
      {:earmark, "~> 0.1", only: :dev},
      {:ex_doc, "~> 0.5", only: :dev}]
-  end 
+  end
 
 end
