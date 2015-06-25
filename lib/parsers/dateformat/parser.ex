@@ -11,8 +11,12 @@ defmodule Timex.Parsers.DateFormat.Parser do
   alias Timex.Parsers.ParseError
   alias Timex.Parsers.DateFormat.Directive
 
+  # Tokenizes the format string
   defcallback tokenize(format_string :: binary) :: [%Directive{}] | {:error, term}
+  # Given a string and a directive, parses the value for the directive from that string
   defcallback parse_directive(date::binary, directive::%Directive{}) :: {token::atom, {value::term, date_rest::binary} | {:error, term}}
+  # Given a stack of directives, produces a DateTime value representing what was parsed
+  defcallback apply_directives(tokens::[{token::atom, value::term}]) :: {:ok, %DateTime{}} | {:error, term}
 
   @doc false
   defmacro __using__(_opts) do
@@ -89,51 +93,51 @@ defmodule Timex.Parsers.DateFormat.Parser do
       end
   end
 
-  defp do_parse(date_string, directives, parser), do: do_parse(date_string, directives, parser, %DateTime{})
-  defp do_parse(<<>>, [], _, %DateTime{timezone: nil} = date), do: {:ok, %{date | :timezone => Timezone.get(:utc, date)}}
-  defp do_parse(<<>>, [], _, %DateTime{} = date),              do: {:ok, date}
-  defp do_parse(rest, [], _, _),                  do: {:error, "Unexpected end of string! Starts at: #{rest}"}
+  defp do_parse(date_string, directives, parser) do
+    case do_parse(date_string, directives, parser, []) do
+      {:error, _} = error -> error
+      {:ok, tokens}       -> tokens |> Enum.reverse |> parser.apply_directives
+    end
+  end
+  defp do_parse(<<>>, [], _, tokens), do: {:ok, tokens}
+  defp do_parse(rest, [], _, _), do: {:error, "Invalid input string! Invalid input starts at: #{rest}"}
+
   # Inject component directives of pre-formatted directives.
-  defp do_parse(date_string, [%Directive{token: token, type: :format, format: format}|rest], parser, %DateTime{} = date) do
+  defp do_parse(date_string, [%Directive{token: token, type: :format, format: format}|rest], parser, tokens) do
     case format do
       [tokenizer: tokenizer, format: format_string] ->
         # Tokenize the nested directives and continue parsing
         case tokenizer.tokenize(format_string) do
           {:error, _} = error -> error
+          directives when token in [:iso8601z, :rfc_822z, :rfc3339z, :rfc_1123z] ->
+            do_parse(date_string, directives ++ rest, parser, [{:force_utc, true}|tokens])
           directives ->
-            case do_parse(date_string, directives ++ rest, parser, date) do
-              # When parsing a date string with one of the zulu directives, shift the date to UTC/Zulu
-              {:ok, result} when token in [:iso8601z, :rfc_822z, :rfc3339z, :rfc_1123z] -> {:ok, Timezone.convert(result, "UTC")}
-              other -> other
-            end
+            do_parse(date_string, directives ++ rest, parser, tokens)
         end
       {:error, _} = error ->
         error
     end
   end
-  defp do_parse(date_string, [%Directive{} = directive|rest], parser, %DateTime{} = date) do
-    case parse_directive(date_string, directive, parser, date) do
+  defp do_parse(date_string, [%Directive{} = directive|rest], parser, tokens) do
+    case parse_directive(date_string, directive, parser, tokens) do
       {:error, _} = error -> error
-      {date_string, date} -> do_parse(date_string, rest, parser, date)
+      {date_string, tokens} -> do_parse(date_string, rest, parser, tokens)
     end
   end
-  defp do_parse(_date_string, [directive|_rest], _parser, %DateTime{} = _date) do
+  defp do_parse(_date_string, [directive|_rest], _parser, _tokens) do
     {:error, "#{directive} not implemented"}
   end
 
-  defp parse_directive(date_string, %Directive{} = directive, parser, %DateTime{} = date) do
+  defp parse_directive(date_string, %Directive{} = directive, parser, tokens) do
     case parser.parse_directive(date_string, directive) do
       {_, {:error, reason}} ->
         {:error, reason}
       {_token, {"", date_string}} ->
         # In cases where the parse result is empty, but no error was produced, this is
         # taken to mean that the token was required but that the result can be ignored
-        {date_string, date}
+        {date_string, tokens}
       {token, {value, date_string}} ->
-        case update_date(date, token, value) do
-          {:error, _} = error -> error
-          date                -> {date_string, date}
-        end
+        {date_string, [{token, value}|tokens]}
       result ->
         {:error, "Invalid return value from parse_directive: #{result |> Macro.to_string}"}
     end
@@ -245,7 +249,7 @@ defmodule Timex.Parsers.DateFormat.Parser do
 
   # Given a date, a token, and the value for that token, update the
   # date according to the rules for that token and the provided value
-  defp update_date(%DateTime{year: year} = date, token, value) when is_atom(token) do
+  def update_date(%DateTime{year: year} = date, token, value) when is_atom(token) do
     case token do
       # Years
       :century   ->
@@ -350,6 +354,13 @@ defmodule Timex.Parsers.DateFormat.Parser do
           _ ->
             {:error, "#{token} not implemented"}
         end
+      :force_utc ->
+        case date.timezone do
+          nil -> %{date | :timezone => %Timex.TimezoneInfo{}}
+          _   -> Timezone.convert(date, "UTC")
+        end
+      _ ->
+        {:error, "Unknown token: #{token}"}
     end
   end
 

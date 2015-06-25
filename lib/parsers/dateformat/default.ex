@@ -8,11 +8,39 @@ defmodule Timex.Parsers.DateFormat.DefaultParser do
   use Timex.Parsers.DateFormat.Parser
 
   alias Timex.Parsers.DateFormat.Directive
+  alias Timex.DateTime
+  alias Timex.TimezoneInfo
 
   @doc """
   The tokenizer used by this parser.
   """
   defdelegate tokenize(format_string), to: Timex.Parsers.DateFormat.Tokenizers.Default
+
+  @doc """
+  Constructs a DateTime from the parsed tokens
+  """
+  def apply_directives([]),     do: {:ok, %DateTime{}}
+  def apply_directives(tokens) do
+    # If :force_utc exists, make sure it is applied last
+    sorted = tokens
+      |> Enum.with_index
+      |> Enum.sort_by(fn
+           {{:force_utc, _}, _} -> 9999
+           {{_,_}, i} -> i
+         end)
+      |> Enum.map(fn {token, _} -> token end)
+    apply_directives(sorted, %DateTime{})
+  end
+  defp apply_directives([], %DateTime{timezone: nil} = date) do
+    apply_directives([], %{date | :timezone => %TimezoneInfo{}})
+  end
+  defp apply_directives([], %DateTime{} = date), do: {:ok, date}
+  defp apply_directives([{token, value}|tokens], %DateTime{} = date) do
+    case Timex.Parsers.DateFormat.Parser.update_date(date, token, value) do
+      {:error, _} = error -> error
+      updated             -> apply_directives(tokens, updated)
+    end
+  end
 
   @doc """
   Extracts the value for a given directive.

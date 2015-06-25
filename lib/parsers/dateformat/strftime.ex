@@ -16,4 +16,9 @@ defmodule Timex.Parsers.DateFormat.StrftimeParser do
   Extracts the value for a given directive.
   """
   defdelegate parse_directive(date_string, directive), to: Timex.Parsers.DateFormat.DefaultParser
+
+  @doc """
+  Constructs a DateTime from the parsed tokens
+  """
+  defdelegate apply_directives(tokens), to: Timex.Parsers.DateFormat.DefaultParser
 end
