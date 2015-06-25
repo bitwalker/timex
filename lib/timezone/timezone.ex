@@ -62,14 +62,14 @@ defmodule Timex.Timezone do
   def get(<<?+, offset :: binary>>, for) do 
     {num, _} = Integer.parse(offset)
     cond do
-      num > 100 -> get(trunc(num/100), for)
+      num >= 100 -> get(trunc(num/100), for)
       true      -> get(num, for)
     end
   end
   def get(<<?-, offset :: binary>>, for) do
     {num, _} = Integer.parse(offset)
     cond do
-      num > 100 -> get(trunc(num/100) * -1, for)
+      num >= 100 -> get(trunc(num/100) * -1, for)
       true      -> get(num * -1, for)
     end
   end
