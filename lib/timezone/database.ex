@@ -1,6 +1,8 @@
 defmodule Timex.Timezone.Database do
   @moduledoc """
-  This module provides access to the database of timezones.
+  This module is not really intended for use outside of Timex, but it
+  provides a way to map Olson timezone names to Windows timezone names,
+  and vice versa.
   """
 
   {olson_mappings, _}   = Path.join("priv", "standard_to_olson.exs") |> Code.eval_file
@@ -30,7 +32,7 @@ defmodule Timex.Timezone.Database do
   ## Example
 
     iex> Timex.Timezone.Database.olson_to_win("Pacific/Noumea")
-    Central Pacific Standard Time
+    "Central Pacific Standard Time"
 
   """
   Enum.each(windows_mappings, fn {key, value} ->

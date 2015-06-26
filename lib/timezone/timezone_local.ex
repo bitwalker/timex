@@ -1,6 +1,28 @@
 defmodule Timex.Timezone.Local do
   @moduledoc """
-  Handles looking up the local timezone configuration for the current machine.
+  This module is responsible for determining the timezone configuration of the
+  local machine. It determines this from a number of sources, depending on platform,
+  but the order of precedence is as follows:
+
+  ALL:
+  - TZ environment variable. Ignored if nil/empty
+
+  OSX:
+  - /etc/localtime
+  - systemsetup -gettimezone (if admin rights are present)
+
+  UNIX:
+  - /etc/timezone
+  - /etc/sysconfig/clock
+  - /etc/conf.d/clock
+  - /etc/localtime
+  - /usr/local/etc/localtime
+
+  Windows:
+  - SYSTEM registry for the currently configured TimeZoneInformation
+
+  Each location is tried, and if an error is encountered, the next is attempted,
+  until either a successful lookup is performed, or we run out of locations to check.
   """
   alias Timex.DateTime,              as: DateTime
   alias Timex.Date,                  as: Date

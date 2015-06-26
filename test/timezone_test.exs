@@ -26,7 +26,13 @@ defmodule TimezoneTests do
   end
 
   test :local do
-    assert Timezone.local() !== nil
+    local = Timezone.local
+    is_error = case local do
+      %TimezoneInfo{} -> false
+      {:error, _}     -> true
+      _               -> true
+    end
+    assert is_error == false
   end
 
   test :diff do
@@ -34,7 +40,7 @@ defmodule TimezoneTests do
     cst = Timezone.get("America/Chicago", Date.from({{2015, 1, 1}, {12, 0, 0}}))
     cdt = Timezone.get("America/Chicago", Date.from({{2015, 3, 30}, {12, 0, 0}}))
     gmt_plus_two    = Timezone.get(2)
-    gmt_minus_three = Timezone.get(-3) 
+    gmt_minus_three = Timezone.get(-3)
     # How many minutes do I apply to UTC when shifting to CST
     assert Date.from({{2014,2,24},{0,0,0}}, utc) |> Timezone.diff(cst) === -360
     # How many minutes do I apply to UTC when shifting to CDT
@@ -56,8 +62,8 @@ defmodule TimezoneTests do
     gmt_minus_three = Timezone.get(-3)
 
     chicago_noon = %Timex.DateTime{calendar: :gregorian, day: 24, hour: 12, minute: 0, month: 2, ms: 123, second: 0,timezone: cst , year: 2014}
-   
-    dinnertime = Timezone.convert(chicago_noon,utc) 
+
+    dinnertime = Timezone.convert(chicago_noon,utc)
 
     gmt = Date.from({{1960, 10, 14}, {13, 45, 0}}, "Europe/London")
     gmt_to_utc = gmt |> Date.universal

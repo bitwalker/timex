@@ -1,6 +1,16 @@
 defmodule Timex.Timezone do
   @moduledoc """
-  Handles timezone lookups, conversion, diffing, and comparison.
+  This module is used for looking up the timezone information for
+  a given point in time, in the desired zone. Timezones are dependent
+  not only on locale, but the date and time for which you are querying.
+  For instance, the timezone offset from UTC for `Europe/Moscow` is different
+  for March 3rd of 2015, than it was in 2013. These differences are important,
+  and as such, all functions in this module are date/time sensitive, and where
+  omitted, the current date/time are assumed.
+
+  In addition to lookups, this module also does conversion of datetimes from one
+  timezone period to another, and determining the difference between a date in one
+  timezone period and the same date/time in another timezone period.
   """
   alias Timex.Date,           as: Date
   alias Timex.DateTime,       as: DateTime
@@ -59,7 +69,7 @@ defmodule Timex.Timezone do
       get("Etc/GMT+#{offset * -1}", for)
     end
   end
-  def get(<<?+, offset :: binary>>, for) do 
+  def get(<<?+, offset :: binary>>, for) do
     {num, _} = Integer.parse(offset)
     cond do
       num >= 100 -> get(trunc(num/100), for)
@@ -127,8 +137,8 @@ defmodule Timex.Timezone do
     # Calculate the difference between `date`'s timezone, and the provided timezone
     difference = diff(date, tz)
     # Offset the provided date's time by the difference
-    Date.shift(date, mins: difference) 
-    |> Map.put(:timezone, tz) 
+    Date.shift(date, mins: difference)
+    |> Map.put(:timezone, tz)
     |> Map.put(:ms, date.ms)
   end
 
