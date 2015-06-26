@@ -234,12 +234,16 @@ defmodule Timex.Time do
   """
   def now(type \\ :timestamp)
 
-  def now(:timestamp) do
-    :os.timestamp
-  end
-
   def now(type) do
-    convert(now, type)
+    ver = Timex.Utils.get_otp_release
+    cond do
+      ver >= 18 && type == :timestamp -> :erlang.system_time(:micro_seconds) |> from(:usecs)
+      ver >= 18 && type == :usecs     -> :erlang.system_time(:micro_seconds)
+      ver >= 18 && type == :msecs     -> :erlang.system_time(:milli_seconds)
+      ver >= 18 && type == :secs      -> :erlang.system_time(:seconds)
+      type == :timestamp              -> :os.timestamp
+      true                            -> :os.timestamp |> convert(type)
+    end
   end
 
   @doc """

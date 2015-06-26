@@ -2,6 +2,23 @@ defmodule Timex.Utils do
   @moduledoc false
 
   @doc """
+  Determines the current version of OTP running this node. The result is
+  cached for fast lookups in performance-sensitive functions.
+  """
+  def get_otp_release do
+    case Process.get(:current_otp_release) do
+      nil ->
+        case ("#{:erlang.system_info(:otp_release)}" |> Integer.parse) do
+          {ver, _} when is_integer(ver) ->
+            Process.put(:current_otp_release, ver)
+            ver
+          _ ->
+        end
+      ver -> ver
+    end
+  end
+
+  @doc """
   Loads all modules that extend a given module in the current code path.
 
   The convention is that it will fetch modules with the same root namespace,
@@ -9,7 +26,7 @@ defmodule Timex.Utils do
 
   ## Example
 
-    > get_plugins(Timex.Parsers.DateFormat.Parser)
+    iex> Timex.Utils.get_plugins(Timex.Parsers.DateFormat.Parser)
     [Timex.Parsers.DateFormat.DefaultParser]
 
   """
