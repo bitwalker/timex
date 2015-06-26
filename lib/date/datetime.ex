@@ -1,6 +1,6 @@
 defmodule Timex.DateTime do
   alias Timex.DateTime
-  alias Timex.Timezone
+  alias Timex.TimezoneInfo
 
   @derive Access
   defstruct day:      1,
@@ -14,6 +14,6 @@ defmodule Timex.DateTime do
             calendar: :gregorian
 
   def new do
-    %{%DateTime{} | :timezone => Timezone.get(:utc)}
+    %{%DateTime{} | :timezone => %TimezoneInfo{}}
   end
 end
