@@ -1,67 +1,86 @@
 defmodule Timex.Time do
-
-  @usecs_in_sec 1_000_000
-  @usecs_in_msec 1_000
-
-  @msecs_in_sec 1_000
-
-  @secs_in_min 60
-  @secs_in_hour @secs_in_min * 60
-  @secs_in_day @secs_in_hour * 24
-  @secs_in_week @secs_in_day * 7
-
-  @million 1_000_000
+  @moduledoc """
+  This module provides a friendly API for working with Erlang
+  timestamps, i.e. `{megasecs, secs, microsecs}`. In addition,
+  it provides an easy way to wrap the measurement of function
+  execution time (via `measure`).
+  """
 
   @type units :: :usecs | :msecs | :secs | :mins | :hours | :days | :weeks | :hms
   @type quantity :: float
 
-  Enum.each [usecs: @usecs_in_sec, msecs: @msecs_in_sec], fn {type, coef} ->
+  @usecs_in_sec  1_000_000
+  @usecs_in_msec 1_000
+  @msecs_in_sec  1_000
+  @secs_in_min   60
+  @secs_in_hour  @secs_in_min * 60
+  @secs_in_day   @secs_in_hour * 24
+  @secs_in_week  @secs_in_day * 7
+  @million       1_000_000
+
+  @doc """
+  Converts a timestamp to it's value in microseconds
+  """
+  @spec to_usecs(Date.timestamp) :: quantity
+  def to_usecs({mega, sec, micro}), do: (mega * @million + sec) * @million + micro
+  @doc """
+  Converts a timestamp to it's value in milliseconds
+  """
+  @spec to_msecs(Date.timestamp) :: quantity
+  def to_msecs({_, _, _} = ts), do: to_usecs(ts) / @usecs_in_msec
+  @doc """
+  Converts a timestamp to it's value in seconds
+  """
+  @spec to_secs(Date.timestamp) :: quantity
+  def to_secs({_, _, _} = ts), do: to_usecs(ts) / @usecs_in_sec
+  @doc """
+  Converts a timestamp to it's value in minutes
+  """
+  @spec to_mins(Date.timestamp) :: quantity
+  def to_mins(timestamp), do: to_secs(timestamp) / @secs_in_min
+  @doc """
+  Converts a timestamp to it's value in hours
+  """
+  @spec to_hours(Date.timestamp) :: quantity
+  def to_hours(timestamp), do: to_secs(timestamp) / @secs_in_hour
+  @doc """
+  Converts a timestamp to it's value in days
+  """
+  @spec to_days(Date.timestamp) :: quantity
+  def to_days(timestamp), do: to_secs(timestamp) / @secs_in_day
+  @doc """
+  Converts a timestamp to it's value in weeks
+  """
+  @spec to_weeks(Date.timestamp) :: quantity
+  def to_weeks(timestamp), do: to_secs(timestamp) / @secs_in_week
+
+  Enum.each [usecs: 1 / @usecs_in_sec,
+             msecs: 1 / @msecs_in_sec,
+             secs:  1,
+             mins:  @secs_in_min,
+             hours: @secs_in_hour,
+             days:  @secs_in_day,
+             weeks: @secs_in_week], fn {type, coef} ->
     @spec to_usecs(quantity, unquote(type)) :: quantity
-    def to_usecs(value, unquote(type)), do: value * @usecs_in_sec / unquote(coef)
+    def to_usecs(value, unquote(type)), do: do_round(value * unquote(coef) * @usecs_in_sec)
 
     @spec to_msecs(quantity, unquote(type)) :: quantity
-    def to_msecs(value, unquote(type)), do: value * @msecs_in_sec / unquote(coef)
+    def to_msecs(value, unquote(type)), do: do_round(value * unquote(coef) * @msecs_in_sec)
 
     @spec to_secs(quantity, unquote(type)) :: quantity
-    def to_secs(value, unquote(type)),  do: value / unquote(coef)
+    def to_secs(value, unquote(type)),  do: do_round(value * unquote(coef))
 
     @spec to_mins(quantity, unquote(type)) :: quantity
-    def to_mins(value, unquote(type)),  do: value / unquote(coef) / @secs_in_min
+    def to_mins(value, unquote(type)),  do: do_round(value * unquote(coef) / @secs_in_min)
 
     @spec to_hours(quantity, unquote(type)) :: quantity
-    def to_hours(value, unquote(type)), do: value / unquote(coef) / @secs_in_hour
+    def to_hours(value, unquote(type)), do: do_round(value * unquote(coef) / @secs_in_hour)
 
     @spec to_days(quantity, unquote(type)) :: quantity
-    def to_days(value, unquote(type)),  do: value / unquote(coef) / @secs_in_day
+    def to_days(value, unquote(type)),  do: do_round(value * unquote(coef) / @secs_in_day)
 
     @spec to_weeks(quantity, unquote(type)) :: quantity
-    def to_weeks(value, unquote(type)), do: value / unquote(coef) / @secs_in_week
-  end
-
-  Enum.each [secs: 1, mins: @secs_in_min, hours: @secs_in_hour, days: @secs_in_day, weeks: @secs_in_week], fn {type, coef} ->
-    @spec unquote(type)(quantity) :: quantity
-    def unquote(type)(value), do: value * unquote(coef)
-
-    @spec to_usecs(quantity, unquote(type)) :: quantity
-    def to_usecs(value, unquote(type)), do: value * unquote(coef) * @usecs_in_sec
-
-    @spec to_msecs(quantity, unquote(type)) :: quantity
-    def to_msecs(value, unquote(type)), do: value * unquote(coef) * @msecs_in_sec
-
-    @spec to_secs(quantity, unquote(type)) :: quantity
-    def to_secs(value, unquote(type)),  do: value * unquote(coef)
-
-    @spec to_mins(quantity, unquote(type)) :: quantity
-    def to_mins(value, unquote(type)),  do: value * unquote(coef) / @secs_in_min
-
-    @spec to_hours(quantity, unquote(type)) :: quantity
-    def to_hours(value, unquote(type)), do: value * unquote(coef) / @secs_in_hour
-
-    @spec to_days(quantity, unquote(type)) :: quantity
-    def to_days(value, unquote(type)),  do: value * unquote(coef) / @secs_in_day
-
-    @spec to_weeks(quantity, unquote(type)) :: quantity
-    def to_weeks(value, unquote(type)), do: value * unquote(coef) / @secs_in_week
+    def to_weeks(value, unquote(type)), do: do_round(value * unquote(coef) / @secs_in_week)
   end
 
   Enum.each [:to_usecs, :to_msecs, :to_secs, :to_mins, :to_hours, :to_days, :to_weeks], fn name ->
@@ -74,7 +93,7 @@ defmodule Timex.Time do
 
   ## Examples
 
-    iex> to_12hour_clock(23)
+    iex> Timex.Time.to_12hour_clock(23)
     {11, :pm}
 
   """
@@ -84,7 +103,6 @@ defmodule Timex.Time do
       hour when hour < 12       -> {hour, :am}
       hour when hour === 12     -> {12, :pm}
       hour when hour > 12       -> {hour - 12, :pm}
-
     end
   end
 
@@ -93,7 +111,7 @@ defmodule Timex.Time do
 
   ## Examples
 
-    iex> to_24hour_clock(7, :pm)
+    iex> Timex.Time.to_24hour_clock(7, :pm)
     19
 
   """
@@ -106,13 +124,22 @@ defmodule Timex.Time do
     end
   end
 
+  @doc """
+  Converts the given input value and unit to an Erlang timestamp.
+
+  ## Example
+
+    iex> Timex.Time.from(1500, :secs)
+    {0, 1500, 0}
+
+  """
+  @spec from(integer | Date.time, units) :: Date.timestamp
   def from(value, :usecs) do
     value = round(value)
     { sec, micro } = mdivmod(value)
     { mega, sec }  = mdivmod(sec)
     { mega, sec, micro }
   end
-
   def from(value, :msecs), do: from(value * @usecs_in_msec, :usecs)
   def from(value, :secs),  do: from(value * @usecs_in_sec, :usecs)
   def from(value, :mins),  do: from(value * @secs_in_min, :secs)
@@ -120,27 +147,6 @@ defmodule Timex.Time do
   def from(value, :days),  do: from(value * @secs_in_day, :secs)
   def from(value, :weeks), do: from(value * @secs_in_week, :secs)
   def from(value, :hms),   do: from(to_secs(value, :hms), :secs)
-
-  @spec to_usecs({quantity, quantity, quantity}) :: quantity
-  def to_usecs({mega, sec, micro}), do: (mega * @million + sec) * @million + micro
-
-  @spec to_msecs({quantity, quantity, quantity}) :: quantity
-  def to_msecs({_, _, _} = ts), do: to_usecs(ts) / @usecs_in_msec
-
-  @spec to_secs({quantity, quantity, quantity}) :: quantity
-  def to_secs({_, _, _} = ts), do: to_usecs(ts) / @usecs_in_sec
-
-  @spec to_mins({quantity, quantity, quantity}) :: quantity
-  def to_mins(timestamp), do: to_secs(timestamp) / @secs_in_min
-
-  @spec to_hours({quantity, quantity, quantity}) :: quantity
-  def to_hours(timestamp), do: to_secs(timestamp) / @secs_in_hour
-
-  @spec to_days({quantity, quantity, quantity}) :: quantity
-  def to_days(timestamp), do: to_secs(timestamp) / @secs_in_day
-
-  @spec to_weeks({quantity, quantity, quantity}) :: quantity
-  def to_weeks(timestamp), do: to_secs(timestamp) / @secs_in_week
 
   Enum.each [:usecs, :msecs, :secs, :mins, :hours, :days, :weeks, :hms], fn type ->
     def to_timestamp(value, unquote(type)), do: from(value, unquote(type))
@@ -216,10 +222,7 @@ defmodule Timex.Time do
     { mega, sec } = mdivmod(seconds)
     { mega, sec, 0 }
   end
-
-  def epoch(type) do
-    convert(epoch, type)
-  end
+  def epoch(type), do: convert(epoch, type)
 
   @doc """
   Time interval since Epoch.
@@ -346,4 +349,8 @@ defmodule Timex.Time do
   defp mdivmod(initial, a) do
     divmod(initial, a, 1_000_000)
   end
+
+  defp do_round(value) when is_integer(value), do: value
+  defp do_round(value) when is_float(value),   do: Float.round(value, 6)
+
 end
