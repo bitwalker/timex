@@ -301,28 +301,42 @@ defmodule Timex.Time do
 
   """
   @spec measure((() -> any)) :: { Date.timestamp, any }
-  def measure(fun) do
-    measure_result(:timer.tc(fun))
-  end
+  def measure(fun), do: do_measure(fun)
 
   @doc """
   Evaluates apply(fun, args). Otherwise works like measure/1
   """
   @spec measure(fun, [any]) :: { Date.timestamp, any }
-  def measure(fun, args) do
-    measure_result(:timer.tc(fun, args))
-  end
+  def measure(fun, args), do: do_measure(fun, args)
 
   @doc """
   Evaluates apply(module, fun, args). Otherwise works like measure/1
   """
   @spec measure(module, atom, [any]) :: { Date.timestamp, any }
-  def measure(module, fun, args) do
-    measure_result(:timer.tc(module, fun, args))
-  end
+  def measure(module, fun, args), do: do_measure(module, fun, args)
 
-  defp measure_result({micro, ret}) do
-    { to_timestamp(micro, :usecs), ret }
+  defp do_measure(m, f \\ nil, a \\ []) do
+    ver = Timex.Utils.get_otp_release
+    case ver do
+      ver when ver >= 18 ->
+        start_time = :erlang.monotonic_time(:micro_seconds)
+        result = cond do
+          is_function(m) && f == nil             -> apply(m, [])
+          is_function(m) && is_list(f)           -> apply(m, f)
+          is_atom(m) && is_atom(f) && is_list(a) -> apply(m, f, a)
+          true -> {:error, "Invalid arguments for do_measure!"}
+        end
+        end_time   = :erlang.monotonic_time(:micro_seconds)
+        {(end_time - start_time) |> to_timestamp(:usecs), result}
+      _ ->
+        {time, result} = cond do
+          is_function(m) && f == nil             -> :timer.tc(m)
+          is_function(m) && is_list(f)           -> :timer.tc(m, f)
+          is_atom(m) && is_atom(f) && is_list(a) -> :timer.tc(m, f, a)
+          true -> {:error, "Invalid arguments for do_measure!"}
+        end
+        {to_timestamp(time, :usecs), result}
+    end
   end
 
   defp normalize({mega, sec, micro}) do
