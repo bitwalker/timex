@@ -66,9 +66,20 @@ defmodule Timex.Date do
 
   ## Examples
 
-      timezone(2, Date.now)      #=> { 2.0, "EET" }
-      timezone("+2", Date.now)   #=> { 2.0, "EET" }
-      timezone("EET", Date.now)  #=> { 2.0, "EET" }
+    iex> date = #{__MODULE__}.from({2015, 4, 12})
+    iex> tz = #{__MODULE__}.timezone(:utc, date)
+    iex> tz.full_name
+    "UTC"
+
+    iex> date = #{__MODULE__}.from({2015, 4, 12})
+    iex> tz = #{__MODULE__}.timezone("America/Chicago", date)
+    iex> {tz.full_name, tz.abbreviation}
+    {"America/Chicago", "CDT"}
+
+    iex> date = #{__MODULE__}.from({2015, 4, 12})
+    iex> tz = #{__MODULE__}.timezone(+2, date)
+    iex> {tz.full_name, tz.abbreviation}
+    {"Etc/GMT-2", "GMT-2"}
 
   """
   @spec timezone(:local | :utc | number | binary, DateTime.t | nil) :: TimezoneInfo.t
@@ -83,7 +94,8 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.now #=> %DateTime{year: 2013, month: 3, day: 16, hour: 11, minute: 1, second: 12, timezone: %TimezoneInfo{...}}
+    > #{__MODULE__}.now
+    %Timex.DateTime{year: 2015, month: 6, day: 26, hour: 23, minute: 56, second: 12}
 
   """
   @spec now() :: DateTime.t
@@ -96,11 +108,11 @@ defmodule Timex.Date do
 
   ## Examples
 
-    > Date.now("America/Chicago")
-    %DateTime{
-      year: 2013, month: 3, day: 16, ..,
-      timezone: %TimezoneInfo{standard_abbreviation: "CST", ...}
-    }
+    iex> %Timex.DateTime{timezone: tz} = #{__MODULE__}.now("America/Chicago")
+    iex> tz.abbreviation in ["CST", "CDT"]
+    true
+    iex> tz.full_name === "America/Chicago"
+    true
   """
   @spec now(binary) :: DateTime.t
   def now(tz) when is_binary(tz) do
@@ -120,8 +132,10 @@ defmodule Timex.Date do
 
   ## Examples
 
-      now(:secs)   #=> 1363439013
-      now(:days)   #=> 15780
+    > #{__MODULE__}.now(:secs)
+    1363439013
+    > #{__MODULE__}.now(:days)
+    15780
 
   """
   @spec now(:secs | :days) :: integer
@@ -136,7 +150,8 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.local #=> %DateTime{year: 2013, month: 3, day: 16, hour: 11, minute: 1, second: 12, timezone: %TimezoneInfo{...}}
+    > #{__MODULE__}.local
+    %Timex.DateTime{year: 2013, month: 3, day: 16, hour: 11, minute: 1, second: 12, timezone: %TimezoneInfo{}}
 
   """
   @spec local() :: DateTime.t
@@ -167,7 +182,13 @@ defmodule Timex.Date do
   @doc """
   Get current the current datetime in UTC.
 
-  See also `local/0`.
+  See also `local/0`. Delegates to `now/0`, since they are identical in behavior
+
+  ## Examples
+
+    > #{__MODULE__}.universal
+    %Timex.DateTime{timezone: %Timex.TimezoneInfo{full_name: "UTC"}}
+
   """
   @spec universal() :: DateTime.t
   defdelegate universal, to: __MODULE__, as: :now
@@ -179,7 +200,10 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.now |> Date.universal
+    > localdate = Date.local
+    %Timex.DateTime{hour: 5, timezone: %Timex.TimezoneInfo{full_name: "America/Chicago"}}
+    > localdate |> Date.universal
+    %Timex.DateTime{hour: 10, timezone: %Timex.TimezoneInfo{full_name: "UTC"}}
 
   """
   @spec universal(DateTime.t) :: DateTime.t
@@ -192,7 +216,9 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.zero |> Date.to_secs #=> 0
+    iex> date = %Timex.DateTime{year: 0, month: 1, day: 1, timezone: %Timex.TimezoneInfo{}}
+    iex> #{__MODULE__}.zero === date
+    true
 
   """
   @spec zero() :: DateTime.t
@@ -206,7 +232,9 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.epoch |> Date.to_secs #=> 0
+    iex> date = %Timex.DateTime{year: 1970, month: 1, day: 1, timezone: %Timex.TimezoneInfo{}}
+    iex> #{__MODULE__}.epoch === date
+    true
 
   """
   @spec epoch() :: DateTime.t
@@ -217,9 +245,10 @@ defmodule Timex.Date do
 
   ## Examples
 
-      epoch()           #=> %DateTime{year: 1970, month: 1 ...}
-      epoch(:timestamp) #=> {0,0,0}
-      epoch(:secs)      #=> 62167219200
+    iex> #{__MODULE__}.epoch(:timestamp)
+    {0,0,0}
+    iex> #{__MODULE__}.epoch(:secs)
+    62167219200
 
   """
   @spec epoch(:timestamp)   :: timestamp
@@ -238,13 +267,15 @@ defmodule Timex.Date do
   will indicate midnight of that day in the specified timezone (UTC by
   default).
 
+  NOTE: When using `from` the input value is normalized to prevent invalid
+  dates from being accidentally introduced. Use `set` with `validate: false`,
+  or create the %DateTime{} by hand if you do not want normalization.
   ## Examples
 
-      Date.from(:erlang.universaltime)             #=> %DateTime{...}
-      Date.from(:erlang.localtime)                 #=> %Datetime{...}
-      Date.from(:erlang.localtime, :local)         #=> %DateTime{...}
-      Date.from({2014,3,16}, Date.timezone("PST")) #=> %DateTime{...}
-      Date.from({2014,3,16}, "PST")                #=> %DateTime{...}
+    > Date.from(:erlang.universaltime)             #=> %DateTime{...}
+    > Date.from(:erlang.localtime)                 #=> %Datetime{...}
+    > Date.from(:erlang.localtime, :local)         #=> %DateTime{...}
+    > Date.from({2014,3,16}, "America/Chicago")    #=> %DateTime{...}
 
   """
   @spec from(date | datetime) :: dtz
@@ -281,11 +312,9 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.from(13, :secs)          #=> %DateTime{...}
-      Date.from(13, :days, :zero)   #=> %DateTime{...}
-
-      date = Date.from(Time.now, :timestamp) 
-      |> Date.set(:timezone, timezone(:local))      #=> yields the same value as Date.now would
+    > Date.from(13, :secs)
+    > Date.from(13, :days, :zero)
+    > Date.from(Time.now, :timestamp)
 
   """
   @spec from(timestamp, :timestamp) :: DateTime.t
@@ -324,7 +353,8 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.epoch |> Date.to_timestamp #=> {0,0,0}
+    iex> #{__MODULE__}.epoch |> #{__MODULE__}.to_timestamp
+    {0,0,0}
 
   """
   @spec to_timestamp(DateTime.t) :: timestamp
@@ -347,7 +377,8 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.from({{1999, 1, 2}, {12,13,14}}) |> Date.to_secs  #=> 915279194
+    iex> #{__MODULE__}.from({{1999, 1, 2}, {12,13,14}}) |> #{__MODULE__}.to_secs
+    915279194
 
   """
   @spec to_secs(DateTime.t) :: integer
@@ -375,7 +406,8 @@ defmodule Timex.Date do
 
   ## Examples
 
-      to_days(now())  #=> 15780
+    iex> #{__MODULE__}.from({1970, 1, 15}) |> #{__MODULE__}.to_days
+    14
 
   """
   @spec to_days(DateTime.t) :: integer
@@ -390,9 +422,9 @@ defmodule Timex.Date do
   @doc """
   Gets the current century
 
-  ## Example
+  ## Examples
 
-    iex> Date.century
+    iex> #{__MODULE__}.century
     21
 
   """
@@ -402,9 +434,9 @@ defmodule Timex.Date do
   @doc """
   Given a date, get the century this date is in.
 
-  ## Example
+  ## Examples
 
-    iex> Date.century(Date.now)
+    iex> #{__MODULE__}.now |> #{__MODULE__}.century
     21
 
   """
@@ -423,7 +455,8 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.epoch |> Date.weekday  #=> 4 (i.e. Thursday)
+    iex> #{__MODULE__}.epoch |> #{__MODULE__}.weekday
+    4 # (i.e. Thursday)
 
   """
   @spec weekday(DateTime.t) :: weekday
@@ -432,6 +465,11 @@ defmodule Timex.Date do
 
   @doc """
   Returns the ordinal day number of the date.
+
+  ## Examples
+
+    iex> #{__MODULE__}.from({{2015,6,26},{0,0,0}}) |> #{__MODULE__}.day
+    177
   """
   @spec day(DateTime.t) :: daynum
 
@@ -448,8 +486,16 @@ defmodule Timex.Date do
 
   ## Examples
 
-      180 |> Date.from_iso_day       #=> %DateTime{year: 2014, month: 6, day: 7}
-      180 |> Date.from_iso_day(date) #=> <modified date struct where the month and day has been set appropriately>
+    # Creating a DateTime from the given day
+    iex> expected = #{__MODULE__}.from({{2015, 6, 30}, {0,0,0}})
+    iex> #{__MODULE__}.from_iso_day(180) === expected
+    true
+
+    # Shifting a DateTime to the given day
+    iex> date = #{__MODULE__}.from({{2015,6,26}, {12,0,0}})
+    iex> expected = #{__MODULE__}.from({{2015, 6, 30}, {12,0,0}})
+    iex> (#{__MODULE__}.from_iso_day(180, date) === expected)
+    true
   """
   @spec from_iso_day(non_neg_integer, date | nil) :: DateTime.t
   def from_iso_day(day, date \\ nil)
@@ -469,7 +515,8 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.epoch |> Date.iso_week  #=> {1970,1}
+    iex> #{__MODULE__}.epoch |> #{__MODULE__}.iso_week
+    {1970,1}
 
   """
   @spec iso_week(DateTime.t) :: {year, weeknum}
@@ -484,11 +531,16 @@ defmodule Timex.Date do
 
   ## Examples
 
-    day_to_num("Monday")  => 1
-    day_to_num("Mon")     => 1
-    day_to_num("monday")  => 1
-    day_to_num("mon")     => 1
-    day_to_num(:mon)   => 1
+    iex> #{__MODULE__}.day_to_num("Monday")
+    1
+    iex> #{__MODULE__}.day_to_num("monday")
+    1
+    iex> #{__MODULE__}.day_to_num("Mon")
+    1
+    iex> #{__MODULE__}.day_to_num("mon")
+    1
+    iex> #{__MODULE__}.day_to_num(:mon)
+    1
 
   """
   @spec day_to_num(binary | atom()) :: integer
@@ -512,6 +564,13 @@ defmodule Timex.Date do
 
   @doc """
   Get the name of the day corresponding to the provided number
+
+  ## Examples
+
+    iex> #{__MODULE__}.day_name(1)
+    "Monday"
+    iex> #{__MODULE__}.day_name(0)
+    {:error, "Invalid day num: 0"}
   """
   @spec day_name(weekday) :: binary
   @weekdays |> Enum.each fn {name, day_num} ->
@@ -521,6 +580,13 @@ defmodule Timex.Date do
 
   @doc """
   Get the short name of the day corresponding to the provided number
+
+  ## Examples
+
+    iex> #{__MODULE__}.day_shortname(1)
+    "Mon"
+    iex> #{__MODULE__}.day_shortname(0)
+    {:error, "Invalid day num: 0"}
   """
   @spec day_shortname(weekday) :: binary
   @weekdays |> Enum.each fn {name, day_num} ->
@@ -533,12 +599,16 @@ defmodule Timex.Date do
 
   ## Examples
 
-    month_to_num("January") => 1
-    month_to_num("Jan")     => 1
-    month_to_num("january") => 1
-    month_to_num("jan")     => 1
-    month_to_num(:january)  => 1
-
+    iex> #{__MODULE__}.month_to_num("January")
+    1
+    iex> #{__MODULE__}.month_to_num("january")
+    1
+    iex> #{__MODULE__}.month_to_num("Jan")
+    1
+    iex> #{__MODULE__}.month_to_num("jan")
+    1
+    iex> #{__MODULE__}.month_to_num(:jan)
+    1
   """
   @spec month_to_num(binary) :: integer
   @months |> Enum.each fn {month_name, month_num} ->
@@ -565,6 +635,13 @@ defmodule Timex.Date do
 
   @doc """
   Get the name of the month corresponding to the provided number
+
+  ## Examples
+
+    iex> #{__MODULE__}.month_name(1)
+    "January"
+    iex> #{__MODULE__}.month_name(0)
+    {:error, "Invalid month num: 0"}
   """
   @spec month_name(month) :: binary
   @months |> Enum.each fn {name, month_num} ->
@@ -574,6 +651,13 @@ defmodule Timex.Date do
 
   @doc """
   Get the short name of the month corresponding to the provided number
+
+  ## Examples
+
+    iex> #{__MODULE__}.month_name(1)
+    "January"
+    iex> #{__MODULE__}.month_name(0)
+    {:error, "Invalid month num: 0"}
   """
   @spec month_shortname(month) :: binary
   @months |> Enum.each fn {name, month_num} ->
@@ -586,7 +670,8 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.epoch |> Date.iso_triplet  #=> {1970, 1, 4}
+    iex> #{__MODULE__}.epoch |> #{__MODULE__}.iso_triplet
+    {1970, 1, 4}
 
   """
   @spec iso_triplet(DateTime.t) :: {year, weeknum, weekday}
@@ -601,7 +686,9 @@ defmodule Timex.Date do
 
   ## Examples
 
-      {2014, 5, 2} |> Date.from_iso_triplet #=> %DateTime{year: 2014, month: 2, day: 2}
+    iex> expected = #{__MODULE__}.from({2014, 1, 29})
+    iex> #{__MODULE__}.from_iso_triplet({2014, 5, 2}) === expected
+    true
 
   """
   @spec from_iso_triplet(iso_triplet) :: DateTime.t
@@ -625,7 +712,8 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.epoch |> Date.days_in_month  #=> 31
+    iex> #{__MODULE__}.epoch |> #{__MODULE__}.days_in_month
+    31
 
   """
   @spec days_in_month(DateTime.t | {year, month}) :: num_of_days
@@ -654,8 +742,10 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.epoch |> Date.is_leap?  #=> false
-      Date.is_leap?(2012)          #=> true
+    iex> #{__MODULE__}.epoch |> #{__MODULE__}.is_leap?
+    false
+    iex> #{__MODULE__}.is_leap?(2012)
+    true
 
   """
   @spec is_leap?(DateTime.t | year) :: boolean
@@ -667,10 +757,12 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.from({1,1,1}, {1,1,1}) |> Date.is_valid?           #=> true
-      Date.from({12,13,14}) |> Date.is_valid?                 #=> false
-      Date.from({12,12,12, {-1,59,59}}) |> Date.is_valid?     #=> false
-      {{12,12,12},{1,1,1}, Date.timezone()} |> Date.is_valid? #=> true
+    iex> #{__MODULE__}.from({{1,1,1}, {1,1,1}}) |> #{__MODULE__}.is_valid?
+    true
+    iex> %Timex.DateTime{} |> #{__MODULE__}.set([month: 13, validate: false]) |> #{__MODULE__}.is_valid?
+    false
+    iex> %Timex.DateTime{} |> #{__MODULE__}.set(hour: -1) |> #{__MODULE__}.is_valid?
+    false
 
   """
   @spec is_valid?(dtz | DateTime.t) :: boolean
@@ -695,9 +787,12 @@ defmodule Timex.Date do
 
   ## Examples
 
-      {{1,13,44}, {-8,60,61}}
-      |> Date.normalize
-      |> Date.local #=> DateTime[month: 12, day: 31, hour: 0, minute: 59, second: 59, ...]
+    iex> expected = #{__MODULE__}.from({{1, 12, 31}, {0, 59, 59}}, :local)
+    iex> date     = {{1,12,31},{0,59,59}}
+    iex> localtz  = Timex.Timezone.local(date)
+    iex> result   = {{1,12,31},{0,59,59}, localtz} |> #{__MODULE__}.normalize |> #{__MODULE__}.local
+    iex> result === expected
+    true
 
   """
   @spec normalize(dtz) :: DateTime.t
@@ -785,13 +880,20 @@ defmodule Timex.Date do
 
   ## Examples
 
-      Date.now |> Date.set(date: {1,1,1})                   #=> DateTime[year: 1, month: 1, day: 1, ...]
-      Date.now |> Date.set(hour: 0)                         #=> DateTime[hour: 0, ...]
-      Date.now |> Date.set([date: {1,1,1}, hour: 30])       #=> DateTime[year: 1, month: 1, day: 1, hour: 23, ...]
-      Date.now |> Date.set([
-        datetime: {{1,1,1}, {0,0,0}}, date: {2,2,2}
-      ])                                                    #=> DateTime[year: 2, month: 2, day: 2, ...]
-      Date.now |> Date.set([minute: 74, validate: false])   #=> DateTime[minute: 74, ...]
+    iex> now = #{__MODULE__}.epoch
+    iex> #{__MODULE__}.set(now, date: {1,1,1})
+    %Timex.DateTime{year: 1, month: 1, day: 1, hour: 0, minute: 0, second: 0, timezone: %Timex.TimezoneInfo{}, calendar: :gregorian}
+    iex> #{__MODULE__}.set(now, hour: 8)
+    %Timex.DateTime{year: 1970, month: 1, day: 1, hour: 8, minute: 0, second: 0, timezone: %Timex.TimezoneInfo{}, calendar: :gregorian}
+    iex> #{__MODULE__}.set(now, [date: {2013,3,26}, hour: 30])
+    %Timex.DateTime{year: 2013, month: 3, day: 26, hour: 23, minute: 0, second: 0, timezone: %Timex.TimezoneInfo{}, calendar: :gregorian}
+    iex> #{__MODULE__}.set(now, [
+    ...>   datetime: {{2013,3,26}, {12,30,0}},
+    ...>   date: {2014,4,12}
+    ...>])
+    %Timex.DateTime{year: 2014, month: 4, day: 12, hour: 12, minute: 30, second: 0, timezone: %Timex.TimezoneInfo{}, calendar: :gregorian}
+    iex> #{__MODULE__}.set(now, [minute: 74, validate: false])
+    %Timex.DateTime{year: 1970, month: 1, day: 1, hour: 0, minute: 74, second: 0, timezone: %Timex.TimezoneInfo{}, calendar: :gregorian}
 
   """
   @spec set(DateTime.t, list({atom(), term})) :: DateTime.t
@@ -862,14 +964,21 @@ defmodule Timex.Date do
 
   You can optionality specify a granularity of any of
 
-  :years :months :weeks :days :hours :mins :secs :timestamp 
+  :years :months :weeks :days :hours :mins :secs :timestamp
 
-  and the dates will be compared with the cooresponding accuracy. 
+  and the dates will be compared with the cooresponding accuracy.
   The default granularity is :secs.
 
   ## Examples
 
-    Date.compare(date1,date2,:years)
+    iex> date1 = #{__MODULE__}.from({2014, 3, 4})
+    iex> date2 = #{__MODULE__}.from({2015, 3, 4})
+    iex> #{__MODULE__}.compare(date1, date2, :years)
+    -1
+    iex> #{__MODULE__}.compare(date2, date1, :years)
+    1
+    iex> #{__MODULE__}.compare(date1, date1)
+    0
 
   """
   @spec compare(DateTime.t, DateTime.t | :epoch | :zero | :distant_past | :distant_future) :: -1 | 0 | 1
@@ -894,6 +1003,13 @@ defmodule Timex.Date do
 
   @doc """
   Determine if two dates represent the same point in time
+
+  ## Examples
+
+    iex> date1 = #{__MODULE__}.from({2014, 3, 1})
+    iex> date2 = #{__MODULE__}.from({2014, 3, 1})
+    iex> #{__MODULE__}.equal?(date1, date2)
+    true
   """
   @spec equal?(DateTime.t, DateTime.t) :: boolean
   def equal?(this, other), do: compare(this, other) == 0
@@ -903,9 +1019,9 @@ defmodule Timex.Date do
   first one in time, return value will be positive; and negative otherwise.
   You must specify one of the following units:
 
-  :years :months :weeks :days :hours :mins :secs :timestamp 
+  :years :months :weeks :days :hours :mins :secs :timestamp
 
-  and the result will be an integer value of those units or a timestamp. 
+  and the result will be an integer value of those units or a timestamp.
   """
   @spec diff(DateTime.t, DateTime.t, :timestamp) :: timestamp
   @spec diff(DateTime.t, DateTime.t, :secs | :mins | :hours | :days | :weeks | :months | :years) :: integer
@@ -1011,7 +1127,7 @@ defmodule Timex.Date do
       :hours  -> value * 3600
     end
     shifted = from(secs, :secs)
-    # convert back to original tz 
+    # convert back to original tz
     Timezone.convert(shifted,tz)
   end
   def shift(%DateTime{:hour => h, :minute => m, :second => s, :timezone => tz} = date, [days: value]) do

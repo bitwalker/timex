@@ -1,5 +1,9 @@
 defmodule DateTests do
   use ExUnit.Case, async: true
+  doctest Timex.Date
+  doctest Timex.Date.Convert
+  doctest Timex.DateTime
+
   use Timex
 
   test :add do
@@ -235,14 +239,15 @@ defmodule DateTests do
     assert Date.is_valid?(Date.from({{1,1,1}, {23,59,59}}))
     assert Date.is_valid?({{1,1,1}, {1, 1, 1}, Timezone.get(:utc)})
 
-    assert not Date.is_valid?(Date.from({12,13,14}))
-    assert not Date.is_valid?(Date.from({12,12,34}))
-    assert not Date.is_valid?(Date.from({1,0,1}))
-    assert not Date.is_valid?(Date.from({1,1,0}))
-    assert not Date.is_valid?(Date.from({{12,12,12}, {24,0,0}}))
-    assert not Date.is_valid?(Date.from({{12,12,12}, {23,60,0}}))
-    assert not Date.is_valid?(Date.from({{12,12,12}, {23,59,60}}))
-    assert not Date.is_valid?(Date.from({{12,12,12}, {-1,59,59}}))
+    new_date = %DateTime{timezone: %TimezoneInfo{}}
+    assert not Date.is_valid?(new_date |> Date.set([date: {12,13,14}, validate: false]))
+    assert not Date.is_valid?(new_date |> Date.set([date: {12,12,34}, validate: false]))
+    assert not Date.is_valid?(new_date |> Date.set([date: {1,0,1}, validate: false]))
+    assert not Date.is_valid?(new_date |> Date.set([date: {1,1,0}, validate: false]))
+    assert not Date.is_valid?(new_date |> Date.set([datetime: {{12,12,12}, {24,0,0}}, validate: false]))
+    assert not Date.is_valid?(new_date |> Date.set([datetime: {{12,12,12}, {23,60,0}}, validate: false]))
+    assert not Date.is_valid?(new_date |> Date.set([datetime: {{12,12,12}, {23,59,60}}, validate: false]))
+    assert not Date.is_valid?(new_date |> Date.set([datetime: {{12,12,12}, {-1,59,59}}, validate: false]))
     assert Date.is_valid?({{12,12,12}, {1,59,59}, %TimezoneInfo{}})
     assert not Date.is_valid?({{12,12,12}, {-1,59,59}, Timezone.get(:utc)})
   end
