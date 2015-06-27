@@ -47,16 +47,17 @@ defmodule Timex.Date do
 
   # Constants
   @million 1_000_000
-  @weekdays [ 
+  @weekdays [
     {"Monday", 1}, {"Tuesday", 2}, {"Wednesday", 3}, {"Thursday", 4},
     {"Friday", 5}, {"Saturday", 6}, {"Sunday", 7}
   ]
-  @months [ 
+  @months [
     {"January", 1},  {"February", 2},  {"March", 3},
     {"April", 4},    {"May", 5},       {"June", 6},
     {"July", 7},     {"August", 8},    {"September", 9},
     {"October", 10}, {"November", 11}, {"December", 12}
   ]
+  @valid_months 1..12
 
   @doc """
   Get a TimezoneInfo object for the specified offset or name.
@@ -73,9 +74,9 @@ defmodule Timex.Date do
   @spec timezone(:local | :utc | number | binary, DateTime.t | nil) :: TimezoneInfo.t
 
   def timezone(:local, {{_,_,_},{_,_,_}}=datetime), do: Timezone.local(construct(datetime))
-  def timezone(:local, date), do: Timezone.local(date)
-  def timezone(:utc, _),      do: %TimezoneInfo{}
-  def timezone(name, date),   do: Timezone.get(name, date)
+  def timezone(:local, %DateTime{}=date),           do: Timezone.local(date)
+  def timezone(:utc, _),                            do: %TimezoneInfo{}
+  defdelegate timezone(name, datetime),             to: Timezone, as: :get
 
   @doc """
   Get current date.
@@ -169,7 +170,7 @@ defmodule Timex.Date do
   See also `local/0`.
   """
   @spec universal() :: DateTime.t
-  def universal, do: construct(calendar_universal_time(), %TimezoneInfo{})
+  defdelegate universal, to: __MODULE__, as: :now
 
   @doc """
   Convert a date to UTC
@@ -249,7 +250,7 @@ defmodule Timex.Date do
   @spec from(date | datetime) :: dtz
   @spec from(date | datetime, :utc | :local | TimezoneInfo.t | binary) :: dtz
 
-  def from({_,_,_} = date),                        do: from(date, :utc)
+  def from({y,m,d} = date) when is_integer(y) and is_integer(m) and is_integer(d), do: from(date, :utc)
   def from({{_,_,_},{_,_,_}} = datetime),          do: from(datetime, :utc)
   def from({{_,_,_},{_,_,_,_}} = datetime),        do: from(datetime, :utc)
   def from({_,_,_} = date, :utc),                  do: construct({date, {0,0,0}}, %TimezoneInfo{})
@@ -299,10 +300,10 @@ defmodule Timex.Date do
   end
   def from(us, :us,   :epoch) do
     construct(calendar_gregorian_microseconds_to_datetime(us, epoch(:secs)), %TimezoneInfo{})
-  end  
+  end
   def from(us, :us,   :zero) do
     construct(calendar_gregorian_microseconds_to_datetime(us, 0), %TimezoneInfo{})
-  end  
+  end
   def from(sec, :secs, :epoch) do
     construct(:calendar.gregorian_seconds_to_datetime(trunc(sec) + epoch(:secs)), %TimezoneInfo{})
   end
@@ -334,7 +335,6 @@ defmodule Timex.Date do
     sec = to_secs(date)
     { div(sec, @million), rem(sec, @million), 0 }
   end
-
   def to_timestamp(date, :zero) do
     sec = to_secs(date, :zero)
     { div(sec, @million), rem(sec, @million), 0 }
@@ -355,7 +355,6 @@ defmodule Timex.Date do
   def to_secs(date, reference \\ :epoch)
 
   def to_secs(date, :epoch), do: to_secs(date, :zero) - epoch(:secs)
-
   def to_secs(date, :zero) do
     offset = Timex.Timezone.diff(date, %TimezoneInfo{})
     case offset do
@@ -363,10 +362,6 @@ defmodule Timex.Date do
       _ -> utc_to_secs(date) + ( 60 * offset )
     end
   end
-
-  # def to_secs(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => s}, :zero) do
-  #   :calendar.datetime_to_gregorian_seconds({{y, m, d}, {h, min, s}})
-  # end
 
   defp utc_to_secs(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => s}) do
     :calendar.datetime_to_gregorian_seconds({{y, m, d}, {h, min, s}})
@@ -595,7 +590,6 @@ defmodule Timex.Date do
 
   """
   @spec iso_triplet(DateTime.t) :: {year, weeknum, weekday}
-
   def iso_triplet(%DateTime{} = datetime) do
     { iso_year, iso_week } = iso_week(datetime)
     { iso_year, iso_week, weekday(datetime) }
@@ -635,11 +629,23 @@ defmodule Timex.Date do
 
   """
   @spec days_in_month(DateTime.t | {year, month}) :: num_of_days
-  def days_in_month(%DateTime{:year => year, :month => month}) do
+  def days_in_month(%DateTime{:year => year, :month => month}) when year >= 0 and month in @valid_months do
+    :calendar.last_day_of_the_month(year, month)
+  end
+  def days_in_month(year, month) when year >= 0 and month in @valid_months do
     :calendar.last_day_of_the_month(year, month)
   end
   def days_in_month(year, month) do
-    :calendar.last_day_of_the_month(year, month)
+    valid_year?  = year > 0
+    valid_month? = month in @valid_months
+    cond do
+      !valid_year? && valid_month? ->
+        raise ArgumentError, message: "Invalid year passed to days_in_month/2: #{year}"
+      valid_year? && !valid_month? ->
+        raise ArgumentError, message: "Invalid month passed to days_in_month/2: #{month}"
+      true ->
+        raise ArgumentError, message: "Invalid year/month pair passed to days_in_month/2: {#{year}, #{month}}"
+    end
   end
 
   @doc """
@@ -653,7 +659,6 @@ defmodule Timex.Date do
 
   """
   @spec is_leap?(DateTime.t | year) :: boolean
-
   def is_leap?(year) when is_integer(year), do: :calendar.is_leap_year(year)
   def is_leap?(%DateTime{:year => year}),   do: is_leap?(year)
 
@@ -669,7 +674,6 @@ defmodule Timex.Date do
 
   """
   @spec is_valid?(dtz | DateTime.t) :: boolean
-
   def is_valid?({date, time, tz}) do
     :calendar.valid_date(date) and is_valid_time?(time) and is_valid_tz?(tz)
   end
@@ -699,8 +703,8 @@ defmodule Timex.Date do
   @spec normalize(dtz) :: DateTime.t
   @spec normalize(atom(), term) :: DateTime.t
 
-  def normalize({date, time}), do: normalize({date, time, %TimezoneInfo{}})
-  def normalize({date, time, tz}) do
+  def normalize({{_,_,_}=date, time}), do: normalize({date, time, %TimezoneInfo{}})
+  def normalize({{_,_,_}=date, time, tz}) do
     construct(normalize(:date, date), normalize(:time, time), tz)
   end
 
@@ -724,6 +728,11 @@ defmodule Timex.Date do
     min   = normalize(:minute, min)
     sec   = normalize(:second, sec)
     {hour, min, sec}
+  end
+  defp normalize(:time, {hour,min,sec,ms}) do
+    {h,m,s} = normalize(:time, {hour,min,sec})
+    msecs   = normalize(:ms, ms)
+    {h, m, s, msecs}
   end
   defp normalize(:hour, hour) do
     cond do
@@ -786,28 +795,31 @@ defmodule Timex.Date do
 
   """
   @spec set(DateTime.t, list({atom(), term})) :: DateTime.t
-
   def set(date, options) do
-    validate? = options |> List.keyfind(:validate, 0, true)
+    validate? = case options |> List.keyfind(:validate, 0, true) do
+      {:validate, bool} -> bool
+      _                 -> true
+    end
     Enum.reduce options, date, fn option, result ->
       case option do
         {:validate, _} -> result
         {:datetime, {{y, m, d}, {h, min, sec}}} ->
           if validate? do
             %{result |
-              :year =>   normalize(y,   :year),
-              :month =>  normalize(m,   :month),
-              :day =>    normalize(d,   :day),
-              :hour =>   normalize(h,   :hour),
-              :minute => normalize(min, :minute),
-              :second => normalize(sec, :second)
+              :year =>   normalize(:year,   y),
+              :month =>  normalize(:month,  m),
+              :day =>    normalize(:day,    {y,m,d}),
+              :hour =>   normalize(:hour,   h),
+              :minute => normalize(:minute, min),
+              :second => normalize(:second, sec)
             }
           else
             %{result | :year => y, :month => m, :day => d, :hour => h, :minute => min, :second => sec}
           end
         {:date, {y, m, d}} ->
           if validate? do
-            %{result | :year => normalize(:year, y), :month => normalize(:month, m), :day => normalize(:day, {y, m, d})}
+            {yn,mn,dn} = normalize(:date, {y,m,d})
+            %{result | :year => yn, :month => mn, :day => dn}
           else
             %{result | :year => y, :month => m, :day => d}
           end
@@ -1080,7 +1092,9 @@ defmodule Timex.Date do
   defp construct({_,_,_} = date, {_,_,_} = time, nil),       do: construct(date, time, %TimezoneInfo{})
   defp construct({_,_,_} = date, {_,_,_,_} = time, nil),     do: construct(date, time, %TimezoneInfo{})
   defp construct(date, {h, min, sec}, %TimezoneInfo{} = tz), do: construct(date, {h, min, sec, 0}, tz)
-  defp construct({y, m, d}, {h, min, sec, ms}, %TimezoneInfo{} = tz) do
+  defp construct({_,_,_}=date, {_,_,_,_}=time, %TimezoneInfo{} = tz) do
+    {y,m,d}        = normalize(:date, date)
+    {h,min,sec,ms} = normalize(:time, time)
     %DateTime{
       year: y, month: m, day: d,
       hour: h, minute: min, second: sec,
@@ -1088,13 +1102,15 @@ defmodule Timex.Date do
       timezone: tz
     }
   end
-  defp construct({y, m, d}, {h, min, sec, ms}, {_, name}) do
-    %DateTime{
+  defp construct({_,_,_}=date, {_,_,_,_}=time, {_, name}) do
+    {y,m,d}        = normalize(:date, date)
+    {h,min,sec,ms} = normalize(:time, time)
+    dt = %DateTime{
       year: y, month: m, day: d,
       hour: h, minute: min, second: sec,
-      ms: ms,
-      timezone: Timezone.get(name)
+      ms: ms
     }
+    %{dt | :timezone => Timezone.get(name, dt)}
   end
   defp construct(date, {h, min, sec}, tz), do: construct(date, {h, min, sec, 0}, tz)
   defp construct({date, time}, tz), do: construct(date, time, tz)
@@ -1108,9 +1124,7 @@ defmodule Timex.Date do
     {year, month, day}
   end
 
-  defp mod(a, b) do
-    rem(rem(a, b) + b, b)
-  end
+  defp mod(a, b), do: rem(rem(a, b) + b, b)
 
   defp round_month(m) do
     case mod(m, 12) do
@@ -1120,20 +1134,20 @@ defmodule Timex.Date do
   end
 
   defp calendar_universal_time() do
-    {_, _, us} = ts = :os.timestamp
+    {_, _, us} = ts = Timex.Time.now
     {d,{h,min,sec}} = :calendar.now_to_universal_time(ts)
     {d,{h,min,sec,round(us/1000)}}
-  end  
+  end
 
   defp calendar_local_time() do
-    {_, _, us} = ts = :os.timestamp
+    {_, _, us} = ts = Timex.Time.now
     {d,{h,min,sec}} = :calendar.now_to_local_time(ts)
     {d,{h,min,sec,round(us/1000)}}
   end
 
   defp calendar_gregorian_microseconds_to_datetime(us, addseconds) do
     sec = div(us, @million)
-    u = rem(us, @million)
+    u   = rem(us, @million)
     {d,{h,m,s}} = :calendar.gregorian_seconds_to_datetime(sec + addseconds)
     {d,{h,m,s,round(u/1000)}}
   end
