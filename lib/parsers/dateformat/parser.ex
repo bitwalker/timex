@@ -70,7 +70,7 @@ defmodule Timex.Parsers.DateFormat.Parser do
           case date_string do
             nil -> {:error, "Input string cannot be null"}
             ""  -> {:error, "Input string cannot be empty"}
-            _   -> 
+            _   ->
               if Enum.any?(directives, fn dir -> dir.type != :char end) do
                 do_parse(date_string, directives, parser)
               else
@@ -251,6 +251,21 @@ defmodule Timex.Parsers.DateFormat.Parser do
   # date according to the rules for that token and the provided value
   def update_date(%DateTime{year: year} = date, token, value) when is_atom(token) do
     case token do
+      complex when complex in [:iso_8601, :iso_8601z] ->
+        case value do
+          nil -> date
+          {:error, _} = err -> err
+          date_spec ->
+            date
+            |> apply_spec(date_spec, :year)
+            |> apply_spec(date_spec, :month)
+            |> apply_spec(date_spec, :day)
+            |> apply_spec(date_spec, :hour)
+            |> apply_spec(date_spec, :minute)
+            |> apply_spec(date_spec, :second)
+            |> apply_spec(date_spec, :ms)
+            |> apply_spec(date_spec, :timezone)
+        end
       # Years
       :century   ->
         century = Date.century(%{date | :year => year})
@@ -289,7 +304,7 @@ defmodule Timex.Parsers.DateFormat.Parser do
         cond do
           current_day == value -> date
           current_day > value -> Date.shift(date, days: current_day - value)
-          current_day < value -> Date.shift(date, days: value - current_day) 
+          current_day < value -> Date.shift(date, days: value - current_day)
         end
       day when day in [:wdshort, :wdfull] ->
         %{date | :day => Date.day_to_num(value)}
@@ -361,6 +376,28 @@ defmodule Timex.Parsers.DateFormat.Parser do
         end
       _ ->
         {:error, "Unknown token: #{token}"}
+    end
+  end
+
+  defp apply_spec(date, spec, key) when key in [:year, :month, :day, :hour, :minute, :second, :ms] do
+    case Map.get(spec, key) do
+      nil -> date
+      val -> Map.put(date, key, val)
+    end
+  end
+  defp apply_spec(date, spec, :timezone) do
+    case Map.get(spec, :timezone) do
+      nil -> date
+      tz  ->
+        date = case date.timezone do
+          nil -> %{date | :timezone => %Timex.TimezoneInfo{}}
+          _   -> date
+        end
+        case Timezone.get(tz, date) do
+          {:error, _} = err -> err
+          timezone ->
+            %{date | :timezone => timezone}
+        end
     end
   end
 

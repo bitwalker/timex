@@ -183,6 +183,10 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
     end
     do_format(date, dirs, <<result::binary, padding::binary, formatted::binary>>)
   end
+  # Redirect pattern directives with a non-false format to the format type handler
+  defp do_format(date, [%Directive{type: :pattern, format: [tokenizer: _, format: _]} = dir | dirs], result) do
+    do_format(date, [%{dir | :type => :format}|dirs], result)
+  end
   defp do_format(date, [%Directive{token: token, type: :format, format: [tokenizer: tokenizer, format: fmt]} | dirs], result) do
     # Shift the date if this format is in Zulu time
     date = case token do

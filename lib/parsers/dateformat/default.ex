@@ -70,6 +70,24 @@ defmodule Timex.Parsers.DateFormat.DefaultParser do
       _     -> {:error, @invalid_input}
     end
   end
+  # Pattern directives
+  defp do_parse_directive(date_string, %Directive{token: _token, type: :pattern, pattern: pattern}) do
+    case Regex.named_captures(pattern, date_string) do
+      nil ->
+        {:error, @invalid_input}
+      map when is_map(map) ->
+        date = %{}
+               |> apply_map(map, "year")
+               |> apply_map(map, "month")
+               |> apply_map(map, "day")
+               |> apply_map(map, "hour")
+               |> apply_map(map, "minute")
+               |> apply_map(map, "second")
+               |> apply_map(map, "ms")
+               |> apply_map(map, "timezone")
+        {date, ""}
+    end
+  end
   # Numeric directives
   defp do_parse_directive(date_string, %Directive{token: token, type: :numeric, pad: pad} = dir) do
     date_chars = date_string |> String.to_char_list
@@ -169,7 +187,7 @@ defmodule Timex.Parsers.DateFormat.DefaultParser do
     when pad > 0,
     do: str
 
-  # Parse a value from a char list given a max length, and 
+  # Parse a value from a char list given a max length, and
   # a list of valid characters the value can be composed of
   defp extract_value(str, str_len, valid_chars) when is_list(str) do
     Stream.transform(str, 0, fn char, chars_taken ->
@@ -185,6 +203,35 @@ defmodule Timex.Parsers.DateFormat.DefaultParser do
           {:halt, chars_taken}
       end
     end) |> Enum.to_list
+  end
+
+  defp apply_map(date, map, key, default_value \\ nil)
+
+  defp apply_map({:error, _} = err, _, _, _), do: err
+  defp apply_map(date, map, key, default_value) when key in ["year", "month", "day", "hour", "minute", "second", "ms"] do
+    case Map.get(map, key) do
+      nil -> date
+      ""  -> date
+      val ->
+        case {to_int(val), default_value} do
+          {:error, default} when default == nil -> {:error, "Value for `#{key}` is invalid (non-numeric): #{val}"}
+          {:error, default} -> Map.put(date, String.to_atom(key), default)
+          {parsed, _}       -> Map.put(date, String.to_atom(key), parsed)
+        end
+    end
+  end
+  defp apply_map(date, map, "timezone", _) do
+    case Map.get(map, "timezone") do
+      nil -> date
+      val -> Map.put(date, :timezone, val)
+    end
+  end
+
+  defp to_int(str) do
+    case Integer.parse(str) do
+      {n, _} -> n
+      :error -> :error
+    end
   end
 
 end

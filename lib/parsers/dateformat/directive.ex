@@ -1,14 +1,15 @@
 defmodule Timex.Parsers.DateFormat.Directive do
   @moduledoc """
   This module defines parsing directives for all date/time
-  tokens timex knows about. It is composed of a Directive struct, 
-  containing the rules for parsing a given token, and a `get/1` 
+  tokens timex knows about. It is composed of a Directive struct,
+  containing the rules for parsing a given token, and a `get/1`
   function, which fetches a directive for a given token value, i.e. `:year4`.
   """
   alias Timex.DateFormat.Formats
   alias Timex.Parsers.DateFormat.Directive
 
   require Formats
+  require Formats.Regex
 
   @derive Access
   defstruct token: :undefined,
@@ -24,9 +25,9 @@ defmodule Timex.Parsers.DateFormat.Directive do
             # The maximum value of a numeric directive
             max: false,
             # Allows :numeric, :alpha, :match, :format, :char
-            type: :undefined, 
+            type: :undefined,
             # Either false, or a number representing the amount of padding
-            pad: false, 
+            pad: false,
             pad_type: :zero,
             # Can be false, meaning no validation, a function to call which
             # will be passed the parsed value as a string, and should return
@@ -41,6 +42,9 @@ defmodule Timex.Parsers.DateFormat.Directive do
             # Expected format:
             #     [tokenizer: <module>, format: <format string>]
             format: false,
+            # If type: :pattern is not false, this is a regex which fully specifies how
+            # to parse the input string.
+            pattern: false,
             # If this token is not required in the source string
             optional: false,
             # The raw token
@@ -96,8 +100,8 @@ defmodule Timex.Parsers.DateFormat.Directive do
   def get(:zoffs_colon), do: %Directive{token: :zoffs_colon, len: 6, type: :word, validate: ~r/^[-+]\d{2}:\d{2}$/}
   def get(:zoffs_sec),   do: %Directive{token: :zoffs_sec, len: 9, type: :word, validate: ~r/^[-+]\d{2}:\d{2}\d{2}$/}
   # Preformatted Directives
-  def get(:iso_8601),    do: %Directive{token: :iso_8601, type: :format, format: Formats.iso_8601}
-  def get(:iso_8601z),   do: %Directive{token: :iso_8601z, type: :format, format: Formats.iso_8601z}
+  def get(:iso_8601),    do: %Directive{token: :iso_8601, type: :pattern, pattern: Formats.Regex.iso_8601, format: Formats.iso_8601}
+  def get(:iso_8601z),   do: %Directive{token: :iso_8601z, type: :pattern, pattern: Formats.Regex.iso_8601z, format: Formats.iso_8601z}
   def get(:iso_date),    do: %Directive{token: :iso_date, type: :format, format: Formats.iso_date}
   def get(:iso_time),    do: %Directive{token: :iso_time, type: :format, format: Formats.iso_time}
   def get(:iso_week),    do: %Directive{token: :iso_week, type: :format, format: Formats.iso_week}

@@ -50,7 +50,7 @@ defmodule Timex.DateFormat.Formatters.Formatter do
 
   @doc """
   Validates the provided format string, using the provided formatter,
-  or if none is provided, the default formatter. Returns `:ok` when valid, 
+  or if none is provided, the default formatter. Returns `:ok` when valid,
   or `{:error, reason}` if not valid.
   """
   @spec validate(String.t, __MODULE__ | nil) :: :ok | {:error, term}

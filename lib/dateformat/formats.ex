@@ -17,6 +17,36 @@ defmodule Timex.DateFormat.Formats do
   @tokenizer {:tokenizer, Default}
   @strftime  {:tokenizer, Strftime}
 
+  defmodule Regex do
+    defmacro iso_8601 do
+      quote do
+        ~r/(?<year>\d{4})
+           -(?<month>\d{2})
+           -(?<day>\d{2})
+           [T\s]{1}
+           (?<hour>\d{2})
+           :(?<minute>\d{2})
+           :(?<second>\d{2})
+           \.?(?<ms>\d{1,3})?
+           (?<timezone>Z|[-+]\d{2}(:?\d{2})?)/x
+      end
+    end
+
+    defmacro iso_8601z do
+      quote do
+        ~r/(?<year>\d{4})
+           -(?<month>\d{2})
+           -(?<day>\d{2})
+           [T\s]{1}
+           (?<hour>\d{2})
+           :(?<minute>\d{2})
+           :(?<second>\d{2})
+           \.?(?<ms>\d{1,3})?
+           (?<timezone>Z)/x
+      end
+    end
+  end
+
   @doc """
   ISO 8601 date/time format with timezone information.
   Example: `2007-08-13T16:48:01 +0300`
