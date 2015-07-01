@@ -1,20 +1,20 @@
-defmodule Timex.Parsers.DateFormat.DefaultParser do
+defmodule Timex.Parse.DateTime.Parsers.DefaultParser do
   @moduledoc """
   This module is responsible for parsing date strings using
   the default timex formatting syntax.
 
   See `Timex.DateFormat.Formatters.DefaultFormatter` for more info.
   """
-  use Timex.Parsers.DateFormat.Parser
+  use Timex.Parse.DateTime.Parser
 
-  alias Timex.Parsers.DateFormat.Directive
+  alias Timex.Format.DateTime.Directive
   alias Timex.DateTime
   alias Timex.TimezoneInfo
 
   @doc """
   The tokenizer used by this parser.
   """
-  defdelegate tokenize(format_string), to: Timex.Parsers.DateFormat.Tokenizers.Default
+  defdelegate tokenize(format_string), to: Timex.Format.DateTime.Tokenizers.Default
 
   @doc """
   Constructs a DateTime from the parsed tokens
@@ -36,7 +36,7 @@ defmodule Timex.Parsers.DateFormat.DefaultParser do
   end
   defp apply_directives([], %DateTime{} = date), do: {:ok, date}
   defp apply_directives([{token, value}|tokens], %DateTime{} = date) do
-    case Timex.Parsers.DateFormat.Parser.update_date(date, token, value) do
+    case Timex.Parse.DateTime.Parser.update_date(date, token, value) do
       {:error, _} = error -> error
       updated             -> apply_directives(tokens, updated)
     end

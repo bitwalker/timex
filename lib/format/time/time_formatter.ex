@@ -1,4 +1,4 @@
-defmodule Timex.TimeFormatter do
+defmodule Timex.Format.Time.TimeFormatter do
   @moduledoc """
   Handles formatting timestamp values as human readable strings.
   For formatting timestamps as points in time rather than intervals,

@@ -1,4 +1,4 @@
-defmodule Timex.Parsers.DateFormat.ParserState do
+defmodule Timex.Parse.DateTime.ParserState do
   @derive Access
   defstruct col: 0,          # The current column number
             start_index: 0,  # The last index of a starting token

@@ -1,8 +1,8 @@
-defmodule Timex.Parsers.ParseError do
+defmodule Timex.Parse.ParseError do
   @moduledoc """
   Used for errors encountered during date parsing.
   """
-  alias Timex.Parsers.ParseError
+  alias Timex.Parse.ParseError
 
   defexception message: "Invalid input!"
 

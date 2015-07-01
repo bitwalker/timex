@@ -1,10 +1,10 @@
-defmodule Timex.Parsers.DateFormat.Tokenizers.Default do
+defmodule Timex.Format.DateTime.Tokenizers.Default do
   @moduledoc """
   Responsible for tokenizing date/time format strings
   which use the Default formatter.
   """
-  alias Timex.Parsers.DateFormat.ParserState, as: State
-  alias Timex.Parsers.DateFormat.Directive,   as: Directive
+  alias Timex.Parse.DateTime.ParserState, as: State
+  alias Timex.Format.DateTime.Directive,  as: Directive
 
   # These are all the default formatter's directives
   @directives [
@@ -100,7 +100,7 @@ defmodule Timex.Parsers.DateFormat.Tokenizers.Default do
     case get_directive(token) do
       :invalid  -> {:error, "Invalid token beginning at column #{state.start_index}!"}
       {_, %Directive{} = directive} ->
-        state = %{state | 
+        state = %{state |
           :col     => state.col + 1,
           :padding => 0,
           :token   => "",

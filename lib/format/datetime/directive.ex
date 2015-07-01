@@ -1,12 +1,12 @@
-defmodule Timex.Parsers.DateFormat.Directive do
+defmodule Timex.Format.DateTime.Directive do
   @moduledoc """
   This module defines parsing directives for all date/time
   tokens timex knows about. It is composed of a Directive struct,
   containing the rules for parsing a given token, and a `get/1`
   function, which fetches a directive for a given token value, i.e. `:year4`.
   """
-  alias Timex.DateFormat.Formats
-  alias Timex.Parsers.DateFormat.Directive
+  alias Timex.Format.DateTime.Formats
+  alias Timex.Format.DateTime.Directive
 
   require Formats
   require Formats.Regex

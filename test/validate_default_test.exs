@@ -1,5 +1,6 @@
 defmodule DateFormatTest.ValidateDefault do
   use ExUnit.Case
+  use Timex
 
   test :validate do
     assert {:error, "Format string cannot be nil or empty!"} = validate ""
@@ -17,6 +18,6 @@ defmodule DateFormatTest.ValidateDefault do
   end
 
   defp validate(fmt) do
-    Timex.DateFormat.validate(fmt)
+    DateFormat.validate(fmt)
   end
 end

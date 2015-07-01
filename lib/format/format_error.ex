@@ -1,8 +1,8 @@
-defmodule Timex.DateFormat.FormatError do
+defmodule Timex.Format.FormatError do
   @moduledoc """
   Used for errors encountered during date formatting.
   """
-  alias Timex.DateFormat.FormatError
+  alias Timex.Format.FormatError
 
   defexception message: "Invalid format!"
 

@@ -1,10 +1,10 @@
-defmodule Timex.Parsers.DateFormat.Tokenizers.Strftime do
+defmodule Timex.Format.DateTime.Tokenizers.Strftime do
   @moduledoc """
   Responsible for tokenizing date/time format strings
   which use the strftime formatter.
   """
-  alias Timex.Parsers.DateFormat.ParserState, as: State
-  alias Timex.Parsers.DateFormat.Directive,   as: Directive
+  alias Timex.Parse.DateTime.ParserState, as: State
+  alias Timex.Format.DateTime.Directive,  as: Directive
 
   # These are all the strftime formatter's directives
   @directives [

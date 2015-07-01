@@ -27,8 +27,8 @@ defmodule Timex.Timezone.Local do
   alias Timex.DateTime,              as: DateTime
   alias Timex.Date,                  as: Date
   alias Timex.Timezone.Database,     as: ZoneDatabase
-  alias Timex.Parsers.ZoneInfo,      as: ZoneParser
-  alias Timex.Parsers.ZoneInfo.TransitionInfo
+  alias Timex.Parse.ZoneInfo.Parser, as: ZoneParser
+  alias Timex.Parse.ZoneInfo.Parser.TransitionInfo
 
   @_ETC_TIMEZONE      "/etc/timezone"
   @_ETC_SYS_CLOCK     "/etc/sysconfig/clock"

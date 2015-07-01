@@ -2,7 +2,7 @@ defmodule DateFormatTest.FormatDefault do
   use ExUnit.Case, async: true
   use Timex
 
-  alias Timex.DateFormat.Formatters.DefaultFormatter
+  alias Timex.Format.DateTime.Formatters.DefaultFormatter
 
   test :format_year do
     date = Date.from({2013,8,18})

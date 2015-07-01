@@ -32,35 +32,35 @@ defmodule Timex.Utils do
   """
   @spec get_plugins(atom) :: [] | [atom]
   def get_plugins(plugin_type) when is_atom(plugin_type) do
-    type_str   = plugin_type |> Atom.to_char_list
-    namespace  = type_str |> Enum.reverse |> Enum.drop_while(fn c -> c != ?. end) |> Enum.reverse
-    suffix     = (type_str -- namespace) |> List.to_string
-    re         = ~r"#{namespace |> List.to_string |> String.replace(".", "\\.")}[\w\d]+#{suffix}"
-    available_modules |> Enum.reduce([], &load_plugin(re, &1, &2))
-  end
-
-  defp load_plugin(re, module_name, modules) do
-    case Regex.match?(re, module_name) do
-      true  -> do_load_plugin(module_name, modules)
-      false -> modules
+    case Process.get(:timex_plugins) do
+      nil ->
+        plugins = available_modules(plugin_type) |> Enum.reduce([], &load_plugin/2)
+        Process.put(:timex_plugins, plugins)
+        plugins
+      plugins ->
+        plugins
     end
   end
 
-  defp do_load_plugin(module, modules) when is_binary(module) do
-    do_load_plugin(module |> String.to_atom, modules)
-  end
-  defp do_load_plugin(module, modules) when is_atom(module) do
+  defp load_plugin(module, modules) do
     if Code.ensure_loaded?(module), do: [module | modules], else: modules
   end
 
-  defp available_modules do
+  defp available_modules(plugin_type) do
     apps_path = Mix.Project.build_path |> Path.join("lib")
     apps      = apps_path |> File.ls!
     apps
     |> Enum.map(&(Path.join([apps_path, &1, "ebin"])))
-    |> Enum.filter(&File.exists?/1)
-    |> Enum.map(&File.ls!/1)
-    |> List.flatten
-    |> Enum.map(&String.replace(&1, ".beam", ""))
+    |> Enum.map(fn app_path -> app_path |> File.ls! |> Enum.map(&(Path.join(app_path, &1))) end)
+    |> Enum.flat_map(&(&1))
+    |> Enum.filter(&(String.ends_with?(&1, ".beam")))
+    |> Enum.map(fn path ->
+      {:ok, {module, chunks}} = :beam_lib.chunks('#{path}', [:attributes])
+      {module, get_in(chunks, [:attributes, :behaviour])}
+    end)
+    |> Enum.filter(fn {_module, behaviours} ->
+      is_list(behaviours) && plugin_type in behaviours
+    end)
+    |> Enum.map(fn {module, _} -> module end)
   end
 end

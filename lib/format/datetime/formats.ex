@@ -1,4 +1,4 @@
-defmodule Timex.DateFormat.Formats do
+defmodule Timex.Format.DateTime.Formats do
   @moduledoc """
   This module defines all known (by timex) common date/time formats, in macro form.
 
@@ -10,8 +10,8 @@ defmodule Timex.DateFormat.Formats do
   These formats are consumed by the datetime string parsers, by first tokenizing the chosen
   format, then parsing the datetime string using those tokens.
   """
-  alias Timex.Parsers.DateFormat.Tokenizers.Default
-  alias Timex.Parsers.DateFormat.Tokenizers.Strftime
+  alias Timex.Format.DateTime.Tokenizers.Default
+  alias Timex.Format.DateTime.Tokenizers.Strftime
 
   # For now, all preformatted strings will be tokenized using the Default tokenizer.
   @tokenizer {:tokenizer, Default}

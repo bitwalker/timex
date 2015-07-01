@@ -1,4 +1,4 @@
-defmodule Timex.DateFormat.Formatters.DefaultFormatter do
+defmodule Timex.Format.DateTime.Formatters.DefaultFormatter do
   @moduledoc """
   Date formatting language used by default by the `DateFormat` module.
 
@@ -107,13 +107,13 @@ defmodule Timex.DateFormat.Formatters.DefaultFormatter do
   * `{kitchen}`     - e.g. `3:25PM`
 
   """
-  use Timex.DateFormat.Formatters.Formatter
+  use Timex.Format.DateTime.Formatter
 
   alias Timex.DateTime
   alias Timex.Timezone
-  alias Timex.DateFormat.FormatError
-  alias Timex.Parsers.DateFormat.Directive
-  alias Timex.Parsers.DateFormat.Tokenizers.Default, as: Tokenizer
+  alias Timex.Format.FormatError
+  alias Timex.Format.DateTime.Directive
+  alias Timex.Format.DateTime.Tokenizers.Default, as: Tokenizer
 
   @spec tokenize(String.t) :: {:ok, [%Directive{}]} | {:error, term}
   defdelegate tokenize(format_string), to: Tokenizer

@@ -1,4 +1,4 @@
-defmodule Timex.Parsers.ZoneInfo do
+defmodule Timex.Parse.ZoneInfo.Parser do
   @moduledoc """
   This module is responsible for parsing binary zoneinfo files,
   such as those found in /usr/local/zoneinfo.
@@ -9,10 +9,10 @@ defmodule Timex.Parsers.ZoneInfo do
   defmodule Zone do
     @moduledoc """
     Represents the data retreived from a binary tzfile.
-    For details on the tzfile format, see: 
+    For details on the tzfile format, see:
 
       http://www.cstdbill.com/tzdb/tzfile-format.html
-      http://linux.about.com/library/cmd/blcmdl5_tzfile.htm 
+      http://linux.about.com/library/cmd/blcmdl5_tzfile.htm
       https://github.com/eggert/tz/blob/master/tzfile.h
     """
     @derive Access
@@ -25,7 +25,7 @@ defmodule Timex.Parsers.ZoneInfo do
 
   defmodule Header do
     @moduledoc false
-              
+
     # Six big-endian 4-8 byte integers
     @derive Access
     defstruct utc_count: 0,        # count of UTC/local indicators
@@ -130,7 +130,7 @@ defmodule Timex.Parsers.ZoneInfo do
     txs = indices
           |> Enum.map(&(Enum.at(txinfos, &1)))
           |> Enum.zip(tzfile.transitions)
-          |> Enum.map(fn {info, time} -> 
+          |> Enum.map(fn {info, time} ->
             put_in(info, [:starts_at], time)
           end)
     do_parse_abbreviations(rest, header, %{tzfile | :transitions => txs})
@@ -139,7 +139,7 @@ defmodule Timex.Parsers.ZoneInfo do
   defp do_parse_abbreviations(data, %Header{abbrev_length: len} = header, tzfile) do
     {abbrevs, rest} = parse_array(data, len, &parse_char/1)
     txinfos = Enum.map(tzfile.transitions, fn tx ->
-      abbrev = abbrevs 
+      abbrev = abbrevs
         |> Enum.drop(tx.abbrev_index)
         |> Enum.take_while(fn c -> c > 0 end)
       %{tx | :abbreviation => "#{abbrev}"}

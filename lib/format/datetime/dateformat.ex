@@ -1,4 +1,4 @@
-defmodule Timex.DateFormat do
+defmodule Timex.Format.DateTime.DateFormat do
   @moduledoc """
   Date formatting and parsing.
 
@@ -10,10 +10,10 @@ defmodule Timex.DateFormat do
   module. One can also implement custom formatters for use with this module.
   """
   alias Timex.DateTime
-  alias Timex.DateFormat.Formatters.Formatter
-  alias Timex.DateFormat.Formatters.StrftimeFormatter
-  alias Timex.Parsers.DateFormat.Parser
-  alias Timex.Parsers.DateFormat.StrftimeParser
+  alias Timex.Format.DateTime.Formatter
+  alias Timex.Format.DateTime.Formatters.StrftimeFormatter
+  alias Timex.Parse.DateTime.Parser
+  alias Timex.Parse.DateTime.Parsers.StrftimeParser
 
   @doc """
   Converts date values to strings according to the given template (aka format string).

@@ -3,14 +3,12 @@ defmodule Timex do
     quote do
       alias Timex.DateTime
       alias Timex.Date
-      alias Timex.DateFormat
       alias Timex.Time
       alias Timex.TimezoneInfo
       alias Timex.Timezone
-      alias Timex.Date.Convert,          as: DateConvert
-      alias Timex.TimeFormatter,         as: TimeFormat
-      alias Timex.DateFormat.Formatters, as: TimexFormatters
-      alias Timex.Parsers.DateFormat,    as: TimexParsers
+      alias Timex.Format.DateTime.DateFormat
+      alias Timex.Date.Convert, as: DateConvert
+      alias Timex.Format.Time.TimeFormatter, as: TimeFormat
     end
   end
   @moduledoc File.read!("README.md")

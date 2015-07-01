@@ -1,12 +1,12 @@
-defmodule Timex.DateFormat.Formatters.Formatter do
+defmodule Timex.Format.DateTime.Formatter do
   use Behaviour
 
   alias Timex.Date
   alias Timex.Time
   alias Timex.DateTime
-  alias Timex.DateFormat.FormatError
-  alias Timex.DateFormat.Formatters.DefaultFormatter
-  alias Timex.Parsers.DateFormat.Directive
+  alias Timex.Format.FormatError
+  alias Timex.Format.DateTime.Formatters.DefaultFormatter
+  alias Timex.Format.DateTime.Directive
 
   defcallback tokenize(format_string :: String.t) :: {:ok, [%Directive{}]} | {:error, term}
   defcallback format(date :: %DateTime{}, format_string :: String.t)  :: {:ok, String.t} | {:error, term}
@@ -15,9 +15,9 @@ defmodule Timex.DateFormat.Formatters.Formatter do
   @doc false
   defmacro __using__(_opts) do
     quote do
-      @behaviour Timex.DateFormat.Formatters.Formatter
+      @behaviour Timex.Format.DateTime.Formatter
 
-      import Timex.DateFormat.Formatters.Formatter, only: [format_token: 2]
+      import Timex.Format.DateTime.Formatter, only: [format_token: 2]
     end
   end
 

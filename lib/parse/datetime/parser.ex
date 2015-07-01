@@ -1,4 +1,4 @@
-defmodule Timex.Parsers.DateFormat.Parser do
+defmodule Timex.Parse.DateTime.Parser do
   @moduledoc """
   This is the base plugin behavior for all Timex date/time string parsers.
   """
@@ -8,8 +8,10 @@ defmodule Timex.Parsers.DateFormat.Parser do
   alias Timex.Time
   alias Timex.DateTime
   alias Timex.Timezone
-  alias Timex.Parsers.ParseError
-  alias Timex.Parsers.DateFormat.Directive
+  alias Timex.Parse.ParseError
+  alias Timex.Format.DateTime.Directive
+  alias Timex.Parse.DateTime.Parsers.DefaultParser
+  alias Timex.Parse.DateTime.Parser
 
   # Tokenizes the format string
   defcallback tokenize(format_string :: binary) :: [%Directive{}] | {:error, term}
@@ -21,9 +23,9 @@ defmodule Timex.Parsers.DateFormat.Parser do
   @doc false
   defmacro __using__(_opts) do
     quote do
-      @behaviour Timex.Parsers.DateFormat.Parser
+      @behaviour Timex.Parse.DateTime.Parser
 
-      import Timex.Parsers.DateFormat.Parser
+      import Timex.Parse.DateTime.Parser
 
         @whitespace    [32, ?\t, ?\n, ?\r]
         @numerics      ?0..?9 |> Enum.to_list
@@ -48,7 +50,7 @@ defmodule Timex.Parsers.DateFormat.Parser do
   @spec parse(binary, binary) :: {:ok, %DateTime{}} | {:error, term}
   def parse(date_string, format_string)
     when is_binary(date_string) and is_binary(format_string),
-    do: parse(date_string, format_string, Timex.Parsers.DateFormat.DefaultParser)
+    do: parse(date_string, format_string, DefaultParser)
 
   @doc """
   Parses a date/time string using the provided parser. Must implement the
@@ -60,7 +62,7 @@ defmodule Timex.Parsers.DateFormat.Parser do
     %Date{year: 2014, month: 7, day: 29, hour: 0, minute: 20, second: 41, ms: 196, tz: %Timezone{name: "CST"}}
 
   """
-  @spec parse(binary, binary, Timex.Parsers.DateFormat.Parser) :: {:ok, %DateTime{}} | {:error, term}
+  @spec parse(binary, binary, Parser) :: {:ok, %DateTime{}} | {:error, term}
   def parse(date_string, format_string, parser)
     when is_binary(date_string) and is_binary(format_string)
     do
@@ -83,8 +85,8 @@ defmodule Timex.Parsers.DateFormat.Parser do
   @doc """
   Same as `parse/2` and `parse/3`, but raises on error.
   """
-  @spec parse!(String.t, String.t, Timex.Parsers.DateFormat.Parser | nil) :: %DateTime{} | no_return
-  def parse!(date_string, format_string, parser \\ Timex.Parsers.DateFormat.DefaultParser)
+  @spec parse!(String.t, String.t, Parser | nil) :: %DateTime{} | no_return
+  def parse!(date_string, format_string, parser \\ DefaultParser)
     when is_binary(date_string) and is_binary(format_string)
     do
       case parse(date_string, format_string, parser) do
