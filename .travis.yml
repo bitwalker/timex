@@ -5,6 +5,9 @@ otp_release:
 elixir:
   - 1.0.0
 env: MIX_ENV=all
+after_script:
+  - MIX_ENV=docs mix deps.get
+  - MIX_ENV=docs mix inch.report
 notifications:
   email:
     - paulschoenfelder@gmail.com

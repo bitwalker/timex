@@ -25,7 +25,8 @@ defmodule Timex.Mixfile do
   def deps do
     [{:tzdata, "~> 0.1.6"},
      {:earmark, "~> 0.1", only: :dev},
-     {:ex_doc, "~> 0.5", only: :dev}]
+     {:ex_doc, "~> 0.5", only: :dev},
+     {:inch_ex, only: :docs}]
   end
 
 end
