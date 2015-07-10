@@ -92,14 +92,14 @@ defmodule Timex.Parse.DateTime.Parsers.DefaultParser do
   defp do_parse_directive(date_string, %Directive{token: token, type: :numeric, pad: pad} = dir) do
     date_chars = date_string |> String.to_char_list
     # Parse padding first
-    padding_stripped = date_chars |> strip_padding(pad, dir.pad_type)
+    {padding, padding_stripped} = date_chars |> strip_padding(pad, dir.pad_type)
     case padding_stripped do
       {:error, _} = error -> error
       []                  -> {:error, @invalid_input}
       [h|_] when h in @numerics == false -> {:error, @invalid_input}
       padding_stripped    ->
         # Extract a numeric value up to the maximum length allowed by dir.len
-        chars = extract_value(padding_stripped, dir.len, @numerics)
+        chars = extract_value(padding_stripped, dir.len, @numerics, padding)
         # Convert to numeric value
         len = length(chars)
         padding_stripped = padding_stripped |> Enum.drop(len)
@@ -155,7 +155,7 @@ defmodule Timex.Parse.DateTime.Parsers.DefaultParser do
   # If 0 is given as padding, do nothing
   defp strip_padding(str, 0, _)
     when is_list(str),
-    do: str
+    do: {0, str}
   # If we reach the end of the input string before
   # we trim all the padding, return an error.
   defp strip_padding([], pad, _)
@@ -164,32 +164,39 @@ defmodule Timex.Parse.DateTime.Parsers.DefaultParser do
   # Start trimming off padding, but pass along the source string as well
   defp strip_padding(str, pad, pad_type)
     when is_list(str),
-    do: strip_padding(str, str, pad, pad_type)
+    do: strip_padding({0, str}, str, pad, pad_type)
   # If we hit 0, return the stripped string
-  defp strip_padding(str, _, 0, _),
-    do: str
+  defp strip_padding({count, str}, _, 0, _),
+    do: {count, str}
   # If we hit the end of the string before the
   # we trim all the padding, return an error.
-  defp strip_padding([], _, _, _),
+  defp strip_padding({_,[]}, _, _, _),
     do: {:error, "Unexpected end of string!"}
   # Trim off leading zeros
-  defp strip_padding([h|rest], str, pad, :zero)
+  defp strip_padding({count, [h|rest]}, str, pad, :zero)
     when pad > 0 and h == ?0,
-    do: strip_padding(rest, str, pad - 1, :zero)
+    do: strip_padding({count + 1, rest}, str, pad - 1, :zero)
   # Trim off leading spaces
-  defp strip_padding([h|rest], str, pad, :space)
+  defp strip_padding({count, [h|rest]}, str, pad, :space)
     when pad > 0 and h == 32,
-    do: strip_padding(rest, str, pad - 1, :space)
+    do: strip_padding({count + 1, rest}, str, pad - 1, :space)
   # If the first character is not padding, and is the same
   # as the source string's first character, there is no padding
   # to strip.
-  defp strip_padding([h|_], [h|_] = str, pad, _)
+  defp strip_padding({count, [h|_]}, [h|_] = str, pad, _)
     when pad > 0,
-    do: str
+    do: {count, str}
 
   # Parse a value from a char list given a max length, and
   # a list of valid characters the value can be composed of
-  defp extract_value(str, str_len, valid_chars) when is_list(str) do
+  defp extract_value(str, str_len, valid_chars, padding \\ 0) when is_list(str) do
+    str_len = case str_len do
+      :word                            -> :word
+      lo..hi when lo <= (hi - padding) -> lo..(hi-padding)
+      lo..hi when lo > (hi - padding)  -> 0
+      num when (num - padding) > 0     -> (num - padding)
+      _                                -> 0
+    end
     Stream.transform(str, 0, fn char, chars_taken ->
       valid_char? = Enum.member?(valid_chars, char)
       case {char, str_len} do
