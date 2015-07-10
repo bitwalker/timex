@@ -1,4 +1,4 @@
-defmodule Timex.Format.DateTime.DateFormat do
+defmodule Timex.DateFormat do
   @moduledoc """
   Date formatting and parsing.
 
