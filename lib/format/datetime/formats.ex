@@ -27,7 +27,7 @@ defmodule Timex.Format.DateTime.Formats do
            (?<hour>\d{2})
            :(?<minute>\d{2})
            :(?<second>\d{2})
-           \.?(?<ms>\d{1,3})?
+           \.?(?<fractional>\d{1,})?
            (?<timezone>Z|[-+]\d{2}(:?\d{2})?)/x
       end
     end
@@ -41,7 +41,7 @@ defmodule Timex.Format.DateTime.Formats do
            (?<hour>\d{2})
            :(?<minute>\d{2})
            :(?<second>\d{2})
-           \.?(?<ms>\d{1,3})?
+           \.?(?<fractional>\d{1,})?
            (?<timezone>Z)/x
       end
     end

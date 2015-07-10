@@ -84,6 +84,7 @@ defmodule Timex.Parse.DateTime.Parsers.DefaultParser do
                |> apply_map(map, "minute")
                |> apply_map(map, "second")
                |> apply_map(map, "ms")
+               |> apply_map(map, "fractional")
                |> apply_map(map, "timezone")
         {date, ""}
     end
@@ -221,9 +222,21 @@ defmodule Timex.Parse.DateTime.Parsers.DefaultParser do
       ""  -> date
       val ->
         case {to_int(val), default_value} do
-          {:error, default} when default == nil -> {:error, "Value for `#{key}` is invalid (non-numeric): #{val}"}
+          {:error, nil}     -> {:error, "Value for `#{key}` is invalid (non-numeric): #{val}"}
           {:error, default} -> Map.put(date, String.to_atom(key), default)
           {parsed, _}       -> Map.put(date, String.to_atom(key), parsed)
+        end
+    end
+  end
+  defp apply_map(date, map, "fractional", default_value) do
+    case Map.get(map, "fractional") do
+      nil -> date
+      ""  -> date
+      val ->
+        case {to_float("0.#{val}"), default_value} do
+          {:error, nil}     -> {:error, "Value for `fractional` is invalid (non-numeric): #{val}"}
+          {:error, default} -> Map.put(date, :ms, default)
+          {parsed, _}       -> Map.put(date, :ms, (1_000*parsed) |> Float.round |> trunc)
         end
     end
   end
@@ -236,6 +249,12 @@ defmodule Timex.Parse.DateTime.Parsers.DefaultParser do
 
   defp to_int(str) do
     case Integer.parse(str) do
+      {n, _} -> n
+      :error -> :error
+    end
+  end
+  defp to_float(str) do
+    case Float.parse(str) do
       {n, _} -> n
       :error -> :error
     end
