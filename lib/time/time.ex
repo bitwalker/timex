@@ -234,16 +234,16 @@ defmodule Timex.Time do
   """
   def now(type \\ :timestamp)
 
-  def now(type) do
-    ver = Timex.Utils.get_otp_release
-    cond do
-      ver >= 18 && type == :timestamp -> :erlang.system_time(:micro_seconds) |> from(:usecs)
-      ver >= 18 && type == :usecs     -> :erlang.system_time(:micro_seconds)
-      ver >= 18 && type == :msecs     -> :erlang.system_time(:milli_seconds)
-      ver >= 18 && type == :secs      -> :erlang.system_time(:seconds)
-      type == :timestamp              -> :os.timestamp
-      true                            -> :os.timestamp |> convert(type)
-    end
+  case Timex.Utils.get_otp_release do
+    ver when ver >= 18 ->
+      def now(:timestamp), do: :erlang.system_time(:micro_seconds) |> from(:usecs)
+      def now(:usecs),     do: :erlang.system_time(:micro_seconds)
+      def now(:msecs),     do: :erlang.system_time(:milli_seconds)
+      def now(:secs),      do: :erlang.system_time(:seconds)
+      def now(type),       do: now(:timestamp) |> convert(type)
+    _ ->
+      def now(:timestamp), do: :os.timestamp
+      def now(type),       do: :os.timestamp |> convert(type)
   end
 
   @doc """
@@ -315,10 +315,9 @@ defmodule Timex.Time do
   @spec measure(module, atom, [any]) :: { Date.timestamp, any }
   def measure(module, fun, args), do: do_measure(module, fun, args)
 
-  defp do_measure(m, f \\ nil, a \\ []) do
-    ver = Timex.Utils.get_otp_release
-    case ver do
-      ver when ver >= 18 ->
+  case Timex.Utils.get_otp_release do
+    ver when ver >= 18 ->
+      defp do_measure(m, f \\ nil, a \\ []) do
         start_time = :erlang.monotonic_time(:micro_seconds)
         result = cond do
           is_function(m) && f == nil             -> apply(m, [])
@@ -328,7 +327,9 @@ defmodule Timex.Time do
         end
         end_time   = :erlang.monotonic_time(:micro_seconds)
         {(end_time - start_time) |> to_timestamp(:usecs), result}
-      _ ->
+      end
+    _ ->
+      defp do_measure(m, f \\ nil, a \\ []) do
         {time, result} = cond do
           is_function(m) && f == nil             -> :timer.tc(m)
           is_function(m) && is_list(f)           -> :timer.tc(m, f)
@@ -336,7 +337,7 @@ defmodule Timex.Time do
           true -> {:error, "Invalid arguments for do_measure!"}
         end
         {to_timestamp(time, :usecs), result}
-    end
+      end
   end
 
   defp normalize({mega, sec, micro}) do
