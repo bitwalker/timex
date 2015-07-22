@@ -1,13 +1,12 @@
 language: elixir
-otp_release:
-  - 17.0
-  - 17.1
 elixir:
-  - 1.0.0
+  - 1.0.5
+otp_release:
+  - 17.4
 env: MIX_ENV=all
 after_script:
-  - MIX_ENV=docs mix deps.get
+  - mix deps.get --only docs
   - MIX_ENV=docs mix inch.report
 notifications:
-  email:
+  recipients:
     - paulschoenfelder@gmail.com
