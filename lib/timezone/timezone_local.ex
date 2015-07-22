@@ -190,8 +190,8 @@ defmodule Timex.Timezone.Local do
         |> List.first
         case match do
           m when m != nil ->
-            [_, tz, _] = m |> String.split "\""
-            {:ok, tz |> String.replace " ", "_"}
+            [_, tz, _] = String.split(m, "\"")
+            {:ok, String.replace(tz, " ", "_")}
           _ ->
             nil
         end
