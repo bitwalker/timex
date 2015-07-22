@@ -84,9 +84,9 @@ defmodule Timex.Format.DateTime.Tokenizers.Default do
   defp do_tokenize(<<>>, %State{start_index: start_index}, status)
     when status != :next,
     do: {:error, "Unclosed directive starting at column #{start_index}"}
-  defp do_tokenize(<<?{, _format :: binary>>, %State{col: col}, status)
+  defp do_tokenize(<<?{, format :: binary>>, %State{col: col}, status)
     when status != :next,
-    do: {:error, "Invalid nesting of directives at column #{col}: #{_format}"}
+    do: {:error, "Invalid nesting of directives at column #{col}: #{format}"}
   defp do_tokenize(<<?}, _format :: binary>>, %State{col: col}, status)
     when status != :token,
     do: {:error, "Missing open brace for closing brace at column #{col}!"}
