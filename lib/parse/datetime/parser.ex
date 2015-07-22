@@ -341,25 +341,11 @@ defmodule Timex.Parse.DateTime.Parser do
         end
       # Timezones
       :zoffs ->
-        # If timezone is not nil, then we know it was set
-        # by a preformatted directive, so do not overrule that value
-        case date.timezone do
-          nil ->
-            zone_date = {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
-            %{date | :timezone => Timezone.get(value, zone_date)}
-          _   ->
-            date
-        end
+        zone_date = {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
+        %{date | :timezone => Timezone.get(value, zone_date)}
       :zname ->
-        # If timezone is not nil, then we know it was set
-        # by a preformatted directive, so do not overrule that value
-        case date.timezone do
-          nil ->
-            zone_date = {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
-            %{date | :timezone => Timezone.get(value, zone_date)}
-          _   ->
-            date
-        end
+        zone_date = {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
+        %{date | :timezone => Timezone.get(value, zone_date)}
       tz when tz in [:zoffs_colon, :zoffs_sec] ->
         case value do
           <<?-, h1::utf8, h2::utf8, _::binary>> ->

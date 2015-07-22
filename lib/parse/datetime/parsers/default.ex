@@ -115,10 +115,10 @@ defmodule Timex.Parse.DateTime.Parsers.DefaultParser do
         end
     end
   end
-  defp do_parse_directive(date_string, %Directive{token: token, type: :word} = dir) do
+  defp do_parse_directive(date_string, %Directive{token: token, type: :word, allowed_chars: allowed_chars} = dir) do
     date_chars = date_string |> String.to_char_list
     # Extract a word value up to the maximum length allowed by dir.len
-    chars      = extract_value(date_chars, dir.len, @allowed_chars)
+    chars      = extract_value(date_chars, dir.len, allowed_chars)
     len        = length(chars)
     date_chars = date_chars |> Enum.drop(len)
     # Validate that the word value is of the correct length

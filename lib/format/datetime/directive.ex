@@ -11,6 +11,11 @@ defmodule Timex.Format.DateTime.Directive do
   require Formats
   require Formats.Regex
 
+  @lower_alpha   ?a..?z |> Enum.to_list
+  @upper_alpha   ?A..?Z |> Enum.to_list
+  @numerics      ?0..?9 |> Enum.to_list
+  @alphanumerics (@lower_alpha ++ @upper_alpha ++ @numerics)
+
   @derive Access
   defstruct token: :undefined,
             # The number of characters this directive can occupy
@@ -48,7 +53,9 @@ defmodule Timex.Format.DateTime.Directive do
             # If this token is not required in the source string
             optional: false,
             # The raw token
-            raw: ""
+            raw: "",
+            # Characters allowed when parsing :word directives. Defaults to alpha-numeric
+            allowed_chars: @alphanumerics
 
   @doc """
   Gets a parsing directive for the given token name, where the token name
@@ -95,10 +102,10 @@ defmodule Timex.Format.DateTime.Directive do
   def get(:am),          do: %Directive{token: :am, len: 2, type: :match, match: ["am", "pm"]}
   def get(:AM),          do: %Directive{token: :AM, len: 2, type: :match, match: ["AM", "PM"]}
   # Timezones
-  def get(:zname),       do: %Directive{token: :zname, len: 1..4, type: :word}
-  def get(:zoffs),       do: %Directive{token: :zoffs, len: 3..6, type: :word, validate: ~r/^[-+]\d{2}([:]?\d{2})?$/}
-  def get(:zoffs_colon), do: %Directive{token: :zoffs_colon, len: 6, type: :word, validate: ~r/^[-+]\d{2}:\d{2}$/}
-  def get(:zoffs_sec),   do: %Directive{token: :zoffs_sec, len: 9, type: :word, validate: ~r/^[-+]\d{2}:\d{2}\d{2}$/}
+  def get(:zname),       do: %Directive{token: :zname, len: :word, type: :word, allowed_chars: [?\\, ?_|@alphanumerics]}
+  def get(:zoffs),       do: %Directive{token: :zoffs, len: 3..6, type: :word, allowed_chars: [?-,?+,?:|@numerics], validate: ~r/^[-+]\d{2}([:]?\d{2})?$/}
+  def get(:zoffs_colon), do: %Directive{token: :zoffs_colon, len: 6, type: :word, allowed_chars: [?-,?+,?:|@numerics], validate: ~r/^[-+]\d{2}:\d{2}$/}
+  def get(:zoffs_sec),   do: %Directive{token: :zoffs_sec, len: 9, type: :word, allowed_chars: [?-,?+,?:|@numerics], validate: ~r/^[-+]\d{2}:\d{2}\d{2}$/}
   # Preformatted Directives
   def get(:iso_8601),    do: %Directive{token: :iso_8601, type: :pattern, pattern: Formats.Regex.iso_8601, format: Formats.iso_8601}
   def get(:iso_8601z),   do: %Directive{token: :iso_8601z, type: :pattern, pattern: Formats.Regex.iso_8601z, format: Formats.iso_8601z}
