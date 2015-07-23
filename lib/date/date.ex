@@ -372,6 +372,10 @@ defmodule Timex.Date do
 
   @doc """
   Convert a date to an integer number of seconds since Epoch or year 0.
+  With `to_secs/3`, you can also specify an option `utc: false | true`,
+  which controls whether the DateTime is converted to UTC prior to calculating
+  the number of seconds from the reference date. By default, UTC conversion is
+  enabled.
 
   See also `diff/2` if you want to specify an arbitrary reference date.
 
@@ -383,16 +387,19 @@ defmodule Timex.Date do
   """
   @spec to_secs(DateTime.t) :: integer
   @spec to_secs(DateTime.t, :epoch | :zero) :: integer
-  def to_secs(date, reference \\ :epoch)
+  @spec to_secs(DateTime.t, :epoch | :zero, [utc: false | true]) :: integer
+  def to_secs(date, reference \\ :epoch, options \\ [utc: true])
 
-  def to_secs(date, :epoch), do: to_secs(date, :zero) - epoch(:secs)
-  def to_secs(date, :zero) do
+  def to_secs(date, :epoch, utc: true), do: to_secs(date, :zero) - epoch(:secs)
+  def to_secs(date, :zero, utc: true) do
     offset = Timex.Timezone.diff(date, %TimezoneInfo{})
     case offset do
       0 -> utc_to_secs(date)
       _ -> utc_to_secs(date) + ( 60 * offset )
     end
   end
+  def to_secs(date, :epoch, utc: false), do: to_secs(date, :zero, utc: false) - epoch(:secs)
+  def to_secs(date, :zero, utc: false), do: utc_to_secs(date)
 
   defp utc_to_secs(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => s}) do
     :calendar.datetime_to_gregorian_seconds({{y, m, d}, {h, min, s}})
@@ -1119,16 +1126,14 @@ defmodule Timex.Date do
   def shift(date, [{_, 0}]),               do: date
   def shift(date, [timestamp: {0,0,0}]),   do: date
   def shift(date, [timestamp: timestamp]), do: add(date, timestamp)
-  def shift(%DateTime{:timezone => tz} = date, [{type, value}]) when type in [:secs, :mins, :hours] do
-    secs = to_secs(date)
+  def shift(%DateTime{} = date, [{type, value}]) when type in [:secs, :mins, :hours] do
+    secs = to_secs(date, :epoch, utc: false)
     secs = secs + case type do
       :secs   -> value
       :mins   -> value * 60
       :hours  -> value * 3600
     end
-    shifted = from(secs, :secs)
-    # convert back to original tz
-    Timezone.convert(shifted,tz)
+    from(secs, :secs)
   end
   def shift(%DateTime{:hour => h, :minute => m, :second => s, :timezone => tz} = date, [days: value]) do
     days = to_days(date)

@@ -107,13 +107,13 @@ defmodule Timex.Timezone do
   end
 
   # Gets a timezone for a DateTime struct
-  def get(timezone, %DateTime{} = for) do
+  def get(timezone, %DateTime{} = dt) do
     case Tzdata.zone_exists?(timezone) do
       false ->
         case @abbreviations |> Enum.member?(timezone) do
           true ->
             # Lookup the real timezone for this abbreviation and date
-            seconds_from_zeroyear = for |> Date.to_secs(:zero)
+            seconds_from_zeroyear = dt |> Date.to_secs(:zero)
             case lookup_timezone_by_abbreviation(timezone, seconds_from_zeroyear) do
               {:error, _}           -> {:error, "No timezone found for: #{timezone}"}
               {:ok, {name, period}} -> tzdata_to_timezone(period, name)
@@ -122,7 +122,7 @@ defmodule Timex.Timezone do
             {:error, "No timezone found for: #{timezone}"}
         end
       true  ->
-        seconds_from_zeroyear = for |> Date.to_secs(:zero)
+        seconds_from_zeroyear = dt |> Date.to_secs(:zero)
         [period | _] = Tzdata.periods_for_time(timezone, seconds_from_zeroyear, :wall)
         period |> tzdata_to_timezone(timezone)
     end
@@ -133,13 +133,27 @@ defmodule Timex.Timezone do
   """
   @spec convert(date :: DateTime.t, tz :: TimezoneInfo.t | String.t) :: DateTime.t
 
-  def convert(date, %TimezoneInfo{} = tz) do
+  def convert(date, %TimezoneInfo{full_name: name} = tz) do
     # Calculate the difference between `date`'s timezone, and the provided timezone
     difference = diff(date, tz)
     # Offset the provided date's time by the difference
-    Date.shift(date, mins: difference)
-    |> Map.put(:timezone, tz)
-    |> Map.put(:ms, date.ms)
+    shifted = Date.shift(date, mins: difference) |> Map.put(:timezone, tz)
+    # Check the shifted datetime to make sure it's in the right zone
+    seconds_from_zeroyear = shifted |> Date.to_secs(:zero, utc: false)
+    [period | _] = Tzdata.periods_for_time(name, seconds_from_zeroyear, :wall)
+    case period |> tzdata_to_timezone(name) do
+      # No change, we're valid
+      ^tz         ->
+        shifted
+        |> Map.put(:ms, date.ms)
+      # The shift put us in a new timezone, so shift by the updated
+      # difference, and set the zone
+      new_zone    ->
+        difference = diff(shifted, new_zone)
+        Date.shift(shifted, mins: difference)
+        |> Map.put(:timezone, new_zone)
+        |> Map.put(:ms, date.ms)
+    end
   end
 
   def convert(date, tz) when is_binary(tz) do

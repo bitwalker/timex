@@ -87,6 +87,15 @@ defmodule TimezoneTests do
     assert %DateTime{hour: 17, ms: 123} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, ms: 123, timezone: gmt_minus_three} |> Timezone.convert(gmt_plus_two)
   end
 
+  test :converting_across_zone_boundaries do
+    utc_date = Date.from(1394344799, :secs)
+    cst_date = utc_date |> Timezone.convert("America/Chicago")
+
+    assert ^utc_date = Date.from({{2014,3,9}, {5,59,59}})
+    assert ^cst_date = Date.from({{2014,3,8}, {23,59,59}}, "America/Chicago")
+    assert ^utc_date = cst_date |> Timezone.convert("UTC")
+  end
+
   test :parse_tzfile do
     # TZIF Version 1
     chicago = System.cwd |> Path.join("test/include/tzif/America/Chicago")
