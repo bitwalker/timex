@@ -12,7 +12,7 @@ defmodule Timex.Mixfile do
   end
 
   def application do
-    [included_applications: [:tzdata, :combine]]
+    [included_applications: [:tzdata, :combine], timezone: nil]
   end
 
   defp package do
