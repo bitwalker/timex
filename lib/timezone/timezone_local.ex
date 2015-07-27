@@ -44,7 +44,7 @@ defmodule Timex.Timezone.Local do
 
   def lookup(), do: Date.now |> lookup
   def lookup(%DateTime{} = date) do
-    tz = Application.get_env(:timex, :timezone)
+    tz = Application.get_env(:timex, :local_timezone)
     if tz == nil do
       tz = case :os.type() do
         {:unix, :darwin} -> localtz(:osx, date)
@@ -53,7 +53,7 @@ defmodule Timex.Timezone.Local do
         {:win32, :nt}    -> localtz(:win, date)
         _                -> raise "Unsupported operating system!"
       end
-      Application.put_env(:timex, :timezone, tz)
+      Application.put_env(:timex, :local_timezone, tz)
     end
     tz
   end
