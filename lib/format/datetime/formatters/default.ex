@@ -1,4 +1,4 @@
-defmodule Timex.Format.DateTime.Formatters.DefaultFormatter do
+defmodule Timex.Format.DateTime.Formatters.Default do
   @moduledoc """
   Date formatting language used by default by the `DateFormat` module.
 
@@ -40,7 +40,7 @@ defmodule Timex.Format.DateTime.Formatters.DefaultFormatter do
   * `{D}`       - day number (1..31)
   * `{Dord}`    - ordinal day of the year (1..366)
   * `{WDmon}`   - weekday, Monday first (1..7, no padding)
-  * `{WDsun}`   - weekday, Sunday first (0..6, no padding)
+  * `{WDsun}`   - weekday, Sunday first (1..7, no padding)
   * `{WDshort}` - abbreviated weekday name (Mon..Sun, no padding)
   * `{WDfull}`  - full weekday name (Monday..Sunday, no padding)
 
@@ -110,10 +110,8 @@ defmodule Timex.Format.DateTime.Formatters.DefaultFormatter do
   use Timex.Format.DateTime.Formatter
 
   alias Timex.DateTime
-  alias Timex.Timezone
   alias Timex.Format.FormatError
-  alias Timex.Format.DateTime.Directive
-  alias Timex.Format.DateTime.Tokenizers.Default, as: Tokenizer
+  alias Timex.Parse.DateTime.Tokenizers.Default, as: Tokenizer
 
   @spec tokenize(String.t) :: {:ok, [%Directive{}]} | {:error, term}
   defdelegate tokenize(format_string), to: Tokenizer
@@ -128,15 +126,12 @@ defmodule Timex.Format.DateTime.Formatters.DefaultFormatter do
 
   @spec format(%DateTime{}, String.t) :: {:ok, String.t} | {:error, term}
   def format(%DateTime{} = date, format_string) do
-    case Tokenizer.tokenize(format_string) do
-      {:error, _} = error ->
-        error
-      directives when is_list(directives) ->
-        if Enum.any?(directives, fn dir -> dir.type != :char end) do
-          do_format(date, directives, <<>>)
-        else
-          {:error, "There were no formatting directives in the provided string."}
-        end
+    case tokenize(format_string) do
+      {:ok, []} ->
+        {:error, "There were no formatting directives in the provided string."}
+      {:ok, dirs} when is_list(dirs) ->
+        do_format(date, dirs, <<>>)
+      {:error, reason} -> {:error, {:format, reason}}
     end
   end
 
@@ -147,76 +142,24 @@ defmodule Timex.Format.DateTime.Formatters.DefaultFormatter do
   @spec format(%DateTime{}, String.t, atom) :: {:ok, String.t} | {:error, term}
   def format(%DateTime{} = date, format_string, tokenizer) do
     case tokenizer.tokenize(format_string) do
-      {:error, _} = error ->
-        error
-      directives when is_list(directives) ->
-        if Enum.any?(directives, fn dir -> dir.type != :char end) do
-          do_format(date, directives, <<>>)
-        else
-          {:error, "There were no formatting directives in the provided string."}
-        end
+      {:ok, []} ->
+        {:error, "There were no formatting directives in the provided string."}
+      {:ok, dirs} when is_list(dirs) ->
+        do_format(date, dirs, <<>>)
+      {:error, reason} -> {:error, {:format, reason}}
     end
   end
-
 
   defp do_format(_date, [], result),             do: {:ok, result}
   defp do_format(_date, _, {:error, _} = error), do: error
-  defp do_format(date, [%Directive{type: :char, token: char} | dirs], result) when is_binary(char) do
+  defp do_format(date, [%Directive{type: :literal, value: char} | dirs], result) when is_binary(char) do
     do_format(date, dirs, <<result::binary, char::binary>>)
   end
-  defp do_format(date, [%Directive{type: :char, token: char} | dirs], result) do
-    do_format(date, dirs, <<result::binary, char::utf8>>)
-  end
-  defp do_format(date, [%Directive{token: token, type: :numeric, pad: false} | dirs], result) do
-    formatted = format_token(token, date)
-    do_format(date, dirs, <<result::binary, formatted::binary>>)
-  end
-  defp do_format(date, [%Directive{token: token, type: :numeric, pad: pad, pad_type: pad_type, len: len_spec} | dirs], result) do
-    formatted = format_token(token, date)
-    len       = String.length(formatted)
-    padding   = case len_spec do
-      ^len                  -> <<>>
-      _..hi                 -> build_padding(len, hi, pad_char(pad_type), pad)
-      :word                 -> pad_char(pad_type) |> String.duplicate(pad)
-      hi when is_number(hi) -> build_padding(len, hi, pad_char(pad_type), pad)
-      _                     -> {:error, "Invalid numeric length specification: #{len_spec}"}
-    end
-    do_format(date, dirs, <<result::binary, padding::binary, formatted::binary>>)
-  end
-  # Redirect pattern directives with a non-false format to the format type handler
-  defp do_format(date, [%Directive{type: :pattern, format: [tokenizer: _, format: _]} = dir | dirs], result) do
-    do_format(date, [%{dir | :type => :format}|dirs], result)
-  end
-  defp do_format(date, [%Directive{token: token, type: :format, format: [tokenizer: tokenizer, format: fmt]} | dirs], result) do
-    # Shift the date if this format is in Zulu time
-    date = case token do
-      token when token in [:iso_8601z, :rfc_822z, :rfc3339z, :rfc_1123z] ->
-        Timezone.convert(date, "UTC")
-      _ ->
-        date
-    end
-    case format(date, fmt, tokenizer) do
-      {:error, _} = error -> error
-      {:ok, formatted}    ->
-        do_format(date, dirs, <<result::binary, formatted::binary>>)
+  defp do_format(date, [%Directive{type: type, modifiers: mods, flags: flags, min_width: min_width} | dirs], result) do
+    case format_token(type, date, mods, flags, min_width) do
+      {:error, _} = err -> err
+      formatted         -> do_format(date, dirs, <<result::binary, formatted::binary>>)
     end
   end
-  defp do_format(date, [%Directive{token: token} | dirs], result) do
-    formatted = format_token(token, date)
-    do_format(date, dirs, <<result::binary, formatted::binary>>)
-  end
-  defp do_format(_, dirs, _), do: {:error, "Unexpected directive type: #{dirs |> Macro.to_string}"}
 
-  defp pad_char(:zero),  do: <<?0>>
-  defp pad_char(:space), do: <<32>>
-
-  defp build_padding(len, hi, pad, padding) do
-    cond do
-      len >= hi           -> <<>>
-      hi - len == padding -> pad |> String.duplicate(hi - len)
-      hi - len > padding  -> pad |> String.duplicate(padding)
-      hi - len < padding  -> pad |> String.duplicate(padding - (hi - len))
-      true                -> <<>>
-    end
-  end
 end

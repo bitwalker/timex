@@ -1,4 +1,4 @@
-defmodule Timex.Format.DateTime.Formatters.StrftimeFormatter do
+defmodule Timex.Format.DateTime.Formatters.Strftime do
   @moduledoc """
   Date formatting language defined by the `strftime` function from the Standard
   C Library.
@@ -98,12 +98,11 @@ defmodule Timex.Format.DateTime.Formatters.StrftimeFormatter do
   use Timex.Format.DateTime.Formatter
 
   alias Timex.DateTime
-  alias Timex.Format.DateTime.Directive
-  alias Timex.Format.DateTime.Formatters.DefaultFormatter
-  alias Timex.Format.DateTime.Tokenizers.Strftime, as: Tokenizer
+  alias Timex.Format.DateTime.Formatters.Default
+  alias Timex.Parse.DateTime.Tokenizers.Strftime
 
   @spec tokenize(String.t) :: {:ok, [%Directive{}]} | {:error, term}
-  defdelegate tokenize(format_string), to: Tokenizer
+  defdelegate tokenize(format_string), to: Strftime
 
   @spec format!(%DateTime{}, String.t) :: String.t | no_return
   def format!(%DateTime{} = date, format_string) do
@@ -115,6 +114,6 @@ defmodule Timex.Format.DateTime.Formatters.StrftimeFormatter do
 
   @spec format(%DateTime{}, String.t) :: {:ok, String.t} | {:error, term}
   def format(%DateTime{} = date, format_string) do
-    DefaultFormatter.format(date, format_string, Tokenizer)
+    Default.format(date, format_string, Strftime)
   end
 end

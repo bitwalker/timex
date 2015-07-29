@@ -11,9 +11,9 @@ defmodule Timex.DateFormat do
   """
   alias Timex.DateTime
   alias Timex.Format.DateTime.Formatter
-  alias Timex.Format.DateTime.Formatters.StrftimeFormatter
+  alias Timex.Format.DateTime.Formatters.Strftime
   alias Timex.Parse.DateTime.Parser
-  alias Timex.Parse.DateTime.Parsers.StrftimeParser
+  alias Timex.Parse.DateTime.Tokenizers.Strftime, as: StrftimeTokenizer
 
   @doc """
   Converts date values to strings according to the given template (aka format string).
@@ -28,7 +28,7 @@ defmodule Timex.DateFormat do
   def format(%DateTime{} = date, format_string, :default),
     do: Formatter.format(date, format_string)
   def format(%DateTime{} = date, format_string, :strftime),
-    do: Formatter.format(date, format_string, StrftimeFormatter)
+    do: Formatter.format(date, format_string, Strftime)
   defdelegate format(%DateTime{} = date, format_string, formatter), to: Formatter
 
   @doc """
@@ -44,7 +44,7 @@ defmodule Timex.DateFormat do
   def format!(%DateTime{} = date, format_string, :default),
     do: Formatter.format!(date, format_string)
   def format!(%DateTime{} = date, format_string, :strftime),
-    do: Formatter.format!(date, format_string, StrftimeFormatter)
+    do: Formatter.format!(date, format_string, Strftime)
   defdelegate format!(%DateTime{} = date, format_string, formatter), to: Formatter
 
   @doc """
@@ -59,7 +59,7 @@ defmodule Timex.DateFormat do
   """
   @spec parse(String.t, String.t, atom) :: {:ok, %DateTime{}} | {:error, term}
   def parse(date_string, format_string, :default),  do: Parser.parse(date_string, format_string)
-  def parse(date_string, format_string, :strftime), do: Parser.parse(date_string, format_string, StrftimeParser)
+  def parse(date_string, format_string, :strftime), do: Parser.parse(date_string, format_string, StrftimeTokenizer)
   defdelegate parse(date_string, format_string, parser), to: Parser
 
   @doc """
@@ -73,7 +73,7 @@ defmodule Timex.DateFormat do
   """
   @spec parse!(String.t, String.t, atom) :: %DateTime{} | no_return
   def parse!(date_string, format_string, :default),  do: Parser.parse!(date_string, format_string)
-  def parse!(date_string, format_string, :strftime), do: Parser.parse!(date_string, format_string, StrftimeParser)
+  def parse!(date_string, format_string, :strftime), do: Parser.parse!(date_string, format_string, StrftimeTokenizer)
   defdelegate parse!(date_string, format_string, parser), to: Parser
 
   @doc """
@@ -92,6 +92,6 @@ defmodule Timex.DateFormat do
   """
   @spec validate(String.t, atom) :: :ok | {:error, term}
   def validate(format_string, :default),  do: Formatter.validate(format_string)
-  def validate(format_string, :strftime), do: Formatter.validate(format_string, StrftimeFormatter)
+  def validate(format_string, :strftime), do: Formatter.validate(format_string, StrftimeTokenizer)
   defdelegate validate(format_string, formatter), to: Formatter
 end
