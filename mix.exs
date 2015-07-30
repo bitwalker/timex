@@ -26,6 +26,7 @@ defmodule Timex.Mixfile do
     [{:tzdata, "~> 0.1.6"},
      {:combine, "~> 0.3"},
      {:ex_doc, "~> 0.5", only: :dev},
+     {:benchfella, "~> 0.2", only: :dev},
      {:inch_ex, only: :docs}]
   end
 
