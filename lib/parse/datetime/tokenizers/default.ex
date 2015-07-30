@@ -24,48 +24,40 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
     end
   end
 
-  defp flags(),     do: map(choice([char("0"), char("_")]), &map_flag/1)
+  defp flags(),     do: map(one_of(char, ["0", "_"]), &map_flag/1)
   defp directives() do
-    choice([
+    one_of(word_of(~r/[\-\w\:]/), [
       # Years/Centuries
-      string("YYYY"), string("YY"), char("C"), string("WYYYY"), string("WYY"),
+      "YYYY", "YY", "C", "WYYYY", "WYY",
       # Months
-      string("Mshort"), string("Mfull"), char("M"),
+      "Mshort", "Mfull", "M",
       # Days
-      string("Dord"), char("D"),
+      "Dord", "D",
       # Weeks
-      string("Wiso"), string("Wmon"), string("Wsun"), string("WDmon"), string("WDsun"), string("WDshort"), string("WDfull"),
+      "Wiso", "Wmon", "Wsun", "WDmon", "WDsun", "WDshort", "WDfull",
       # Time
-      string("h24"), string("h12"), char("m"), string("ss"), string("s-epoch"), char("s"), string("am"), string("AM"),
+      "h24", "h12", "m", "ss", "s-epoch", "s", "am", "AM",
       # Timezones
-      string("Zname"), string("Z::"), string("Z:"), char("Z"),
+      "Zname", "Z::", "Z:", "Z",
       # Compound
-      string("ISOord"), string("ISOweek-day"), string("ISOweek"), string("ISOdate"), string("ISOtime"), string("ISOz"), string("ISO"),
-      string("RFC822z"), string("RFC822"), string("RFC1123z"), string("RFC1123"), string("RFC3339z"), string("RFC3339"),
-      string("ANSIC"), string("UNIX"), string("kitchen")
+      "ISOord", "ISOweek-day", "ISOweek", "ISOdate", "ISOtime", "ISOz", "ISO",
+      "RFC822z", "RFC822", "RFC1123z", "RFC1123", "RFC3339z", "RFC3339",
+      "ANSIC", "UNIX", "kitchen"
     ])
   end
 
   defp default_format_parser() do
     sequence([
       many1(choice([
-        label(
-          map(pair_left(char("{"), char("{")), &map_literal/1),
-          "an escaped { character"),
-        label(
-          map(pair_left(char("}"), char("}")), &map_literal/1),
-          "an escaped } character"),
-        label(
-          map(
-            # {<padding><directive>}
-            between(char("{"), sequence([option(flags()), directives()]), char("}")),
-            &coalesce_token/1
-          ),
+        # {<padding><directive>}
+        label(map(between(char("{"), sequence([option(flags()), directives()]), char("}")), &coalesce_token/1),
           "a valid directive."),
-        choice([
-          sequence([between(char("{"), word, char("}")), fail("Invalid directive!")]),
-          map(none_of(char, ["{", "}"]), &map_literal/1)
-        ])
+        label(map(none_of(char, ["{", "}"]), &map_literal/1),
+          "any character but { or }."),
+        label(map(pair_left(char("{"), char("{")), &map_literal/1),
+          "an escaped { character"),
+        label(map(pair_left(char("}"), char("}")), &map_literal/1),
+          "an escaped } character")
       ])),
       eof
     ])

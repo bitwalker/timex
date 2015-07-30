@@ -24,33 +24,34 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
     end
   end
 
-  defp flags(),     do: map(choice([char("-"), char("0"), char("_")]), &map_flag/1)
-  defp min_width(), do: map(many1(digit), &map_width/1)
-  defp modifiers(), do: map(choice([char("E"), char("O")]), &map_modifier/1)
+  defp flags(),     do: map(one_of(char, ["-", "0", "_"]), &map_flag/1)
+  defp min_width(), do: integer
+  defp modifiers(), do: map(one_of(char, ["E", "O"]), &map_modifier/1)
   defp directives() do
     choice([
-      # Years/Centuries
-      char("Y"), char("y"), char("C"), char("G"), char("g"),
-      # Months
-      char("m"), char("B"), char("b"), char("h"),
-      # Days, Days of Week
-      char("d"), char("e"), char("j"), char("u"), char("w"), char("A"), char("a"),
-      # Weeks
-      char("V"), char("W"), char("U"),
-      # Time
-      char("H"), char("k"), char("I"), char("l"), char("M"), char("S"), char("s"), char("P"), char("p"),
-      # Timezones
-      char("Z"), char("z"), string(":z"), string("::z"),
-      # Compound
-      char("D"), char("F"), char("R"), char("r"), char("T"), char("v")
+      one_of(char, [
+        # Years/Centuries
+        "Y", "y", "C", "G", "g",
+        # Months
+        "m", "B", "b", "h",
+        # Days, Days of Week
+        "d", "e", "j", "u", "w", "A", "a",
+        # Weeks
+        "V", "W", "U",
+        # Time
+        "H", "k", "I", "l", "M", "S", "s", "P", "p",
+        # Timezones
+        "Z", "z",
+        # Compound
+        "D", "F", "R", "r", "T", "v"
+      ]),
+      string(":z"),
+      string("::z")
     ])
   end
   defp strftime_format_parser() do
     sequence([
-      many1(choice([
-        label(
-          map(pair_left(char("%"), char("%")), &map_literal/1),
-          "an escaped % character"),
+      many1(either(
         label(
           map(
             # %<flag><width><modifier><directive>
@@ -59,10 +60,11 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
           ),
           "a valid strftime directive."),
         choice([
+          label(map(pair_left(char("%"), char("%")), &map_literal/1), "an escaped %"),
           sequence([pair_left(char("%"), char), fail("Invalid strftime directive")]),
           map(none_of(char, ["%"]), &map_literal/1)
         ])
-      ])),
+      )),
       eof
     ])
   end
@@ -152,11 +154,6 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
   defp swap_case(<<char::utf8, _::binary>> = str)
     when char in ?A..?Z, do: String.downcase(str)
   defp swap_case(str), do: str
-
-  defp map_width(digits) do
-    {num, _} = Enum.join(digits) |> Integer.parse
-    num
-  end
 
   defp map_modifier(modifier) do
     case modifier do

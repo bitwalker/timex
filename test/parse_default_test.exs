@@ -91,7 +91,7 @@ defmodule DateFormatTest.ParseDefault do
 
     assert {:error, "Input datetime string cannot be empty."} = parse("", "{0Mfull}")
     assert {:error, "Input datetime string cannot be empty."} = parse("", " {_Mshort}")
-    assert {:error, "Expected `full month name` at line 1, column 1."} = parse("Apr", "{Mfull}")
+    assert {:error, "Expected `full month name` at line 1, column 4."} = parse("Apr", "{Mfull}")
     assert {:error, "Expected ` `, but found `J` at line 1, column 1."} = parse("January", " {Mshort}")
   end
 

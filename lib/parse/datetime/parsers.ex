@@ -28,16 +28,13 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("2 digit month")
   end
   def month_full(_) do
-    Helpers.months
-    |> Enum.map(fn m -> string(m) end)
-    |> choice
+    one_of(word, Helpers.months)
     |> map(&Helpers.to_month_num/1)
     |> label("full month name")
   end
   def month_short(_) do
-    Helpers.months
-    |> Enum.map(fn m -> string(String.slice(m, 0, 3)) end)
-    |> choice
+    abbrs = Helpers.months |> Enum.map(fn m -> String.slice(m, 0, 3) end)
+    one_of(word, abbrs)
     |> map(&Helpers.to_month_num/1)
     |> label("month abbreviation")
   end
@@ -92,17 +89,17 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("hour between 1 and 12")
   end
   def ampm_lower(_) do
-    choice([string("am"), string("pm")])
+    one_of(word, ["am", "pm"])
     |> map(&Helpers.to_ampm/1)
     |> label("am/pm")
   end
   def ampm_upper(_) do
-    choice([string("AM"), string("PM")])
+    one_of(word, ["AM", "PM"])
     |> map(&Helpers.to_ampm/1)
     |> label("AM/PM")
   end
   def ampm(_) do
-    choice([string("am"), string("AM"), string("pm"), string("PM")])
+    one_of(word, ["am", "AM", "pm", "PM"])
     |> map(&Helpers.to_ampm/1)
     |> label("am/pm or AM/PM")
   end
@@ -134,36 +131,37 @@ defmodule Timex.Parse.DateTime.Parsers do
   end
 
   def zname(_) do
-    choice([sequence([word, char("/"), word]), word])
-    |> map(fn
-      name when is_binary(name) -> [zname: name]
-      parts -> [zname: parts |> List.flatten |> Enum.join]
-    end)
+    word_of(~r/[\/\w_]/)
+    |> map(fn name -> [zname: name] end)
     |> label("timezone name")
   end
   def zoffs(_) do
-    [ either(char("-"), char("+")),
-      either(fixed_integer(4), fixed_integer(2))
-    ] |> pipe(fn parts -> [zoffs: parts |> Enum.join] end)
-      |> label("timezone offset (+/-hhmm)")
+    pipe([
+        one_of(char, ["-", "+"]),
+        digit, digit,
+        option(digit), option(digit)
+      ], fn xs -> [zoffs: xs |> Stream.filter(&(&1 != nil)) |> Enum.join] end
+    ) |> label("timezone offset (+/-hhmm)")
   end
   def zoffs_colon(_) do
-    [ either(char("-"), char("+")),
-      digit, digit,
-      ignore(char(":")),
-      digit, digit
-    ] |> pipe(fn xs -> [zoffs_colon: Enum.join(xs)] end)
-      |> label("timezone offset (+/-hh:mm)")
+    pipe([
+        one_of(char, ["-", "+"]),
+        digit, digit,
+        ignore(char(":")),
+        digit, digit
+      ], fn xs -> [zoffs_colon: xs |> Enum.join] end
+    ) |> label("timezone offset (+/-hh:mm)")
   end
   def zoffs_sec(_) do
-    [ either(char("-"), char("+")),
-      digit, digit,
-      ignore(char(":")),
-      digit, digit,
-      ignore(char(":")),
-      ignore(digit), ignore(digit)
-    ] |> pipe(fn parts -> [zoffs_sec: parts |> Enum.join] end)
-      |> label("timezone offset (+/-hh:mm:ss)")
+    pipe([
+        one_of(char, ["-", "+"]),
+        digit, digit,
+        ignore(char(":")),
+        digit, digit,
+        ignore(char(":")),
+        ignore(fixed_integer(2))
+      ], fn xs -> [zoffs_sec: xs |> Enum.join] end
+    ) |> label("timezone offset (+/-hh:mm:ss)")
   end
 
   def iso_date(_) do
@@ -262,7 +260,7 @@ defmodule Timex.Parse.DateTime.Parsers do
       true ->
         zone_parts = [
           literal(space),
-          map(choice([literal(string("UT")), literal(string("GMT")), literal(char("Z"))]), fn _ -> [zname: "UTC"] end)
+          map(one_of(word, ["UT", "GMT", "Z"]), fn _ -> [zname: "UTC"] end)
         ]
         sequence(parts ++ zone_parts)
       _ ->
@@ -271,14 +269,14 @@ defmodule Timex.Parse.DateTime.Parsers do
           choice([
             zname(opts),
             zoffs(opts),
-            map(string("UT"),  fn _ -> [zname: "UTC"] end),
-            map(string("GMT"), fn _ -> [zname: "UTC"] end),
-            map(char("Z"),     fn _ -> [zname: "UTC"] end),
-            map(char("A"),     fn _ -> [zoffs: "-0100"] end),
-            map(char("M"),     fn _ -> [zoffs: "-1200"] end),
-            map(char("N"),     fn _ -> [zoffs: "+0100"] end),
-            map(char("Y"),     fn _ -> [zoffs: "+1200"] end),
-            map(char("J"),     fn _ -> [] end)
+            map(one_of(word, ["UT", "GMT", "Z"]), fn _ -> [zname: "UTC"] end),
+            map(one_of(char, ["A", "M", "N", "Y", "J"]), fn
+              "A" -> [zoffs: "-0100"]
+              "M" -> [zoffs: "-1200"]
+              "N" -> [zoffs: "+0100"]
+              "Y" -> [zoffs: "+1200"]
+              "J" -> []
+            end)
           ])
         ]
         sequence(parts ++ zone_parts)
@@ -308,13 +306,13 @@ defmodule Timex.Parse.DateTime.Parsers do
       true ->
         zone_parts = [
           literal(space),
-          map(literal(char("Z")), fn _ -> [zname: "UTC"] end)
+          map(char("Z"), fn _ -> [zname: "UTC"] end)
         ]
         sequence(parts ++ zone_parts)
       _ ->
         zone_parts = [
           literal(space),
-          choice([zname(opts),zoffs(opts)])
+          either(zname(opts), zoffs(opts))
         ]
         sequence(parts ++ zone_parts)
     end
