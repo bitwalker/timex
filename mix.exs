@@ -24,7 +24,7 @@ defmodule Timex.Mixfile do
 
   def deps do
     [{:tzdata, "~> 0.1.6"},
-     {:combine, path: "../combine"},
+     {:combine, "~> 0.3"},
      {:ex_doc, "~> 0.5", only: :dev},
      {:inch_ex, only: :docs}]
   end
