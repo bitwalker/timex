@@ -2,76 +2,77 @@ defmodule DateFormatTest.FormatStrftime do
   use ExUnit.Case, async: true
   use Timex
 
-  @date2013 Date.from({{2013,8,18}, {12,30,5}})
-  @date0003 Date.from({{3,8,18}, {12,30,5}})
+  @aug182013 Date.from({{2013,8,18}, {12,30,5}})
+  @aug180003 Date.from({{3,8,18}, {12,30,5}})
   @jan12015 Date.from({{2015,1,1}, {0,0,0}})
   @jan152015 Date.from({{2015,1,15}, {0,0,0}})
   @dec312015 Date.from({{2015,12,31}, {0,0,0}})
+  @dec312012 Date.from({{2012,12,31}, {0,0,0}})
 
   test "format %Y" do
-    assert { :ok, "2013" } = format(@date2013, "%Y")
-    assert { :ok, "0003" } = format(@date0003, "%Y")
-    assert { :ok, "3" }    = format(@date0003, "%-Y")
-    assert { :ok, "0003" } = format(@date0003, "%0Y")
-    assert { :ok, "   3" } = format(@date0003, "%_Y")
+    assert { :ok, "2013" } = format(@aug182013, "%Y")
+    assert { :ok, "0003" } = format(@aug180003, "%Y")
+    assert { :ok, "3" }    = format(@aug180003, "%-Y")
+    assert { :ok, "0003" } = format(@aug180003, "%0Y")
+    assert { :ok, "   3" } = format(@aug180003, "%_Y")
   end
 
   test "format %y" do
-    assert { :ok, "13" }   = format(@date2013, "%y")
-    assert { :ok, "3" }    = format(@date0003, "%-y")
-    assert { :ok, "03" }   = format(@date0003, "%y")
-    assert { :ok, "03" }   = format(@date0003, "%0y")
-    assert { :ok, " 3" }   = format(@date0003, "%_y")
+    assert { :ok, "13" }   = format(@aug182013, "%y")
+    assert { :ok, "3" }    = format(@aug180003, "%-y")
+    assert { :ok, "03" }   = format(@aug180003, "%y")
+    assert { :ok, "03" }   = format(@aug180003, "%0y")
+    assert { :ok, " 3" }   = format(@aug180003, "%_y")
   end
 
   test "format %C" do
-    assert { :ok, "20" }   = format(@date2013, "%C")
-    assert { :ok, "0" }    = format(@date0003, "%-C")
-    assert { :ok, "00" }   = format(@date0003, "%C")
-    assert { :ok, "00" }   = format(@date0003, "%0C")
-    assert { :ok, " 0" }   = format(@date0003, "%_C")
+    assert { :ok, "20" }   = format(@aug182013, "%C")
+    assert { :ok, "0" }    = format(@aug180003, "%-C")
+    assert { :ok, "00" }   = format(@aug180003, "%C")
+    assert { :ok, "00" }   = format(@aug180003, "%0C")
+    assert { :ok, " 0" }   = format(@aug180003, "%_C")
   end
 
   test "format %G" do
-    assert { :ok, "2013" } = format(@date2013, "%G")
+    assert { :ok, "2013" } = format(@aug182013, "%G")
     assert { :ok, "2015" } = format(@jan12015, "%G")
-    assert { :ok, "0003" } = format(@date0003, "%G")
+    assert { :ok, "0003" } = format(@aug180003, "%G")
     assert { :ok, "2015" } = format(@jan12015, "%-G")
-    assert { :ok, "3" }    = format(@date0003, "%-G")
+    assert { :ok, "3" }    = format(@aug180003, "%-G")
     assert { :ok, "2015" } = format(@jan12015, "%0G")
-    assert { :ok, "0003" } = format(@date0003, "%0G")
+    assert { :ok, "0003" } = format(@aug180003, "%0G")
     assert { :ok, "2015" } = format(@jan12015, "%_G")
-    assert { :ok, "   3" } = format(@date0003, "%_G")
+    assert { :ok, "   3" } = format(@aug180003, "%_G")
   end
 
   test "format %g" do
     assert { :ok, "15" }   = format(@jan12015, "%g")
-    assert { :ok, "03" }   = format(@date0003, "%g")
+    assert { :ok, "03" }   = format(@aug180003, "%g")
     assert { :ok, "15" }   = format(@jan12015, "%-g")
-    assert { :ok, "3" }    = format(@date0003, "%-g")
+    assert { :ok, "3" }    = format(@aug180003, "%-g")
     assert { :ok, "15" }   = format(@jan12015, "%0g")
-    assert { :ok, "03" }   = format(@date0003, "%0g")
+    assert { :ok, "03" }   = format(@aug180003, "%0g")
     assert { :ok, "15" }   = format(@jan12015, "%_g")
-    assert { :ok, " 3" }   = format(@date0003, "%_g")
+    assert { :ok, " 3" }   = format(@aug180003, "%_g")
   end
 
   test "format %m" do
-    assert { :ok, "08" } = format(@date0003, "%m")
-    assert { :ok, "8" }  = format(@date0003, "%-m")
-    assert { :ok, "08" } = format(@date0003, "%0m")
-    assert { :ok, " 8" } = format(@date0003, "%_m")
+    assert { :ok, "08" } = format(@aug180003, "%m")
+    assert { :ok, "8" }  = format(@aug180003, "%-m")
+    assert { :ok, "08" } = format(@aug180003, "%0m")
+    assert { :ok, " 8" } = format(@aug180003, "%_m")
   end
 
   test "format %b" do
-    assert { :ok, "Aug" } = format(@date2013, "%b")
+    assert { :ok, "Aug" } = format(@aug182013, "%b")
     assert { :ok, "Jan" } = format(@jan12015, "%b")
-    assert { :ok, "Aug" } = format(@date2013, "%0b")
+    assert { :ok, "Aug" } = format(@aug182013, "%0b")
   end
 
   test "format %B" do
-    assert { :ok, "August" }  = format(@date2013, "%B")
+    assert { :ok, "August" }  = format(@aug182013, "%B")
     assert { :ok, "January" } = format(@jan12015, "%B")
-    assert { :ok, "August" }  = format(@date2013, "%-B")
+    assert { :ok, "August" }  = format(@aug182013, "%-B")
   end
 
   test "format %h" do
@@ -80,17 +81,17 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "format %d" do
-    assert { :ok, "18" } = format(@date2013, "%d")
-    assert { :ok, "8" }  = format(@date0003, "%-d")
-    assert { :ok, "08" } = format(@date0003, "%d")
-    assert { :ok, "08" } = format(@date0003, "%0d")
-    assert { :ok, " 8" } = format(@date0003, "%_d")
+    assert { :ok, "01" } = format(@jan12015, "%d")
+    assert { :ok, "1" }  = format(@jan12015, "%-d")
+    assert { :ok, "01" } = format(@jan12015, "%d")
+    assert { :ok, "01" } = format(@jan12015, "%0d")
+    assert { :ok, " 1" } = format(@jan12015, "%_d")
   end
 
   test "format %e" do
-    assert { :ok, "18" } = format(@date2013, "%e")
-    assert { :ok, " 8" } = format(@date0003, "%e")
-    assert { :ok, "08" } = format(@date0003, "%0e")
+    assert { :ok, " 1" } = format(@jan12015, "%e")
+    assert { :ok, "1" }  = format(@jan12015, "%-e")
+    assert { :ok, "01" } = format(@jan12015, "%0e")
   end
 
   test "format %j" do
@@ -98,19 +99,19 @@ defmodule DateFormatTest.FormatStrftime do
     assert { :ok, "015" } = format(@jan152015, "%j")
     assert { :ok, "015" } = format(@jan152015, "%0j")
     assert { :ok, " 15" } = format(@jan152015, "%_j")
-    assert { :ok, "366" } = format(@dec312015, "%j")
+    assert { :ok, "366" } = format(@dec312012, "%j")
     assert { :ok, "001" } = format(@jan12015, "%j")
   end
 
   test "format %w" do
-    assert { :ok, "7" } = format(@date2013, "%w")
-    assert { :ok, "7" } = format(@date2013, "%0w")
-    assert { :ok, "7" } = format(@date2013, "%_w")
+    assert { :ok, "6" } = format(@aug182013, "%w")
+    assert { :ok, "6" } = format(@aug182013, "%0w")
+    assert { :ok, "6" } = format(@aug182013, "%_w")
   end
 
   test "format %u" do
-    assert { :ok, "1" } = format(@date2013, "%u")
-    assert { :ok, "1" } = format(@date2013, "%-u")
+    assert { :ok, "7" } = format(@aug182013, "%u")
+    assert { :ok, "7" } = format(@aug182013, "%-u")
   end
 
   test "format %a" do
