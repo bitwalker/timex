@@ -9,9 +9,11 @@ defimpl Timex.Date.Convert, for: Timex.DateTime do
 
   @doc """
   Converts a DateTime struct to an Erlang datetime tuple + timezone tuple
-  Example:
-    iex> {{2015, 3, 5}, {12, 0, 0}} |> Date.from("America/Chicago") |> Date.Convert.to_gregorian
-    {{2015, 3, 5}, {12, 0, 0}, {5, "CDT"}}
+
+  ## Examples:
+
+      iex> {{2015, 3, 5}, {12, 0, 0}} |> Date.from("America/Chicago") |> Date.Convert.to_gregorian
+      {{2015, 3, 5}, {12, 0, 0}, {5, "CDT"}}
   """
   def to_gregorian(
     %DateTime{

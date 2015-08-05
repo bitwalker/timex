@@ -16,11 +16,10 @@ defmodule Timex.Format.Time.TimeFormatter do
   @doc """
   Return a human readable string representing the time interval.
 
-  # Example
+  ## Examples
 
-    iex> {1435, 180354, 590264} |> TimeFormatter.format
-    "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds"
-
+      iex> {1435, 180354, 590264} |> #{__MODULE__}.format
+      "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds, 590.264 milliseconds"
 
   """
   @spec format(Date.timestamp) :: String.t

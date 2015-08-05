@@ -19,8 +19,16 @@ defmodule Timex.Parse.DateTime.Parser do
 
   ## Examples
 
-      iex> #{__MODULE__}.parse("2014-07-29T00:20:41.196Z", "{ISOz}")
-      %DateTime{year: 2014, month: 7, day: 29, hour: 0, minute: 20, second: 41, ms: 196, tz: %Timezone{name: "CST"}}
+      iex> use Timex
+      ...> {:ok, dt} = #{__MODULE__}.parse("2014-07-29T00:20:41.196Z", "{ISOz}")
+      ...> dt.year
+      2014
+      ...> dt.month
+      7
+      ...> dt.day
+      29
+      ...> dt.timezone.full_name
+      "UTC"
 
   """
   @spec parse(binary, binary) :: {:ok, %DateTime{}} | {:error, term}
@@ -29,13 +37,21 @@ defmodule Timex.Parse.DateTime.Parser do
     do: parse(date_string, format_string, DefaultTokenizer)
 
   @doc """
-  Parses a date/time string using the provided parser. Must implement the
-  `Timex.Parsers.Parser` behaviour.
+  Parses a date/time string using the provided tokenizer. Tokenizers must implement the
+  `Timex.Parse.DateTime.Tokenizer` behaviour.
 
   ## Examples
 
-    iex> #{__MODULE__}.parse("2014-07-29T00:30:41.196Z", "{ISOz}", Timex.Parse.DateTime.Tokenizers.Default)
-    %Date{year: 2014, month: 7, day: 29, hour: 0, minute: 20, second: 41, ms: 196, tz: %Timezone{name: "CST"}}
+      iex> use Timex
+      ...> {:ok, dt} = #{__MODULE__}.parse("2014-07-29T00:30:41.196-0200", "{ISO}", Timex.Parse.DateTime.Tokenizers.Default)
+      ...> dt.year
+      2014
+      ...> dt.month
+      7
+      ...> dt.day
+      29
+      ...> dt.timezone.full_name
+      "Etc/GMT+2"
 
   """
   @spec parse(binary, binary, atom) :: {:ok, %DateTime{}} | {:error, term}

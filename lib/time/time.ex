@@ -93,8 +93,8 @@ defmodule Timex.Time do
 
   ## Examples
 
-    iex> Timex.Time.to_12hour_clock(23)
-    {11, :pm}
+      iex> Timex.Time.to_12hour_clock(23)
+      {11, :pm}
 
   """
   def to_12hour_clock(hour) when hour in 0..24 do
@@ -111,8 +111,8 @@ defmodule Timex.Time do
 
   ## Examples
 
-    iex> Timex.Time.to_24hour_clock(7, :pm)
-    19
+      iex> Timex.Time.to_24hour_clock(7, :pm)
+      19
 
   """
   def to_24hour_clock(hour, am_or_pm) when hour in 1..12 and am_or_pm in [:am, :pm] do
@@ -129,8 +129,8 @@ defmodule Timex.Time do
 
   ## Example
 
-    iex> Timex.Time.from(1500, :secs)
-    {0, 1500, 0}
+      iex> Timex.Time.from(1500, :secs)
+      {0, 1500, 0}
 
   """
   @spec from(integer | Date.time, units) :: Date.timestamp
@@ -185,12 +185,12 @@ defmodule Timex.Time do
   @doc """
   Return a timestamp representing a time lapse of length 0.
 
-    Time.convert(Time.zero, :secs)
-    #=> 0
+      Time.convert(Time.zero, :secs)
+      #=> 0
 
   Can be useful for operations on collections of timestamps. For instance,
 
-    Enum.reduce timestamps, Time.zero, Time.add(&1, &2)
+      Enum.reduce timestamps, Time.zero, Time.add(&1, &2)
 
   """
   def zero, do: {0, 0, 0}
@@ -292,12 +292,15 @@ defmodule Timex.Time do
   end
 
   @doc """
-  Evaluates fun() and measures the elapsed time as reported by :os.timestamp/0. Returns {time, value}, where time is { megasecs, seconds, microsecs } and value is what is returned from the function evaluation.
+  Evaluates fun() and measures the elapsed time.
+
+  Returns {timestamp, result}, timestamp is the usual `{ megasecs, seconds, microsecs }`.
 
   ## Example
 
-    iex> Time.measure(fn -> 2 * 2 end)
-    {{0, 0, 10}, 4}
+      iex> {_timestamp, result} = Time.measure(fn -> 2 * 2 end)
+      ...> result == 4
+      true
 
   """
   @spec measure((() -> any)) :: { Date.timestamp, any }

@@ -4,6 +4,12 @@ defmodule Timex.Utils do
   @doc """
   Determines the current version of OTP running this node. The result is
   cached for fast lookups in performance-sensitive functions.
+
+  ## Example
+
+      iex> rel = Timex.Utils.get_otp_release
+      ...> '\#{rel}' == :erlang.system_info(:otp_release)
+      true
   """
   def get_otp_release do
     case Process.get(:current_otp_release) do
@@ -26,8 +32,8 @@ defmodule Timex.Utils do
 
   ## Example
 
-    iex> Timex.Utils.get_plugins(Timex.Parsers.DateFormat.Parser)
-    [Timex.Parsers.DateFormat.DefaultParser]
+      iex> Timex.Utils.get_plugins(Timex.Parse.DateTime.Tokenizer)
+      [Timex.Parse.DateTime.Tokenizers.Strftime, Timex.Parse.DateTime.Tokenizers.Default]
 
   """
   @spec get_plugins(atom) :: [] | [atom]

@@ -14,8 +14,8 @@ defmodule Timex.Timezone.Database do
 
   ## Example
 
-    iex> Timex.Timezone.Database.to_olson("Azores Standard Time")
-    "Atlantic/Azores"
+      iex> Timex.Timezone.Database.to_olson("Azores Standard Time")
+      "Atlantic/Azores"
 
   """
   Enum.each(olson_mappings, fn {key, value} ->
@@ -31,8 +31,8 @@ defmodule Timex.Timezone.Database do
 
   ## Example
 
-    iex> Timex.Timezone.Database.olson_to_win("Pacific/Noumea")
-    "Central Pacific Standard Time"
+      iex> Timex.Timezone.Database.olson_to_win("Pacific/Noumea")
+      "Central Pacific Standard Time"
 
   """
   Enum.each(windows_mappings, fn {key, value} ->

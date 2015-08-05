@@ -1,6 +1,9 @@
 defmodule TimezoneTests do
   use ExUnit.Case, async: true
   use Timex
+  doctest Timex.Timezone
+  doctest Timex.Timezone.Local
+  doctest Timex.Timezone.Database
 
   test :get do
     %TimezoneInfo{:full_name => name, :abbreviation => abbrev, :offset_utc => offset} = Timezone.get("America/Chicago", Date.from{{2015,1,1}, {1,0,0}})

@@ -1,6 +1,8 @@
 defmodule TimeTests do
   use ExUnit.Case, async: true
   use Timex
+  doctest Timex.Time
+  doctest Timex.Format.Time.TimeFormatter
 
   test :to_12hour_clock do
     assert Time.to_12hour_clock(0) == {12, :am}

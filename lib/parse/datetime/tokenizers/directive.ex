@@ -14,12 +14,12 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
   Gets a parsing directive for the given token name, where the token name
   is an atom.
 
-  ## Example
+  ## Examples
 
-    iex> alias Timex.Parsers.Directive
-    ...> %Directive{type: type, flags: flags} = Directive.get(:year4, "YYYY", padding: :zeros)
-    ...> {type, flags}
-    {:year4, [padding: :zeros]}
+      iex> alias Timex.Parsers.Directive
+      ...> %Directive{type: type, flags: flags} = Directive.get(:year4, "YYYY", padding: :zeros)
+      ...> {type, flags}
+      {:year4, [padding: :zeros]}
 
   """
   @spec get(atom, String.t, [{atom, term}] | []) :: %Directive{}
