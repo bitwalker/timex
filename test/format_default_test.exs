@@ -294,12 +294,21 @@ defmodule DateFormatTest.FormatDefault do
 
   test "format RFC3339" do
     local = {{2013,3,5},{23,25,19}}
-    date = Date.from(local)
 
-    assert { :ok, "2013-03-05T23:25:19Z" } = format(date, "{RFC3339z}")
+    assert { :ok, "2013-03-05T23:25:19Z" } = format(Date.from(local), "{RFC3339z}")
+    assert {:ok, "2014-09-26T17:10:20Z"} = format(Date.from({{2014,9,26},{17,10,20}}, "Etc/UTC"), "{RFC3339z}")
+    assert {:ok, "2014-09-26T07:00:02Z"} = format(Date.from({{2014,9,26},{7,0,2}}, "UTC"), "{RFC3339z}")
+
 
     assert { :ok, "2013-03-05T23:25:19+02:00" } = format(Date.from(local, "Europe/Athens"), "{RFC3339}")
     assert { :ok, "2013-03-05T23:25:19-08:00" } = format(Date.from(local, "America/Los_Angeles"), "{RFC3339}")
+
+    date = Date.from({{2014,9,26}, {17,10,20}}, "America/Montevideo")
+    assert format(date, "{RFC3339}") == {:ok, "2014-09-26T17:10:20-03:00"}
+    date = Date.from({{2014,9,26}, {7,0,2}}, "Europe/Copenhagen")
+    assert format(date, "{RFC3339}") == {:ok, "2014-09-26T07:00:02+02:00"}
+    date = Date.from({{10,9,26}, {7,0,2}}, "Europe/Copenhagen")
+    assert format(date, "{RFC3339}") == {:ok, "0010-09-26T07:00:02+00:50"}
   end
 
   test "format ANSIC" do

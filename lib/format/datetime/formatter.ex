@@ -374,17 +374,13 @@ defmodule Timex.Format.DateTime.Formatter do
       padding when padding in [:spaces, :none] ->
         {:error, {:formatter, "Invalid directive flag: Timezone offsets require 0-padding to remain unambiguous."}}
       _ ->
-        offset = ((tz.offset_std + tz.offset_utc) / 60) |> trunc
+        offset_hours = div(tz.offset_std + tz.offset_utc, 60)
+        offset_mins  = rem(tz.offset_std + tz.offset_utc, 60)
+        hour  = "#{pad_numeric(offset_hours, [padding: :zeroes], 2)}"
+        min   = "#{pad_numeric(offset_mins, [padding: :zeroes], 2)}"
         cond do
-          offset < 0 and offset > -10   -> "-0#{offset * -1}00"
-          offset < 0 and offset > -100  -> "-#{offset * -1}00"
-          offset < 0 and offset > -1000 -> "-#{offset * -1}0"
-          offset == 0                   -> "+0000"
-          offset < 0                    -> "#{offset}"
-          offset > 0 and offset < 10    -> "+0#{offset}00"
-          offset > 0 and offset < 100   -> "+#{offset}00"
-          offset > 0 and offset < 1000  -> "+#{offset}0"
-          true                          -> "+#{offset}"
+          (offset_hours + offset_mins) >= 0 -> "+#{hour}#{min}"
+          true -> "#{hour}#{min}"
         end
     end
   end
@@ -410,6 +406,10 @@ defmodule Timex.Format.DateTime.Formatter do
 
   defp pad_numeric(number, flags, min_width) when is_integer(number), do: pad_numeric("#{number}", flags, min_width)
   defp pad_numeric(number_str, [], _min_width), do: number_str
+  defp pad_numeric(<<?-, number_str::binary>>, flags, min_width) do
+    res = pad_numeric(number_str, flags, min_width)
+    <<?-, res::binary>>
+  end
   defp pad_numeric(number_str, flags, min_width) do
     case get_in(flags, [:padding]) do
       pad_type when pad_type in [nil, :none] -> number_str
