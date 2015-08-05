@@ -104,9 +104,9 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "format %w" do
-    assert { :ok, "6" } = format(@aug182013, "%w")
-    assert { :ok, "6" } = format(@aug182013, "%0w")
-    assert { :ok, "6" } = format(@aug182013, "%_w")
+    assert { :ok, "0" } = format(@aug182013, "%w")
+    assert { :ok, "0" } = format(@aug182013, "%0w")
+    assert { :ok, "0" } = format(@aug182013, "%_w")
   end
 
   test "format %u" do
@@ -166,8 +166,8 @@ defmodule DateFormatTest.FormatStrftime do
 
   test "format %U" do
     date = Date.from({2015,12,28})
-    assert { :ok, "52" } = format(date, "%U")
-    assert { :ok, "52" } = format(date, "%-U")
+    assert { :ok, "53" } = format(date, "%U")
+    assert { :ok, "53" } = format(date, "%-U")
     date = Date.from({2013,1,6})
     assert { :ok, "02" } = format(date, "%U")
     assert { :ok, "2" } = format(date, "%-U")

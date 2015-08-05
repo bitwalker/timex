@@ -310,8 +310,8 @@ defmodule Timex.Format.DateTime.Formatter do
     end
     ordinal = Date.day(date)
     weekday = case Date.weekday(date) do # shift back one since our week starts with Sunday instead of Monday
-      7 -> 1
-      x -> x + 1
+      7 -> 0
+      x -> x
     end
     week = div(ordinal - weekday + 10, 7)
     week = cond do
@@ -324,8 +324,14 @@ defmodule Timex.Format.DateTime.Formatter do
   end
   def format_token(:wday_mon, %DateTime{} = date, _modifiers, flags, min_width),
     do: "#{Date.weekday(date) |> pad_numeric(flags, min_width)}"
-  def format_token(:wday_sun, %DateTime{} = date, _modifiers, flags, min_width),
-    do: "#{(Date.weekday(date) - 1) |> pad_numeric(flags, min_width)}"
+  def format_token(:wday_sun, %DateTime{} = date, _modifiers, flags, min_width) do
+    # from 1..7 to 0..6
+    weekday = case Date.weekday(date) do
+      7   -> 0
+      day -> day
+    end
+    "#{pad_numeric(weekday, flags, min_width)}"
+  end
   def format_token(:wdshort, %DateTime{} = date, _modifiers, _flags, _min_width),
     do: "#{Date.weekday(date) |> Date.day_shortname}"
   def format_token(:wdfull, %DateTime{} = date, _modifiers, _flags, _min_width),
