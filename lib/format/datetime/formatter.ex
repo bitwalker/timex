@@ -359,6 +359,9 @@ defmodule Timex.Format.DateTime.Formatter do
         "#{Date.to_secs(date, :epoch) |> pad_numeric(flags, min_width)}"
     end
   end
+  def format_token(:us, %DateTime{ms: ms}, _modifiers, flags, min_width) do
+    "#{pad_numeric(ms, flags, min_width)}000"
+  end
   def format_token(:am, %DateTime{hour: hour}, _modifiers, _flags, _min_width),
     do: "#{{_, am_pm} = Time.to_12hour_clock(hour); Atom.to_string(am_pm)}"
   def format_token(:AM, %DateTime{} = date, modifiers, flags, min_width),

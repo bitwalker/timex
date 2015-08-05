@@ -74,6 +74,7 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
   * `%l` - same as `%I`, but padded with spaces ( 1..12)
   * `%M` - minutes of the hour (0..59)
   * `%S` - seconds of the minute (0..60)
+  * `%f` - microseconds in zero padded decimal form, i.e. 025000
   * `%s` - number of seconds since UNIX epoch
   * `%P` - lowercase am or pm (no padding)
   * `%p` - uppercase AM or PM (no padding)

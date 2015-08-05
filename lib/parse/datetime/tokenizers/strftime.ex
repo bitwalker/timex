@@ -39,7 +39,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
         # Weeks
         "V", "W", "U",
         # Time
-        "H", "k", "I", "l", "M", "S", "s", "P", "p",
+        "H", "k", "I", "l", "M", "S", "s", "P", "p", "f",
         # Timezones
         "Z", "z",
         # Compound
@@ -111,6 +111,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
       "s" -> Directive.get(:sec_epoch, directive, opts)
       "P" -> Directive.get(:am, directive, opts)
       "p" -> Directive.get(:AM, directive, opts)
+      "f" -> force_width(3, :us, directive, opts)
       # Timezones
       "Z"   -> Directive.get(:zname, directive, opts)
       "z"   -> Directive.get(:zoffs, directive, opts)

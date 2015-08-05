@@ -129,6 +129,9 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> map(fn secs -> [sec_epoch: secs] end)
     |> label("seconds since epoch")
   end
+  def microseconds(_) do
+    label(map(integer, fn us -> [us: us] end), "microseconds")
+  end
 
   def zname(_) do
     word_of(~r/[\/\w_]/)

@@ -81,6 +81,8 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
     do: %Directive{type: :sec_fractional, value: directive, flags: flags, modifiers: mods, min_width: width, parser: Parsers.second_fractional(flags)}
   def get(:sec_epoch, directive, flags, mods, width),
     do: %Directive{type: :sec_epoch, value: directive, flags: flags, modifiers: mods, min_width: width, parser: Parsers.seconds_epoch(flags)}
+  def get(:us, directive, flags, mods, width),
+    do: %Directive{type: :us, value: directive, flags: flags, modifiers: mods, min_width: width, parser: Parsers.microseconds(flags)}
   def get(:am, directive, flags, mods, width),
     do: %Directive{type: :am, value: directive, flags: flags, modifiers: mods, min_width: width, parser: Parsers.ampm(flags)}
   def get(:AM, directive, flags, mods, width),
