@@ -32,8 +32,8 @@ defmodule Timex.Utils do
 
   ## Example
 
-      iex> Timex.Utils.get_plugins(Timex.Parse.DateTime.Tokenizer)
-      [Timex.Parse.DateTime.Tokenizers.Strftime, Timex.Parse.DateTime.Tokenizers.Default]
+      iex> Timex.Utils.get_plugins(Timex.Parse.DateTime.Tokenizer) |> Enum.sort
+      [Timex.Parse.DateTime.Tokenizers.Default, Timex.Parse.DateTime.Tokenizers.Strftime]
 
   """
   @spec get_plugins(atom) :: [] | [atom]
