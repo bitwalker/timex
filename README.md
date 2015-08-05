@@ -5,6 +5,7 @@
 [![InchCI](https://inch-ci.org/github/bitwalker/timex.svg?branch=master)](https://inch-ci.org/github/bitwalker/timex)
 
 The full documentation for Timex is located [here](https://timex.readme.io).
+API documentation for Timex is located [here](http://hexdocs.pm/timex/0.17.0/).
 
 ## Getting Started
 
