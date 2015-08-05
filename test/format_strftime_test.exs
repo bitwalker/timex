@@ -317,6 +317,58 @@ defmodule DateFormatTest.FormatStrftime do
     assert {:error, {:format, "Invalid format string, must contain at least one directive."}} = format(date, "%%%%abc%%")
   end
 
+  test "lau/calendar tests" do
+    dt = Date.from({{2014, 11, 3}, {1, 41, 2, 123}})
+    dt_sunday = Date.from({{2014, 11, 2}, {1, 41, 2}})
+    assert format(dt, "%a") == {:ok, "Mon"}
+    assert format(dt, "%A") == {:ok, "Monday"}
+    assert format(dt, "%b") == {:ok, "Nov"}
+    assert format(dt, "%h") == {:ok, "Nov"}
+    assert format(dt, "%B") == {:ok, "November"}
+    assert format(dt, "%d") == {:ok, "03"}
+    assert format(dt, "%e") == {:ok, " 3"}
+    assert format(dt, "%f") == {:ok, "123000"}
+    assert format(dt, "%u") == {:ok, "1"}
+    assert format(dt, "%w") == {:ok, "1"}
+    assert format(dt_sunday, "%u") == {:ok, "7"}
+    assert format(dt_sunday, "%w") == {:ok, "0"}
+    assert format(dt, "%V") == {:ok, "45"}
+    assert format(dt, "%G") == {:ok, "2014"}
+    assert format(dt, "%g") == {:ok, "14"}
+    assert format(dt, "%C") == {:ok, "20"}
+    assert format(dt, "%k") == {:ok, " 1"}
+    assert format(dt, "%I") == {:ok, "01"}
+    assert format(dt, "%l") == {:ok, " 1"}
+    assert format(dt, "%P") == {:ok, "am"}
+    assert format(dt, "%p") == {:ok, "AM"}
+    assert format(dt, "%r") == {:ok, "01:41:02 AM"}
+    assert format(dt, "%R") == {:ok, "01:41"}
+    assert format(dt, "%T") == {:ok, "01:41:02"}
+    assert format(dt, "%F") == {:ok, "2014-11-03"}
+    assert format(dt, "%Z") == {:ok, "UTC"}
+
+    dt = Date.from({{2014, 12, 31}, {21, 41, 2}})
+    assert format(dt, "%l %P") == {:ok, " 9 pm"}
+    assert format(dt, "%I %p") == {:ok, "09 PM"}
+    dt = Date.from({{2014, 12, 31}, {12, 41, 2}})
+    assert format(dt, "%l %P") == {:ok, "12 pm"}
+    assert format(dt, "%I %p") == {:ok, "12 PM"}
+    dt = Date.from({{2014, 12, 31}, {0, 41, 2}})
+    assert format(dt, "%l %P") == {:ok, "12 am"}
+    assert format(dt, "%I %p") == {:ok, "12 AM"}
+    dt = Date.from({{2014, 12, 31}, {9, 41, 2}})
+    assert format(dt, "%l %P") == {:ok, " 9 am"}
+    assert format(dt, "%I %p") == {:ok, "09 AM"}
+
+    dt = Date.from({{2014, 12, 31}, {21, 41, 2}})
+    assert format(dt, "%j") == {:ok, "365"}
+    dt = Date.from({{2014, 1, 1}, {21, 41, 2}})
+    assert format(dt, "%j") == {:ok, "001"}
+    # Leap year
+    dt = Date.from({{2012, 12, 31}, {21, 41, 2}})
+    assert format(dt, "%j") == {:ok, "366"}
+  end
+
   defp format(date, fmt) do
     DateFormat.format(date, fmt, :strftime)
   end
