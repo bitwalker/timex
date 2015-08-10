@@ -26,8 +26,8 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   * `{YYYY}`    - full year number (0..9999)
   * `{YY}`      - the last two digits of the year number (0.99)
   * `{C}`       - century number (0..99)
-  * `{WYYYY}`   - year number corresponding to the date's ISO week (0..9999)
-  * `{WYY}`     - year number (2 digits) corresponding to the date's ISO week (0.99)
+  * `{WYYYY}`   - year number (4 digits) corresponding to the date's ISO week (0000..9999)
+  * `{WYY}`     - year number (2 digits) corresponding to the date's ISO week (00.99)
 
   ### Months
 
@@ -46,16 +46,16 @@ defmodule Timex.Format.DateTime.Formatters.Default do
 
   ### Weeks
 
-  * `{Wiso}`    - ISO week number (1..53)
-  * `{Wmon}`    - week number of the year, Monday first (0..53)
-  * `{Wsun}`    - week number of the year, Sunday first (0..53)
+  * `{Wiso}`    - ISO week number (01..53)
+  * `{Wmon}`    - week number of the year, Monday first (01..53)
+  * `{Wsun}`    - week number of the year, Sunday first (01..53)
 
   ### Time
 
-  * `{h24}`     - hour of the day (0..23)
+  * `{h24}`     - hour of the day (00..23)
   * `{h12}`     - hour of the day (1..12)
-  * `{m}`       - minutes of the hour (0..59)
-  * `{s}`       - seconds of the minute (0..60)
+  * `{m}`       - minutes of the hour (00..59)
+  * `{s}`       - seconds of the minute (00..60)
   * `{s-epoch}` - number of seconds since UNIX epoch
   * `{am}`      - lowercase am or pm (no padding)
   * `{AM}`      - uppercase AM or PM (no padding)
@@ -155,8 +155,8 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   defp do_format(date, [%Directive{type: :literal, value: char} | dirs], result) when is_binary(char) do
     do_format(date, dirs, <<result::binary, char::binary>>)
   end
-  defp do_format(date, [%Directive{type: type, modifiers: mods, flags: flags, min_width: min_width} | dirs], result) do
-    case format_token(type, date, mods, flags, min_width) do
+  defp do_format(date, [%Directive{type: type, modifiers: mods, flags: flags, width: width} | dirs], result) do
+    case format_token(type, date, mods, flags, width) do
       {:error, _} = err -> err
       formatted         -> do_format(date, dirs, <<result::binary, formatted::binary>>)
     end

@@ -1,7 +1,8 @@
 defmodule Timex.Parse.DateTime.Helpers do
   @moduledoc false
   import Combine.Parsers.Base
-  import Combine.Parsers.Text
+  import Combine.Parsers.Text, except: [integer: 0, integer: 1]
+  alias Combine.Parsers.Text
 
   @weekdays_abbr ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
   @weekdays      ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
@@ -61,53 +62,19 @@ defmodule Timex.Parse.DateTime.Helpers do
   def to_ampm("pm"), do: [am: "pm"]
   def to_ampm("PM"), do: [AM: "PM"]
 
-  def integer4(opts \\ []) do
-    case get_in(opts, [:padding]) do
-      :zeroes ->
-        choice([
-          pair_right(string("000"), fixed_integer(1)),
-          pair_right(string("00"), fixed_integer(2)),
-          pair_right(char("0"), fixed_integer(3)),
-          fixed_integer(4),
-        ])
-      :spaces ->
-        choice([
-          pair_right(string("   "), fixed_integer(1)),
-          pair_right(string("  "), fixed_integer(2)),
-          pair_right(char(" "), fixed_integer(3)),
-          fixed_integer(4),
-        ])
-      _ ->
-        choice([
-          fixed_integer(4),
-          fixed_integer(3),
-          fixed_integer(2),
-          fixed_integer(1)
-        ])
-    end
-  end
-  def integer3(opts \\ []) do
-    case get_in(opts, [:padding]) do
-      :zeroes -> choice([
-          pair_right(string("00"), fixed_integer(1)),
-          pair_right(char("0"), fixed_integer(2)),
-          fixed_integer(3)
-        ])
-      :spaces -> choice([
-          pair_right(string("  "), fixed_integer(1)),
-          pair_right(char(" "), fixed_integer(2)),
-          fixed_integer(3)
-        ])
-      _ -> choice([
-          fixed_integer(3), fixed_integer(2), fixed_integer(1)
-        ])
-    end
-  end
-  def integer2(opts \\ []) do
-    case get_in(opts, [:padding]) do
-      :zeroes -> choice([pair_right(char("0"), fixed_integer(1)), fixed_integer(2)])
-      :spaces -> choice([pair_right(char(" "), fixed_integer(1)), fixed_integer(2)])
-      _       -> choice([fixed_integer(2), fixed_integer(1)])
+  def integer(opts \\ []) do
+    min_width = get_in(opts, [:min]) || -1
+    max_width = get_in(opts, [:max])
+    padding   = get_in(opts, [:padding])
+    case {padding, min_width, max_width} do
+      {:zeroes, _, nil}   -> Text.integer
+      {:zeroes, _, max}   -> fixed_integer(max)
+      {:spaces, -1, nil}  -> skip(spaces) |> Text.integer
+      {:spaces, min, nil} -> skip(spaces) |> fixed_integer(min)
+      {:spaces, _, max}   -> skip(spaces) |> choice(Enum.map(max..1, &(fixed_integer(&1))))
+      {_, -1, nil}        -> Text.integer
+      {_, min, nil}       -> fixed_integer(min)
+      {_, min, max}       -> choice(Enum.map(max..min, &(fixed_integer(&1))))
     end
   end
 end

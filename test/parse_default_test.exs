@@ -75,7 +75,7 @@ defmodule DateFormatTest.ParseDefault do
     date = Date.from({2007,1,1})
     year = date.year
     assert { :ok, %DateTime{year: ^year} } = parse("2007", "{WYYYY}")
-    assert { :ok, %DateTime{year: ^year} } = parse("7"   , "{WYY}")
+    assert {:error, "Expected `2 digit year` at line 1, column 1."} = parse("7"   , "{WYY}")
     assert { :ok, %DateTime{year: ^year} } = parse("07"  , "{0WYY}")
     assert { :ok, %DateTime{year: ^year} } = parse(" 7"  , "{_WYY}")
   end
@@ -109,7 +109,8 @@ defmodule DateFormatTest.ParseDefault do
 
   test "parse hour24" do
     date_midnight = Date.from({0,1,1})
-    assert { :ok, ^date_midnight } = parse("0", "{h24}")
+    assert {:error, "Expected `hour between 0 and 24` at line 1, column 1."} = parse("0", "{h24}")
+    assert { :ok, ^date_midnight } = parse("00", "{h24}")
     assert { :ok, ^date_midnight } = parse("00", "{0h24}")
     assert { :ok, ^date_midnight } = parse(" 0", "{_h24}")
     assert {:error, "Input datetime string cannot be empty."} = parse("", "{0am}")
@@ -130,7 +131,7 @@ defmodule DateFormatTest.ParseDefault do
 
   test "parse simple time formats" do
     date = Date.from({{0,1,1}, {12,3,4}})
-    assert { :ok, ^date } = parse("12: 3: 4", "{h24}:{_m}:{_s}")
+    assert { :ok, ^date }  = parse("12: 3: 4", "{h24}:{_m}:{_s}")
     assert { :ok, ^date } = parse("12:03:04", "{h12}:{0m}:{0s}")
     assert { :ok, ^date } = parse("12:03:04 PM", "{h12}:{0m}:{0s} {AM}")
     assert { :error, "Expected `minute` at line 1, column 7." } = parse("pm 12:3:4", "{am} {h24}:{m}:{s}")

@@ -65,37 +65,37 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
 
   defp coalesce_token([flags, directive]) do
     flags     = map_flag(flags) || []
-    width     = -1
+    width     = [min: -1, max: nil]
     modifiers = []
-    map_directive(directive, [flags: flags, min_width: width, modifiers: modifiers])
+    map_directive(directive, [flags: flags, width: width, modifiers: modifiers])
   end
 
   defp map_directive(directive, opts) do
     case directive do
       # Years/Centuries
-      "YYYY"  -> set_width(4, :year4, directive, opts)
-      "YY"    -> set_width(2, :year2, directive, opts)
-      "C"     -> set_width(2, :century, directive, opts)
-      "WYYYY" -> set_width(4, :iso_year4, directive, opts)
-      "WYY"   -> set_width(2, :iso_year2, directive, opts)
+      "YYYY"  -> set_width(1, 4, :year4, directive, opts)
+      "YY"    -> set_width(1, 2, :year2, directive, opts)
+      "C"     -> set_width(1, 2, :century, directive, opts)
+      "WYYYY" -> force_width(4, :iso_year4, directive, opts)
+      "WYY"   -> force_width(2, :iso_year2, directive, opts)
       # Months
-      "M"      -> set_width(2, :month, directive, opts)
+      "M"      -> set_width(1, 2, :month, directive, opts)
       "Mfull"  -> Directive.get(:mfull, directive, opts)
       "Mshort" -> Directive.get(:mshort, directive, opts)
       # Days
-      "D"    -> set_width(2, :day, directive, opts)
-      "Dord" -> set_width(3, :oday, directive, opts)
+      "D"    -> set_width(1, 2, :day, directive, opts)
+      "Dord" -> set_width(1, 3, :oday, directive, opts)
       # Weeks
       "Wiso"    -> force_width(2, :iso_weeknum, directive, opts)
-      "Wmon"    -> set_width(2, :week_mon, directive, opts)
-      "Wsun"    -> set_width(2, :week_sun, directive, opts)
+      "Wmon"    -> set_width(1, 2, :week_mon, directive, opts)
+      "Wsun"    -> set_width(1, 2, :week_sun, directive, opts)
       "WDmon"   -> Directive.get(:wday_mon, directive, opts)
       "WDsun"   -> Directive.get(:wday_sun, directive, opts)
       "WDshort" -> Directive.get(:wdshort, directive, opts)
       "WDfull"  -> Directive.get(:wdfull, directive, opts)
       # Hours
-      "h24"     -> set_width(2, :hour24, directive, opts)
-      "h12"     -> set_width(2, :hour12, directive, opts)
+      "h24"     -> force_width(2, :hour24, directive, opts)
+      "h12"     -> set_width(1, 2, :hour12, directive, opts)
       "m"       -> force_width(2, :min, directive, opts)
       "s"       -> force_width(2, :sec, directive, opts)
       "s-epoch" -> Directive.get(:sec_epoch, directive, opts)
@@ -127,16 +127,15 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
     end
   end
 
-  defp set_width(size, type, directive, opts) do
-    opts = Keyword.merge(opts, [min_width: size])
+  defp set_width(min, max, type, directive, opts) do
+    opts = Keyword.merge(opts, [width: [min: min, max: max]])
     Directive.get(type, directive, opts)
   end
 
   defp force_width(size, type, directive, opts) do
     flags     = Keyword.merge([padding: :zeroes], get_in(opts, [:flags]))
     mods      = get_in(opts, [:modifiers])
-    min_width = size
-    Directive.get(type, directive, [flags: flags, modifiers: mods, min_width: min_width])
+    Directive.get(type, directive, [flags: flags, modifiers: mods, width: [min: size, max: size]])
   end
 
   defp map_literal([]),        do: nil

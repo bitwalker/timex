@@ -50,23 +50,12 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
     ])
   end
   defp strftime_format_parser() do
-    sequence([
-      many1(either(
-        label(
-          map(
-            # %<flag><width><modifier><directive>
-            pair_right(char("%"), sequence([option(flags()), option(min_width()), option(modifiers()), directives()])),
-            &coalesce_token/1
-          ),
-          "a valid strftime directive."),
-        choice([
-          label(map(pair_left(char("%"), char("%")), &map_literal/1), "an escaped %"),
-          sequence([pair_left(char("%"), char), fail("Invalid strftime directive")]),
-          map(none_of(char, ["%"]), &map_literal/1)
-        ])
-      )),
-      eof
-    ])
+    many1(choice([
+      # %<flag><width><modifier><directive>
+      pair_right(char("%"), pipe([option(flags()), option(min_width()), option(modifiers()), directives()], &coalesce_token/1)),
+      map(none_of(char, ["%"]), &map_literal/1),
+      map(pair_left(char("%"), char("%")), &map_literal/1)
+    ])) |> eof
   end
 
   defp coalesce_token([flags, width, modifiers, directive]) do
@@ -130,8 +119,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
   defp force_width(size, type, directive, opts) do
     flags     = Keyword.merge([padding: :zeroes], get_in(opts, [:flags]))
     mods      = get_in(opts, [:modifiers])
-    min_width = size
-    Directive.get(type, directive, [flags: flags, modifiers: mods, min_width: min_width])
+    Directive.get(type, directive, [flags: flags, modifiers: mods, width: [min: size, max: size]])
   end
 
   defp map_literal([]),        do: nil

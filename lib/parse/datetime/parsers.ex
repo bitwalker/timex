@@ -5,24 +5,24 @@ defmodule Timex.Parse.DateTime.Parsers do
   import Combine.Parsers.Text
 
   def year4(opts \\ []) do
-    Helpers.integer4(opts)
+    Helpers.integer(opts)
     |> satisfy(fn year -> year > 0 end)
     |> map(fn year -> [year4: year] end)
     |> label("4 digit year")
   end
   def year2(opts \\ []) do
-    Helpers.integer2(opts)
+    Helpers.integer(opts)
     |> satisfy(fn year -> year > 0 end)
     |> map(fn year -> [year2: year] end)
     |> label("2 digit year")
   end
   def century(opts \\ []) do
-    Helpers.integer2(opts)
+    Helpers.integer(opts)
     |> map(fn c -> [century: c] end)
     |> label("2 digit century")
   end
   def month2(opts \\ []) do
-    Helpers.integer2(opts)
+    Helpers.integer(opts)
     |> satisfy(fn month -> month in 0..12 end)
     |> map(&Helpers.to_month/1)
     |> label("2 digit month")
@@ -40,19 +40,19 @@ defmodule Timex.Parse.DateTime.Parsers do
   end
 
   def day_of_month(opts \\ []) do
-    Helpers.integer2(opts)
+    Helpers.integer(opts)
     |> satisfy(fn day -> day >= 1 && day <= 31 end)
     |> map(fn n -> [day: n] end)
     |> label("day of month")
   end
   def day_of_year(opts \\ []) do
-    Helpers.integer3(opts)
+    Helpers.integer(opts)
     |> satisfy(fn day -> day >= 1 && day <= 366 end)
     |> map(fn n -> [day_of_year: n] end)
     |> label("day of year")
   end
   def week_of_year(opts \\ []) do
-    Helpers.integer2(opts)
+    Helpers.integer(opts)
     |> satisfy(fn week -> week >= 1 && week <= 53 end)
     |> map(fn n -> [week_of_year: n] end)
     |> label("week of year")
@@ -77,13 +77,13 @@ defmodule Timex.Parse.DateTime.Parsers do
   end
 
   def hour24(opts \\ []) do
-    Helpers.integer2(opts)
+    Helpers.integer(opts)
     |> satisfy(fn hour -> hour >= 0 && hour <= 24 end)
     |> map(fn hour -> [hour24: hour] end)
     |> label("hour between 0 and 24")
   end
   def hour12(opts \\ []) do
-    Helpers.integer2(opts)
+    Helpers.integer(opts)
     |> satisfy(fn hour -> hour >= 1 && hour <= 12 end)
     |> map(fn hour -> [hour12: hour] end)
     |> label("hour between 1 and 12")
@@ -104,19 +104,19 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("am/pm or AM/PM")
   end
   def minute(opts \\ []) do
-    Helpers.integer2(opts)
+    Helpers.integer(opts)
     |> satisfy(fn min -> min >= 0 && min <= 59 end)
     |> map(fn min -> [min: min] end)
     |> label("minute")
   end
   def second(opts \\ []) do
-    Helpers.integer2(opts)
+    Helpers.integer(opts)
     |> satisfy(fn sec -> sec >= 0 && sec <= 59 end)
     |> map(fn sec -> [sec: sec] end)
     |> label("second")
   end
   def second_fractional(opts \\ []) do
-    both(Helpers.integer2(opts), pair_right(char("."), integer), &Helpers.to_sec_ms/2)
+    both(Helpers.integer(opts), pair_right(char("."), integer), &Helpers.to_sec_ms/2)
     |> satisfy(fn [{:sec, sec}|_] -> sec >= 0 && sec <= 59 end)
     |> label("fractional second")
   end

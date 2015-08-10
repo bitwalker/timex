@@ -31,13 +31,13 @@ defmodule DateFormatTest.FormatDefault do
   test "format ISO year" do
     date = Date.from({2007,11,19})
     assert { :ok, "2007" } = format(date, "{WYYYY}")
-    assert { :ok, "7" }    = format(date, "{WYY}")
+    assert { :ok, "07" }   = format(date, "{WYY}")
     assert { :ok, "07" }   = format(date, "{0WYY}")
     assert { :ok, " 7" }   = format(date, "{_WYY}")
 
     date = Date.from({2006,1,1})
     assert { :ok, "2005" } = format(date, "{WYYYY}")
-    assert { :ok, "5" }    = format(date, "{WYY}")
+    assert { :ok, "05" }   = format(date, "{WYY}")
     assert { :ok, "05" }   = format(date, "{0WYY}")
     assert { :ok, " 5" }   = format(date, "{_WYY}")
   end
@@ -176,7 +176,7 @@ defmodule DateFormatTest.FormatDefault do
     date = Date.from({{2013,8,18}, {16,28,27}})
     date_midnight = Date.from({{2013,8,18}, {0,3,4}})
 
-    assert { :ok, "0" }  = format(date_midnight, "{h24}")
+    assert { :ok, "00" } = format(date_midnight, "{h24}")
     assert { :ok, "00" } = format(date_midnight, "{0h24}")
     assert { :ok, " 0" } = format(date_midnight, "{_h24}")
 
