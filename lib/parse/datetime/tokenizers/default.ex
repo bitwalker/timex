@@ -24,47 +24,47 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
     end
   end
 
-  defp flags(),     do: map(one_of(char, ["0", "_"]), &map_flag/1)
   defp directives() do
-    one_of(word_of(~r/[\-\w\:]/), [
-      # Years/Centuries
-      "YYYY", "YY", "C", "WYYYY", "WYY",
-      # Months
-      "Mshort", "Mfull", "M",
-      # Days
-      "Dord", "D",
-      # Weeks
-      "Wiso", "Wmon", "Wsun", "WDmon", "WDsun", "WDshort", "WDfull",
-      # Time
-      "h24", "h12", "m", "ss", "s-epoch", "s", "am", "AM",
-      # Timezones
-      "Zname", "Z::", "Z:", "Z",
-      # Compound
-      "ISOord", "ISOweek-day", "ISOweek", "ISOdate", "ISOtime", "ISOz", "ISO",
-      "RFC822z", "RFC822", "RFC1123z", "RFC1123", "RFC3339z", "RFC3339",
-      "ANSIC", "UNIX", "kitchen"
-    ])
+    pipe([
+      option(one_of(char, ["0", "_"])),
+      one_of(word_of(~r/[\-\w\:]/), [
+        # Years/Centuries
+        "YYYY", "YY", "C", "WYYYY", "WYY",
+        # Months
+        "Mshort", "Mfull", "M",
+        # Days
+        "Dord", "D",
+        # Weeks
+        "Wiso", "Wmon", "Wsun", "WDmon", "WDsun", "WDshort", "WDfull",
+        # Time
+        "h24", "h12", "m", "ss", "s-epoch", "s", "am", "AM",
+        # Timezones
+        "Zname", "Z::", "Z:", "Z",
+        # Compound
+        "ISOord", "ISOweek-day", "ISOweek", "ISOdate", "ISOtime", "ISOz", "ISO",
+        "RFC822z", "RFC822", "RFC1123z", "RFC1123", "RFC3339z", "RFC3339",
+        "ANSIC", "UNIX", "kitchen"
+      ])],
+      &coalesce_token/1
+    )
   end
 
   defp default_format_parser() do
-    sequence([
-      many1(choice([
-        # {<padding><directive>}
-        label(map(between(char("{"), sequence([option(flags()), directives()]), char("}")), &coalesce_token/1),
-          "a valid directive."),
-        label(map(none_of(char, ["{", "}"]), &map_literal/1),
-          "any character but { or }."),
-        label(map(pair_left(char("{"), char("{")), &map_literal/1),
-          "an escaped { character"),
-        label(map(pair_left(char("}"), char("}")), &map_literal/1),
-          "an escaped } character")
-      ])),
-      eof
-    ])
+    many1(choice([
+      # {<padding><directive>}
+      label(between(char(?{), directives, char(?})),
+        "a valid directive."),
+      label(map(none_of(char, ["{", "}"]), &map_literal/1),
+        "any character but { or }."),
+      label(map(pair_left(char(?{), char(?{)), &map_literal/1),
+        "an escaped { character"),
+      label(map(pair_left(char(?}), char(?})), &map_literal/1),
+        "an escaped } character")
+    ])) |> eof
   end
 
   defp coalesce_token([flags, directive]) do
-    flags     = flags || []
+    flags     = map_flag(flags) || []
     width     = -1
     modifiers = []
     map_directive(directive, [flags: flags, min_width: width, modifiers: modifiers])
@@ -144,11 +144,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
     when is_list(literals),    do: Enum.map(literals, &map_literal/1)
   defp map_literal(literal),   do: %Directive{type: :literal, value: literal, parser: char(literal)}
 
-  defp map_flag(flag) do
-    case flag do
-      "_" -> [padding: :spaces]
-      "0" -> [padding: :zeroes]
-      _   -> []
-    end
-  end
+  defp map_flag("_"), do: [padding: :spaces]
+  defp map_flag("0"), do: [padding: :zeroes]
+  defp map_flag(_),   do: []
 end
