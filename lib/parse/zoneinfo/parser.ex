@@ -15,7 +15,6 @@ defmodule Timex.Parse.ZoneInfo.Parser do
       http://linux.about.com/library/cmd/blcmdl5_tzfile.htm
       https://github.com/eggert/tz/blob/master/tzfile.h
     """
-    @derive Access
     defstruct transitions: [],     # Transition times
               abbreviations: [],   # Zone abbreviations,
               leaps: [],           # Leap second adjustments
@@ -27,7 +26,6 @@ defmodule Timex.Parse.ZoneInfo.Parser do
     @moduledoc false
 
     # Six big-endian 4-8 byte integers
-    @derive Access
     defstruct utc_count: 0,        # count of UTC/local indicators
               wall_count: 0,       # count of standard/wall indicators
               leap_count: 0,       #  number of leap seconds
@@ -38,7 +36,6 @@ defmodule Timex.Parse.ZoneInfo.Parser do
 
   defmodule TransitionInfo do
     @moduledoc false
-    @derive Access
     defstruct gmt_offset: 0,       # total ISO 8601 offset (std + dst)
               starts_at: 0,        # The time at which this transition starts
               is_dst?: false,      # Is this transition in daylight savings time
@@ -50,7 +47,6 @@ defmodule Timex.Parse.ZoneInfo.Parser do
 
   defmodule LeapSecond do
     @moduledoc false
-    @derive Access
     defstruct start: 0,    # The time at which this leap second occurs
               remaining: 0 # The count of leap seconds after this leap second
   end
