@@ -90,7 +90,7 @@ defmodule Timex.Format.DateTime.Formatter do
     hour   = format_token(:hour24, date, modifiers, flags, width_spec(2..2))
     minute = format_token(:min, date, modifiers, flags, width_spec(2..2))
     sec    = format_token(:sec, date, modifiers, flags, width_spec(2..2))
-    ms     = format_token(:sec_fractional, date, modifiers, flags, width_spec(-1..nil))
+    ms     = format_token(:sec_fractional, date, modifiers, flags, width_spec(-1, nil))
     "#{hour}:#{minute}:#{sec}#{ms}"
   end
   def format_token(token, %DateTime{} = date, modifiers, _flags, _width)
@@ -106,10 +106,10 @@ defmodule Timex.Format.DateTime.Formatter do
     hour  = format_token(:hour24, date, modifiers, flags, width_spec(2..2))
     min   = format_token(:min, date, modifiers, flags, width_spec(2..2))
     sec   = format_token(:sec, date, modifiers, flags, width_spec(2..2))
-    ms    = format_token(:sec_fractional, date, modifiers, flags, width_spec(-1..nil))
+    ms    = format_token(:sec_fractional, date, modifiers, flags, width_spec(-1, nil))
     case token do
       :iso_8601 ->
-        tz = format_token(:zoffs, date, modifiers, flags, width_spec(-1..nil))
+        tz = format_token(:zoffs, date, modifiers, flags, width_spec(-1, nil))
         "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}#{tz}"
       :iso_8601z ->
         "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}Z"
@@ -124,15 +124,15 @@ defmodule Timex.Format.DateTime.Formatter do
     end
     flags = [padding: :zeroes]
     year  = format_token(:year2, date, modifiers, flags, width_spec(2..2))
-    month = format_token(:mshort, date, modifiers, flags, width_spec(-1..nil))
+    month = format_token(:mshort, date, modifiers, flags, width_spec(-1, nil))
     day   = format_token(:day, date, modifiers, flags, width_spec(2..2))
     hour  = format_token(:hour24, date, modifiers, flags, width_spec(2..2))
     min   = format_token(:min, date, modifiers, flags, width_spec(2..2))
     sec   = format_token(:sec, date, modifiers, flags, width_spec(2..2))
-    wday  = format_token(:wdshort, date, modifiers, flags, width_spec(-1..nil))
+    wday  = format_token(:wdshort, date, modifiers, flags, width_spec(-1, nil))
     case token do
       :rfc_822 ->
-        tz = format_token(:zoffs, date, modifiers, flags, width_spec(-1..nil))
+        tz = format_token(:zoffs, date, modifiers, flags, width_spec(-1, nil))
         "#{wday}, #{day} #{month} #{year} #{hour}:#{min}:#{sec} #{tz}"
       :rfc_822z ->
         "#{wday}, #{day} #{month} #{year} #{hour}:#{min}:#{sec} Z"
@@ -147,15 +147,15 @@ defmodule Timex.Format.DateTime.Formatter do
     end
     flags = [padding: :zeroes]
     year  = format_token(:year4, date, modifiers, flags, width_spec(4..4))
-    month = format_token(:mshort, date, modifiers, flags, width_spec(-1..nil))
+    month = format_token(:mshort, date, modifiers, flags, width_spec(-1, nil))
     day   = format_token(:day, date, modifiers, flags, width_spec(2..2))
     hour  = format_token(:hour24, date, modifiers, flags, width_spec(2..2))
     min   = format_token(:min, date, modifiers, flags, width_spec(2..2))
     sec   = format_token(:sec, date, modifiers, flags, width_spec(2..2))
-    wday  = format_token(:wdshort, date, modifiers, flags, width_spec(-1..nil))
+    wday  = format_token(:wdshort, date, modifiers, flags, width_spec(-1, nil))
     case token do
       :rfc_1123 ->
-        tz = format_token(:zoffs, date, modifiers, flags, width_spec(-1..nil))
+        tz = format_token(:zoffs, date, modifiers, flags, width_spec(-1, nil))
         "#{wday}, #{day} #{month} #{year} #{hour}:#{min}:#{sec} #{tz}"
       :rfc_1123z ->
         "#{wday}, #{day} #{month} #{year} #{hour}:#{min}:#{sec} Z"
@@ -175,10 +175,10 @@ defmodule Timex.Format.DateTime.Formatter do
     hour  = format_token(:hour24, date, modifiers, flags, width_spec(2..2))
     min   = format_token(:min, date, modifiers, flags, width_spec(2..2))
     sec   = format_token(:sec, date, modifiers, flags, width_spec(2..2))
-    ms    = format_token(:sec_fractional, date, modifiers, flags, width_spec(-1..nil))
+    ms    = format_token(:sec_fractional, date, modifiers, flags, width_spec(-1, nil))
     case token do
       :rfc_3339 ->
-        tz = format_token(:zoffs_colon, date, modifiers, flags, width_spec(-1..nil))
+        tz = format_token(:zoffs_colon, date, modifiers, flags, width_spec(-1, nil))
         "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}#{tz}"
       :rfc_3339z ->
         "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}Z"
@@ -188,31 +188,31 @@ defmodule Timex.Format.DateTime.Formatter do
     # Tue Mar  5 23:25:19 PST 2013`
     flags = [padding: :zeroes]
     year  = format_token(:year4, date, modifiers, [padding: :spaces], width_spec(4..4))
-    month = format_token(:mshort, date, modifiers, flags, width_spec(-1..nil))
+    month = format_token(:mshort, date, modifiers, flags, width_spec(-1, nil))
     day   = format_token(:day, date, modifiers, [padding: :spaces], width_spec(2..2))
     hour  = format_token(:hour24, date, modifiers, [padding: :zeroes], width_spec(2..2))
     min   = format_token(:min, date, modifiers, [padding: :zeroes], width_spec(2..2))
     sec   = format_token(:sec, date, modifiers, [padding: :zeroes], width_spec(2..2))
-    wday  = format_token(:wdshort, date, modifiers, flags, width_spec(-1..nil))
-    tz    = format_token(:zname, date, modifiers, flags, width_spec(-1..nil))
+    wday  = format_token(:wdshort, date, modifiers, flags, width_spec(-1, nil))
+    tz    = format_token(:zname, date, modifiers, flags, width_spec(-1, nil))
     "#{wday} #{month} #{day} #{hour}:#{min}:#{sec} #{tz} #{year}"
   end
   def format_token(:ansic, %DateTime{} = date, modifiers, flags, _width) do
     # Tue Mar  5 23:25:19 2013`
     year  = format_token(:year4, date, modifiers, [padding: :spaces], width_spec(4..4))
-    month = format_token(:mshort, date, modifiers, flags, width_spec(-1..nil))
+    month = format_token(:mshort, date, modifiers, flags, width_spec(-1, nil))
     day   = format_token(:day, date, modifiers, [padding: :spaces], width_spec(2..2))
     hour  = format_token(:hour24, date, modifiers, [padding: :zeroes], width_spec(2..2))
     min   = format_token(:min, date, modifiers, [padding: :zeroes], width_spec(2..2))
     sec   = format_token(:sec, date, modifiers, [padding: :zeroes], width_spec(2..2))
-    wday  = format_token(:wdshort, date, modifiers, flags, width_spec(-1..nil))
+    wday  = format_token(:wdshort, date, modifiers, flags, width_spec(-1, nil))
     "#{wday} #{month} #{day} #{hour}:#{min}:#{sec} #{year}"
   end
   def format_token(:kitchen, %DateTime{} = date, modifiers, _flags, _width) do
     # `3:25PM`
     hour  = format_token(:hour12, date, modifiers, [], width_spec(2..2))
     min   = format_token(:min, date, modifiers, [padding: :zeroes], width_spec(2..2))
-    ampm  = format_token(:AM, date, modifiers, [], width_spec(-1..nil))
+    ampm  = format_token(:AM, date, modifiers, [], width_spec(-1, nil))
     "#{hour}:#{min}#{ampm}"
   end
   def format_token(:slashed, %DateTime{} = date, modifiers, _flags, _width) do
@@ -241,14 +241,14 @@ defmodule Timex.Format.DateTime.Formatter do
     hour  = format_token(:hour12, date, modifiers, [padding: :zeroes], width_spec(2..2))
     min   = format_token(:min, date, modifiers, [padding: :zeroes], width_spec(2..2))
     sec   = format_token(:sec, date, modifiers, [padding: :zeroes], width_spec(2..2))
-    ampm  = format_token(:AM, date, modifiers, [], width_spec(-1..nil))
+    ampm  = format_token(:AM, date, modifiers, [], width_spec(-1, nil))
     "#{hour}:#{min}:#{sec} #{ampm}"
   end
   def format_token(:strftime_iso_shortdate, %DateTime{} = date, modifiers, _flags, _width) do
     # ` 5-Jan-2014`
     flags = [padding: :zeroes]
     year  = format_token(:year4, date, modifiers, flags, width_spec(4..4))
-    month = format_token(:mshort, date, modifiers, flags, width_spec(-1..nil))
+    month = format_token(:mshort, date, modifiers, flags, width_spec(-1, nil))
     day   = format_token(:day, date, modifiers, [padding: :spaces], width_spec(2..2))
     "#{day}-#{month}-#{year}"
   end
@@ -264,7 +264,7 @@ defmodule Timex.Format.DateTime.Formatter do
     flags = [padding: :zeroes]
     year = format_token(:year4, date, modifiers, flags, width_spec(4..4))
     week = format_token(:iso_weeknum, date, modifiers, flags, width_spec(2..2))
-    day  = format_token(:wday_mon, date, modifiers, flags, width_spec(1..1))
+    day  = format_token(:wday_mon, date, modifiers, flags, width_spec(1, 1))
     "#{year}-W#{week}-#{day}"
   end
   def format_token(:iso_ordinal, %DateTime{} = date, modifiers, _flags, _width) do
@@ -427,4 +427,5 @@ defmodule Timex.Format.DateTime.Formatter do
   defp pad_char(:spaces), do: <<32>>
 
   defp width_spec(min..max), do: [min: min, max: max]
+  defp width_spec(min, max), do: [min: min, max: max]
 end
