@@ -1,4 +1,4 @@
-defmodule Timex.Parse.DateTime.Tokenizers.Humanized do
+defmodule MyApp.DateTimeTokenizers.Humanized do
   use Timex.Parse.DateTime.Tokenizer
   use Combine
   alias Timex.Date
@@ -39,6 +39,8 @@ defmodule Timex.Parse.DateTime.Tokenizers.Humanized do
         {:ok, %{date | :day => value}}
       :date_shift ->
         case value do
+          :none ->
+            {:ok, date}
           [{shift, n}] when is_integer(n) ->
             {:ok, Date.shift(date, [{shift, n}])}
           shift ->
@@ -78,13 +80,16 @@ defmodule Timex.Parse.DateTime.Tokenizers.Humanized do
 
   # Parses a date shift expression, i.e. 3 days after
   defp date_shift_parser() do
-    map(sequence([
-      integer,
-      skip(spaces),
-      one_of(word, ["seconds", "minutes", "hours", "days", "weeks", "months", "years"]),
-      skip(spaces),
-      one_of(word, ["before", "after"])
-    ]), fn
+    map(either(
+      string("currently"),
+      sequence([
+        integer,
+        skip(spaces),
+        one_of(word, ["seconds", "minutes", "hours", "days", "weeks", "months", "years"]),
+        skip(spaces),
+        one_of(word, ["before", "after"])
+      ])), fn
+      "currently"          -> [date_shift: :none]
       [n, shift, "before"] -> [date_shift: [{to_shift(shift), -n}]]
       [n, shift, "after"]  -> [date_shift: [{to_shift(shift), n}]]
     end)
