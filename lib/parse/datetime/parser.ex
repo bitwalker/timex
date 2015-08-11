@@ -2,8 +2,7 @@ defmodule Timex.Parse.DateTime.Parser do
   @moduledoc """
   This is the base plugin behavior for all Timex date/time string parsers.
   """
-  use Behaviour
-  import Combine.Parsers.Base, only: [eof: 0, sequence: 1]
+  import Combine.Parsers.Base, only: [eof: 0, sequence: 1, map: 2, pipe: 2]
 
   alias Timex.Date
   alias Timex.Time
@@ -13,6 +12,7 @@ defmodule Timex.Parse.DateTime.Parser do
   alias Timex.Parse.ParseError
   alias Timex.Parse.DateTime.Tokenizers.Directive
   alias Timex.Parse.DateTime.Tokenizers.Default, as: DefaultTokenizer
+
 
   @doc """
   Parses a date/time string using the default parser.
@@ -64,7 +64,7 @@ defmodule Timex.Parse.DateTime.Parser do
         {:ok, directives} ->
           case date_string do
             ""  -> {:error, "Input datetime string cannot be empty."}
-            _   -> do_parse(date_string, directives)
+            _   -> do_parse(date_string, directives, tokenizer)
           end
       end
   end
@@ -82,52 +82,54 @@ defmodule Timex.Parse.DateTime.Parser do
       end
   end
 
-  defp do_parse(str, directives) do
+  defp do_parse(str, directives, tokenizer) do
     parsers = directives
-              |> Stream.map(fn %Directive{parser: parser} -> parser end)
+              |> Stream.map(fn %Directive{weight: weight, parser: parser} -> map(parser, &({&1, weight})) end)
               |> Stream.filter(fn nil -> false; _ -> true end)
               |> Enum.reverse
-    case Combine.parse(str, sequence([eof|parsers] |> Enum.reverse)) do
-      results when is_list(results) ->
+    case Combine.parse(str, pipe([eof|parsers] |> Enum.reverse, &(&1))) do
+      [results] when is_list(results) ->
         results
-        |> List.flatten
+        |> Stream.with_index
+        |> Enum.sort_by(fn
+            # If :force_utc exists, make sure it is applied last
+            {{[force_utc: true], _}, _}       -> 9999
+            # If weight is zeroed, use the index as it's weight
+            {{_token, 0}, i}      -> i
+            # Otherwise use the weight supplied by the directive
+            {{_token, weight}, _} -> weight
+          end)
+        |> Stream.flat_map(fn
+            {{token, _}, _} when is_list(token) -> List.flatten(token);
+            {{token, _}, _} -> [token]
+          end)
         |> Enum.filter(&Kernel.is_tuple/1)
-        |> apply_directives
+        |> apply_directives(tokenizer)
       {:error, _} = err -> err
     end
   end
 
   # Constructs a DateTime from the parsed tokens
-  defp apply_directives([]), do: {:ok, %DateTime{}}
-  defp apply_directives(tokens) do
-    # If :force_utc exists, make sure it is applied last
-    sorted = tokens
-      |> Enum.with_index
-      |> Enum.sort_by(fn
-           {{:force_utc, _}, _} -> 9999
-           {{_,_}, i} -> i
-         end)
-      |> Enum.map(fn {token, _} -> token end)
-    apply_directives(sorted, %DateTime{})
+  defp apply_directives([], _),             do: {:ok, %DateTime{}}
+  defp apply_directives(tokens, tokenizer), do: apply_directives(tokens, %DateTime{}, tokenizer)
+  defp apply_directives([], %DateTime{timezone: nil} = date, tokenizer) do
+    apply_directives([], %{date | :timezone => %TimezoneInfo{}}, tokenizer)
   end
-  defp apply_directives([], %DateTime{timezone: nil} = date) do
-    apply_directives([], %{date | :timezone => %TimezoneInfo{}})
-  end
-  defp apply_directives([], %DateTime{} = date), do: {:ok, date}
-  defp apply_directives([{token, value}|tokens], %DateTime{} = date) do
-    case update_date(date, token, value) do
+  defp apply_directives([], %DateTime{} = date, _), do: {:ok, date}
+  defp apply_directives([{token, value}|tokens], %DateTime{} = date, tokenizer) do
+    case update_date(date, token, value, tokenizer) do
       {:error, _} = error -> error
-      updated             -> apply_directives(tokens, updated)
+      updated             -> apply_directives(tokens, updated, tokenizer)
     end
   end
 
   # Given a date, a token, and the value for that token, update the
   # date according to the rules for that token and the provided value
-  defp update_date(%DateTime{year: year} = date, token, value) when is_atom(token) do
+  defp update_date(%DateTime{year: year} = date, token, value, tokenizer) when is_atom(token) do
     case token do
       # Formats
       clock when clock in [:kitchen, :strftime_iso_kitchen] ->
-        case apply_directives(value, Date.now) do
+        case apply_directives(value, Date.now, tokenizer) do
           {:error, _} = err -> err
           {:ok, date} when clock == :kitchen -> %{date | :second => 0, :ms => 0}
           {:ok, date} -> %{date | :ms => 0}
@@ -228,7 +230,12 @@ defmodule Timex.Parse.DateTime.Parser do
         end
       :literal -> date
       _ ->
-        {:error, "Unknown token: #{token}"}
+        case tokenizer.apply(date, token, value) do
+          {:ok, date}       -> date
+          {:error, _} = err -> err
+          _ ->
+            {:error, "Unrecognized token: #{token}"}
+        end
     end
   end
 

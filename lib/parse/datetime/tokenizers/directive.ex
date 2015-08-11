@@ -8,7 +8,8 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
             modifiers: [],
             flags: [],
             width: [min: -1, max: nil],
-            parser: nil
+            parser: nil,
+            weight: 0
 
   @doc """
   Gets a parsing directive for the given token name, where the token name
