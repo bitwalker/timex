@@ -2,7 +2,6 @@ defmodule Timex.DateTime do
   alias Timex.DateTime
   alias Timex.TimezoneInfo
 
-  @derive Access
   defstruct day:      1,
             month:    1,
             year:     0,
