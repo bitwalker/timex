@@ -1,4 +1,14 @@
 defmodule MyApp.DateTimeFormatters.Humanized do
+  @moduledoc """
+  See https://timex.readme.io/docs/custom-formatters for more context.
+
+  This custom formatter accepts format strings containing the following tokens:
+
+    - `{day}` - The phonetic name of the ordinal day of the month, i.e. third
+    - `{month}` - The full name of the month, i.e. July
+    - `{year}` - The four digit year, i.e. 2015
+    - `{shift}` - A shift expression, i.e. "currently" or "3 days before"
+  """
   use Timex.Format.DateTime.Formatter
 
   alias Timex.DateTime

@@ -1,4 +1,22 @@
 defmodule MyApp.DateTimeTokenizers.Humanized do
+  @moduledoc """
+  See https://timex.readme.io/docs/custom-parsers for more context.
+
+  This custom tokenizer accepts format strings containing the following tokens:
+
+    - `{day}` - The phonetic name of the ordinal day of the month, i.e. third
+    - `{month}` - The full name of the month, i.e. July
+    - `{year}` - The four digit year, i.e. 2015
+    - `{shift}` - A shift expression, should be one of the following formats:
+      - "currently"
+      - "<integer> <seconds|minutes|hours|days|weeks|months|years> <before|after>"
+
+  Combined with `DateFormat.parse`, this allows you to parse strings such as:
+
+    - "currently the eleventh of August, 2015"
+    - "3 days before the fourth of July, 2015"
+    - "3 minutes after the fourth of July, 2015"
+  """
   use Timex.Parse.DateTime.Tokenizer
   use Combine
   alias Timex.Date
