@@ -46,6 +46,7 @@ defmodule Timex.Date do
   @type microseconds :: non_neg_integer
 
   # Constants
+  @valid_months 1..12
   @million 1_000_000
   @weekdays [
     {"Monday", 1}, {"Tuesday", 2}, {"Wednesday", 3}, {"Thursday", 4},
@@ -57,7 +58,21 @@ defmodule Timex.Date do
     {"July", 7},     {"August", 8},    {"September", 9},
     {"October", 10}, {"November", 11}, {"December", 12}
   ]
-  @valid_months 1..12
+  # {is_leap_year, month, shift}
+  @ordinal_day_map [
+    {true, 1, 0}, {false, 1, 0},
+    {true, 2, 31}, {false, 2, 31},
+    {true, 3, 60}, {false, 3, 59},
+    {true, 4, 91}, {false, 4, 90},
+    {true, 5, 121}, {false, 5, 120},
+    {true, 6, 152}, {false, 6, 151},
+    {true, 7, 182}, {false, 7, 181},
+    {true, 8, 213}, {false, 8, 212},
+    {true, 9, 244}, {false, 9, 243},
+    {true, 10, 274}, {false, 10, 273},
+    {true, 11, 305}, {false, 11, 304},
+    {true, 12, 335}, {false, 12, 334}
+  ]
 
   @doc """
   Get a TimezoneInfo object for the specified offset or name.
@@ -494,13 +509,13 @@ defmodule Timex.Date do
   ## Examples
 
       # Creating a DateTime from the given day
-      iex> expected = #{__MODULE__}.from({{2015, 6, 30}, {0,0,0}})
-      iex> #{__MODULE__}.from_iso_day(180) === expected
+      iex> expected = #{__MODULE__}.from({{2015, 6, 29}, {0,0,0}})
+      iex> (#{__MODULE__}.from_iso_day(180) === expected)
       true
 
       # Shifting a DateTime to the given day
       iex> date = #{__MODULE__}.from({{2015,6,26}, {12,0,0}})
-      iex> expected = #{__MODULE__}.from({{2015, 6, 30}, {12,0,0}})
+      iex> expected = #{__MODULE__}.from({{2015, 6, 29}, {12,0,0}})
       iex> (#{__MODULE__}.from_iso_day(180, date) === expected)
       true
   """
@@ -508,12 +523,24 @@ defmodule Timex.Date do
   def from_iso_day(day, date \\ nil)
 
   def from_iso_day(day, nil) do
-    today = now |> set([month: 1, day: 1, hour: 0, minute: 0, second: 0, ms: 0])
-    shift(today, days: day)
+    {{year,_,_},_} = :calendar.universal_time
+    datetime = iso_day_to_date_tuple(year, day)
+    Date.from(datetime)
   end
-  def from_iso_day(day, date) do
-    reset = date |> set([month: 1, day: 1])
-    shift(reset, days: day)
+  def from_iso_day(day, %DateTime{year: year} = date) do
+    {year, month, day_of_month} = iso_day_to_date_tuple(year, day)
+    %{date | :year => year, :month => month, :day => day_of_month}
+  end
+  defp iso_day_to_date_tuple(year, day) do
+    {year, day} = cond do
+      day < 1 && :calendar.is_leap_year(year - 1) -> {year - 1, day + 366}
+      day < 1                                     -> {year - 1, day + 365}
+      day > 366 && :calendar.is_leap_year(year)   -> {year, day - 366}
+      day > 365                                   -> {year, day - 365}
+      true                                        -> {year, day}
+    end
+    {_, month, first_of_month} = Enum.take_while(@ordinal_day_map, fn {_, _, oday} -> oday <= day end) |> List.last
+    {year, month, day - first_of_month}
   end
 
   @doc """
@@ -693,25 +720,18 @@ defmodule Timex.Date do
 
   ## Examples
 
-      iex> expected = #{__MODULE__}.from({2014, 1, 29})
+      iex> expected = #{__MODULE__}.from({2014, 1, 28})
       iex> #{__MODULE__}.from_iso_triplet({2014, 5, 2}) === expected
       true
 
   """
   @spec from_iso_triplet(iso_triplet) :: DateTime.t
-  def from_iso_triplet({year, _, _} = triplet) do
-    DateTime.new
-    |> set([year: year, month: 1, day: 1])
-    |> do_from_iso_triplet(triplet)
-  end
-  defp do_from_iso_triplet(date, {_, week, weekday}) do
-    {year, _, first_weekday}  = date |> set([month: 1, day: 4]) |> iso_triplet
-    weekday_offset            = first_weekday + 3
-    ordinal                   = ((week * 7) + weekday) - weekday_offset
-    cond do
-      ordinal <= 0 -> do_from_iso_triplet(%{date | :year => year - 1}, {year, 53, weekday})
-      true -> date |> shift(days: ordinal)
-    end
+  def from_iso_triplet({year, week, weekday}) do
+    {_, _, jan4weekday} = Date.from({year, 1, 4}) |> iso_triplet
+    offset = jan4weekday + 3
+    ordinal_date = ((week * 7) + weekday) - offset
+    datetime = iso_day_to_date_tuple(year, ordinal_date)
+    Date.from(datetime)
   end
 
   @doc """
