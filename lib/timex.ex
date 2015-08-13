@@ -8,7 +8,7 @@ defmodule Timex do
       alias Timex.Timezone
       alias Timex.DateFormat
       alias Timex.Date.Convert, as: DateConvert
-      alias Timex.Format.Time.TimeFormatter, as: TimeFormat
+      alias Timex.Format.Time.Formatter, as: TimeFormat
     end
   end
   @moduledoc File.read!("README.md")

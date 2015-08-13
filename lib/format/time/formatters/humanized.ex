@@ -1,10 +1,10 @@
-defmodule Timex.Format.Time.TimeFormatter do
+defmodule Timex.Format.Time.Formatters.Humanized do
   @moduledoc """
   Handles formatting timestamp values as human readable strings.
   For formatting timestamps as points in time rather than intervals,
   use `DateFormat`
   """
-  alias Timex.Time
+  use Timex.Format.Time.Formatter
 
   @minute 60
   @hour   @minute * 60
@@ -20,6 +20,8 @@ defmodule Timex.Format.Time.TimeFormatter do
 
       iex> {1435, 180354, 590264} |> #{__MODULE__}.format
       "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds, 590.264 milliseconds"
+      iex> {0, 65, 0} |> #{__MODULE__}.format
+      "1 minutes, 5 seconds"
 
   """
   @spec format(Date.timestamp) :: String.t
