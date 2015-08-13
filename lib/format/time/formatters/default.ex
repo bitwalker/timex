@@ -67,12 +67,14 @@ defmodule Timex.Format.Time.Formatters.Default do
     cond do
       seconds >= @year   -> deconstruct({rem(seconds, @year), us}, [{:years, div(seconds, @year)} | components])
       seconds >= @month  -> deconstruct({rem(seconds, @month), us}, [{:months, div(seconds, @month)} | components])
-      seconds >= @week   -> deconstruct({rem(seconds, @week), us}, [{:weeks, div(seconds, @week)} | components])
       seconds >= @day    -> deconstruct({rem(seconds, @day), us}, [{:days, div(seconds, @day)} | components])
       seconds >= @hour   -> deconstruct({rem(seconds, @hour), us}, [{:hours, div(seconds, @hour)} | components])
       seconds >= @minute -> deconstruct({rem(seconds, @minute), us}, [{:minutes, div(seconds, @minute)} | components])
       true -> get_fractional_seconds(seconds, us, components)
     end
+  end
+  defp deconstruct({seconds, us}, components) do
+    get_fractional_seconds(seconds, us, components)
   end
   defp get_fractional_seconds(seconds, 0, components), do: deconstruct({0, 0}, [{:seconds, seconds} | components])
   defp get_fractional_seconds(seconds, micro, components) when micro > 0 do
