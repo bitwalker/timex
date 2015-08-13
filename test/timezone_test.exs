@@ -5,7 +5,7 @@ defmodule TimezoneTests do
   doctest Timex.Timezone.Local
   doctest Timex.Timezone.Database
 
-  test :get do
+  test "get" do
     %TimezoneInfo{:full_name => name, :abbreviation => abbrev, :offset_utc => offset} = Timezone.get("America/Chicago", Date.from{{2015,1,1}, {1,0,0}})
     assert name === "America/Chicago"
     assert abbrev === "CST"
@@ -28,7 +28,7 @@ defmodule TimezoneTests do
     assert (offset + offset_std) === -300
   end
 
-  test :local do
+  test "local" do
     local = Timezone.local
     is_error = case local do
       %TimezoneInfo{} -> false
@@ -38,7 +38,7 @@ defmodule TimezoneTests do
     assert is_error == false
   end
 
-  test :diff do
+  test "diff" do
     utc = Timezone.get(:utc)
     cst = Timezone.get("America/Chicago", Date.from({{2015, 1, 1}, {12, 0, 0}}))
     cdt = Timezone.get("America/Chicago", Date.from({{2015, 3, 30}, {12, 0, 0}}))
@@ -57,7 +57,7 @@ defmodule TimezoneTests do
     assert Date.from({{2014,2,24},{0,0,0}}, gmt_minus_three) |> Timezone.diff(gmt_plus_two) === 300
   end
 
-  test :convert do
+  test "convert" do
     utc = Timezone.get(:utc)
     cst = Timezone.get("America/Chicago", Date.from({{2014, 2, 24}, {12,0,0}}))
     est = Timezone.get("America/New_York", Date.from({{2014, 2, 24}, {12,0,0}}))
@@ -90,34 +90,12 @@ defmodule TimezoneTests do
     assert %DateTime{hour: 17, ms: 123} = %DateTime{year: 2014, month: 2, day: 24, hour: 12, ms: 123, timezone: gmt_minus_three} |> Timezone.convert(gmt_plus_two)
   end
 
-  test :converting_across_zone_boundaries do
+  test "converting across zone boundaries" do
     utc_date = Date.from(1394344799, :secs)
     cst_date = utc_date |> Timezone.convert("America/Chicago")
 
     assert ^utc_date = Date.from({{2014,3,9}, {5,59,59}})
     assert ^cst_date = Date.from({{2014,3,8}, {23,59,59}}, "America/Chicago")
     assert ^utc_date = cst_date |> Timezone.convert("UTC")
-  end
-
-  test :parse_tzfile do
-    # TZIF Version 1
-    chicago = System.cwd |> Path.join("test/include/tzif/America/Chicago")
-    assert {:ok, "CDT"} = chicago |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,3,24}, {0,0,0}}))
-    assert {:ok, "CST"} = chicago |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,2,24}, {0,0,0}}))
-
-    # TZIF Version 2
-    chicago = System.cwd |> Path.join("test/include/tzif2/America/Chicago")
-    assert {:ok, "CDT"} = chicago |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,3,24}, {0,0,0}}))
-    assert {:ok, "CST"} = chicago |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,2,24}, {0,0,0}}))
-
-    # TZIF Version 1
-    new_york = System.cwd |> Path.join("test/include/tzif/America/New_York")
-    assert {:ok, "EDT"} = new_york |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,3,24}, {0,0,0}}))
-    assert {:ok, "EST"} = new_york |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,2,24}, {0,0,0}}))
-
-    # TZIF Version 2
-    new_york = System.cwd |> Path.join("test/include/tzif2/America/New_York")
-    assert {:ok, "EDT"} = new_york |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,3,24}, {0,0,0}}))
-    assert {:ok, "EST"} = new_york |> File.read! |> Timezone.Local.parse_tzfile(Date.from({{2014,2,24}, {0,0,0}}))
   end
 end

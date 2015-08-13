@@ -6,31 +6,29 @@ defmodule DateTests do
 
   use Timex
 
-  test :add do
+  test "add" do
     date     = Date.from({{2015, 6, 24}, {14, 27, 52}})
     expected = Date.from({{2015, 7, 2}, {14, 27, 52}})
     result   = date |> Date.add(Time.to_timestamp(8, :days))
     assert expected === result
   end
 
-  test :subtract do
+  test "subtract" do
     date     = Date.from({{2015, 6, 24}, {14, 27, 52}})
     expected = Date.from({{2015, 6, 16}, {14, 27, 52}})
     result   = date |> Date.subtract(Time.to_timestamp(8, :days))
     assert expected === result
   end
 
-  test :"century/0" do
+  test "century" do
     assert 21 === Date.century
-  end
 
-  test :"century/1" do
     date = Date.from({{2015, 6, 24}, {14, 27, 52}})
     c = date |> Date.century
     assert 21 === c
   end
 
-  test :now do
+  test "now" do
     # We cannot assert matching to a specific value. However, we can still do
     # some sanity checks
     now = Date.now
@@ -47,28 +45,28 @@ defmodule DateTests do
     assert now_secs > now_days
   end
 
-  test :local do
+  test "local" do
     local     = Date.local
     %DateTime{year: y, month: m, day: d, hour: h, minute: min, second: s, ms: ms} = local
     localdate = Date.from({{y,m,d}, {h,min,s,ms}}, :local)
     assert local === Date.local(localdate)
   end
 
-  test :universal do
+  test "universal" do
     uni     = Date.universal()
     %DateTime{year: y, month: m, day: d, hour: h, minute: min, second: s, ms: ms} = uni
     unidate = Date.from({{y,m,d}, {h,min,s,ms}})
     assert uni === Date.universal(unidate)
   end
 
-  test :zero do
+  test "zero" do
     zero = Date.zero
     { date, time, tz } = zero |> DateConvert.to_gregorian
     assert :calendar.datetime_to_gregorian_seconds({date,time}) === 0
     assert tz === {zero.timezone.offset_std/60, zero.timezone.full_name}
   end
 
-  test :epoch do
+  test "epoch" do
     epoch = Date.epoch
     assert { {1970,1,1}, {0,0,0}, {0.0, "UTC"} } = DateConvert.to_gregorian(epoch)
     assert Date.to_secs(epoch) === 0
@@ -77,7 +75,7 @@ defmodule DateTests do
     assert Date.to_timestamp(epoch) === Date.epoch(:timestamp)
   end
 
-  test :from_date do
+  test "from date" do
     date = {2000, 11, 11}
     assert %DateTime{year: 2000, month: 11, day: 11, hour: 0, minute: 0, second: 0} = date |> Date.from
 
@@ -97,7 +95,7 @@ defmodule DateTests do
     assert {date,time} === {{2000,11,11}, {0,0,0}}
   end
 
-  test :from_datetime do
+  test "from datetime" do
     assert Date.from({{1970,1,1}, {0,0,0}}) === Date.from({1970,1,1})
     assert 0 === Date.from({{1970,1,1}, {0,0,0}}) |> Date.to_secs
 
@@ -116,31 +114,31 @@ defmodule DateTests do
     assert {d,time} === {{2000,11,11}, {1,0,0}}
   end
 
-  test :from_timestamp do
+  test "from timestamp" do
     now = Time.now
     assert trunc(Time.to_secs(now)) === now |> Date.from(:timestamp) |> Date.to_secs
     assert 0 === {0,0,0} |> Date.from(:timestamp) |> Date.to_secs
     assert -Date.epoch(:secs) === {0,0,0} |> Date.from(:timestamp, :zero) |> Date.to_secs
   end
 
-  test :from_sec do
+  test "from seconds" do
     now_sec = trunc(Time.now(:secs))
     assert now_sec === now_sec |> Date.from(:secs) |> Date.to_secs
     assert now_sec - Date.epoch(:secs) === now_sec |> Date.from(:secs, :zero) |> Date.to_secs
   end
 
-  test :from_days do
+  test "from days" do
     assert %DateTime{year: 1970, month: 1, day: 31, hour: 0, minute: 0, second: 0} = Date.from(30, :days)
     assert %DateTime{year: 1970, month: 2, day: 1, hour: 0, minute: 0, second: 0} = Date.from(31, :days)
   end
 
-  test :to_timestamp do
+  test "to timestamp" do
     assert {0,0,0} === Date.epoch |> Date.to_timestamp
     assert {62167,219200,0} === Date.epoch |> Date.to_timestamp(:zero)
     assert Date.epoch(:secs) == Date.epoch |> Date.to_timestamp(:zero) |> Time.to_secs
   end
 
-  test :to_secs do
+  test "to seconds" do
     date = Date.now()
     assert Date.to_secs(date, :zero) === date |> DateConvert.to_erlang_datetime |> :calendar.datetime_to_gregorian_seconds
 
@@ -162,7 +160,7 @@ defmodule DateTests do
 
   end
 
-  test :to_days do
+  test "to days" do
     date = Date.from({2013,3,16})
     assert Date.to_days(date) === 15780
     assert Date.to_days(date, :zero) === 735308
@@ -171,33 +169,33 @@ defmodule DateTests do
     assert Date.to_days(Date.epoch(), :zero) === 719528
   end
 
-  test :weekday do
+  test "weekday" do
     localdate = {{2013,3,17},{11,59,10}}
     assert Date.weekday(Date.from(localdate)) === 7
     assert Date.weekday(Date.epoch()) === 4
   end
 
-  test :day do
+  test "day" do
     assert Date.day(Date.from({3,1,1})) === 1
     assert Date.day(Date.from({3,2,1})) === 32
     assert Date.day(Date.from({3,12,31})) === 365
     assert Date.day(Date.from({2012,12,31})) === 366
   end
 
-  test :week do
+  test "week" do
     localdate = {{2013,3,17},{11,59,10}}
     assert Date.iso_week(localdate) === {2013,11}
     assert Date.iso_week(Date.from(localdate)) === {2013,11}
     assert Date.iso_week(Date.epoch()) === {1970,1}
   end
 
-  test :iso_triplet do
+  test "iso_triplet" do
     localdate = {{2013,3,17},{11,59,10}}
     assert Date.iso_triplet(Date.from(localdate)) === {2013,11,7}
     assert Date.iso_triplet(Date.epoch()) === {1970,1,4}
   end
 
-  test :days_in_month do
+  test "days_in_month" do
     localdate = {{2013,2,17},{11,59,10}}
     assert Date.days_in_month(Date.from(localdate)) === 28
 
@@ -209,7 +207,7 @@ defmodule DateTests do
     assert Date.days_in_month(2013, 2) === 28
   end
 
-  test :month_to_num do
+  test "month_to_num" do
     assert Date.month_to_num("April") == 4
     assert Date.month_to_num("april") == 4
     assert Date.month_to_num("Apr") == 4
@@ -217,7 +215,7 @@ defmodule DateTests do
     assert Date.month_to_num(:apr) == 4
   end
 
-  test :day_to_num do
+  test "day_to_num" do
     assert Date.day_to_num("Wednesday") == 3
     assert Date.day_to_num("wednesday") == 3
     assert Date.day_to_num("Wed") == 3
@@ -225,13 +223,13 @@ defmodule DateTests do
     assert Date.day_to_num(:wed) == 3
   end
 
-  test :is_leap do
+  test "is_leap" do
     assert not Date.is_leap?(Date.epoch())
     assert Date.is_leap?(2012)
     assert not Date.is_leap?(2100)
   end
 
-  test :is_valid? do
+  test "is_valid?" do
     assert Date.is_valid?(Date.now())
     assert Date.is_valid?(Date.from({1,1,1}))
     assert Date.is_valid?(Date.from({{1,1,1}, {1,1,1}}))
@@ -252,13 +250,13 @@ defmodule DateTests do
     assert not Date.is_valid?({{12,12,12}, {-1,59,59}, Timezone.get(:utc)})
   end
 
-  test :normalize do
+  test "normalize" do
     tz = Timezone.get(:utc)
     date = { {1,13,44}, {-8,60,61}, tz }
     assert %DateTime{year: 1, month: 12, day: 31, hour: 0, minute: 59, second: 59, timezone: _} = Date.normalize(date)
   end
 
-  test :set do
+  test "set" do
     import Date.Convert, only: [to_gregorian: 1]
 
     eet = Timezone.get("Europe/Athens", Date.from({{2013,3,17}, {17,26,5}}))
@@ -276,7 +274,7 @@ defmodule DateTests do
     assert to_gregorian(Date.set(date, [date: {-1,-2,-3}, hour: 33, second: 61, timezone: utc])) === { {0,1,1}, {23,26,59}, {utc_offset_min/60, utc_name} }
   end
 
-  test :compare do
+  test "compare" do
     assert Date.compare(Date.epoch(), Date.zero()) === 1
     assert Date.compare(Date.zero(), Date.epoch()) === -1
 
@@ -297,7 +295,7 @@ defmodule DateTests do
     assert Date.compare(date, :distant_future) === -1
   end
 
-  test :compare_with_granularity do
+  test "compare with granularity" do
     tz1   = Timezone.get(2)
     tz2   = Timezone.get(-3)
     date1 = %DateTime{year: 2013, month: 3, day: 18, hour: 13, minute: 44, timezone: tz1}
@@ -317,7 +315,7 @@ defmodule DateTests do
     assert Date.compare(date3, date4, :secs) === -1
   end
 
-  test :diff do
+  test "diff" do
     epoch = Date.epoch()
     date1 = Date.from({1971,1,1})
     date2 = Date.from({1973,1,1})
@@ -351,7 +349,7 @@ defmodule DateTests do
     assert Date.diff(date2, date1, :months) === 25
   end
 
-  test :shift_seconds do
+  test "shift by seconds" do
     date = {2013,3,5}
     time = {23,23,23}
     datetime = {date,time}
@@ -382,7 +380,7 @@ defmodule DateTests do
     assert %DateTime{year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23} = shift(datetime, secs: -24*3600*(365*2+1))   # +1 day for leap year 2012
   end
 
-  test :shift_seconds_with_timezone do
+  test "shift by seconds with timezone" do
     utc = Timezone.get(:utc)
     cst = Timezone.get("America/Chicago")
 
@@ -394,7 +392,7 @@ defmodule DateTests do
 
   end
 
-  test :shift_minutes do
+  test "shift by minutes" do
     date = {2013,3,5}
     time = {23,23,23}
     datetime = {date,time}
@@ -415,7 +413,7 @@ defmodule DateTests do
     assert %DateTime{year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23} = shift(datetime, mins: -60*24*(365*2 + 1))
   end
 
-  test :shift_minutes_with_timezone do
+  test "shift by minutes with timezone" do
     utc = Timezone.get(:utc)
     cst = Timezone.get("America/Chicago")
 
@@ -426,7 +424,7 @@ defmodule DateTests do
     assert %DateTime{ hour: 12, minute: 0} = Date.shift(utc_dinner, mins: -360 )
   end
 
-  test :shift_hours do
+  test "shift by hours" do
     date = {2013,3,5}
     time = {23,23,23}
     datetime = {date,time}
@@ -446,7 +444,7 @@ defmodule DateTests do
     assert %DateTime{month: 3, day: 5, hour: 23, minute: 23, second: 23} = shift(datetime, hours: -24*(365*2 + 1))
   end
 
-  test :shift_days do
+  test "shift by days" do
     date = {2013,3,5}
     time = {23,23,23}
     datetime = { date, time }
@@ -464,7 +462,7 @@ defmodule DateTests do
     assert %DateTime{year: 2011, month: 3, day: 5} = shift(datetime, days: -365*2-1)
   end
 
-  test :shift_weeks do
+  test "shift by weeks" do
     date = {2013,3,5}
     time = {23,23,23}
     datetime = { date, time }
@@ -484,7 +482,7 @@ defmodule DateTests do
     end
   end
 
-  test :shift_months do
+  test "shift by months" do
     date = {2013,3,5}
     time = {23,23,23}
     datetime = { date, time }
@@ -502,7 +500,7 @@ defmodule DateTests do
     assert %DateTime{year: 2013, month: 2, day: 28} = shift(datetime, months: -1)
   end
 
-  test :shift_years do
+  test "shift by years" do
     date = {2013,3,5}
     time = {23,23,23}
     datetime = { date, time }
@@ -520,7 +518,7 @@ defmodule DateTests do
     assert %DateTime{year: 2008, month: 2, day: 29} = shift(datetime, years: -4)
   end
 
-  test :arbitrary_shifts do
+  test "arbitrary shifts" do
     datetime = { {2013,3,5}, {23,23,23} }
     assert %DateTime{year: 2013, month: 6, day: 5} = shift(datetime, months: 3)
     assert_raise ArgumentError, fn ->

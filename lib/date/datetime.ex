@@ -13,6 +13,6 @@ defmodule Timex.DateTime do
             calendar: :gregorian
 
   def new do
-    %{%DateTime{} | :timezone => %TimezoneInfo{}}
+    %DateTime{timezone: %TimezoneInfo{}}
   end
 end
