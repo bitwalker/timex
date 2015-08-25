@@ -12,7 +12,7 @@ defmodule Timex.Mixfile do
   end
 
   def application do
-    [included_applications: [:tzdata, :combine], local_timezone: nil]
+    [applications: [:tzdata], included_applications: [:combine], local_timezone: nil]
   end
 
   defp package do
@@ -23,7 +23,7 @@ defmodule Timex.Mixfile do
   end
 
   def deps do
-    [{:tzdata, "~> 0.1.6"},
+    [{:tzdata, "~> 0.5.1"},
      {:combine, "~> 0.5"},
      {:ex_doc, "~> 0.5", only: :dev},
      {:benchfella, "~> 0.2", only: :dev},
