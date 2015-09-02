@@ -17,6 +17,8 @@ defmodule Timex.Timezone do
   alias Timex.TimezoneInfo,   as: TimezoneInfo
   alias Timex.Timezone.Local, as: Local
 
+  Application.ensure_all_started(:tzdata)
+
   @abbreviations Tzdata.canonical_zone_list
                  |> Enum.flat_map(fn name -> {:ok, periods} = Tzdata.periods(name); periods end)
                  |> Enum.map(fn %{:zone_abbr => abbr} -> abbr end)
