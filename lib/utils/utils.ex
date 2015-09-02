@@ -36,37 +36,48 @@ defmodule Timex.Utils do
       [Timex.Parse.DateTime.Tokenizers.Default, Timex.Parse.DateTime.Tokenizers.Strftime]
 
   """
-  @spec get_plugins(atom) :: [] | [atom]
+  @spec get_plugins(atom) :: list(atom)
   def get_plugins(plugin_type) when is_atom(plugin_type) do
     case Process.get(:timex_plugins) do
-      nil ->
+      plugins when is_list(plugins) ->
+        plugins
+      _ ->
         plugins = available_modules(plugin_type) |> Enum.reduce([], &load_plugin/2)
         Process.put(:timex_plugins, plugins)
-        plugins
-      plugins ->
         plugins
     end
   end
 
+  @spec load_plugin(atom, list(atom)) :: list(atom) | no_return
   defp load_plugin(module, modules) do
     if Code.ensure_loaded?(module), do: [module | modules], else: modules
   end
 
+  @spec available_modules(atom) :: Enumerable.t
   defp available_modules(plugin_type) do
     apps_path = Mix.Project.build_path |> Path.join("lib")
-    apps      = apps_path |> File.ls!
-    apps
-    |> Enum.map(&(Path.join([apps_path, &1, "ebin"])))
-    |> Enum.map(fn app_path -> app_path |> File.ls! |> Enum.map(&(Path.join(app_path, &1))) end)
-    |> Enum.flat_map(&(&1))
-    |> Enum.filter(&(String.ends_with?(&1, ".beam")))
-    |> Enum.map(fn path ->
-      {:ok, {module, chunks}} = :beam_lib.chunks('#{path}', [:attributes])
-      {module, get_in(chunks, [:attributes, :behaviour])}
-    end)
-    |> Enum.filter(fn {_module, behaviours} ->
-      is_list(behaviours) && plugin_type in behaviours
-    end)
-    |> Enum.map(fn {module, _} -> module end)
+    case apps_path |> File.ls do
+      {:ok, apps} ->
+        apps
+        |> Stream.map(&(Path.join([apps_path, &1, "ebin"])))
+        |> Stream.map(fn app_path ->
+          case app_path |> File.ls do
+            {:ok, files} -> files |> Enum.map(&(Path.join(app_path, &1)))
+            _ -> []
+          end
+        end)
+        |> Stream.flat_map(&(&1))
+        |> Stream.filter(&(String.ends_with?(&1, ".beam")))
+        |> Stream.map(fn path ->
+          {:ok, {module, chunks}} = :beam_lib.chunks('#{path}', [:attributes])
+          {module, get_in(chunks, [:attributes, :behaviour])}
+        end)
+        |> Stream.filter(fn {_module, behaviours} ->
+          is_list(behaviours) && plugin_type in behaviours
+        end)
+        |> Enum.map(fn {module, _} -> module end)
+      _ ->
+        []
+    end
   end
 end

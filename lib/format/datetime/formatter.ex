@@ -30,7 +30,7 @@ defmodule Timex.Format.DateTime.Formatter do
 
   If an error is encountered during formatting, `format!` will raise.
   """
-  @spec format!(%DateTime{}, String.t, __MODULE__ | nil) :: String.t | no_return
+  @spec format!(%DateTime{}, String.t, atom | nil) :: String.t | no_return
   def format!(%DateTime{} = date, format_string, formatter \\ Default)
     when is_binary(format_string) and is_atom(formatter)
     do
@@ -45,8 +45,10 @@ defmodule Timex.Format.DateTime.Formatter do
   string and formatter. If a formatter is not provided, the formatter
   used is `Timex.DateFormat.Formatters.DefaultFormatter`.
   """
-  @spec format(%DateTime{}, String.t, __MODULE__ | nil) :: {:ok, String.t} | {:error, term}
-  def format(%DateTime{} = date, format_string, formatter \\ Default)
+  @spec format(%DateTime{}, String.t, atom | nil) :: {:ok, String.t} | {:error, term}
+  def format(date, format_string, formatter \\ Default)
+
+  def format(%DateTime{} = date, format_string, formatter)
     when is_binary(format_string) and is_atom(formatter),
     do: formatter.format(date, format_string)
 
@@ -55,15 +57,13 @@ defmodule Timex.Format.DateTime.Formatter do
   or if none is provided, the default formatter. Returns `:ok` when valid,
   or `{:error, reason}` if not valid.
   """
-  @spec validate(String.t, __MODULE__ | nil) :: :ok | {:error, term}
+  @spec validate(String.t, atom | nil) :: :ok | {:error, term}
   def validate(format_string, formatter \\ Default) when is_binary(format_string) do
     try do
       case formatter.tokenize(format_string) do
         {:error, _} = error -> error
         {:ok, []} -> {:error, "There were no formatting directives in the provided string."}
         {:ok, directives} when is_list(directives)-> :ok
-        _ ->
-          raise FormatError, message: "Invalid tokenization result!"
       end
     rescue
       x -> {:error, x}
@@ -74,7 +74,7 @@ defmodule Timex.Format.DateTime.Formatter do
   Given a token (as found in `Timex.Parsers.Directive`), and a DateTime struct,
   produce a string representation of the token using values from the struct.
   """
-  @spec format_token(atom, %DateTime{}, [modifiers: [{atom, term}]], [flags: [{atom, term}]], [min: integer, max: integer | nil]) :: String.t
+  @spec format_token(atom, %DateTime{}, list(), list(), list()) :: String.t | {:error, term}
   def format_token(token, date, modifiers, flags, width)
 
   # Formats

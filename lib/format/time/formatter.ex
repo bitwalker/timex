@@ -27,8 +27,8 @@ defmodule Timex.Format.Time.Formatter do
       iex> #{__MODULE__}.format({1435, 180354, 590264}, :humanized)
       "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds, 590.264 milliseconds"
   """
-  @spec format(Date.timestamp, __MODULE__ | nil) :: String.t
-  def format({_,_,_} = timestamp, formatter \\ Default) when is_atom(formatter) do
+  @spec format(Date.timestamp, atom) :: String.t
+  def format(timestamp, formatter \\ Default) when is_atom(formatter) do
     case formatter do
       :humanized -> Humanized.format(timestamp)
       _          -> formatter.format(timestamp)

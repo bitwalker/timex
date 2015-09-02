@@ -24,12 +24,14 @@ defmodule Timex.DateFormat do
   @doc """
   Same as `format/2`, but takes a custom formatter.
   """
-  @spec format(%DateTime{}, String.t, atom) :: {:ok, String.t} | {:error, String.t}
-  def format(%DateTime{} = date, format_string, :default),
-    do: Formatter.format(date, format_string)
-  def format(%DateTime{} = date, format_string, :strftime),
-    do: Formatter.format(date, format_string, Strftime)
-  defdelegate format(%DateTime{} = date, format_string, formatter), to: Formatter
+  @spec format(%DateTime{}, String.t, :default | :strftime | atom()) :: {:ok, String.t} | {:error, String.t}
+  def format(%DateTime{} = date, format_string, formatter) when is_binary(format_string) do
+    case formatter do
+      :default  -> Formatter.format(date, format_string)
+      :strftime -> Formatter.format(date, format_string, Strftime)
+      _         -> Formatter.format(date, format_string, formatter)
+    end
+  end
 
   @doc """
   Raising version of `format/2`. Returns a string with formatted date or raises a `FormatError`.
@@ -77,21 +79,19 @@ defmodule Timex.DateFormat do
   defdelegate parse!(date_string, format_string, parser), to: Parser
 
   @doc """
-  Verifies the validity of the given format string. The default formatter is assumed.
+  Verifies the validity of the given format string according to the provided
+  formatter, defaults to the Default formatter if one is not provided.
 
   Returns `:ok` if the format string is clean, `{ :error, <reason> }` otherwise.
   """
   @spec validate(String.t) :: :ok | {:error, term}
-  defdelegate validate(format_string), to: Formatter
-
-  @doc """
-  Verifies the validity of the given format string according to the provided
-  formatter.
-
-  Returns `:ok` if the format string is clean, `{ :error, <reason> }` otherwise.
-  """
   @spec validate(String.t, atom) :: :ok | {:error, term}
-  def validate(format_string, :default),  do: Formatter.validate(format_string)
-  def validate(format_string, :strftime), do: Formatter.validate(format_string, StrftimeTokenizer)
-  defdelegate validate(format_string, formatter), to: Formatter
+  def validate(format_string, formatter \\ nil) do
+    case formatter do
+      f when f in [:default, nil] ->
+        Formatter.validate(format_string)
+      :strftime -> Formatter.validate(format_string, StrftimeTokenizer)
+      _         -> Formatter.validate(format_string, formatter)
+    end
+  end
 end

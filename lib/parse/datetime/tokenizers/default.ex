@@ -13,7 +13,8 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
   @spec tokenize(String.t) :: [%Directive{}] | {:error, term}
   def tokenize(<<>>), do: {:error, "Format string cannot be empty."}
   def tokenize(str) do
-    case Combine.parse(str, default_format_parser()) do
+    token_parser = default_format_parser()
+    case Combine.parse(str, token_parser) do
       results when is_list(results) ->
         directives = results |> List.flatten |> Enum.filter(fn x -> x !== nil end)
         case Enum.any?(directives, fn %Directive{type: type} -> type != :literal end) do
@@ -30,6 +31,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
   @spec apply(DateTime.t, atom, term) :: {:ok, DateTime.t} | {:error, term} | :unrecognized
   def apply(_, _, _), do: :unrecognized
 
+  @spec directives() :: (Combine.ParserState.t -> Combine.ParserState.t)
   defp directives() do
     pipe([
       option(one_of(char, ["0", "_"])),
@@ -55,10 +57,11 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
     )
   end
 
+  @spec default_format_parser() :: (Combine.ParserState.t -> Combine.ParserState.t)
   defp default_format_parser() do
     many1(choice([
       # {<padding><directive>}
-      label(between(char(?{), directives, char(?})),
+      label(between(char(?{), directives(), char(?})),
         "a valid directive."),
       label(map(none_of(char, ["{", "}"]), &map_literal/1),
         "any character but { or }."),
@@ -69,13 +72,15 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
     ])) |> eof
   end
 
+  @spec coalesce_token(list(binary)) :: Directive.t
   defp coalesce_token([flags, directive]) do
-    flags     = map_flag(flags) || []
+    flags     = map_flag(flags)
     width     = [min: -1, max: nil]
     modifiers = []
     map_directive(directive, [flags: flags, width: width, modifiers: modifiers])
   end
 
+  @spec map_directive(String.t, list()) :: Directive.t
   defp map_directive(directive, opts) do
     case directive do
       # Years/Centuries
@@ -149,6 +154,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
     when is_list(literals),    do: Enum.map(literals, &map_literal/1)
   defp map_literal(literal),   do: %Directive{type: :literal, value: literal, parser: char(literal)}
 
+  @spec map_flag(binary) :: [{:padding, :spaces | :zeroes}] | []
   defp map_flag("_"), do: [padding: :spaces]
   defp map_flag("0"), do: [padding: :zeroes]
   defp map_flag(_),   do: []

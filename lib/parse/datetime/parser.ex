@@ -12,6 +12,7 @@ defmodule Timex.Parse.DateTime.Parser do
   alias Timex.Parse.ParseError
   alias Timex.Parse.DateTime.Tokenizers.Directive
   alias Timex.Parse.DateTime.Tokenizers.Default, as: DefaultTokenizer
+  alias Timex.Date.Convert, as: DateConvert
 
 
   @doc """
@@ -125,7 +126,7 @@ defmodule Timex.Parse.DateTime.Parser do
 
   # Given a date, a token, and the value for that token, update the
   # date according to the rules for that token and the provided value
-  defp update_date(%DateTime{year: year} = date, token, value, tokenizer) when is_atom(token) do
+  defp update_date(%DateTime{year: year, hour: hh} = date, token, value, tokenizer) when is_atom(token) do
     case token do
       # Formats
       clock when clock in [:kitchen, :strftime_iso_kitchen] ->
@@ -146,11 +147,11 @@ defmodule Timex.Parse.DateTime.Parser do
       y when y in [:year4, :iso_year4] ->
         # Special case for UNIX format dates, where the year is parsed after the timezone,
         # so we must lookup the timezone again to ensure it's properly set
-        case date.timezone do
-          %Timex.TimezoneInfo{:full_name => tzname} ->
-            zone_date = {{value, date.month, date.day}, {date.hour, date.minute, date.second}}
+        case date do
+          %DateTime{timezone: %Timex.TimezoneInfo{:full_name => tzname}} ->
+            zone_date = DateConvert.to_erlang_datetime(%{date | :year => value})
             %{date | :year => value, :timezone => Timezone.get(tzname, zone_date)}
-          nil ->
+          %DateTime{timezone: nil} ->
             %{date | :year => value}
         end
       # Months
@@ -159,7 +160,8 @@ defmodule Timex.Parse.DateTime.Parser do
         %{date | :month => Date.month_to_num(value)}
       # Days
       :day      -> %{date | :day => value}
-      :oday     -> Date.from_iso_day(value, date)
+      :oday when is_integer(value) and value >= 0 ->
+        Date.from_iso_day(value, date)
       :wday_mon ->
         current_day = Date.weekday(date)
         cond do
@@ -179,8 +181,8 @@ defmodule Timex.Parse.DateTime.Parser do
       # Weeks
       :iso_weeknum ->
         {year, _, weekday} = Date.iso_triplet(date)
-        converted = Date.from_iso_triplet({year, value, weekday})
-        %{date | :year => converted.year, :month => converted.month, :day => converted.day}
+        %DateTime{year: y, month: m, day: d} = Date.from_iso_triplet({year, value, weekday})
+        %{date | :year => y, :month => m, :day => d}
       week_num when week_num in [:week_mon, :week_sun] ->
         reset = %{date | :month => 1, :day => 1}
         reset |> Date.shift(weeks: value)
@@ -196,7 +198,7 @@ defmodule Timex.Parse.DateTime.Parser do
         end
       :sec_epoch -> Date.from(value, :secs, :epoch)
       am_pm when am_pm in [:am, :AM] ->
-        {converted, hemisphere} = Time.to_12hour_clock(date.hour)
+        {converted, hemisphere} = Time.to_12hour_clock(hh)
         case value do
           am when am in ["am", "AM"]->
             %{date | :hour => converted}
@@ -207,25 +209,25 @@ defmodule Timex.Parse.DateTime.Parser do
         end
       # Timezones
       :zoffs ->
-        zone_date = {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
+        zone_date = DateConvert.to_erlang_datetime(date)
         %{date | :timezone => Timezone.get(value, zone_date)}
       :zname ->
-        zone_date = {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
+        zone_date = DateConvert.to_erlang_datetime(date)
         %{date | :timezone => Timezone.get(value, zone_date)}
       tz when tz in [:zoffs_colon, :zoffs_sec] ->
         case value do
           <<?-, h1::utf8, h2::utf8, _::binary>> ->
-            zone_date = {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
+            zone_date = DateConvert.to_erlang_datetime(date)
             %{date | :timezone => Timezone.get(<<?-, h1::utf8, h2::utf8>>, zone_date)}
           <<?+, h1::utf8, h2::utf8, _::binary>> ->
-            zone_date = {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
+            zone_date = DateConvert.to_erlang_datetime(date)
             %{date | :timezone => Timezone.get(<<?+, h1::utf8, h2::utf8>>, zone_date)}
           _ ->
             {:error, "#{token} not implemented"}
         end
       :force_utc ->
-        case date.timezone do
-          nil -> %{date | :timezone => %Timex.TimezoneInfo{}}
+        case date do
+          %DateTime{timezone: nil} -> %{date | :timezone => %Timex.TimezoneInfo{}}
           _   -> Timezone.convert(date, "UTC")
         end
       :literal -> date

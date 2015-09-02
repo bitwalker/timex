@@ -110,7 +110,11 @@ defmodule Timex.Parse.ZoneInfo.Parser do
     do_parse_transition_info(rest, header, %Zone{transitions: times})
   end
   # Parse transition time info for this zone
-  defp do_parse_transition_info(data, %Header{transition_count: tx_count, type_count: type_count} = header, tzfile) do
+  defp do_parse_transition_info(
+    data,
+    %Header{transition_count: tx_count, type_count: type_count} = header,
+    %Zone{transitions: transitions} = tzfile
+  ) do
     {indices, rest} = parse_array data, tx_count, &parse_uchar/1
     {txinfos, rest} = parse_array rest, type_count, fn data ->
       {gmt_offset, next}   = parse_int(data)
@@ -125,18 +129,18 @@ defmodule Timex.Parse.ZoneInfo.Parser do
     end
     txs = indices
           |> Enum.map(&(Enum.at(txinfos, &1)))
-          |> Enum.zip(tzfile.transitions)
+          |> Enum.zip(transitions)
           |> Enum.map(fn {info, time} ->
             Map.put(info, :starts_at, time)
           end)
     do_parse_abbreviations(rest, header, %{tzfile | :transitions => txs})
   end
   # Parses zone abbreviations for this zone
-  defp do_parse_abbreviations(data, %Header{abbrev_length: len} = header, tzfile) do
+  defp do_parse_abbreviations(data, %Header{abbrev_length: len} = header, %Zone{transitions: transitions} = tzfile) do
     {abbrevs, rest} = parse_array(data, len, &parse_char/1)
-    txinfos = Enum.map(tzfile.transitions, fn tx ->
+    txinfos = Enum.map(transitions, fn %TransitionInfo{abbrev_index: idx} = tx ->
       abbrev = abbrevs
-        |> Enum.drop(tx.abbrev_index)
+        |> Enum.drop(idx)
         |> Enum.take_while(fn c -> c > 0 end)
       %{tx | :abbreviation => "#{abbrev}"}
     end)

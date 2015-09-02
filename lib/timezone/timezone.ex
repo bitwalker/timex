@@ -50,7 +50,7 @@ defmodule Timex.Timezone do
   can either be an Erlang datetime tuple, or a DateTime struct, and if one
   is not provided, then the current date and time is returned.
   """
-  @spec get(String.t, Date.datetime | %DateTime{} | nil) :: %TimezoneInfo{} | {:error, String.t}
+  @spec get(String.t | integer | :utc, Date.datetime | %DateTime{} | nil) :: %TimezoneInfo{} | {:error, String.t}
   def get(tz, for \\ Date.now)
 
   def get(tz, for) when tz in ["Z", "UT", "GMT"], do: get(:utc, for)
@@ -133,7 +133,7 @@ defmodule Timex.Timezone do
   """
   @spec convert(date :: DateTime.t, tz :: TimezoneInfo.t | String.t) :: DateTime.t
 
-  def convert(date, %TimezoneInfo{full_name: name} = tz) do
+  def convert(%DateTime{ms: ms} = date, %TimezoneInfo{full_name: name} = tz) do
     # Calculate the difference between `date`'s timezone, and the provided timezone
     difference = diff(date, tz)
     # Offset the provided date's time by the difference
@@ -145,14 +145,14 @@ defmodule Timex.Timezone do
       # No change, we're valid
       ^tz         ->
         shifted
-        |> Map.put(:ms, date.ms)
+        |> Map.put(:ms, ms)
       # The shift put us in a new timezone, so shift by the updated
       # difference, and set the zone
       new_zone    ->
         difference = diff(shifted, new_zone)
         Date.shift(shifted, mins: difference)
         |> Map.put(:timezone, new_zone)
-        |> Map.put(:ms, date.ms)
+        |> Map.put(:ms, ms)
     end
   end
 

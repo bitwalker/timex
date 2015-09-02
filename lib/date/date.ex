@@ -24,10 +24,6 @@ defmodule Timex.Date do
   alias Timex.TimezoneInfo, as: TimezoneInfo
 
   # Date types
-  @type dtz :: { datetime, TimezoneInfo.t }
-  @type datetime :: { date, time }
-  @type date :: { year, month, day }
-  @type iso_triplet :: { year, weeknum, weekday }
   @type year :: non_neg_integer
   @type month :: 1..12
   @type day :: 1..31
@@ -36,7 +32,6 @@ defmodule Timex.Date do
   @type weeknum :: 1..53
   @type num_of_days :: 28..31
   # Time types
-  @type time :: { hour, minute, second }
   @type hour :: 0..23
   @type minute :: 0..59
   @type second :: 0..59
@@ -44,6 +39,12 @@ defmodule Timex.Date do
   @type megaseconds :: non_neg_integer
   @type seconds :: non_neg_integer
   @type microseconds :: non_neg_integer
+  # Complex types
+  @type time :: { hour, minute, second }
+  @type date :: { year, month, day }
+  @type datetime :: { date, time }
+  @type dtz :: { datetime, TimezoneInfo.t }
+  @type iso_triplet :: { year, weeknum, weekday }
 
   # Constants
   @valid_months 1..12
@@ -293,8 +294,8 @@ defmodule Timex.Date do
       > Date.from({2014,3,16}, "America/Chicago")    #=> %DateTime{...}
 
   """
-  @spec from(date | datetime) :: dtz
-  @spec from(date | datetime, :utc | :local | TimezoneInfo.t | binary) :: dtz
+  @spec from(datetime | date) :: DateTime.t
+  @spec from(datetime | date, :utc | :local | TimezoneInfo.t | binary) :: DateTime.t
 
   def from({y,m,d} = date) when is_integer(y) and is_integer(m) and is_integer(d), do: from(date, :utc)
   def from({{_,_,_},{_,_,_}} = datetime),          do: from(datetime, :utc)
@@ -333,9 +334,9 @@ defmodule Timex.Date do
 
   """
   @spec from(timestamp, :timestamp) :: DateTime.t
-  @spec from(number, :secs | :days)  :: DateTime.t
+  @spec from(number, :us | :secs | :days)  :: DateTime.t
   @spec from(timestamp, :timestamp, :epoch | :zero) :: DateTime.t
-  @spec from(number, :secs | :days, :epoch | :zero)  :: DateTime.t
+  @spec from(number, :us | :secs | :days, :epoch | :zero)  :: DateTime.t
   def from(value, type, reference \\ :epoch)
 
   def from({mega, sec, us}, :timestamp, :epoch), do: from((mega * @million + sec) * @million + us, :us)
@@ -519,7 +520,7 @@ defmodule Timex.Date do
       iex> (#{__MODULE__}.from_iso_day(180, date) === expected)
       true
   """
-  @spec from_iso_day(non_neg_integer, date | nil) :: DateTime.t
+  @spec from_iso_day(non_neg_integer, DateTime.t | nil) :: DateTime.t
   def from_iso_day(day, date \\ nil)
 
   def from_iso_day(day, nil) do
@@ -822,72 +823,72 @@ defmodule Timex.Date do
       true
 
   """
-  @spec normalize(dtz) :: DateTime.t
-  @spec normalize(atom(), term) :: DateTime.t
+  @spec normalize(datetime | dtz | {date, time, TimezoneInfo.t}) :: DateTime.t
 
   def normalize({{_,_,_}=date, time}), do: normalize({date, time, %TimezoneInfo{}})
   def normalize({{_,_,_}=date, time, tz}) do
-    construct(normalize(:date, date), normalize(:time, time), tz)
+    construct(do_normalize(:date, date), do_normalize(:time, time), tz)
   end
 
-  defp normalize(:date, {year, month, day}) do
-    year  = normalize(:year, year)
-    month = normalize(:month, month)
-    day   = normalize(:day, {year, month, day})
+  @spec do_normalize(atom(), term) :: DateTime.t
+  defp do_normalize(:date, {year, month, day}) do
+    year  = do_normalize(:year, year)
+    month = do_normalize(:month, month)
+    day   = do_normalize(:day, {year, month, day})
     {year, month, day}
   end
-  defp normalize(:year, year) when year < 0, do: 0
-  defp normalize(:year, year), do: year
-  defp normalize(:month, month) do
+  defp do_normalize(:year, year) when year < 0, do: 0
+  defp do_normalize(:year, year), do: year
+  defp do_normalize(:month, month) do
     cond do
       month < 1   -> 1
       month > 12  -> 12
       true        -> month
     end
   end
-  defp normalize(:time, {hour,min,sec}) do
-    hour  = normalize(:hour, hour)
-    min   = normalize(:minute, min)
-    sec   = normalize(:second, sec)
+  defp do_normalize(:time, {hour,min,sec}) do
+    hour  = do_normalize(:hour, hour)
+    min   = do_normalize(:minute, min)
+    sec   = do_normalize(:second, sec)
     {hour, min, sec}
   end
-  defp normalize(:time, {hour,min,sec,ms}) do
-    {h,m,s} = normalize(:time, {hour,min,sec})
-    msecs   = normalize(:ms, ms)
+  defp do_normalize(:time, {hour,min,sec,ms}) do
+    {h,m,s} = do_normalize(:time, {hour,min,sec})
+    msecs   = do_normalize(:ms, ms)
     {h, m, s, msecs}
   end
-  defp normalize(:hour, hour) do
+  defp do_normalize(:hour, hour) do
     cond do
       hour < 0    -> 0
       hour > 23   -> 23
       true        -> hour
     end
   end
-  defp normalize(:minute, min) do
+  defp do_normalize(:minute, min) do
     cond do
       min < 0    -> 0
       min > 59   -> 59
       true       -> min
     end
   end
-  defp normalize(:second, sec) do
+  defp do_normalize(:second, sec) do
     cond do
       sec < 0    -> 0
       sec > 59   -> 59
       true       -> sec
     end
   end
-  defp normalize(:ms, ms) do
+  defp do_normalize(:ms, ms) do
     cond do
       ms < 0   -> 0
       ms > 999 -> 999
       true     -> ms
     end
   end
-  defp normalize(:timezone, tz), do: tz
-  defp normalize(:day, {year, month, day}) do
-    year  = normalize(:year, year)
-    month = normalize(:month, month)
+  defp do_normalize(:timezone, tz), do: tz
+  defp do_normalize(:day, {year, month, day}) do
+    year  = do_normalize(:year, year)
+    month = do_normalize(:month, month)
     ndays = days_in_month(year, month)
     cond do
       day < 1     -> 1
@@ -924,7 +925,7 @@ defmodule Timex.Date do
 
   """
   @spec set(DateTime.t, list({atom(), term})) :: DateTime.t
-  def set(date, options) do
+  def set(%DateTime{} = date, options) do
     validate? = case options |> List.keyfind(:validate, 0, true) do
       {:validate, bool} -> bool
       _                 -> true
@@ -935,45 +936,48 @@ defmodule Timex.Date do
         {:datetime, {{y, m, d}, {h, min, sec}}} ->
           if validate? do
             %{result |
-              :year =>   normalize(:year,   y),
-              :month =>  normalize(:month,  m),
-              :day =>    normalize(:day,    {y,m,d}),
-              :hour =>   normalize(:hour,   h),
-              :minute => normalize(:minute, min),
-              :second => normalize(:second, sec)
+              :year =>   do_normalize(:year,   y),
+              :month =>  do_normalize(:month,  m),
+              :day =>    do_normalize(:day,    {y,m,d}),
+              :hour =>   do_normalize(:hour,   h),
+              :minute => do_normalize(:minute, min),
+              :second => do_normalize(:second, sec)
             }
           else
             %{result | :year => y, :month => m, :day => d, :hour => h, :minute => min, :second => sec}
           end
         {:date, {y, m, d}} ->
           if validate? do
-            {yn,mn,dn} = normalize(:date, {y,m,d})
+            {yn,mn,dn} = do_normalize(:date, {y,m,d})
             %{result | :year => yn, :month => mn, :day => dn}
           else
             %{result | :year => y, :month => m, :day => d}
           end
         {:time, {h, m, s}} ->
           if validate? do
-            %{result | :hour => normalize(:hour, h), :minute => normalize(:minute, m), :second => normalize(:second, s)}
+            %{result | :hour => do_normalize(:hour, h), :minute => do_normalize(:minute, m), :second => do_normalize(:second, s)}
           else
             %{result | :hour => h, :minute => m, :second => s}
           end
         {:day, d} ->
           if validate? do
-            %{result | :day => normalize(:day, {result.year, result.month, d})}
+            %{result | :day => do_normalize(:day, {result.year, result.month, d})}
           else
             %{result | :day => d}
           end
         {:timezone, tz} ->
-          case tz do
-            %TimezoneInfo{} ->
-              %{result | :timezone => tz}
-            _ ->
-              %{result | :timezone => Timezone.get(tz, result)}
+          tz = case tz do
+            %TimezoneInfo{} -> tz
+            _ -> Timezone.get(tz, result)
+          end
+          if validate? do
+            %{result | :timezone => do_normalize(:timezone, tz)}
+          else
+            %{result | :timezone => tz}
           end
         {name, val} when name in [:year, :month, :hour, :minute, :second, :ms] ->
           if validate? do
-            Map.put(result, name, normalize(name, val))
+            Map.put(result, name, do_normalize(name, val))
           else
             Map.put(result, name, val)
           end
@@ -1089,7 +1093,7 @@ defmodule Timex.Date do
   """
   @spec add(DateTime.t, timestamp) :: DateTime.t
 
-  def add(date, {mega, sec, _}) do
+  def add(%DateTime{} = date, {mega, sec, _}) do
     shift(date, [secs: (mega * @million) + sec])
   end
 
@@ -1099,7 +1103,7 @@ defmodule Timex.Date do
   """
   @spec subtract(DateTime.t, timestamp) :: DateTime.t
 
-  def subtract(date, {mega, sec, _}) do
+  def subtract(%DateTime{} = date, {mega, sec, _}) do
     shift(date, [secs: (-mega * @million) - sec])
   end
 
@@ -1143,9 +1147,9 @@ defmodule Timex.Date do
   """
   @spec shift(DateTime.t, list({atom(), term})) :: DateTime.t
 
-  def shift(date, [{_, 0}]),               do: date
-  def shift(date, [timestamp: {0,0,0}]),   do: date
-  def shift(date, [timestamp: timestamp]), do: add(date, timestamp)
+  def shift(%DateTime{} = date, [{_, 0}]),               do: date
+  def shift(%DateTime{} = date, [timestamp: {0,0,0}]),   do: date
+  def shift(%DateTime{} = date, [timestamp: timestamp]), do: add(date, timestamp)
   def shift(%DateTime{} = date, [{type, value}]) when type in [:secs, :mins, :hours] do
     secs = to_secs(date, :epoch, utc: false)
     secs = secs + case type do
@@ -1161,10 +1165,10 @@ defmodule Timex.Date do
     shifted = from(days, :days) |> set([time: {h, m, s}])
     %{shifted | :timezone => tz}
   end
-  def shift(date, [weeks: value]) do
+  def shift(%DateTime{} = date, [weeks: value]) do
     date |> shift([days: value * 7])
   end
-  def shift(date, [months: value]) do
+  def shift(%DateTime{} = date, [months: value]) do
     %DateTime{
       :year => year, :month => month, :day => day,
       :hour => h, :minute => m, :second => s,
@@ -1182,7 +1186,7 @@ defmodule Timex.Date do
 
     validate({year, round_month(month), day}) |> construct({h, m, s}, tz)
   end
-  def shift(date, [years: value]) do
+  def shift(%DateTime{} = date, [years: value]) do
     %DateTime{
       :year => year, :month => month, :day => day,
       :hour => h, :minute => m, :second => s,
@@ -1194,7 +1198,7 @@ defmodule Timex.Date do
   Record.defrecordp :shift_rec, secs: 0, days: 0, years: 0
 
   # This clause will match lists with at least 2 values
-  def shift(date, spec) when is_list(spec) do
+  def shift(%DateTime{} = date, spec) when is_list(spec) do
     shift_rec(secs: sec, days: day, years: year)
       = Enum.reduce spec, shift_rec(), fn
         ({:timestamp, {mega, tsec, _}}, shift_rec(secs: sec) = rec) ->
@@ -1234,8 +1238,8 @@ defmodule Timex.Date do
   defp construct({_,_,_} = date, {_,_,_,_} = time, nil),     do: construct(date, time, %TimezoneInfo{})
   defp construct(date, {h, min, sec}, %TimezoneInfo{} = tz), do: construct(date, {h, min, sec, 0}, tz)
   defp construct({_,_,_}=date, {_,_,_,_}=time, %TimezoneInfo{} = tz) do
-    {y,m,d}        = normalize(:date, date)
-    {h,min,sec,ms} = normalize(:time, time)
+    {y,m,d}        = do_normalize(:date, date)
+    {h,min,sec,ms} = do_normalize(:time, time)
     %DateTime{
       year: y, month: m, day: d,
       hour: h, minute: min, second: sec,
@@ -1244,8 +1248,8 @@ defmodule Timex.Date do
     }
   end
   defp construct({_,_,_}=date, {_,_,_,_}=time, {_, name}) do
-    {y,m,d}        = normalize(:date, date)
-    {h,min,sec,ms} = normalize(:time, time)
+    {y,m,d}        = do_normalize(:date, date)
+    {h,min,sec,ms} = do_normalize(:time, time)
     dt = %DateTime{
       year: y, month: m, day: d,
       hour: h, minute: min, second: sec,
