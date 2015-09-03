@@ -5,16 +5,28 @@ defmodule Timex.Parse.DateTime.Parsers do
   import Combine.Parsers.Text
 
   def year4(opts \\ []) do
+    min_digits = get_in(opts, [:min]) || 1
+    max_digits = get_in(opts, [:max])
+    expected_digits = case {min_digits, max_digits} do
+      {min, min} -> "#{min} digit year"
+      {min, max} -> "#{min}-#{max} digit year"
+    end
     Helpers.integer(opts)
     |> satisfy(fn year -> year > 0 end)
     |> map(fn year -> [year4: year] end)
-    |> label("4 digit year")
+    |> label(expected_digits)
   end
   def year2(opts \\ []) do
+    min_digits = get_in(opts, [:min]) || 1
+    max_digits = get_in(opts, [:max])
+    expected_digits = case {min_digits, max_digits} do
+      {min, min} -> "#{min} digit year"
+      {min, max} -> "#{min}-#{max} digit year"
+    end
     Helpers.integer(opts)
     |> satisfy(fn year -> year > 0 end)
     |> map(fn year -> [year2: year] end)
-    |> label("2 digit year")
+    |> label(expected_digits)
   end
   def century(opts \\ []) do
     Helpers.integer(opts)
@@ -22,10 +34,16 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("2 digit century")
   end
   def month2(opts \\ []) do
+    min_digits = get_in(opts, [:min]) || 1
+    max_digits = get_in(opts, [:max])
+    expected_digits = case {min_digits, max_digits} do
+      {min, min} -> "#{min} digit month"
+      {min, max} -> "#{min}-#{max} digit month"
+    end
     Helpers.integer(opts)
     |> satisfy(fn month -> month in 0..12 end)
     |> map(&Helpers.to_month/1)
-    |> label("2 digit month")
+    |> label(expected_digits)
   end
   def month_full(_) do
     one_of(word, Helpers.months)
@@ -169,20 +187,20 @@ defmodule Timex.Parse.DateTime.Parsers do
 
   def iso_date(_) do
     sequence([
-      year4([padding: :zeroes]),
+      year4([padding: :zeroes, min: 4, max: 4]),
       ignore(char("-")),
-      month2([padding: :zeroes]),
+      month2([padding: :zeroes, min: 2, max: 2]),
       ignore(char("-")),
-      day_of_month([padding: :zeroes])
+      day_of_month([padding: :zeroes, min: 2, max: 2])
     ])
   end
   def iso_time(_) do
     sequence([
-      hour24([padding: :zeroes]),
+      hour24([padding: :zeroes, min: 2, max: 2]),
       ignore(char(":")),
-      minute([padding: :zeroes]),
+      minute([padding: :zeroes, min: 2, max: 2]),
       ignore(char(":")),
-      either(second_fractional([padding: :zeroes]), second([padding: :zeroes]))
+      either(second_fractional([padding: :zeroes]), second([padding: :zeroes, min: 2, max: 2]))
     ])
   end
   def iso_week(_) do
@@ -354,7 +372,7 @@ defmodule Timex.Parse.DateTime.Parsers do
       literal(space),
       zname(opts),
       literal(space),
-      year4(padding: :spaces)
+      year4(padding: :spaces, min: 4, max: 4)
     ])
   end
   @doc """
@@ -371,7 +389,7 @@ defmodule Timex.Parse.DateTime.Parsers do
       literal(space),
       iso_time(opts),
       literal(space),
-      year4(padding: :spaces)
+      year4(padding: :spaces, min: 4, max: 4)
     ])
   end
   @doc """

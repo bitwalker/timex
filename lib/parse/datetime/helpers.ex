@@ -63,12 +63,12 @@ defmodule Timex.Parse.DateTime.Helpers do
   def to_ampm("PM"), do: [AM: "PM"]
 
   def integer(opts \\ []) do
-    min_width = get_in(opts, [:min]) || -1
+    min_width = get_in(opts, [:min]) || 1
     max_width = get_in(opts, [:max])
     padding   = get_in(opts, [:padding])
     case {padding, min_width, max_width} do
       {:zeroes, _, nil}   -> Text.integer
-      {:zeroes, _, max}   -> fixed_integer(max)
+      {:zeroes, min, max} -> choice(Enum.map(max..min, &(fixed_integer(&1))))
       {:spaces, -1, nil}  -> skip(spaces) |> Text.integer
       {:spaces, min, nil} -> skip(spaces) |> fixed_integer(min)
       {:spaces, _, max}   -> skip(spaces) |> choice(Enum.map(max..1, &(fixed_integer(&1))))

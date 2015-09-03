@@ -21,12 +21,12 @@ defmodule DateFormatTest.ParseDefault do
 
     assert { :ok, ^date0003 } = parse("3", "{YYYY}")
     assert { :ok, ^date0003 } = parse("0003", "{YYYY}")
-    assert {:error, "Expected `4 digit year` at line 1, column 1."} = parse("   3", "{YYYY}")
+    assert {:error, "Expected `1-4 digit year` at line 1, column 1."} = parse("   3", "{YYYY}")
     assert { :ok, ^date0003 } = parse("0003", "{0YYYY}")
     assert { :ok, ^date0003 } = parse("   3", "{_YYYY}")
     assert { :ok, ^date2003 } = parse("3", "{YY}")
     assert { :ok, ^date2003 } = parse("03", "{YY}")
-    assert {:error, "Expected `2 digit year` at line 1, column 1."} = parse(" 3", "{YY}")
+    assert {:error, "Expected `1-2 digit year` at line 1, column 1."} = parse(" 3", "{YY}")
     assert { :ok, ^date2003 } = parse("03", "{0YY}")
     assert { :ok, ^date2003 } = parse(" 3", "{_YY}")
   end
@@ -46,7 +46,7 @@ defmodule DateFormatTest.ParseDefault do
     date = Date.from({0,3,1})
     assert { :ok, ^date } = parse("3", "{M}")
     assert { :ok, ^date } = parse("03", "{M}")
-    assert {:error, "Expected `2 digit month` at line 1, column 1."} = parse(" 3", "{M}")
+    assert {:error, "Expected `1-2 digit month` at line 1, column 1."} = parse(" 3", "{M}")
     assert { :ok, ^date } = parse("03", "{0M}")
     assert { :ok, ^date } = parse(" 3", "{_M}")
   end
@@ -67,7 +67,7 @@ defmodule DateFormatTest.ParseDefault do
     date2013_11 = Date.from({2013,11,8})
 
     assert { :ok, ^date2013_11 } = parse("2013-11-08", "{YYYY}-{M}-{D}")
-    assert {:error, "Expected `2 digit month` at line 1, column 6."} = parse("2013- 1- 8", "{YYYY}-{0M}-{0D}")
+    assert {:error, "Expected `1-2 digit month` at line 1, column 6."} = parse("2013- 1- 8", "{YYYY}-{0M}-{0D}")
     assert { :ok, ^date2013_11 } = parse("20131108", "{0YYYY}{0M}{0D}")
   end
 
