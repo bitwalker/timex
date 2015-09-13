@@ -19,6 +19,10 @@ To use Timex with your projects, edit your `mix.exs` file and add it as a depend
 defp deps do
   [{:timex, "~> x.x.x"}]
 end
+
+defp application do
+  [applications: [:tzdata]]
+end
 ```
 
 To use Timex modules without the Timex namespace, add `use Timex` to the top of each module you plan on referencing Timex from. You can then reference the modules directly, for example: `Date.now`, versus `Timex.Date.now`. This is for compatibility with other libraries which might define their own Date/DateTime/Time implementations. You can also alias individual modules if that suits your needs better, but for purposes of this documentation, we'll assume that you're going the `use Timex` route.
