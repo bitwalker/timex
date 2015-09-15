@@ -346,11 +346,12 @@ defmodule Timex.Format.DateTime.Formatter do
   def format_token(:sec, %DateTime{second: sec}, _modifiers, flags, width), do: "#{pad_numeric(sec, flags, width)}"
   def format_token(:sec_fractional, %DateTime{ms: 0}, _modifiers, _flags, _width), do: <<>>
   def format_token(:sec_fractional, %DateTime{ms: ms}, _modifiers, _flags, _width)
-    when ms < 10, do: ".00#{ms}"
+    when ms < 10, do: ".00#{trunc(ms)}"
   def format_token(:sec_fractional, %DateTime{ms: ms}, _modifiers, _flags, _width)
-    when ms < 100, do: ".0#{ms}"
+    when ms < 100, do: ".0#{trunc(ms)}"
   def format_token(:sec_fractional, %DateTime{ms: ms}, _modifiers, _flags, _width),
-    do: ".#{ms}"
+    do: ".#{trunc(ms)}"
+
   def format_token(:sec_epoch, %DateTime{} = date, _modifiers, flags, width) do
     case get_in(flags, [:padding]) do
       padding when padding in [:zeroes, :spaces] ->

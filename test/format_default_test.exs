@@ -369,12 +369,19 @@ defmodule DateFormatTest.FormatDefault do
     expected_err = {:error, {:format, "Invalid format string, must contain at least one directive."}}
     empty_err = {:error, {:format, "Format string cannot be empty."}}
     unexpected_end_err = {:error, {:format, "Expected end of input at line 1, column 4"}}
-    assert ^empty_err = format(date, "")
-    assert ^expected_err = format(date, "abc")
-    assert ^expected_err = format(date, "Use {{ as oft{{en as you like{{")
-    assert ^expected_err = format(date, "Same go}}es for }}")
-    assert ^expected_err = format(date, "{{{{abc}}")
-    assert ^unexpected_end_err = format(date, "abc } def")
+    assert empty_err == format(date, "")
+    assert expected_err == format(date, "abc")
+    assert expected_err == format(date, "Use {{ as oft{{en as you like{{")
+    assert expected_err == format(date, "Same go}}es for }}")
+    assert expected_err == format(date, "{{{{abc}}")
+    assert unexpected_end_err == format(date, "abc } def")
+  end
+
+  test "issue #79 - invalid ISO 8601 string with fractional ms" do
+    date = %DateTime{day: 14, hour: 12, month: 1, ms: 0.0, year: 2015, timezone: %TimezoneInfo{}}
+    formatted = format(date, "{ISO}")
+    expected = {:ok, "2015-01-14T12:00:00.000+0000"}
+    assert expected == formatted
   end
 
   defp format(date, fmt) do
