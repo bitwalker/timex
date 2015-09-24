@@ -417,11 +417,15 @@ defmodule DateTests do
     utc = Timezone.get(:utc)
     cst = Timezone.get("America/Chicago")
 
-    chicago_noon = %Timex.DateTime{calendar: :gregorian, day: 24, hour: 12, minute: 0, month: 2, ms: 0, second: 0,timezone: cst , year: 2014}
-    utc_dinner = %Timex.DateTime{calendar: :gregorian, day: 24, hour: 18, minute: 0, month: 2, ms: 0, second: 0,timezone: utc , year: 2014}
+    chicago_noon = %Timex.DateTime{calendar: :gregorian, day: 24, hour: 12, minute: 0, month: 2, ms: 0, second: 0, timezone: cst , year: 2014}
+    utc_dinner = %Timex.DateTime{calendar: :gregorian, day: 24, hour: 18, minute: 0, month: 2, ms: 0, second: 0, timezone: utc , year: 2014}
 
-    assert %DateTime{ hour: 18, minute: 0 } = Date.shift(chicago_noon, mins: 360 )
-    assert %DateTime{ hour: 12, minute: 0} = Date.shift(utc_dinner, mins: -360 )
+    assert %DateTime{ hour: 18, minute: 0, timezone: ^cst } = Date.shift(chicago_noon, mins: 360 )
+    assert %DateTime{ hour: 12, minute: 0, timezone: ^utc } = Date.shift(utc_dinner, mins: -360 )
+
+    date = Date.from({{2015, 09, 24}, {10, 0, 0}}, "America/Los_Angeles")
+    shifted = Date.shift(date, mins: 45)
+    assert "2015-09-24T10:45:00-0700" = Timex.DateFormat.format!(shifted, "{ISO}")
   end
 
   test "shift by hours" do

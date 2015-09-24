@@ -1150,14 +1150,15 @@ defmodule Timex.Date do
   def shift(%DateTime{} = date, [{_, 0}]),               do: date
   def shift(%DateTime{} = date, [timestamp: {0,0,0}]),   do: date
   def shift(%DateTime{} = date, [timestamp: timestamp]), do: add(date, timestamp)
-  def shift(%DateTime{} = date, [{type, value}]) when type in [:secs, :mins, :hours] do
+  def shift(%DateTime{timezone: tz} = date, [{type, value}]) when type in [:secs, :mins, :hours] do
     secs = to_secs(date, :epoch, utc: false)
     secs = secs + case type do
       :secs   -> value
       :mins   -> value * 60
       :hours  -> value * 3600
     end
-    from(secs, :secs)
+    shifted = from(secs, :secs)
+    %{shifted | :timezone => tz}
   end
   def shift(%DateTime{:hour => h, :minute => m, :second => s, :timezone => tz} = date, [days: value]) do
     days = to_days(date)
