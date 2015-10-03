@@ -136,6 +136,14 @@ defmodule DateTests do
     assert {0,0,0} === Date.epoch |> Date.to_timestamp
     assert {62167,219200,0} === Date.epoch |> Date.to_timestamp(:zero)
     assert Date.epoch(:secs) == Date.epoch |> Date.to_timestamp(:zero) |> Time.to_secs
+
+    # Force some micro seconds to appear in case we are unlucky and hit when micro := 0
+    {mega, secs, _micro} = Time.now
+    now = {mega, secs, 864123}
+
+    # deliberately match against 864000 AND NOT 864123 since DateTime only
+    # takes milliseconds into account
+    assert {mega, secs, 864000} === Date.from(now, :timestamp, :epoch) |> Date.to_timestamp(:epoch)
   end
 
   test "to seconds" do
