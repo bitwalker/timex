@@ -377,13 +377,13 @@ defmodule Timex.Date do
   @spec to_timestamp(DateTime.t, :epoch | :zero) :: timestamp
   def to_timestamp(date, reference \\ :epoch)
 
-  def to_timestamp(date, :epoch) do
+  def to_timestamp(%DateTime{:ms => ms} = date, :epoch) do
     sec = to_secs(date)
-    { div(sec, @million), rem(sec, @million), 0 }
+    { div(sec, @million), rem(sec, @million), ms * 1000 }
   end
-  def to_timestamp(date, :zero) do
+  def to_timestamp(%DateTime{:ms => ms} = date, :zero) do
     sec = to_secs(date, :zero)
-    { div(sec, @million), rem(sec, @million), 0 }
+    { div(sec, @million), rem(sec, @million), ms * 1000 }
   end
 
   @doc """
