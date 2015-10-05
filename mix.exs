@@ -12,7 +12,8 @@ defmodule Timex.Mixfile do
   end
 
   def application do
-    [applications: [:tzdata], included_applications: [:combine], local_timezone: nil]
+    [applications: [:logger, :tzdata],
+     included_applications: [:combine], local_timezone: nil]
   end
 
   defp package do
