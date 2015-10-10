@@ -4,6 +4,7 @@ defmodule Timex do
       alias Timex.DateTime
       alias Timex.Date
       alias Timex.Time
+      alias Timex.Interval
       alias Timex.TimezoneInfo
       alias Timex.Timezone
       alias Timex.DateFormat
