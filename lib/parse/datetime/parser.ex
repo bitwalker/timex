@@ -24,11 +24,11 @@ defmodule Timex.Parse.DateTime.Parser do
       ...> {:ok, dt} = #{__MODULE__}.parse("2014-07-29T00:20:41.196Z", "{ISOz}")
       ...> dt.year
       2014
-      ...> dt.month
+      iex> dt.month
       7
-      ...> dt.day
+      iex> dt.day
       29
-      ...> dt.timezone.full_name
+      iex> dt.timezone.full_name
       "UTC"
 
   """
@@ -47,11 +47,11 @@ defmodule Timex.Parse.DateTime.Parser do
       ...> {:ok, dt} = #{__MODULE__}.parse("2014-07-29T00:30:41.196-0200", "{ISO}", Timex.Parse.DateTime.Tokenizers.Default)
       ...> dt.year
       2014
-      ...> dt.month
+      iex> dt.month
       7
-      ...> dt.day
+      iex> dt.day
       29
-      ...> dt.timezone.full_name
+      iex> dt.timezone.full_name
       "Etc/GMT+2"
 
   """
