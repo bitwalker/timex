@@ -225,7 +225,10 @@ defmodule Timex.Parse.DateTime.Parser do
           am when am in ["am", "AM"]->
             %{date | :hour => converted}
           pm when pm in ["pm", "PM"] and hemisphere == :am ->
-            %{date | :hour => converted + 12}
+            cond do
+              converted + 12 == 24 -> %{date | :hour => 0}
+              :else -> %{date | :hour => converted + 12}
+            end
           _ ->
             %{date | :hour => converted}
         end
