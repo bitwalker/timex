@@ -199,6 +199,10 @@ defmodule DateFormatTest.ParseDefault do
     # * `{UNIX}`        - e.g. `Tue Mar  5 23:25:19 EET 2013`
     date = Date.from({{2013, 3, 5}, {23, 25, 19}}, "EET")
     assert { :ok, ^date } = parse("Tue Mar  5 23:25:19 EET 2013", "{UNIX}")
+
+
+    date = Date.from({{2015, 10, 5}, {0, 7, 11}}, "PST")
+    assert { :ok, ^date } = parse("Mon Oct 5 00:07:11 PST 2015", "{UNIX}")
   end
 
   test "parse kitchen" do

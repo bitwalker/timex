@@ -91,23 +91,45 @@ defmodule Timex.Parse.DateTime.Parser do
     case Combine.parse(str, pipe([eof|parsers] |> Enum.reverse, &(&1))) do
       [results] when is_list(results) ->
         results
+        |> extract_parse_results
         |> Stream.with_index
         |> Enum.sort_by(fn
             # If :force_utc exists, make sure it is applied last
-            {{[force_utc: true], _}, _}       -> 9999
-            # If weight is zeroed, use the index as it's weight
-            {{_token, 0}, i}      -> i
-            # Otherwise use the weight supplied by the directive
-            {{_token, weight}, _} -> weight
+            {{{:force_utc, true}, _}, _} -> 9999
+            # Timezones must always be applied after other date/time tokens ->
+            {{{tz, _}, _}, _} when tz in [:zname, :zoffs, :zoffs_colon, :zoffs_sec] -> 9998
+            # If no weight is set, use the index as it's weight
+            {{{_token, _value}, 0}, i} -> i
+            # Use the directive weight
+            {{{_token, _value}, weight}, _} -> weight
           end)
-        |> Stream.flat_map(fn
-            {{token, _}, _} when is_list(token) -> List.flatten(token);
-            {{token, _}, _} -> [token]
-          end)
+        |> Stream.flat_map(fn {{token, _}, _} -> [token] end)
         |> Enum.filter(&Kernel.is_tuple/1)
         |> apply_directives(tokenizer)
       {:error, _} = err -> err
     end
+  end
+  defp extract_parse_results(parse_results), do: extract_parse_results(parse_results, [])
+  defp extract_parse_results([], acc), do: Enum.reverse(acc)
+  defp extract_parse_results([{tokens, _}|rest], acc) when is_list(tokens) do
+    extracted = Enum.reverse(extract_parse_results(tokens))
+    extract_parse_results(rest, extracted ++ acc)
+  end
+  defp extract_parse_results([{{token, value}, weight}|rest], acc) when is_atom(token) do
+    extract_parse_results(rest, [{{token, value}, weight}|acc])
+  end
+  defp extract_parse_results([{token, value}|rest], acc) when is_atom(token) do
+    extract_parse_results(rest, [{{token, value}, 0}|acc])
+  end
+  defp extract_parse_results([[{token, value}]|rest], acc) when is_atom(token) do
+    extract_parse_results(rest, [{{token, value}, 0}|acc])
+  end
+  defp extract_parse_results([h|rest], acc) when is_list(h) do
+    extracted = Enum.reverse(extract_parse_results(h))
+    extract_parse_results(rest, extracted ++ acc)
+  end
+  defp extract_parse_results([_|rest], acc) do
+    extract_parse_results(rest, acc)
   end
 
   # Constructs a DateTime from the parsed tokens
