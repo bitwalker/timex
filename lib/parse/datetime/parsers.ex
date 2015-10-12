@@ -238,7 +238,23 @@ defmodule Timex.Parse.DateTime.Parsers do
     parts = [
       iso_date(opts),
       either(literal(char("T")), literal(space)),
-      iso_time(opts)
+      choice([
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+          ignore(char(":")),
+          minute([padding: :zeroes, min: 2, max: 2]),
+          ignore(char(":")),
+          either(second_fractional([padding: :zeroes]), second([padding: :zeroes, min: 2, max: 2]))
+        ]),
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+          ignore(char(":")),
+          minute([padding: :zeroes, min: 2, max: 2]),
+        ]),
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+        ])
+      ])
     ]
     case is_zulu? do
       true ->
