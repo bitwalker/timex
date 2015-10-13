@@ -7,7 +7,8 @@ defmodule Timex.Mixfile do
       elixir: "~> 1.0",
       description: "A date/time library for Elixir",
       package: package,
-      deps: deps ]
+      deps: deps,
+      docs: docs ]
 
   end
 
@@ -30,6 +31,23 @@ defmodule Timex.Mixfile do
      {:benchfella, "~> 0.2", only: :dev},
      {:dialyze, "~> 0.2", only: :dev},
      {:inch_ex, "~> 0.4", only: :docs}]
+  end
+
+  defp docs do
+    [main: "extra-getting-started",
+     extras: [
+       "docs/Getting Started.md",
+       "docs/Basic Usage.md",
+       "docs/Erlang Interop.md",
+       "docs/Working with DateTime.md",
+       "docs/Working with Time.md",
+       "docs/Formatting.md",
+       "docs/Parsing.md",
+       "docs/FAQ.md",
+       "docs/Using with Ecto.md",
+       "docs/Custom Parsers.md",
+       "docs/Custom Formatters.md"
+    ]]
   end
 
 end
