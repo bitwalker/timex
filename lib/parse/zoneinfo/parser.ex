@@ -141,7 +141,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
     txinfos = Enum.map(transitions, fn %TransitionInfo{abbrev_index: idx} = tx ->
       abbrev = abbrevs
         |> Enum.drop(idx)
-        |> Enum.take_while(fn c -> c > 0 end)
+        |> take_while_gt(0)
       %{tx | :abbreviation => "#{abbrev}"}
     end)
     do_parse_leap_seconds(rest, header, %{tzfile | :transitions => txinfos})
@@ -172,13 +172,13 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   ###
   defp parse_array(data, 0, _parser), do: {[], data}
   defp parse_array(data, count, parser) when is_binary(data) and is_function(parser) do
-    {results, rest} = Range.new(1, count)
-      |> Enum.reduce({[], data}, &do_parse_array(&1, &2, parser))
-    {results |> Enum.reverse, rest}
+    {results, rest} = do_parse_array(data, count, parser, [])
+    {results, rest}
   end
-  defp do_parse_array(_, {acc, data}, parser) when is_function(parser) do
+  defp do_parse_array(data, 0, _, acc), do: {Enum.reverse(acc), data}
+  defp do_parse_array(data, count, parser, acc) do
     {item, next} = parser.(data)
-    {[item | acc], next}
+    do_parse_array(next, count - 1, parser, [item | acc])
   end
 
   #################
@@ -186,4 +186,11 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   defp parse_int(<<val :: integer_32bit_be, rest :: binary>>),   do: {val, rest}
   defp parse_char(<<val :: signed_char_be, rest :: binary>>),    do: {val, rest}
   defp parse_uchar(<<val :: unsigned_char_be, rest :: binary>>), do: {val, rest}
+
+
+  # Enum.take_while, but not so slow
+  defp take_while_gt(xs, match),  do: take_while_gt(xs, match, [])
+  defp take_while_gt([], _, acc), do: Enum.reverse(acc)
+  defp take_while_gt([h|rest], match, acc) when h > match, do: take_while_gt(rest, match, [h|acc])
+  defp take_while_gt(_, _, acc),  do: Enum.reverse(acc)
 end

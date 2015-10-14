@@ -42,4 +42,9 @@ defmodule Timex.DateFormat.Bench do
       {:ok, _} = Default.tokenize("{YYYY}-{M}-{D}T{h24}:{m}:{s}Z")
       {:ok, _} = Default.tokenize("{YYYY}-{M}-{D}T{h24}:{m}:{s}{Z}")
     end
+
+    bench "Date.local" do
+      _ = Date.local
+      :ok
+    end
 end
