@@ -3,7 +3,7 @@
 [![Master](https://travis-ci.org/bitwalker/timex.svg?branch=master)](https://travis-ci.org/bitwalker/timex)
 [![Hex.pm Version](http://img.shields.io/hexpm/v/timex.svg?style=flat)](https://hex.pm/packages/timex)
 [![InchCI](https://inch-ci.org/github/bitwalker/timex.svg?branch=master)](https://inch-ci.org/github/bitwalker/timex)
-[![Coverage Status](https://coveralls.io/repos/bitwalker/timex/badge.png?branch=master)]
+![Coverage Status](https://coveralls.io/repos/bitwalker/timex/badge.png?branch=master)
 
 The full documentation for Timex is located [here](https://hexdocs.pm/timex).
 
