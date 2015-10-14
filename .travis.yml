@@ -2,9 +2,13 @@ language: elixir
 sudo: false
 elixir:
   - 1.0.5
+  - 1.1.0
 otp_release:
   - 17.4
-env: MIX_ENV=all
+  - 18.3
+env: MIX_ENV=test
+script:
+  - "MIX_ENV=test mix do deps.get, compile, coveralls.travis"
 after_script:
   - mix deps.get --only docs
   - MIX_ENV=docs mix inch.report

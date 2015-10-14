@@ -8,7 +8,8 @@ defmodule Timex.Mixfile do
       description: "A date/time library for Elixir",
       package: package,
       deps: deps,
-      docs: docs ]
+      docs: docs,
+      test_coverage: [tool: ExCoveralls] ]
 
   end
 
@@ -30,6 +31,7 @@ defmodule Timex.Mixfile do
      {:ex_doc, "~> 0.10", only: :dev},
      {:benchfella, "~> 0.2", only: :dev},
      {:dialyze, "~> 0.2", only: :dev},
+     {:excoveralls, "~> 0.4", only: :test},
      {:inch_ex, "~> 0.4", only: :docs}]
   end
 

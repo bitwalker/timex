@@ -7,3 +7,4 @@ _build/
 mix.lock
 erl_crash.dump
 bench/snapshots
+priv/tmp_downloads
