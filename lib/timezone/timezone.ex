@@ -45,7 +45,7 @@ defmodule Timex.Timezone do
   def local(date)
 
   def local({{y,m,d}, {h,min,s}}), do: %DateTime{year: y, month: m, day: d, hour: h, minute: min, second: s, timezone: %TimezoneInfo{}} |> local
-  def local(%DateTime{} = for),    do: get(Local.lookup(for), for)
+  def local(%DateTime{} = date),   do: get(Local.lookup(date), date)
 
   @doc """
   Gets timezone info for a given zone name and date. The date provided
