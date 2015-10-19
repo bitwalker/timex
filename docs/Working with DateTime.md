@@ -321,7 +321,7 @@ false
 {2015, 26}
 ```
 
-### Get the name of the month corresponding to it's ordinal number
+### Get the name of the month corresponding to its ordinal number
 
 ```elixir
 > Date.month_name(3)
@@ -330,7 +330,7 @@ false
 "Mar"
 ```
 
-### Convert a month name to it's ordinal number
+### Convert a month name to its ordinal number
 
 ```elixir
 > Date.month_to_num("March")

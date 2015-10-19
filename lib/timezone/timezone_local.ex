@@ -113,7 +113,7 @@ defmodule Timex.Timezone.Local do
   # We ignore the reference date here, since there is no way to lookup
   # transition times for historical/future dates
   defp localtz(:win, _date) do
-    # Windows has many of it's own unique time zone names, which can
+    # Windows has many of its own unique time zone names, which can
     # also be translated to the OS's language.
     {:ok, handle} = :win32reg.open([:read])
     :ok           = :win32reg.change_key(handle, '\\local_machine\\#{@local_tz_key}')

@@ -104,7 +104,7 @@ in making it happen.
 
 Timex is composed of the following general components:
 
-- The tzdata Parser Expression Grammar (PEG), it's associated mix task, and the
+- The tzdata Parser Expression Grammar (PEG), its associated mix task, and the
   current tzdata Erlang module produced by the PEG. This is used for parsing the
   raw Olson Timezone Database. (not yet on master)
 - The `Timex.Date` namespace, containing the `DateTime` struct, `DateTime` conversions,

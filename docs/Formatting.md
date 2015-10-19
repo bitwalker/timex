@@ -19,7 +19,7 @@ Formatting DateTimes in Timex is done via the `Timex.DateFormat` module. There a
 > Date.from({2013, 8, 18}) |> DateFormat.format(format_str, MyApp.MyDateFormatter)
 
 # If formatting fails for some reason you will get an `{:error, reason}` tuple, so it's
-# recommended to use `format/1` or `format/2`, however you can use the "bang"
+# recommended to use `format/1` or `format/2`; however you can use the "bang"
 # versions of these two, `format!/1` or `format!/2` which will return the result directly,
 # or raise on failure
 > Date.from({2013, 8, 18}) |> DateFormat.format!("%Y-%m-%d", :strftime)

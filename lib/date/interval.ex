@@ -46,7 +46,7 @@ defmodule Timex.Interval do
       while the set of non-negative reals, for example, is a right-open but not left-open interval.
       The open intervals coincide with the open sets of the real line in its standard topology."
 
-  Note: `until` shifts delegate to `Date.shift`, so the options provided should match it's valid options.
+  Note: `until` shifts delegate to `Date.shift`, so the options provided should match its valid options.
 
   ## Examples
 

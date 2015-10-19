@@ -10,7 +10,7 @@ defmodule Timex.Timezone.Database do
 
 
   @doc """
-  Lookup the Olson time zone given it's standard name
+  Lookup the Olson time zone given its standard name
 
   ## Example
 
