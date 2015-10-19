@@ -98,7 +98,7 @@ defmodule Timex.Parse.DateTime.Parser do
             {{{:force_utc, true}, _}, _} -> 9999
             # Timezones must always be applied after other date/time tokens ->
             {{{tz, _}, _}, _} when tz in [:zname, :zoffs, :zoffs_colon, :zoffs_sec] -> 9998
-            # If no weight is set, use the index as it's weight
+            # If no weight is set, use the index as its weight
             {{{_token, _value}, 0}, i} -> i
             # Use the directive weight
             {{{_token, _value}, weight}, _} -> weight

@@ -19,37 +19,37 @@ defmodule Timex.Time do
   @million       1_000_000
 
   @doc """
-  Converts a timestamp to it's value in microseconds
+  Converts a timestamp to its value in microseconds
   """
   @spec to_usecs(Date.timestamp) :: quantity
   def to_usecs({mega, sec, micro}), do: (mega * @million + sec) * @million + micro
   @doc """
-  Converts a timestamp to it's value in milliseconds
+  Converts a timestamp to its value in milliseconds
   """
   @spec to_msecs(Date.timestamp) :: quantity
   def to_msecs({_, _, _} = ts), do: to_usecs(ts) / @usecs_in_msec
   @doc """
-  Converts a timestamp to it's value in seconds
+  Converts a timestamp to its value in seconds
   """
   @spec to_secs(Date.timestamp) :: quantity
   def to_secs({_, _, _} = ts), do: to_usecs(ts) / @usecs_in_sec
   @doc """
-  Converts a timestamp to it's value in minutes
+  Converts a timestamp to its value in minutes
   """
   @spec to_mins(Date.timestamp) :: quantity
   def to_mins(timestamp), do: to_secs(timestamp) / @secs_in_min
   @doc """
-  Converts a timestamp to it's value in hours
+  Converts a timestamp to its value in hours
   """
   @spec to_hours(Date.timestamp) :: quantity
   def to_hours(timestamp), do: to_secs(timestamp) / @secs_in_hour
   @doc """
-  Converts a timestamp to it's value in days
+  Converts a timestamp to its value in days
   """
   @spec to_days(Date.timestamp) :: quantity
   def to_days(timestamp), do: to_secs(timestamp) / @secs_in_day
   @doc """
-  Converts a timestamp to it's value in weeks
+  Converts a timestamp to its value in weeks
   """
   @spec to_weeks(Date.timestamp) :: quantity
   def to_weeks(timestamp), do: to_secs(timestamp) / @secs_in_week

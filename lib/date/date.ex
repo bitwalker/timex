@@ -499,7 +499,7 @@ defmodule Timex.Date do
   Convert an iso ordinal day number to the day it represents in the
   current year. If no date is provided, a new one will be created, with
   the time will be set to 0:00:00, in UTC. Otherwise, the date provided will
-  have it's month and day reset to the date represented by the ordinal day.
+  have its month and day reset to the date represented by the ordinal day.
 
   ## Examples
 
