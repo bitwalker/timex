@@ -4,7 +4,6 @@ deps/
 ebin/
 _build/
 .exenv-version
-mix.lock
 erl_crash.dump
 bench/snapshots
 priv/tmp_downloads
