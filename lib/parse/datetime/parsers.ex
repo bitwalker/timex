@@ -134,7 +134,7 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("second")
   end
   def second_fractional(opts \\ []) do
-    both(Helpers.integer(opts), pair_right(char("."), integer), &Helpers.to_sec_ms/2)
+    both(Helpers.integer(opts), pair_right(char("."), word_of(~r/\d/)), &Helpers.to_sec_ms/2)
     |> satisfy(fn [{:sec, sec}|_] -> sec >= 0 && sec <= 59 end)
     |> label("fractional second")
   end

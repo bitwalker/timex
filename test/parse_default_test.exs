@@ -131,10 +131,15 @@ defmodule DateFormatTest.ParseDefault do
 
   test "parse simple time formats" do
     date = Date.from({{0,1,1}, {12,3,4}})
-    assert { :ok, ^date }  = parse("12: 3: 4", "{h24}:{_m}:{_s}")
+    assert { :ok, ^date } = parse("12: 3: 4", "{h24}:{_m}:{_s}")
     assert { :ok, ^date } = parse("12:03:04", "{h12}:{0m}:{0s}")
     assert { :ok, ^date } = parse("12:03:04 PM", "{h12}:{0m}:{0s} {AM}")
     assert { :error, "Expected `minute` at line 1, column 7." } = parse("pm 12:3:4", "{am} {h24}:{m}:{s}")
+  end
+
+  test "parse fractional seconds" do
+    str = "2015-11-07T13:45:02.060Z"
+    assert {:ok, %DateTime{second: 2, ms: 60}} = parse(str, "{ISOz}")
   end
 
   test "parse s-epoch" do
