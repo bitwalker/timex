@@ -1,6 +1,7 @@
 %{"benchfella": {:hex, :benchfella, "0.2.1"},
   "combine": {:hex, :combine, "0.5.3"},
   "dialyze": {:hex, :dialyze, "0.2.0"},
+  "earmark": {:hex, :earmark, "0.1.19"},
   "ex_doc": {:hex, :ex_doc, "0.10.0"},
   "excoveralls": {:hex, :excoveralls, "0.4.0"},
   "exjsx": {:hex, :exjsx, "3.2.0"},
