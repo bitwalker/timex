@@ -218,6 +218,7 @@ defmodule Timex.Parse.DateTime.Parser do
           "" -> date
           n when is_number(n) -> %{date | :ms => n}
         end
+      :us -> %{date | :ms => div(value, 1000)}
       :sec_epoch -> Date.from(value, :secs, :epoch)
       am_pm when am_pm in [:am, :AM] ->
         {converted, hemisphere} = Time.to_12hour_clock(hh)
