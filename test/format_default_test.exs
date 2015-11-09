@@ -237,12 +237,12 @@ defmodule DateFormatTest.FormatDefault do
 
   test "format ISO8601" do
     date = Date.from({{2013,3,5},{23,25,19}}, "Europe/Athens")
-    assert { :ok, "2013-03-05T23:25:19+0200" } = format(date, "{ISO}")
+    assert { :ok, "2013-03-05T23:25:19+02:00" } = format(date, "{ISO}")
     assert { :ok, "2013-03-05T21:25:19Z" }     = format(date, "{ISOz}")
 
     local = {{2013,3,5},{23,25,19}}
-    assert { :ok, "2013-03-05T23:25:19-0800" } = format(Date.from(local, "America/Los_Angeles"), "{ISO}")
-    assert { :ok, "2013-03-05T23:25:19+0000" } = format(Date.from(local, :utc), "{ISO}")
+    assert { :ok, "2013-03-05T23:25:19-08:00" } = format(Date.from(local, "America/Los_Angeles"), "{ISO}")
+    assert { :ok, "2013-03-05T23:25:19+00:00" } = format(Date.from(local, :utc), "{ISO}")
   end
 
   test "format ISO date" do
@@ -380,7 +380,7 @@ defmodule DateFormatTest.FormatDefault do
   test "issue #79 - invalid ISO 8601 string with fractional ms" do
     date = %DateTime{day: 14, hour: 12, month: 1, ms: 0.0, year: 2015, timezone: %TimezoneInfo{}}
     formatted = format(date, "{ISO}")
-    expected = {:ok, "2015-01-14T12:00:00.000+0000"}
+    expected = {:ok, "2015-01-14T12:00:00.000+00:00"}
     assert expected == formatted
   end
 

@@ -433,7 +433,7 @@ defmodule DateTests do
 
     date = Date.from({{2015, 09, 24}, {10, 0, 0}}, "America/Los_Angeles")
     shifted = Date.shift(date, mins: 45)
-    assert "2015-09-24T10:45:00-0700" = Timex.DateFormat.format!(shifted, "{ISO}")
+    assert "2015-09-24T10:45:00-07:00" = Timex.DateFormat.format!(shifted, "{ISO}")
   end
 
   test "shift by hours" do

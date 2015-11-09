@@ -109,7 +109,7 @@ defmodule Timex.Format.DateTime.Formatter do
     ms    = format_token(:sec_fractional, date, modifiers, flags, width_spec(-1, nil))
     case token do
       :iso_8601 ->
-        tz = format_token(:zoffs, date, modifiers, flags, width_spec(-1, nil))
+        tz = format_token(:zoffs_colon, date, modifiers, flags, width_spec(-1, nil))
         "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}#{tz}"
       :iso_8601z ->
         "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}Z"
