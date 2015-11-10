@@ -235,14 +235,26 @@ defmodule DateFormatTest.FormatDefault do
              "Invalid directive flag: Timezone offsets require 0-padding to remain unambiguous."}} = format(date, "{_Z::}")
   end
 
-  test "format ISO8601" do
+  test "format ISO8601 (Extended)" do
     date = Date.from({{2013,3,5},{23,25,19}}, "Europe/Athens")
     assert { :ok, "2013-03-05T23:25:19+02:00" } = format(date, "{ISO}")
-    assert { :ok, "2013-03-05T21:25:19Z" }     = format(date, "{ISOz}")
+    assert { :ok, "2013-03-05T23:25:19+02:00" } = format(date, "{ISO:Extended}")
+    assert { :ok, "2013-03-05T21:25:19Z" }      = format(date, "{ISOz}")
+    assert { :ok, "2013-03-05T21:25:19Z" }      = format(date, "{ISO:Extended:Z}")
 
     local = {{2013,3,5},{23,25,19}}
-    assert { :ok, "2013-03-05T23:25:19-08:00" } = format(Date.from(local, "America/Los_Angeles"), "{ISO}")
-    assert { :ok, "2013-03-05T23:25:19+00:00" } = format(Date.from(local, :utc), "{ISO}")
+    assert { :ok, "2013-03-05T23:25:19-08:00" } = format(Date.from(local, "America/Los_Angeles"), "{ISO:Extended}")
+    assert { :ok, "2013-03-05T23:25:19+00:00" } = format(Date.from(local, :utc), "{ISO:Extended}")
+  end
+
+  test "format ISO8601 (Basic)" do
+    date = Date.from({{2013,3,5},{23,25,19}}, "Europe/Athens")
+    assert { :ok, "20130305T232519+0200" } = format(date, "{ISO:Basic}")
+    assert { :ok, "20130305T212519Z" }      = format(date, "{ISO:Basic:Z}")
+
+    local = {{2013,3,5},{23,25,19}}
+    assert { :ok, "20130305T232519-0800" } = format(Date.from(local, "America/Los_Angeles"), "{ISO:Basic}")
+    assert { :ok, "20130305T232519+0000" } = format(Date.from(local, :utc), "{ISO:Basic}")
   end
 
   test "format ISO date" do

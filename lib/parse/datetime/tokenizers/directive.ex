@@ -102,6 +102,14 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
     do: %Directive{type: :iso_8601, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.iso8601(flags)}
   def get(:iso_8601z, directive, flags, mods, width),
     do: %Directive{type: :iso_8601z, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.iso8601([{:zulu, true}|flags])}
+  def get(:iso_8601_extended, directive, flags, mods, width),
+    do: %Directive{type: :iso_8601_extended, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.iso8601_extended(flags)}
+  def get(:iso_8601_extended_z, directive, flags, mods, width),
+    do: %Directive{type: :iso_8601_extended_z, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.iso8601_extended([{:zulu, true}|flags])}
+  def get(:iso_8601_basic, directive, flags, mods, width),
+    do: %Directive{type: :iso_8601_basic, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.iso8601_basic(flags)}
+  def get(:iso_8601_basic_z, directive, flags, mods, width),
+    do: %Directive{type: :iso_8601_basic_z, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.iso8601_basic([{:zulu, true}|flags])}
   def get(:iso_date, directive, flags, mods, width),
     do: %Directive{type: :iso_date, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.iso_date(flags)}
   def get(:iso_time, directive, flags, mods, width),

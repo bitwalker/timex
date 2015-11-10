@@ -21,7 +21,7 @@ defmodule Timex.Parse.DateTime.Parser do
   ## Examples
 
       iex> use Timex
-      ...> {:ok, dt} = #{__MODULE__}.parse("2014-07-29T00:20:41.196Z", "{ISOz}")
+      ...> {:ok, dt} = #{__MODULE__}.parse("2014-07-29T00:20:41.196Z", "{ISO:Extended:Z}")
       ...> dt.year
       2014
       iex> dt.month
@@ -44,7 +44,7 @@ defmodule Timex.Parse.DateTime.Parser do
   ## Examples
 
       iex> use Timex
-      ...> {:ok, dt} = #{__MODULE__}.parse("2014-07-29T00:30:41.196-0200", "{ISO}", Timex.Parse.DateTime.Tokenizers.Default)
+      ...> {:ok, dt} = #{__MODULE__}.parse("2014-07-29T00:30:41.196-02:00", "{ISO:Extended}", Timex.Parse.DateTime.Tokenizers.Default)
       ...> dt.year
       2014
       iex> dt.month
