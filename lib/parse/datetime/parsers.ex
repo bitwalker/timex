@@ -228,10 +228,8 @@ defmodule Timex.Parse.DateTime.Parsers do
 
   @doc """
   ISO 8601 date/time format with timezone information.
-  With zulu: true, assumes UTC timezone.
-  Examples:
-    2007-08-13T16:48:01+0300
-    2007-08-13T13:48:01Z
+
+  NOTE: Deprecated. See iso8601_extended for documentation
   """
   def iso8601(opts \\ []) do
     is_zulu? = get_in(opts, [:zulu])
@@ -263,6 +261,82 @@ defmodule Timex.Parse.DateTime.Parsers do
         sequence(parts ++ [choice([map(char("Z"), fn _ -> [zname: "UTC"] end), zoffs_sec(opts), zoffs_colon(opts), zoffs(opts)])])
     end
   end
+  @doc """
+  ISO 8601 date/time (extended) format with timezone information.
+  With zulu: true, assumes UTC timezone.
+  Examples:
+    2007-08-13T16:48:01+03:00
+    2007-08-13T13:48:01Z
+  """
+  def iso8601_extended(opts \\ []) do
+    is_zulu? = get_in(opts, [:zulu])
+    parts = [
+      iso_date(opts),
+      either(literal(char("T")), literal(space)),
+      choice([
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+          ignore(char(":")),
+          minute([padding: :zeroes, min: 2, max: 2]),
+          ignore(char(":")),
+          either(second_fractional([padding: :zeroes]), second([padding: :zeroes, min: 2, max: 2]))
+        ]),
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+          ignore(char(":")),
+          minute([padding: :zeroes, min: 2, max: 2]),
+        ]),
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+        ])
+      ])
+    ]
+    case is_zulu? do
+      true ->
+        sequence(parts ++ [literal(char("Z"))])
+      _ ->
+        sequence(parts ++ [choice([map(char("Z"), fn _ -> [zname: "UTC"] end), zoffs_sec(opts), zoffs_colon(opts), zoffs(opts)])])
+    end
+  end
+  @doc """
+  ISO 8601 date/time (basic) format with timezone information.
+  With zulu: true, assumes UTC timezone.
+  Examples:
+    20070813T164801+0300
+    20070813T134801Z
+  """
+  def iso8601_basic(opts \\ []) do
+    is_zulu? = get_in(opts, [:zulu])
+    parts = [
+      sequence([
+        year4([padding: :zeroes, min: 4, max: 4]),
+        month2([padding: :zeroes, min: 2, max: 2]),
+        day_of_month([padding: :zeroes, min: 2, max: 2])
+      ]),
+      either(literal(char("T")), literal(space)),
+      choice([
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+          minute([padding: :zeroes, min: 2, max: 2]),
+          either(second_fractional([padding: :zeroes]), second([padding: :zeroes, min: 2, max: 2]))
+        ]),
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+          minute([padding: :zeroes, min: 2, max: 2]),
+        ]),
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+        ])
+      ])
+    ]
+    case is_zulu? do
+      true ->
+        sequence(parts ++ [literal(char("Z"))])
+      _ ->
+        sequence(parts ++ [choice([map(char("Z"), fn _ -> [zname: "UTC"] end), zoffs_sec(opts), zoffs(opts)])])
+    end
+  end
+
   @doc """
   RFC 822 date/time format with timezone information.
   Examples: `Mon, 05 Jun 14 23:20:59 Y`
