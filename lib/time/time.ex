@@ -169,10 +169,10 @@ defmodule Timex.Time do
   end
 
   def abs(timestamp={mega, sec, micro}) do
-    cond do
-      mega != 0 -> value = mega
-      sec != 0  -> value = sec
-      true      -> value = micro
+    value = cond do
+      mega != 0 -> mega
+      sec != 0  -> sec
+      true      -> micro
     end
 
     if value < 0 do
