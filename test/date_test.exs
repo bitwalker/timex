@@ -546,6 +546,66 @@ defmodule DateTests do
     assert %DateTime{year: 2012, month: 3, day: 1, hour: 0, minute: 0, second: 0} = shift(datetime, mins: 36, secs: 37)
   end
 
+  test "beginning_of_month" do
+    assert Date.beginning_of_month(%DateTime{year: 2016, month: 2, day: 15}) == Date.from {{2016, 2, 1},  {0, 0, 0}}
+    assert Date.beginning_of_month(Date.from({{2014,2,15},{14,14,14}})) == Date.from {{2014, 2, 1},  {0, 0, 0}}
+  end
+
+  test "end_of_month" do
+    assert Date.end_of_month(%DateTime{year: 2016, month: 2, day: 15}) == Date.from {{2016, 2, 29},  {23, 59, 59}}
+    refute Date.end_of_month(%DateTime{year: 2016, month: 2, day: 15}) == Date.from {{2016, 2, 28},  {23, 59, 59}}
+    assert Date.end_of_month(Date.from({{2014,2,15},{14,14,14}})) == Date.from {{2014, 2, 28},  {23, 59, 59}}
+    assert Date.end_of_month(2015, 11) == Date.from {{2015, 11, 30},  {23, 59, 59}}
+
+    assert_raise FunctionClauseError, fn ->
+      Date.end_of_month 2015, 13
+    end
+    assert_raise FunctionClauseError, fn ->
+      Date.end_of_month -2015, 12
+    end
+  end
+
+  test "quarter" do
+    assert Date.quarter(12) == 4
+    assert Date.quarter(11) == 4
+    assert Date.quarter(10) == 4
+    assert Date.quarter(9 ) == 3
+    assert Date.quarter(8 ) == 3
+    assert Date.quarter(7 ) == 3
+    assert Date.quarter(6 ) == 2
+    assert Date.quarter(5 ) == 2
+    assert Date.quarter(4 ) == 2
+    assert Date.quarter(3 ) == 1
+    assert Date.quarter(2 ) == 1
+    assert Date.quarter(1 ) == 1
+
+    date = Date.from({2015, 11, 1})
+    assert Date.quarter(date) == 4
+
+    assert_raise ArgumentError, fn ->
+      Date.quarter(13)
+    end
+  end
+
+  test "beginning_of_quarter" do
+    assert Date.beginning_of_quarter(%DateTime{year: 2016, month: 3, day: 15}) == Date.from {{2016, 1, 1},  {0, 0, 0}}
+    assert Date.beginning_of_quarter(Date.from({{2014,2,15},{14,14,14}})) == Date.from {{2014, 1, 1},  {0, 0, 0}}
+    assert Date.beginning_of_quarter(%DateTime{year: 2016, month: 5, day: 15}) == Date.from {{2016, 4, 1},  {0, 0, 0}}
+    assert Date.beginning_of_quarter(%DateTime{year: 2016, month: 8, day: 15}) == Date.from {{2016, 7, 1},  {0, 0, 0}}
+    assert Date.beginning_of_quarter(%DateTime{year: 2016, month: 11, day: 15}) == Date.from {{2016, 10, 1},  {0, 0, 0}}
+  end
+
+  test "end_of_quarter" do
+    assert Date.end_of_quarter(%DateTime{year: 2016, month: 2, day: 15}) == Date.from {{2016, 3, 31},  {23, 59, 59}}
+    assert Date.end_of_quarter(Date.from({{2014,2,15},{14,14,14}})) == Date.from {{2014, 3, 31},  {23, 59, 59}}
+    assert Date.end_of_quarter(2015, 1) == Date.from {{2015, 3, 31}, {23, 59, 59}}
+
+    assert_raise FunctionClauseError, fn ->
+      Date.end_of_quarter 2015, 5
+    end
+
+  end
+
   defp shift(date, spec) when is_list(spec) do
     date |> Date.from |> Date.shift(spec)
   end
