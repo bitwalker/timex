@@ -976,7 +976,7 @@ defmodule Timex.Date do
           else
             Map.put(result, name, val)
           end
-        {option_name, _}   -> raise "Invalid option passed to Date.set: #{option_name}"
+        {option_name, _}   -> raise ArgumentError, "Invalid option passed to Date.set: #{option_name}"
       end
     end
   end
