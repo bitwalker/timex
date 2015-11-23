@@ -21,7 +21,7 @@ defmodule Timex.Time do
   Converts a timestamp to its value in microseconds
   """
   @spec to_usecs(Date.timestamp) :: integer
-  def to_usecs({mega, sec, micro}), do: (mega * @million + sec) * @million + micro
+  def to_usecs({mega, sec, micro}), do: mega * @million * @million + sec * @million + micro
   @doc """
   Converts a timestamp to its value in milliseconds
   """
@@ -281,9 +281,12 @@ defmodule Timex.Time do
   """
   def diff(t1, t2, type \\ :timestamp)
 
-  def diff({mega1,secs1,micro1}, {mega2,secs2,micro2}, :timestamp) do
-    # TODO: normalize the result
-    {mega1 - mega2, secs1 - secs2, micro1 - micro2}
+  def diff({_,_,_} = t1, {_,_,_} = t2, :timestamp) do
+    microsecs = :timer.now_diff(t1, t2)
+    mega  = div(microsecs, 1_000_000_000_000)
+    secs  = div(microsecs, 1_000_000 - mega*1_000_000)
+    micro = rem(microsecs, 1_000_000)
+    {mega, secs, micro}
   end
 
   def diff(t1 = {_,_,_}, t2 = {_,_,_}, type) do
