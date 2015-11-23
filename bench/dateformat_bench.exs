@@ -5,7 +5,7 @@ defmodule Timex.DateFormat.Bench do
     alias Timex.Parse.DateTime.Tokenizers.Default
 
     @datetime "2014-07-22T12:30:05Z"
-    @datetime_zoned "2014-07-22T12:30:05+0200"
+    @datetime_zoned "2014-07-22T12:30:05+02:00"
 
     bench "(default) parse ISO 8601 datetime" do
       datetime = DateFormat.parse(@datetime, "{ISOz}")

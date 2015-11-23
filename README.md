@@ -117,7 +117,7 @@ Some common scenarios with examples.
 
 ```elixir
 # With timezone offset
-> date = "2015-06-24T04:50:34-0500"
+> date = "2015-06-24T04:50:34-05:00"
 > date |> DateFormat.parse("{ISO}")
 {:ok,
  %DateTime{calendar: :gregorian, day: 24, hour: 4, minute: 50, month: 6,
@@ -140,7 +140,7 @@ Some common scenarios with examples.
 
 ```elixir
 > Date.local |> DateFormat.format("{ISO}")
-{:ok, "2015-06-24T00:04:09.293-0500"}
+{:ok, "2015-06-24T00:04:09.293-05:00"}
 > Date.local |> DateFormat.format("{ISOz}")
 {:ok, "2015-06-24T05:04:13.910Z"}
 ```

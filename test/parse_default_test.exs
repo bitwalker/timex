@@ -250,6 +250,58 @@ defmodule DateFormatTest.ParseDefault do
     assert { :ok, ^date5} = parse("2007-04-05T14Z", "{ISO}")
   end
 
+  test "parse ISO8601 (Extended)" do
+    date1 = Date.from({{2014, 8, 14}, {12, 34, 33}})
+    date2 = %{date1 | :ms => 199}
+
+    assert { :ok, ^date1 } = parse("2014-08-14T12:34:33+00:00", "{ISO:Extended}")
+    assert { :ok, ^date1 } = parse("2014-08-14T12:34:33+0000", "{ISO:Extended}")
+    assert { :ok, ^date1 } = parse("2014-08-14T12:34:33+00", "{ISO:Extended}")
+    assert { :ok, ^date1 } = parse("2014-08-14T12:34:33Z", "{ISO:Extended}")
+    assert { :ok, ^date1 } = parse("2014-08-14T12:34:33Z", "{ISO:Extended:Z}")
+
+    assert { :ok, ^date2 } = parse("2014-08-14T12:34:33.199+00:00", "{ISO:Extended}")
+    assert { :ok, ^date2 } = parse("2014-08-14T12:34:33.199+0000", "{ISO:Extended}")
+    assert { :ok, ^date2 } = parse("2014-08-14T12:34:33.199+00", "{ISO:Extended}")
+    assert { :ok, ^date2 } = parse("2014-08-14T12:34:33.199Z", "{ISO:Extended}")
+    assert { :ok, ^date2 } = parse("2014-08-14T12:34:33.199Z", "{ISO:Extended:Z}")
+
+    date3 = Date.from({{2014, 8, 14}, {12, 34, 33}}, "Etc/GMT+5")
+    assert { :ok, ^date3 } = parse("2014-08-14T12:34:33-05:00", "{ISO:Extended}")
+    assert { :ok, ^date3 } = parse("2014-08-14T12:34:33-0500", "{ISO:Extended}")
+    assert { :ok, ^date3 } = parse("2014-08-14T12:34:33-05", "{ISO:Extended}")
+
+    date4 = Date.from({{2007, 4, 5}, {14, 30, 0}})
+    assert { :ok, ^date4} = parse("2007-04-05T14:30Z", "{ISO:Extended}")
+
+    date5 = Date.from({{2007, 4, 5}, {14, 0, 0}})
+    assert { :ok, ^date5} = parse("2007-04-05T14Z", "{ISO:Extended}")
+  end
+
+  test "parse ISO8601 (Basic)" do
+    date1 = Date.from({{2014, 8, 14}, {12, 34, 33}})
+    date2 = %{date1 | :ms => 199}
+
+    assert { :ok, ^date1 } = parse("20140814T123433+0000", "{ISO:Basic}")
+    assert { :ok, ^date1 } = parse("20140814T123433+00", "{ISO:Basic}")
+    assert { :ok, ^date1 } = parse("20140814T123433Z", "{ISO:Basic}")
+    assert { :ok, ^date1 } = parse("20140814T123433Z", "{ISO:Basic:Z}")
+
+    assert { :ok, ^date2 } = parse("20140814T123433.199+0000", "{ISO:Basic}")
+    assert { :ok, ^date2 } = parse("20140814T123433.199+00", "{ISO:Basic}")
+    assert { :ok, ^date2 } = parse("20140814T123433.199Z", "{ISO:Basic}")
+    assert { :ok, ^date2 } = parse("20140814T123433.199Z", "{ISO:Basic:Z}")
+
+    date3 = Date.from({{2014, 8, 14}, {12, 34, 33}}, "Etc/GMT+5")
+    assert { :ok, ^date3 } = parse("20140814T123433-0500", "{ISO:Basic}")
+    assert { :ok, ^date3 } = parse("20140814T123433-05", "{ISO:Basic}")
+
+    date4 = Date.from({{2007, 4, 5}, {14, 30, 0}})
+    assert { :ok, ^date4} = parse("20070405T1430Z", "{ISO:Basic}")
+
+    date5 = Date.from({{2007, 4, 5}, {14, 0, 0}})
+    assert { :ok, ^date5} = parse("20070405T14Z", "{ISO:Basic}")
+  end
 
   defp parse(date, fmt) do
     DateFormat.parse(date, fmt)

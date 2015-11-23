@@ -50,8 +50,9 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
         "Zname", "Z::", "Z:", "Z",
         # Compound
         "ISOord", "ISOweek-day", "ISOweek", "ISOdate", "ISOtime", "ISOz", "ISO",
-        "RFC822z", "RFC822", "RFC1123z", "RFC1123", "RFC3339z", "RFC3339",
-        "ANSIC", "UNIX", "kitchen"
+        "ISO:Extended", "ISO:Extended:Z", "ISO:Basic", "ISO:Basic:Z", "RFC822z",
+        "RFC822", "RFC1123z", "RFC1123", "RFC3339z", "RFC3339", "ANSIC", "UNIX",
+        "kitchen"
       ])],
       &coalesce_token/1
     )
@@ -119,22 +120,26 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
       "Z:"    -> Directive.get(:zoffs_colon, directive, opts)
       "Z::"   -> Directive.get(:zoffs_sec, directive, opts)
       # Preformatted Directives
-      "ISO"         -> Directive.get(:iso_8601, directive, opts)
-      "ISOz"        -> Directive.get(:iso_8601z, directive, opts)
-      "ISOdate"     -> Directive.get(:iso_date, directive, opts)
-      "ISOtime"     -> Directive.get(:iso_time, directive, opts)
-      "ISOweek"     -> Directive.get(:iso_week, directive, opts)
-      "ISOweek-day" -> Directive.get(:iso_weekday, directive, opts)
-      "ISOord"      -> Directive.get(:iso_ordinal, directive, opts)
-      "RFC822"      -> Directive.get(:rfc_822, directive, opts)
-      "RFC822z"     -> Directive.get(:rfc_822z, directive, opts)
-      "RFC1123"     -> Directive.get(:rfc_1123, directive, opts)
-      "RFC1123z"    -> Directive.get(:rfc_1123z, directive, opts)
-      "RFC3339"     -> Directive.get(:rfc_3339, directive, opts)
-      "RFC3339z"    -> Directive.get(:rfc_3339z, directive, opts)
-      "ANSIC"       -> Directive.get(:ansic, directive, opts)
-      "UNIX"        -> Directive.get(:unix, directive, opts)
-      "kitchen"     -> Directive.get(:kitchen, directive, opts)
+      "ISO"            -> Directive.get(:iso_8601, directive, opts)
+      "ISOz"           -> Directive.get(:iso_8601z, directive, opts)
+      "ISO:Extended"   -> Directive.get(:iso_8601_extended, directive, opts)
+      "ISO:Extended:Z" -> Directive.get(:iso_8601_extended_z, directive, opts)
+      "ISO:Basic"      -> Directive.get(:iso_8601_basic, directive, opts)
+      "ISO:Basic:Z"    -> Directive.get(:iso_8601_basic_z, directive, opts)
+      "ISOdate"        -> Directive.get(:iso_date, directive, opts)
+      "ISOtime"        -> Directive.get(:iso_time, directive, opts)
+      "ISOweek"        -> Directive.get(:iso_week, directive, opts)
+      "ISOweek-day"    -> Directive.get(:iso_weekday, directive, opts)
+      "ISOord"         -> Directive.get(:iso_ordinal, directive, opts)
+      "RFC822"         -> Directive.get(:rfc_822, directive, opts)
+      "RFC822z"        -> Directive.get(:rfc_822z, directive, opts)
+      "RFC1123"        -> Directive.get(:rfc_1123, directive, opts)
+      "RFC1123z"       -> Directive.get(:rfc_1123z, directive, opts)
+      "RFC3339"        -> Directive.get(:rfc_3339, directive, opts)
+      "RFC3339z"       -> Directive.get(:rfc_3339z, directive, opts)
+      "ANSIC"          -> Directive.get(:ansic, directive, opts)
+      "UNIX"           -> Directive.get(:unix, directive, opts)
+      "kitchen"        -> Directive.get(:kitchen, directive, opts)
     end
   end
 
