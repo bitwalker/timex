@@ -324,6 +324,13 @@ defmodule DateFormatTest.FormatDefault do
 
     assert { :ok, "Tue Mar  5 23:25:19 UTC 2013" } = format(date, "{UNIX}")
     assert { :ok, "Tue Mar  5 23:25:19 PST 2013" } = format(Date.from(local, "America/Los_Angeles"), "{UNIX}")
+
+    local = {{2015,11,16},{22,23,48}}
+    date = Date.from(local, :utc)
+
+    assert { :ok, "Mon Nov 16 22:23:48 UTC 2015" } = format(date, "{UNIX}")
+    assert { :ok, "Mon Nov 16 22:23:48 PST 2015" } = format(Date.from(local, "America/Los_Angeles"), "{UNIX}")
+
   end
 
   test "format kitchen" do

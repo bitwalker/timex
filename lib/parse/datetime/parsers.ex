@@ -285,7 +285,7 @@ defmodule Timex.Parse.DateTime.Parsers do
     parts = [
       weekday_short(opts),
       literal(string(", ")),
-      day_of_month(padding: :zeroes),
+      day_of_month([padding: :zeroes, min: 2, max: 2]),
       literal(space),
       month_short(opts),
       literal(space),
@@ -331,7 +331,7 @@ defmodule Timex.Parse.DateTime.Parsers do
     parts = [
       weekday_short(opts),
       literal(string(", ")),
-      day_of_month(padding: :zeroes),
+      day_of_month([padding: :zeroes, min: 2, max: 2]),
       literal(space),
       month_short(opts),
       literal(space),
@@ -382,7 +382,7 @@ defmodule Timex.Parse.DateTime.Parsers do
       literal(space),
       month_short(opts),
       literal(space),
-      day_of_month(padding: :spaces),
+      day_of_month([padding: :spaces, min: 1, max: 2]),
       literal(space),
       iso_time(opts),
       literal(space),
@@ -401,7 +401,7 @@ defmodule Timex.Parse.DateTime.Parsers do
       literal(space),
       month_short(opts),
       literal(space),
-      day_of_month(padding: :spaces),
+      day_of_month([padding: :spaces, min: 1, max: 2]),
       literal(space),
       iso_time(opts),
       literal(space),
@@ -426,7 +426,7 @@ defmodule Timex.Parse.DateTime.Parsers do
   Example: `04/12/87`
   """
   def slashed(_) do
-    opts = [padding: :zeroes]
+    opts = [padding: :zeroes, min: 2, max: 2]
     sequence([
       month2(opts),
       day_of_month(opts),
@@ -481,7 +481,7 @@ defmodule Timex.Parse.DateTime.Parsers do
   """
   def strftime_iso_shortdate(_) do
     sequence([
-      day_of_month(padding: :spaces),
+      day_of_month([padding: :spaces, min: 1, max: 2]),
       literal(char("-")),
       month_short([]),
       literal(char("-")),

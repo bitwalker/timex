@@ -198,6 +198,9 @@ defmodule DateFormatTest.ParseDefault do
     # * `{ANSIC}`       - e.g. `Tue Mar  5 23:25:19 2013`
     date = Date.from({{2013, 3, 5}, {23, 25, 19}})
     assert { :ok, ^date } = parse("Tue Mar  5 23:25:19 2013", "{ANSIC}")
+
+    date = Date.from({{2015, 11, 16}, {22, 23, 48}}, "UTC")
+    assert { :ok, ^date } = parse("Mon Nov 16 22:23:48 2015", "{ANSIC}")
   end
 
   test "parse UNIX" do
@@ -208,6 +211,9 @@ defmodule DateFormatTest.ParseDefault do
 
     date = Date.from({{2015, 10, 5}, {0, 7, 11}}, "PST")
     assert { :ok, ^date } = parse("Mon Oct 5 00:07:11 PST 2015", "{UNIX}")
+
+    date = Date.from({{2015, 11, 16}, {22, 23, 48}}, "UTC")
+    assert { :ok, ^date } = parse("Mon Nov 16 22:23:48 UTC 2015", "{UNIX}")
   end
 
   test "parse kitchen" do
