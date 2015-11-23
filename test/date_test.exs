@@ -28,6 +28,10 @@ defmodule DateTests do
     assert 21 === c
   end
 
+  # test "timezone" do
+  #   assert Date.timezone(:local, Date.from({2015,1,1})) == "x"
+  # end
+
   test "now" do
     # We cannot assert matching to a specific value. However, we can still do
     # some sanity checks
@@ -43,6 +47,7 @@ defmodule DateTests do
     assert is_integer(now_secs)
     assert is_integer(now_days)
     assert now_secs > now_days
+
   end
 
   test "local" do
@@ -130,6 +135,7 @@ defmodule DateTests do
   test "from days" do
     assert %DateTime{year: 1970, month: 1, day: 31, hour: 0, minute: 0, second: 0} = Date.from(30, :days)
     assert %DateTime{year: 1970, month: 2, day: 1, hour: 0, minute: 0, second: 0} = Date.from(31, :days)
+    assert Date.from(31, :days, :zero) == Date.from({{0,2,1},{0,0,0}})
   end
 
   test "to timestamp" do
@@ -213,6 +219,19 @@ defmodule DateTests do
     assert Date.days_in_month(Date.epoch()) === 31
     assert Date.days_in_month(2012, 2) === 29
     assert Date.days_in_month(2013, 2) === 28
+
+    assert_raise ArgumentError, fn ->
+      Date.days_in_month(-1, 2)
+    end
+
+    assert_raise ArgumentError, fn ->
+      Date.days_in_month(2015, 13)
+    end
+
+    assert_raise ArgumentError, fn ->
+      Date.days_in_month(-13, 13)
+    end
+
   end
 
   test "month_to_num" do
@@ -221,6 +240,14 @@ defmodule DateTests do
     assert Date.month_to_num("Apr") == 4
     assert Date.month_to_num("apr") == 4
     assert Date.month_to_num(:apr) == 4
+
+    assert Date.month_to_num("Munday") == {:error, "Invalid month name: Munday"}
+
+  end
+
+  test "month_shortname" do
+    assert Date.month_shortname(1) == "Jan"
+    assert Date.month_shortname(13) == {:error, "Invalid month num: 13"}
   end
 
   test "day_to_num" do
@@ -229,6 +256,8 @@ defmodule DateTests do
     assert Date.day_to_num("Wed") == 3
     assert Date.day_to_num("wed") == 3
     assert Date.day_to_num(:wed) == 3
+
+    assert Date.day_to_num("Munday") == {:error, "Invalid day name: Munday"}
   end
 
   test "is_leap" do
@@ -262,6 +291,7 @@ defmodule DateTests do
     tz = Timezone.get(:utc)
     date = { {1,13,44}, {-8,60,61}, tz }
     assert %DateTime{year: 1, month: 12, day: 31, hour: 0, minute: 59, second: 59, timezone: _} = Date.normalize(date)
+    assert %DateTime{year: 1, month: 12, day: 31, hour: 0, minute: 59, second: 59, timezone: _} = Date.normalize({{1,13,44}, {-8,60,61}})    
   end
 
   test "set" do
@@ -280,11 +310,20 @@ defmodule DateTests do
 
     assert to_gregorian(Date.set(date, [date: {1,1,1}, hour: 13, second: 61, timezone: utc]))    === { {1,1,1}, {13,26,59}, {utc_offset_min/60, utc_name} }
     assert to_gregorian(Date.set(date, [date: {-1,-2,-3}, hour: 33, second: 61, timezone: utc])) === { {0,1,1}, {23,26,59}, {utc_offset_min/60, utc_name} }
+
+    assert %DateTime{year: 2015, month: 1, day: 33} = Date.set(Date.from({2015,1,1}), [day: 33, validate: false])
+    assert %DateTime{hour: 33} = Date.set(Date.from({2015,1,1}), [time: {33,1,1}, validate: false])
+    assert %DateTime{timezone: {:error, _}} = Date.set(Date.from({2015,1,1}), [timezone: "Moon Time", validate: false])
+
+    assert_raise ArgumentError, fn ->
+      Date.set(Date.from({2015,1,1}), [bad_arg: true])
+    end
+
   end
 
   test "compare" do
-    assert Date.compare(Date.epoch(), Date.zero()) === 1
-    assert Date.compare(Date.zero(), Date.epoch()) === -1
+    assert Date.compare(Date.epoch(), :zero) === 1
+    assert Date.compare(Date.zero(), :epoch) === -1
 
     tz1   = Timezone.get(2)
     tz2   = Timezone.get(-3)
@@ -355,6 +394,12 @@ defmodule DateTests do
     date2 = Date.from({1969,2,11})
     assert Date.diff(date1, date2, :months) === -25
     assert Date.diff(date2, date1, :months) === 25
+  end
+
+  test "shift" do
+    date = Date.from({{2015, 1, 1},{1, 0, 0}})
+    assert Date.shift(date, [timestamp: {0, 0, 0}]) == date
+    assert Date.shift(date, [timestamp: {1, 0, 0}]) == Date.from({{2015, 1, 12}, {14, 46, 40}})
   end
 
   test "shift by seconds" do
@@ -510,6 +555,9 @@ defmodule DateTests do
     datetime = { {2013,3,31}, time }
     assert %DateTime{year: 2013, month: 4, day: 30} = shift(datetime, months: 1)
     assert %DateTime{year: 2013, month: 2, day: 28} = shift(datetime, months: -1)
+
+    datetime = { {2013,1,31}, time }
+    assert %DateTime{year: 2012, month: 12, day: 31} = shift(datetime, months: -1)
   end
 
   test "shift by years" do
@@ -544,6 +592,66 @@ defmodule DateTests do
     assert %DateTime{year: 2002, month: 3, day: 1} = shift(datetime, years: -10, days: 1)
     assert %DateTime{year: 2012, month: 2, day: 29, hour: 23, minute: 59, second: 59} = shift(datetime, mins: 36, secs: 36)
     assert %DateTime{year: 2012, month: 3, day: 1, hour: 0, minute: 0, second: 0} = shift(datetime, mins: 36, secs: 37)
+  end
+
+  test "beginning_of_month" do
+    assert Date.beginning_of_month(%DateTime{year: 2016, month: 2, day: 15}) == Date.from {{2016, 2, 1},  {0, 0, 0}}
+    assert Date.beginning_of_month(Date.from({{2014,2,15},{14,14,14}})) == Date.from {{2014, 2, 1},  {0, 0, 0}}
+  end
+
+  test "end_of_month" do
+    assert Date.end_of_month(%DateTime{year: 2016, month: 2, day: 15}) == Date.from {{2016, 2, 29},  {23, 59, 59}}
+    refute Date.end_of_month(%DateTime{year: 2016, month: 2, day: 15}) == Date.from {{2016, 2, 28},  {23, 59, 59}}
+    assert Date.end_of_month(Date.from({{2014,2,15},{14,14,14}})) == Date.from {{2014, 2, 28},  {23, 59, 59}}
+    assert Date.end_of_month(2015, 11) == Date.from {{2015, 11, 30},  {23, 59, 59}}
+
+    assert_raise FunctionClauseError, fn ->
+      Date.end_of_month 2015, 13
+    end
+    assert_raise FunctionClauseError, fn ->
+      Date.end_of_month -2015, 12
+    end
+  end
+
+  test "quarter" do
+    assert Date.quarter(12) == 4
+    assert Date.quarter(11) == 4
+    assert Date.quarter(10) == 4
+    assert Date.quarter(9 ) == 3
+    assert Date.quarter(8 ) == 3
+    assert Date.quarter(7 ) == 3
+    assert Date.quarter(6 ) == 2
+    assert Date.quarter(5 ) == 2
+    assert Date.quarter(4 ) == 2
+    assert Date.quarter(3 ) == 1
+    assert Date.quarter(2 ) == 1
+    assert Date.quarter(1 ) == 1
+
+    date = Date.from({2015, 11, 1})
+    assert Date.quarter(date) == 4
+
+    assert_raise ArgumentError, fn ->
+      Date.quarter(13)
+    end
+  end
+
+  test "beginning_of_quarter" do
+    assert Date.beginning_of_quarter(%DateTime{year: 2016, month: 3, day: 15}) == Date.from {{2016, 1, 1},  {0, 0, 0}}
+    assert Date.beginning_of_quarter(Date.from({{2014,2,15},{14,14,14}})) == Date.from {{2014, 1, 1},  {0, 0, 0}}
+    assert Date.beginning_of_quarter(%DateTime{year: 2016, month: 5, day: 15}) == Date.from {{2016, 4, 1},  {0, 0, 0}}
+    assert Date.beginning_of_quarter(%DateTime{year: 2016, month: 8, day: 15}) == Date.from {{2016, 7, 1},  {0, 0, 0}}
+    assert Date.beginning_of_quarter(%DateTime{year: 2016, month: 11, day: 15}) == Date.from {{2016, 10, 1},  {0, 0, 0}}
+  end
+
+  test "end_of_quarter" do
+    assert Date.end_of_quarter(%DateTime{year: 2016, month: 2, day: 15}) == Date.from {{2016, 3, 31},  {23, 59, 59}}
+    assert Date.end_of_quarter(Date.from({{2014,2,15},{14,14,14}})) == Date.from {{2014, 3, 31},  {23, 59, 59}}
+    assert Date.end_of_quarter(2015, 1) == Date.from {{2015, 3, 31}, {23, 59, 59}}
+
+    assert_raise FunctionClauseError, fn ->
+      Date.end_of_quarter 2015, 5
+    end
+
   end
 
   defp shift(date, spec) when is_list(spec) do

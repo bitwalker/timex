@@ -31,6 +31,7 @@ defmodule Timex.Date do
   @type weekday :: 1..7
   @type weeknum :: 1..53
   @type num_of_days :: 28..31
+  @type quarter :: 1..4
   # Time types
   @type hour :: 0..23
   @type minute :: 0..59
@@ -975,7 +976,7 @@ defmodule Timex.Date do
           else
             Map.put(result, name, val)
           end
-        {option_name, _}   -> raise "Invalid option passed to Date.set: #{option_name}"
+        {option_name, _}   -> raise ArgumentError, "Invalid option passed to Date.set: #{option_name}"
       end
     end
   end
@@ -1290,6 +1291,120 @@ defmodule Timex.Date do
     u   = rem(us, @million)
     {d,{h,m,s}} = :calendar.gregorian_seconds_to_datetime(sec + addseconds)
     {d,{h,m,s,round(u/1000)}}
+  end
+
+  @doc """
+  Given a date returns a date at the beginning of the month.
+
+    iex> date = #{__MODULE__}.from {{2015, 6, 15}, {12,30,0}}, "Europe/Paris"
+    iex> #{__MODULE__}.beginning_of_month date
+    #{__MODULE__}.from {{2015, 6, 1}, {0, 0, 0}}, "Europe/Paris"
+
+  """
+  @spec beginning_of_month(DateTime.t) :: DateTime.t
+  def beginning_of_month(%DateTime{year: year, month: month, timezone: tz}) when not is_nil(tz) do
+    from {{year, month, 1},{0, 0, 0}}, tz
+  end
+  def beginning_of_month(%DateTime{year: year, month: month}) do
+    from {{year, month, 1},{0, 0, 0}}
+  end
+
+  @doc """
+  Given a date returns a date at the end of the month.
+
+    iex> date = #{__MODULE__}.from {{2015, 6, 15}, {12, 30, 0}}, "Europe/London"
+    iex> #{__MODULE__}.end_of_month date
+    #{__MODULE__}.from {{2015, 6, 30}, {23, 59, 59}}, "Europe/London"
+
+    iex> #{__MODULE__}.end_of_month  2016, 2
+    #{__MODULE__}.from {{2016, 2, 29}, {23, 59, 59}}
+
+  """
+  @spec end_of_month(DateTime.t) :: DateTime.t
+  def end_of_month(%DateTime{year: year, month: month, timezone: tz} = date) when not is_nil(tz) do
+    from {{year, month, days_in_month(date)},{23, 59, 59}}, tz
+  end
+  def end_of_month(%DateTime{year: year, month: month} = date) do
+    from {{year, month, days_in_month(date)},{23, 59, 59}}
+  end
+  def end_of_month(year, month) when month in @valid_months and year > 0 do
+    # if valid_year?(year) && valid_month?(month) do
+      end_of_month(from({year, month, 1}))
+    # else
+    #   cond do
+    #     not valid_year?(year) ->
+    #       raise ArgumentError, message: "Invalid year passed to end_of_month/2: #{year}"
+    #     not valid_month?(month) ->
+    #       raise ArgumentError, message: "Invalid month passed to end_of_month/2: #{month}"
+    #   end
+    # end
+  end
+
+  @doc """
+  Given a date or a integer representing a month returns an integer representing the quarter
+
+    iex> date = #{__MODULE__}.from {2015, 8, 1}
+    iex> #{__MODULE__}.quarter date
+    3
+
+    iex> #{__MODULE__}.quarter 11
+    4
+  """
+
+  @spec quarter(DateTime.t | month) :: quarter
+  def quarter(month) when is_integer(month) do
+    cond do
+      month in 1..3   -> 1
+      month in 4..6   -> 2
+      month in 7..9   -> 3
+      month in 10..12 -> 4
+      true ->  raise ArgumentError, message: "Invalid month passed to quarter/1: #{month}"
+    end
+  end
+  def quarter(%DateTime{month: month}) do
+    quarter(month)
+  end
+
+  @doc """
+  Given a date returns a date at the beginning of the quarter.
+
+    iex> date = #{__MODULE__}.from {{2015, 6, 15}, {12,30,0}}, "CEST"
+    iex> #{__MODULE__}.beginning_of_quarter date
+    #{__MODULE__}.from {{2015, 4, 1}, {0, 0, 0}}, "CEST"
+
+  """
+  @spec beginning_of_quarter(DateTime.t) :: DateTime.t
+  def beginning_of_quarter(%DateTime{year: year, month: month, timezone: tz}) when not is_nil(tz) do
+    month = 1 + (3 * (quarter(month) - 1))
+    from {{year, month, 1},{0, 0, 0}}, tz
+  end
+  def beginning_of_quarter(%DateTime{year: year, month: month}) do
+    month = 1 + (3 * (quarter(month) - 1))
+  from {{year, month, 1},{0, 0, 0}}
+  end
+
+  @doc """
+  Given a date returns a date at the end of the quarter.
+
+    iex> date = #{__MODULE__}.from {{2015, 6, 15}, {12,30,0}}, "CEST"
+    iex> #{__MODULE__}.end_of_quarter date
+    #{__MODULE__}.from {{2015, 6, 30}, {23, 59, 59}}, "CEST"
+
+    iex> #{__MODULE__}.end_of_quarter 2015, 2
+    #{__MODULE__}.from {{2015, 6, 30}, {23, 59, 59}}
+
+  """
+  @spec end_of_quarter(DateTime.t | year, quarter) :: DateTime.t
+  def end_of_quarter(%DateTime{year: year, month: month, timezone: tz}) when not is_nil(tz) do
+    month = 3 * quarter(month)
+    end_of_month(from {{year, month, 1},{0, 0, 0}}, tz)
+  end
+  def end_of_quarter(%DateTime{year: year, month: month}) do
+    month = 3 * quarter(month)
+    end_of_month(from {year, month, 1})
+  end
+  def end_of_quarter(year, quarter) when year > 0 and quarter in 1..4 do
+    end_of_month(from {year, 3 * quarter, 1})
   end
 
 end
