@@ -50,7 +50,7 @@ defmodule Timex.Format.Time.Formatters.Humanized do
     end
   end
   defp deconstruct({seconds, micro}, components) when seconds < 0, do: deconstruct({seconds * -1, micro}, components)
-  defp deconstruct({0, micro}, components) when micro > 0 do
+  defp deconstruct({0, micro}, components) do
     msecs = {0, 0, micro} |> Time.abs |> Time.to_msecs
     cond do
       msecs >= 1.0 -> deconstruct({0, 0}, [{:milliseconds, msecs} | components])
