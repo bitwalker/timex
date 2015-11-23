@@ -7,7 +7,6 @@ defmodule Timex.Time do
   """
 
   @type units :: :usecs | :msecs | :secs | :mins | :hours | :days | :weeks | :hms
-  @type quantity :: float
 
   @usecs_in_sec  1_000_000
   @usecs_in_msec 1_000
@@ -21,37 +20,37 @@ defmodule Timex.Time do
   @doc """
   Converts a timestamp to its value in microseconds
   """
-  @spec to_usecs(Date.timestamp) :: quantity
+  @spec to_usecs(Date.timestamp) :: integer
   def to_usecs({mega, sec, micro}), do: (mega * @million + sec) * @million + micro
   @doc """
   Converts a timestamp to its value in milliseconds
   """
-  @spec to_msecs(Date.timestamp) :: quantity
+  @spec to_msecs(Date.timestamp) :: float
   def to_msecs({_, _, _} = ts), do: to_usecs(ts) / @usecs_in_msec
   @doc """
   Converts a timestamp to its value in seconds
   """
-  @spec to_secs(Date.timestamp) :: quantity
+  @spec to_secs(Date.timestamp) :: float
   def to_secs({_, _, _} = ts), do: to_usecs(ts) / @usecs_in_sec
   @doc """
   Converts a timestamp to its value in minutes
   """
-  @spec to_mins(Date.timestamp) :: quantity
+  @spec to_mins(Date.timestamp) :: float
   def to_mins(timestamp), do: to_secs(timestamp) / @secs_in_min
   @doc """
   Converts a timestamp to its value in hours
   """
-  @spec to_hours(Date.timestamp) :: quantity
+  @spec to_hours(Date.timestamp) :: float
   def to_hours(timestamp), do: to_secs(timestamp) / @secs_in_hour
   @doc """
   Converts a timestamp to its value in days
   """
-  @spec to_days(Date.timestamp) :: quantity
+  @spec to_days(Date.timestamp) :: float
   def to_days(timestamp), do: to_secs(timestamp) / @secs_in_day
   @doc """
   Converts a timestamp to its value in weeks
   """
-  @spec to_weeks(Date.timestamp) :: quantity
+  @spec to_weeks(Date.timestamp) :: float
   def to_weeks(timestamp), do: to_secs(timestamp) / @secs_in_week
 
   Enum.each [usecs: 1 / @usecs_in_sec,
@@ -61,30 +60,30 @@ defmodule Timex.Time do
              hours: @secs_in_hour,
              days:  @secs_in_day,
              weeks: @secs_in_week], fn {type, coef} ->
-    @spec to_usecs(quantity, unquote(type)) :: quantity
+    @spec to_usecs(integer | float, unquote(type)) :: float
     def to_usecs(value, unquote(type)), do: do_round(value * unquote(coef) * @usecs_in_sec)
 
-    @spec to_msecs(quantity, unquote(type)) :: quantity
+    @spec to_msecs(integer | float, unquote(type)) :: float
     def to_msecs(value, unquote(type)), do: do_round(value * unquote(coef) * @msecs_in_sec)
 
-    @spec to_secs(quantity, unquote(type)) :: quantity
+    @spec to_secs(integer | float, unquote(type)) :: float
     def to_secs(value, unquote(type)),  do: do_round(value * unquote(coef))
 
-    @spec to_mins(quantity, unquote(type)) :: quantity
+    @spec to_mins(integer | float, unquote(type)) :: float
     def to_mins(value, unquote(type)),  do: do_round(value * unquote(coef) / @secs_in_min)
 
-    @spec to_hours(quantity, unquote(type)) :: quantity
+    @spec to_hours(integer | float, unquote(type)) :: float
     def to_hours(value, unquote(type)), do: do_round(value * unquote(coef) / @secs_in_hour)
 
-    @spec to_days(quantity, unquote(type)) :: quantity
+    @spec to_days(integer | float, unquote(type)) :: float
     def to_days(value, unquote(type)),  do: do_round(value * unquote(coef) / @secs_in_day)
 
-    @spec to_weeks(quantity, unquote(type)) :: quantity
+    @spec to_weeks(integer | float, unquote(type)) :: float
     def to_weeks(value, unquote(type)), do: do_round(value * unquote(coef) / @secs_in_week)
   end
 
   Enum.each [:to_usecs, :to_msecs, :to_secs, :to_mins, :to_hours, :to_days, :to_weeks], fn name ->
-    @spec unquote(name)({quantity, quantity, quantity}, :hms) :: quantity
+    @spec unquote(name)({integer | float, integer | float, integer | float}, :hms) :: float
     def unquote(name)({hours, minutes, seconds}, :hms), do: unquote(name)(hours * @secs_in_hour + minutes * @secs_in_min + seconds, :secs)
   end
 
