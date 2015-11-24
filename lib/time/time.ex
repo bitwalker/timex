@@ -16,14 +16,21 @@ defmodule Timex.Time do
   @secs_in_day   @secs_in_hour * 24
   @secs_in_week  @secs_in_day * 7
   @million       1_000_000
+  @units [:usecs, :msecs, :secs, :mins, :hours, :days, :weeks]
 
   @doc """
   Converts a timestamp to its value in microseconds
+
+      iex> #{__MODULE__}.to_usecs({1, 0, 0})
+      1_000_000_000_000
   """
   @spec to_usecs(Date.timestamp) :: integer
   def to_usecs({mega, sec, micro}), do: mega * @million * @million + sec * @million + micro
   @doc """
   Converts a timestamp to its value in milliseconds
+
+      iex> #{__MODULE__}.to_msecs({1, 0, 0})
+      1.0e9
   """
   @spec to_msecs(Date.timestamp) :: float
   def to_msecs({_, _, _} = ts), do: to_usecs(ts) / @usecs_in_msec
@@ -44,11 +51,17 @@ defmodule Timex.Time do
   def to_hours(timestamp), do: to_secs(timestamp) / @secs_in_hour
   @doc """
   Converts a timestamp to its value in days
+  
+      iex> #{__MODULE__}.to_days({0, 604_800, 0})
+      7.0
   """
   @spec to_days(Date.timestamp) :: float
   def to_days(timestamp), do: to_secs(timestamp) / @secs_in_day
   @doc """
   Converts a timestamp to its value in weeks
+
+      iex> #{__MODULE__}.to_weeks({0, 604_800, 0})
+      1.0
   """
   @spec to_weeks(Date.timestamp) :: float
   def to_weeks(timestamp), do: to_secs(timestamp) / @secs_in_week
@@ -85,6 +98,7 @@ defmodule Timex.Time do
   Enum.each [:to_usecs, :to_msecs, :to_secs, :to_mins, :to_hours, :to_days, :to_weeks], fn name ->
     @spec unquote(name)({integer | float, integer | float, integer | float}, :hms) :: float
     def unquote(name)({hours, minutes, seconds}, :hms), do: unquote(name)(hours * @secs_in_hour + minutes * @secs_in_min + seconds, :secs)
+    def unquote(name)(_, unknown_unit), do: raise(Timex.Time.InvalidUnitError, unit: unknown_unit)
   end
 
   @doc """
@@ -147,9 +161,10 @@ defmodule Timex.Time do
   def from(value, :weeks), do: from(value * @secs_in_week, :secs)
   def from(value, :hms),   do: from(to_secs(value, :hms), :secs)
 
-  Enum.each [:usecs, :msecs, :secs, :mins, :hours, :days, :weeks, :hms], fn type ->
-    def to_timestamp(value, unquote(type)), do: from(value, unquote(type))
+  Enum.each [:usecs, :msecs, :secs, :mins, :hours, :days, :weeks, :hms], fn unit ->
+    def to_timestamp(value, unquote(unit)), do: from(value, unquote(unit))
   end
+  def to_timestamp(_, unknown_unit), do: raise(Timex.Time.InvalidUnitError, unit: unknown_unit)
 
   def add({mega1,sec1,micro1}, {mega2,sec2,micro2}) do
     normalize { mega1+mega2, sec1+sec2, micro1+micro2 }
@@ -159,6 +174,13 @@ defmodule Timex.Time do
     normalize { mega1-mega2, sec1-sec2, micro1-micro2 }
   end
 
+  @doc """
+  Multiplies all units of a timestamp by a coeficent.
+
+      iex>Time.scale({1, 10, 100}, 2)
+      {2, 20, 200}
+  """
+  @spec scale(Timestamp, Float) :: Timestamp
   def scale({mega, secs, micro}, coef) do
     normalize { mega*coef, secs*coef, micro*coef }
   end
@@ -210,6 +232,7 @@ defmodule Timex.Time do
   def convert(timestamp, :hours), do: to_hours(timestamp)
   def convert(timestamp, :days),  do: to_days(timestamp)
   def convert(timestamp, :weeks), do: to_weeks(timestamp)
+  def convert(_        , unit)  , do: raise(Timex.Time.InvalidUnitError, unit: unit)
 
   @doc """
   Return time interval since the first day of year 0 to Epoch.
@@ -376,5 +399,7 @@ defmodule Timex.Time do
 
   defp do_round(value) when is_integer(value), do: value
   defp do_round(value) when is_float(value),   do: Float.round(value, 6)
+
+  def all_units, do: @units
 
 end
