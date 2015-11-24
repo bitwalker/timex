@@ -73,26 +73,34 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   specification. The benefit of using these over manually constructed ISO
   formats is that these directives convert the date to UTC for you.
 
-  * `{ISO}`         - `<date>T<time><offset>`. Full date and time
-                      specification (e.g. `2007-08-13T16:48:01 +0300`)
+  * `{ISO:Basic}`      - `<date>T<time><offset>`. Full date and time
+                         specification without separators. This is equivalent
+                         to `{ISO}`. (e.g. `20070813T164801+0300`)
 
-  * `{ISOz}`        - `<date>T<time>Z`. Full date and time in UTC (e.g.
-                      `2007-08-13T13:48:01Z`)
+  * `{ISO:Basic:Z}`    - `<date>T<time>Z`. Full date and time in UTC without
+                         separators (e.g. `20070813T134801Z`)
 
-  * `{ISOdate}`     - `YYYY-MM-DD`. That is, 4-digit year number, followed by
-                      2-digit month and day numbers (e.g. `2007-08-13`)
+  * `{ISO:Extended}`   - `<date>T<time><offset>`. Full date and time
+                         specification with separators. This is equivalent
+                         to `{ISO}`. (e.g. `2007-08-13T16:48:01 +03:00`)
 
-  * `{ISOtime}`     - `hh:mm:ss`. That is, 2-digit hour, minute, and second,
-                      separated by colons (e.g. `13:04:05`). Midnight is 00 hours.
+  * `{ISO:Extended:Z}` - `<date>T<time>Z`. Full date and time in UTC. This is
+                         equivalent to `{ISOz}` (e.g. `2007-08-13T13:48:01Z`)
 
-  * `{ISOweek}`     - `YYYY-Www`. That is, ISO week-based year, followed by ISO
-                      week number (e.g. `2007-W09`)
+  * `{ISOdate}`        - `YYYY-MM-DD`. That is, 4-digit year number, followed by
+                         2-digit month and day numbers (e.g. `2007-08-13`)
 
-  * `{ISOweek-day}` - `YYYY-Www-D`. That is, an `{ISOweek}`, additionally
-                      followed by weekday (e.g. `2007-W09-1`)
+  * `{ISOtime}`        - `hh:mm:ss`. That is, 2-digit hour, minute, and second,
+                         separated by colons (e.g. `13:04:05`). Midnight is 00 hours.
 
-  * `{ISOord}`      - `YYYY-DDD`. That is, year number, followed by the ordinal
-                      day number (e.g. `2007-113`)
+  * `{ISOweek}`        - `YYYY-Www`. That is, ISO week-based year, followed by ISO
+                         week number (e.g. `2007-W09`)
+
+  * `{ISOweek-day}`    - `YYYY-Www-D`. That is, an `{ISOweek}`, additionally
+                         followed by weekday (e.g. `2007-W09-1`)
+
+  * `{ISOord}`         - `YYYY-DDD`. That is, year number, followed by the ordinal
+                         day number (e.g. `2007-113`)
 
   These directives provide support for miscellaneous common formats:
 

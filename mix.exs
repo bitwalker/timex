@@ -3,7 +3,7 @@ defmodule Timex.Mixfile do
 
   def project do
     [ app: :timex,
-      version: "1.0.0-rc1",
+      version: "1.0.0-rc2",
       elixir: "~> 1.0",
       description: "A date/time library for Elixir",
       package: package,
@@ -29,10 +29,12 @@ defmodule Timex.Mixfile do
     [{:tzdata, "== 0.1.8 or ~> 0.5"},
      {:combine, "~> 0.5"},
      {:ex_doc, "~> 0.10", only: :dev},
+     {:earmark, ">= 0.0.0", only: :dev},
      {:benchfella, "~> 0.2", only: :dev},
      {:dialyze, "~> 0.2", only: :dev},
      {:excoveralls, "~> 0.4", only: :test},
-     {:inch_ex, "~> 0.4", only: :docs}]
+     {:inch_ex, "~> 0.4", only: :docs},
+     {:credo, "~> 0.1.9", only: [:dev, :test]}]
   end
 
   defp docs do

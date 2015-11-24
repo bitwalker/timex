@@ -93,6 +93,7 @@ defmodule Timex.Format.DateTime.Formatter do
     ms     = format_token(:sec_fractional, date, modifiers, flags, width_spec(-1, nil))
     "#{hour}:#{minute}:#{sec}#{ms}"
   end
+  # NOTE: iso_8601 is deprecated in favor of iso_8601_extended
   def format_token(token, %DateTime{} = date, modifiers, _flags, _width)
     when token in [:iso_8601, :iso_8601z] do
     date  = case token do
@@ -109,10 +110,54 @@ defmodule Timex.Format.DateTime.Formatter do
     ms    = format_token(:sec_fractional, date, modifiers, flags, width_spec(-1, nil))
     case token do
       :iso_8601 ->
-        tz = format_token(:zoffs, date, modifiers, flags, width_spec(-1, nil))
+        tz = format_token(:zoffs_colon, date, modifiers, flags, width_spec(-1, nil))
         "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}#{tz}"
       :iso_8601z ->
         "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}Z"
+    end
+  end
+  def format_token(token, %DateTime{} = date, modifiers, _flags, _width)
+    when token in [:iso_8601_extended, :iso_8601_extended_z] do
+    date  = case token do
+      :iso_8601_extended  -> date
+      :iso_8601_extended_z -> Timezone.convert(date, "UTC")
+    end
+    flags = [padding: :zeroes]
+    year  = format_token(:year4, date, modifiers, flags, width_spec(4..4))
+    month = format_token(:month, date, modifiers, flags, width_spec(2..2))
+    day   = format_token(:day, date, modifiers, flags, width_spec(2..2))
+    hour  = format_token(:hour24, date, modifiers, flags, width_spec(2..2))
+    min   = format_token(:min, date, modifiers, flags, width_spec(2..2))
+    sec   = format_token(:sec, date, modifiers, flags, width_spec(2..2))
+    ms    = format_token(:sec_fractional, date, modifiers, flags, width_spec(-1, nil))
+    case token do
+      :iso_8601_extended ->
+        tz = format_token(:zoffs_colon, date, modifiers, flags, width_spec(-1, nil))
+        "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}#{tz}"
+      :iso_8601_extended_z ->
+        "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}Z"
+    end
+  end
+  def format_token(token, %DateTime{} = date, modifiers, _flags, _width)
+    when token in [:iso_8601_basic, :iso_8601_basic_z] do
+    date  = case token do
+      :iso_8601_basic  -> date
+      :iso_8601_basic_z -> Timezone.convert(date, "UTC")
+    end
+    flags = [padding: :zeroes]
+    year  = format_token(:year4, date, modifiers, flags, width_spec(4..4))
+    month = format_token(:month, date, modifiers, flags, width_spec(2..2))
+    day   = format_token(:day, date, modifiers, flags, width_spec(2..2))
+    hour  = format_token(:hour24, date, modifiers, flags, width_spec(2..2))
+    min   = format_token(:min, date, modifiers, flags, width_spec(2..2))
+    sec   = format_token(:sec, date, modifiers, flags, width_spec(2..2))
+    ms    = format_token(:sec_fractional, date, modifiers, flags, width_spec(-1, nil))
+    case token do
+      :iso_8601_basic ->
+        tz = format_token(:zoffs, date, modifiers, flags, width_spec(-1, nil))
+        "#{year}#{month}#{day}T#{hour}#{min}#{sec}#{ms}#{tz}"
+      :iso_8601_basic_z ->
+        "#{year}#{month}#{day}T#{hour}#{min}#{sec}#{ms}Z"
     end
   end
   def format_token(token, %DateTime{} = date, modifiers, _flags, _width)
