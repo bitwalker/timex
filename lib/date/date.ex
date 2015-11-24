@@ -31,6 +31,7 @@ defmodule Timex.Date do
   @type weekday :: 1..7
   @type weeknum :: 1..53
   @type num_of_days :: 28..31
+  @type quarter :: 1..4
   # Time types
   @type hour :: 0..23
   @type minute :: 0..59
