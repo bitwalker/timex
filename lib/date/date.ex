@@ -1386,4 +1386,64 @@ defmodule Timex.Date do
     end_of_month(from {year, 3 * quarter(month), 1})
   end
 
+  @doc """
+  Given a date or a number create a date at the beginning of that year
+
+  Examples
+
+      iex> date = #{__MODULE__}.from {{2015, 6, 15}, {0, 0, 0, 0}}
+      iex> #{__MODULE__}.beginning_of_year date
+      #{__MODULE__}.from {{2015, 1, 1}, {0, 0, 0, 0}}
+
+      iex> #{__MODULE__}.beginning_of_year 2015
+      #{__MODULE__}.from {{2015, 1, 1}, {0, 0, 0, 0}}
+
+      iex> #{__MODULE__}.beginning_of_year 2015, "Europe/London"
+      #{__MODULE__}.from {{2015, 1, 1}, {0, 0, 0, 0}}, "Europe/London"
+
+  """
+  @spec beginning_of_year(DateTime.t | year, String.t) :: DateTime.t
+  def beginning_of_year(%DateTime{year: year, timezone: tz}) when not is_nil(tz) do
+    beginning_of_year year, tz.full_name
+  end
+  def beginning_of_year(%DateTime{year: year}) do
+    beginning_of_year year
+  end
+  def beginning_of_year(year) do
+    from {year, 1, 1}
+  end
+  def beginning_of_year(year, timezone) do
+    from {year, 1, 1}, timezone
+  end
+
+  @doc """
+  Given a date or a number create a date at the end of that year
+
+  Examples
+
+      iex> date = #{__MODULE__}.from {{2015, 6, 15}, {0, 0, 0, 0}}
+      iex> #{__MODULE__}.end_of_year date
+      #{__MODULE__}.from {{2015, 12, 31}, {23, 59, 59}}
+
+      iex> #{__MODULE__}.end_of_year 2015
+      #{__MODULE__}.from {{2015, 12, 31}, {23, 59, 59}}
+
+      iex> #{__MODULE__}.end_of_year 2015, "Europe/London"
+      #{__MODULE__}.from {{2015, 12, 31}, {23, 59, 59}}, "Europe/London"
+
+  """
+  @spec end_of_year(DateTime.t | year, String.t) :: DateTime.t
+  def end_of_year(%DateTime{year: year, timezone: tz}) when not is_nil(tz) do
+    end_of_year year, tz.full_name
+  end
+  def end_of_year(%DateTime{year: year}) do
+    end_of_year year
+  end
+  def end_of_year(year) do
+    from {{year, 12, 31}, {23, 59, 59}}
+  end
+  def end_of_year(year, timezone) do
+    from {{year, 12, 31}, {23, 59, 59}}, timezone
+  end
+
 end
