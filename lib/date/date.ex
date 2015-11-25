@@ -1292,4 +1292,98 @@ defmodule Timex.Date do
     {d,{h,m,s,round(u/1000)}}
   end
 
+  @doc """
+  Given a date returns a date at the beginning of the month.
+
+    iex> date = #{__MODULE__}.from {{2015, 6, 15}, {12,30,0}}, "Europe/Paris"
+    iex> #{__MODULE__}.beginning_of_month date
+    #{__MODULE__}.from {{2015, 6, 1}, {0, 0, 0}}, "Europe/Paris"
+
+  """
+  @spec beginning_of_month(DateTime.t) :: DateTime.t
+  def beginning_of_month(%DateTime{year: year, month: month, timezone: tz}) when not is_nil(tz) do
+    from {{year, month, 1},{0, 0, 0}}, tz
+  end
+  def beginning_of_month(%DateTime{year: year, month: month}) do
+    from {{year, month, 1},{0, 0, 0}}
+  end
+
+  @doc """
+  Given a date returns a date at the end of the month.
+
+    iex> date = #{__MODULE__}.from {{2015, 6, 15}, {12, 30, 0}}, "Europe/London"
+    iex> #{__MODULE__}.end_of_month date
+    #{__MODULE__}.from {{2015, 6, 30}, {23, 59, 59}}, "Europe/London"
+
+    iex> #{__MODULE__}.end_of_month  2016, 2
+    #{__MODULE__}.from {{2016, 2, 29}, {23, 59, 59}}
+
+  """
+  @spec end_of_month(DateTime.t) :: DateTime.t
+  def end_of_month(%DateTime{year: year, month: month, timezone: tz} = date) when not is_nil(tz) do
+    from {{year, month, days_in_month(date)},{23, 59, 59}}, tz
+  end
+  def end_of_month(%DateTime{year: year, month: month} = date) do
+    from {{year, month, days_in_month(date)},{23, 59, 59}}
+  end
+  def end_of_month(year, month) when month in @valid_months and year > 0 do
+      end_of_month(from({year, month, 1}))
+  end
+
+  @spec quarter(DateTime.t | month) :: integer
+  defp quarter(month) when is_integer(month) do
+    cond do
+      month in 1..3   -> 1
+      month in 4..6   -> 2
+      month in 7..9   -> 3
+      month in 10..12 -> 4
+      true ->  raise ArgumentError, message: "Invalid month passed to quarter/1: #{month}"
+    end
+  end
+  defp quarter(%DateTime{month: month}) do
+    quarter(month)
+  end
+
+  @doc """
+  Given a date returns a date at the beginning of the quarter.
+
+    iex> date = #{__MODULE__}.from {{2015, 6, 15}, {12,30,0}}, "CEST"
+    iex> #{__MODULE__}.beginning_of_quarter date
+    #{__MODULE__}.from {{2015, 4, 1}, {0, 0, 0}}, "CEST"
+
+  """
+  @spec beginning_of_quarter(DateTime.t) :: DateTime.t
+  def beginning_of_quarter(%DateTime{year: year, month: month, timezone: tz}) when not is_nil(tz) do
+    month = 1 + (3 * (quarter(month) - 1))
+    from {{year, month, 1},{0, 0, 0}}, tz
+  end
+  def beginning_of_quarter(%DateTime{year: year, month: month}) do
+    month = 1 + (3 * (quarter(month) - 1))
+  from {{year, month, 1},{0, 0, 0}}
+  end
+
+  @doc """
+  Given a date or a year and month returns a date at the end of the quarter.
+
+    iex> date = #{__MODULE__}.from {{2015, 6, 15}, {12,30,0}}, "CEST"
+    iex> #{__MODULE__}.end_of_quarter date
+    #{__MODULE__}.from {{2015, 6, 30}, {23, 59, 59}}, "CEST"
+
+    iex> #{__MODULE__}.end_of_quarter 2015, 4
+    #{__MODULE__}.from {{2015, 6, 30}, {23, 59, 59}}
+
+  """
+  @spec end_of_quarter(DateTime.t | year, month) :: DateTime.t
+  def end_of_quarter(%DateTime{year: year, month: month, timezone: tz}) when not is_nil(tz) do
+    month = 3 * quarter(month)
+    end_of_month(from {{year, month, 1},{0, 0, 0}}, tz)
+  end
+  def end_of_quarter(%DateTime{year: year, month: month}) do
+    month = 3 * quarter(month)
+    end_of_month(from {year, month, 1})
+  end
+  def end_of_quarter(year, month) when year > 0 and month in 1..12 do
+    end_of_month(from {year, 3 * quarter(month), 1})
+  end
+
 end
