@@ -145,6 +145,13 @@ Some common scenarios with examples.
 {:ok, "2015-06-24T05:04:13.910Z"}
 ```
 
+### Formatting a DateTime via strftime
+
+```elixir
+> Date.universal |> DateFormat.format("%a, %d %b %Y %H:%M:%S GMT", :strftime)
+{:ok, "Wed, 25 Nov 2015 05:48:17 GMT"}
+```
+
 ## Erlang Interop
 
 How to work with Erlang datetime and time representations.
