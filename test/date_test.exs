@@ -546,6 +546,20 @@ defmodule DateTests do
     assert %DateTime{year: 2012, month: 3, day: 1, hour: 0, minute: 0, second: 0} = shift(datetime, mins: 36, secs: 37)
   end
 
+  test "beginning_of_year" do
+    year_start = Date.from {{2015, 1, 1},  {0, 0, 0}}
+    assert Date.beginning_of_year(2015) == year_start
+    assert Date.beginning_of_year(%DateTime{year: 2015, month: 6, day: 15}) == year_start
+    assert Date.beginning_of_year(Date.from({2015, 6, 15})) == year_start
+  end
+
+  test "end_of_year" do
+    year_end = Date.from {{2015, 12, 32},  {23, 59, 59}}
+    assert Date.end_of_year(2015) == year_end
+    assert Date.end_of_year(%DateTime{year: 2015, month: 6, day: 15}) == year_end
+    assert Date.end_of_year(Date.from({2015, 6, 15})) == year_end
+  end
+
   test "beginning_of_month" do
     assert Date.beginning_of_month(%DateTime{year: 2016, month: 2, day: 15}) == Date.from {{2016, 2, 1},  {0, 0, 0}}
     assert Date.beginning_of_month(Date.from({{2014,2,15},{14,14,14}})) == Date.from {{2014, 2, 1},  {0, 0, 0}}
