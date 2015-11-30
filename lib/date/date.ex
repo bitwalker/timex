@@ -1446,4 +1446,59 @@ defmodule Timex.Date do
     from {{year, 12, 31}, {23, 59, 59}}, timezone
   end
 
+  @doc """
+  Number of days to the beginning of the week
+
+  The weekstart can between 1..7, an atom e.g. :mon, or a string e.g. "Monday"
+
+  ## Examples
+
+      Week starting Monday
+      iex> date = #{__MODULE__}.from({2015, 11, 30}) # Monday 30th November
+      iex> #{__MODULE__}.days_to_beginning_of_week(date)
+      0
+
+      Week starting Sunday
+      iex> date = #{__MODULE__}.from({2015, 11, 30}) # Monday 30th November
+      iex> #{__MODULE__}.days_to_beginning_of_week(date, :sun)
+      1
+
+  """
+  @spec days_to_beginning_of_week(DateTime.t, weekday) :: integer
+  def days_to_beginning_of_week(date, weekstart \\ 1)
+  def days_to_beginning_of_week(date, weekstart) when is_atom(weekstart) or is_binary(weekstart)  do
+    days_to_beginning_of_week(date, day_to_num(weekstart))
+  end
+  def days_to_beginning_of_week(date, weekstart) when weekstart in 1..7 do
+    case weekday(date) - weekstart do
+      diff when diff < 0 ->
+        7 + diff
+      diff ->
+        diff
+    end
+  end
+
+  @doc """
+  Number of days to the end of the week.
+
+  The weekstart can between 1..7, an atom e.g. :mon, or a string e.g. "Monday"
+
+  ## Examples
+
+      Week starting Monday
+      iex> date = #{__MODULE__}.from({2015, 11, 30}) # Monday 30th November
+      iex> #{__MODULE__}.days_to_end_of_week(date)
+      6
+
+      Week starting Sunday
+      iex> date = #{__MODULE__}.from({2015, 11, 30}) # Monday 30th November
+      iex> #{__MODULE__}.days_to_end_of_week(date, :sun)
+      5
+
+  """
+  @spec days_to_end_of_week(DateTime.t, weekday) :: integer
+  def days_to_end_of_week(date, weekstart \\ 1) do
+    abs(days_to_beginning_of_week(date, weekstart) - 6)
+  end
+
 end

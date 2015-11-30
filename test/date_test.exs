@@ -596,7 +596,119 @@ defmodule DateTests do
       Date.end_of_quarter 2015, 13
     end
   end
-  
+
+  test "days_to_beginning_of_week" do
+    # Monday 30th November 2015
+    date = Date.from({2015, 11, 30})
+
+    # Monday..Monday
+    assert Date.days_to_beginning_of_week(date) == 0
+    assert Date.days_to_beginning_of_week(date, 1) == 0
+    assert Date.days_to_beginning_of_week(date, :mon) == 0
+    assert Date.days_to_beginning_of_week(date, "Monday") == 0
+
+    # Monday..Tuesday
+    assert Date.days_to_beginning_of_week(date, 2) == 6
+    assert Date.days_to_beginning_of_week(date, :tue) == 6
+    assert Date.days_to_beginning_of_week(date, "Tuesday") == 6
+
+    # Monday..Wednesday
+    assert Date.days_to_beginning_of_week(date, 3) == 5
+    assert Date.days_to_beginning_of_week(date, :wed) == 5
+    assert Date.days_to_beginning_of_week(date, "Wednesday") == 5
+
+    # Monday..Thursday
+    assert Date.days_to_beginning_of_week(date, 4) == 4
+    assert Date.days_to_beginning_of_week(date, :thu) == 4
+    assert Date.days_to_beginning_of_week(date, "Thursday") == 4
+
+    # Monday..Friday
+    assert Date.days_to_beginning_of_week(date, 5) == 3
+    assert Date.days_to_beginning_of_week(date, :fri) == 3
+    assert Date.days_to_beginning_of_week(date, "Friday") == 3
+
+    # Monday..Saturday
+    assert Date.days_to_beginning_of_week(date, 6) == 2
+    assert Date.days_to_beginning_of_week(date, :sat) == 2
+    assert Date.days_to_beginning_of_week(date, "Saturday") == 2
+
+    # Monday..Sunday
+    assert Date.days_to_beginning_of_week(date, 7) == 1
+    assert Date.days_to_beginning_of_week(date, :sun) == 1
+    assert Date.days_to_beginning_of_week(date, "Sunday") == 1
+
+    # Invalid start of week - out of range
+    assert_raise FunctionClauseError, fn ->
+      assert Date.days_to_beginning_of_week(date, 0)
+    end
+
+    # Invalid start of week - out of range
+    assert_raise FunctionClauseError, fn ->
+      assert Date.days_to_beginning_of_week(date, 8)
+    end
+
+    # Invalid start of week string
+    assert_raise FunctionClauseError, fn ->
+      assert Date.days_to_beginning_of_week(date, "Made up day")
+    end
+  end
+
+  test "days_to_end_of_week" do
+    # Monday 30th November 2015
+    date = Date.from({2015, 11, 30})
+
+    # Monday..Sunday
+    assert Date.days_to_end_of_week(date) == 6
+    assert Date.days_to_end_of_week(date, 1) == 6
+    assert Date.days_to_end_of_week(date, :mon) == 6
+    assert Date.days_to_end_of_week(date, "Monday") == 6
+
+    # Monday..Monday
+    assert Date.days_to_end_of_week(date, 2) == 0
+    assert Date.days_to_end_of_week(date, :tue) == 0
+    assert Date.days_to_end_of_week(date, "Tuesday") == 0
+
+    # Monday..Tuesday
+    assert Date.days_to_end_of_week(date, 3) == 1
+    assert Date.days_to_end_of_week(date, :wed) == 1
+    assert Date.days_to_end_of_week(date, "Wednesday") == 1
+
+    # Monday..Wednesday
+    assert Date.days_to_end_of_week(date, 4) == 2
+    assert Date.days_to_end_of_week(date, :thu) == 2
+    assert Date.days_to_end_of_week(date, "Thursday") == 2
+
+    # Monday..Thursday
+    assert Date.days_to_end_of_week(date, 5) == 3
+    assert Date.days_to_end_of_week(date, :fri) == 3
+    assert Date.days_to_end_of_week(date, "Friday") == 3
+
+    # Monday..Friday
+    assert Date.days_to_end_of_week(date, 6) == 4
+    assert Date.days_to_end_of_week(date, :sat) == 4
+    assert Date.days_to_end_of_week(date, "Saturday") == 4
+
+    # Monday..Saturday
+    assert Date.days_to_end_of_week(date, 7) == 5
+    assert Date.days_to_end_of_week(date, :sun) == 5
+    assert Date.days_to_end_of_week(date, "Sunday") == 5
+
+    # Invalid start of week - out of range
+    assert_raise FunctionClauseError, fn ->
+      assert Date.days_to_end_of_week(date, 0)
+    end
+
+    # Invalid start of week - out of range
+    assert_raise FunctionClauseError, fn ->
+      assert Date.days_to_end_of_week(date, 8)
+    end
+
+    # Invalid start of week string
+    assert_raise FunctionClauseError, fn ->
+      assert Date.days_to_end_of_week(date, "Made up day")
+    end
+  end
+
   defp shift(date, spec) when is_list(spec) do
     date |> Date.from |> Date.shift(spec)
   end
