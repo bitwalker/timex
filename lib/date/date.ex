@@ -1501,4 +1501,50 @@ defmodule Timex.Date do
     abs(days_to_beginning_of_week(date, weekstart) - 6)
   end
 
+  @doc """
+  Shifts the date to the beginning of the week
+
+  The weekstart can between 1..7, an atom e.g. :mon, or a string e.g. "Monday"
+
+  ## Examples
+
+      iex> date = #{__MODULE__}.from({{2015, 11, 30}, {13, 30, 30}}) # Monday 30th November
+      iex> #{__MODULE__}.beginning_of_week(date)
+      #{__MODULE__}.from({2015, 11, 30})
+
+      iex> date = #{__MODULE__}.from({{2015, 11, 30}, {13, 30, 30}}) # Monday 30th November
+      iex> #{__MODULE__}.beginning_of_week(date, :sun)
+      #{__MODULE__}.from({2015, 11, 29})
+
+  """
+  @spec beginning_of_week(DateTime.t, weekday) :: DateTime.t
+  def beginning_of_week(date, weekstart \\ 1) do
+    date
+      |> shift([days: -days_to_beginning_of_week(date, weekstart)])
+      |> set([hour: 0, minute: 0, second: 0])
+  end
+
+  @doc """
+  Shifts the date to the end of the week
+
+  The weekstart can between 1..7, an atom e.g. :mon, or a string e.g. "Monday"
+
+  ## Examples
+
+      iex> date = #{__MODULE__}.from({{2015, 11, 30}, {13, 30, 30}}) # Monday 30th November
+      iex> #{__MODULE__}.end_of_week(date)
+      #{__MODULE__}.from({{2015, 12, 6}, {23, 59, 59}})
+
+      iex> date = #{__MODULE__}.from({{2015, 11, 30}, {13, 30, 30}}) # Monday 30th November
+      iex> #{__MODULE__}.end_of_week(date, :sun)
+      #{__MODULE__}.from({{2015, 12, 5}, {23, 59, 59}})
+
+  """
+  @spec end_of_week(DateTime.t, weekday) :: DateTime.t
+  def end_of_week(date, weekstart \\ 1) do
+    date
+      |> shift([days: days_to_end_of_week(date, weekstart)])
+      |> set([hour: 23, minute: 59, second: 59])
+  end
+
 end
