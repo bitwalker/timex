@@ -597,115 +597,179 @@ defmodule DateTests do
     end
   end
 
-  test "days_to_beginning_of_week" do
+  test "beginning_of_week" do
     # Monday 30th November 2015
-    date = Date.from({2015, 11, 30})
+    date = Date.from({{2015, 11, 30}, {13, 30, 30}})
 
     # Monday..Monday
+    monday = Date.from({2015, 11, 30})
     assert Date.days_to_beginning_of_week(date) == 0
     assert Date.days_to_beginning_of_week(date, 1) == 0
     assert Date.days_to_beginning_of_week(date, :mon) == 0
     assert Date.days_to_beginning_of_week(date, "Monday") == 0
+    assert Date.beginning_of_week(date) == monday
+    assert Date.beginning_of_week(date, 1) == monday
+    assert Date.beginning_of_week(date, :mon) == monday
+    assert Date.beginning_of_week(date, "Monday") == monday
 
     # Monday..Tuesday
+    tuesday = Date.from({2015, 11, 24})
     assert Date.days_to_beginning_of_week(date, 2) == 6
     assert Date.days_to_beginning_of_week(date, :tue) == 6
     assert Date.days_to_beginning_of_week(date, "Tuesday") == 6
+    assert Date.beginning_of_week(date, 2) == tuesday
+    assert Date.beginning_of_week(date, :tue) == tuesday
+    assert Date.beginning_of_week(date, "Tuesday") == tuesday
 
     # Monday..Wednesday
+    wednesday = Date.from({2015, 11, 25})
     assert Date.days_to_beginning_of_week(date, 3) == 5
     assert Date.days_to_beginning_of_week(date, :wed) == 5
     assert Date.days_to_beginning_of_week(date, "Wednesday") == 5
+    assert Date.beginning_of_week(date, 3) == wednesday
+    assert Date.beginning_of_week(date, :wed) == wednesday
+    assert Date.beginning_of_week(date, "Wednesday") == wednesday
 
     # Monday..Thursday
+    thursday = Date.from({2015, 11, 26})
     assert Date.days_to_beginning_of_week(date, 4) == 4
     assert Date.days_to_beginning_of_week(date, :thu) == 4
     assert Date.days_to_beginning_of_week(date, "Thursday") == 4
+    assert Date.beginning_of_week(date, 4) == thursday
+    assert Date.beginning_of_week(date, :thu) == thursday
+    assert Date.beginning_of_week(date, "Thursday") == thursday
 
     # Monday..Friday
+    friday = Date.from({2015, 11, 27})
     assert Date.days_to_beginning_of_week(date, 5) == 3
     assert Date.days_to_beginning_of_week(date, :fri) == 3
     assert Date.days_to_beginning_of_week(date, "Friday") == 3
+    assert Date.beginning_of_week(date, 5) == friday
+    assert Date.beginning_of_week(date, :fri) == friday
+    assert Date.beginning_of_week(date, "Friday") == friday
 
     # Monday..Saturday
+    saturday = Date.from({2015, 11, 28})
     assert Date.days_to_beginning_of_week(date, 6) == 2
     assert Date.days_to_beginning_of_week(date, :sat) == 2
     assert Date.days_to_beginning_of_week(date, "Saturday") == 2
+    assert Date.beginning_of_week(date, 6) == saturday
+    assert Date.beginning_of_week(date, :sat) == saturday
+    assert Date.beginning_of_week(date, "Saturday") == saturday
 
     # Monday..Sunday
+    sunday = Date.from({2015, 11, 29})
     assert Date.days_to_beginning_of_week(date, 7) == 1
     assert Date.days_to_beginning_of_week(date, :sun) == 1
     assert Date.days_to_beginning_of_week(date, "Sunday") == 1
+    assert Date.beginning_of_week(date, 7) == sunday
+    assert Date.beginning_of_week(date, :sun) == sunday
+    assert Date.beginning_of_week(date, "Sunday") == sunday
 
     # Invalid start of week - out of range
     assert_raise FunctionClauseError, fn ->
       assert Date.days_to_beginning_of_week(date, 0)
+      assert Date.beginning_of_week(date, 0)
     end
 
     # Invalid start of week - out of range
     assert_raise FunctionClauseError, fn ->
       assert Date.days_to_beginning_of_week(date, 8)
+      assert Date.beginning_of_week(date, 8)
     end
 
     # Invalid start of week string
     assert_raise FunctionClauseError, fn ->
       assert Date.days_to_beginning_of_week(date, "Made up day")
+      assert Date.beginning_of_week(date, "Made up day")
     end
   end
 
-  test "days_to_end_of_week" do
+  test "end_of_week" do
     # Monday 30th November 2015
     date = Date.from({2015, 11, 30})
 
     # Monday..Sunday
+    sunday = Date.from({{2015, 12, 6}, {23, 59, 59}})
     assert Date.days_to_end_of_week(date) == 6
     assert Date.days_to_end_of_week(date, 1) == 6
     assert Date.days_to_end_of_week(date, :mon) == 6
     assert Date.days_to_end_of_week(date, "Monday") == 6
+    assert Date.end_of_week(date) == sunday
+    assert Date.end_of_week(date, 1) == sunday
+    assert Date.end_of_week(date, :mon) == sunday
+    assert Date.end_of_week(date, "Monday") == sunday
 
     # Monday..Monday
+    monday = Date.from({{2015, 11, 30}, {23, 59, 59}})
     assert Date.days_to_end_of_week(date, 2) == 0
     assert Date.days_to_end_of_week(date, :tue) == 0
     assert Date.days_to_end_of_week(date, "Tuesday") == 0
+    assert Date.end_of_week(date, 2) == monday
+    assert Date.end_of_week(date, :tue) == monday
+    assert Date.end_of_week(date, "Tuesday") == monday
 
     # Monday..Tuesday
+    tuesday = Date.from({{2015, 12, 1}, {23, 59, 59}})
     assert Date.days_to_end_of_week(date, 3) == 1
     assert Date.days_to_end_of_week(date, :wed) == 1
     assert Date.days_to_end_of_week(date, "Wednesday") == 1
+    assert Date.end_of_week(date, 3) == tuesday
+    assert Date.end_of_week(date, :wed) == tuesday
+    assert Date.end_of_week(date, "Wednesday") == tuesday
 
     # Monday..Wednesday
+    wednesday = Date.from({{2015, 12, 2}, {23, 59, 59}})
     assert Date.days_to_end_of_week(date, 4) == 2
     assert Date.days_to_end_of_week(date, :thu) == 2
     assert Date.days_to_end_of_week(date, "Thursday") == 2
+    assert Date.end_of_week(date, 4) == wednesday
+    assert Date.end_of_week(date, :thu) == wednesday
+    assert Date.end_of_week(date, "Thursday") == wednesday
 
     # Monday..Thursday
+    thursday = Date.from({{2015, 12, 3}, {23, 59, 59}})
     assert Date.days_to_end_of_week(date, 5) == 3
     assert Date.days_to_end_of_week(date, :fri) == 3
     assert Date.days_to_end_of_week(date, "Friday") == 3
+    assert Date.end_of_week(date, 5) == thursday
+    assert Date.end_of_week(date, :fri) == thursday
+    assert Date.end_of_week(date, "Friday") == thursday
 
     # Monday..Friday
+    friday = Date.from({{2015, 12, 4}, {23, 59, 59}})
     assert Date.days_to_end_of_week(date, 6) == 4
     assert Date.days_to_end_of_week(date, :sat) == 4
     assert Date.days_to_end_of_week(date, "Saturday") == 4
+    assert Date.end_of_week(date, 6) == friday
+    assert Date.end_of_week(date, :sat) == friday
+    assert Date.end_of_week(date, "Saturday") == friday
 
     # Monday..Saturday
+    saturday = Date.from({{2015, 12, 5}, {23, 59, 59}})
     assert Date.days_to_end_of_week(date, 7) == 5
     assert Date.days_to_end_of_week(date, :sun) == 5
     assert Date.days_to_end_of_week(date, "Sunday") == 5
+    assert Date.end_of_week(date, 7) == saturday
+    assert Date.end_of_week(date, :sun) == saturday
+    assert Date.end_of_week(date, "Sunday") == saturday
 
     # Invalid start of week - out of range
     assert_raise FunctionClauseError, fn ->
       assert Date.days_to_end_of_week(date, 0)
+      assert Date.end_of_week(date, 0)
     end
 
     # Invalid start of week - out of range
     assert_raise FunctionClauseError, fn ->
       assert Date.days_to_end_of_week(date, 8)
+      assert Date.end_of_week(date, 8)
     end
 
     # Invalid start of week string
     assert_raise FunctionClauseError, fn ->
       assert Date.days_to_end_of_week(date, "Made up day")
+      assert Date.end_of_week(date, "Made up day")
     end
   end
 
