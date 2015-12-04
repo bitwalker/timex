@@ -48,11 +48,16 @@ Some common scenarios with examples.
 ### Getting the current datetime in UTC
 
 ```elixir
+# As a DateTime struct
 > Date.now
 %DateTime{calendar: :gregorian, day: 24, hour: 4, minute: 45, month: 6,
  ms: 730, second: 8,
  timezone: %TimezoneInfo{abbreviation: "UTC", from: :min,
   full_name: "UTC", offset_std: 0, offset_utc: 0, until: :max}, year: 2015}
+
+# As a Unix timestamp
+> Date.now(:secs)
+1449190438
 ```
 
 ### Getting the current datetime in the local timezone
