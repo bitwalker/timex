@@ -1521,7 +1521,7 @@ defmodule Timex.Date do
   def beginning_of_week(date, weekstart \\ 1) do
     date
       |> shift([days: -days_to_beginning_of_week(date, weekstart)])
-      |> set([hour: 0, minute: 0, second: 0])
+      |> beginning_of_day
   end
 
   @doc """
@@ -1544,7 +1544,37 @@ defmodule Timex.Date do
   def end_of_week(date, weekstart \\ 1) do
     date
       |> shift([days: days_to_end_of_week(date, weekstart)])
-      |> set([hour: 23, minute: 59, second: 59])
+      |> end_of_day
+  end
+
+  @doc """
+  Set date to the beginning of the day
+
+  ## Examples
+
+      iex> date = #{__MODULE__}.from({{2015, 1, 1}, {13, 14, 15}})
+      iex> #{__MODULE__}.beginning_of_day(date)
+      #{__MODULE__}.from({{2015, 1, 1}, {0, 0, 0}})
+
+  """
+  @spec beginning_of_day(DateTime.t) :: DateTime.t
+  def beginning_of_day(date) do
+    Date.set(date, [hour: 0, minute: 0, second: 0])
+  end
+
+  @doc """
+  Set date to the end of the day
+
+  ## Examples
+
+      iex> date = #{__MODULE__}.from({{2015, 1, 1}, {13, 14, 15}})
+      iex> #{__MODULE__}.end_of_day(date)
+      #{__MODULE__}.from({{2015, 1, 1}, {23, 59, 59}})
+
+  """
+  @spec end_of_day(DateTime.t) :: DateTime.t
+  def end_of_day(date) do
+    Date.set(date, [hour: 23, minute: 59, second: 59])
   end
 
 end

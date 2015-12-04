@@ -773,6 +773,16 @@ defmodule DateTests do
     end
   end
 
+  test "beginning_of_day" do
+    date = Date.from({{2015, 1, 1}, {13, 14, 15}})
+    assert Date.beginning_of_day(date) == Date.from({{2015, 1, 1}, {0, 0, 0}})
+  end
+
+  test "end_of_day" do
+    date = Date.from({{2015, 1, 1}, {13, 14, 15}})
+    assert Date.end_of_day(date) == Date.from({{2015, 1, 1}, {23, 59, 59}})
+  end
+
   defp shift(date, spec) when is_list(spec) do
     date |> Date.from |> Date.shift(spec)
   end
