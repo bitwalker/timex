@@ -235,10 +235,10 @@ defmodule Timex.Time do
 
   case Timex.Utils.get_otp_release do
     ver when ver >= 18 ->
-      def now(:timestamp), do: :erlang.system_time(:micro_seconds) |> from(:usecs)
-      def now(:usecs),     do: :erlang.system_time(:micro_seconds)
-      def now(:msecs),     do: :erlang.system_time(:milli_seconds)
-      def now(:secs),      do: :erlang.system_time(:seconds)
+      def now(:timestamp), do: :os.system_time(:micro_seconds) |> from(:usecs)
+      def now(:usecs),     do: :os.system_time(:micro_seconds)
+      def now(:msecs),     do: :os.system_time(:milli_seconds)
+      def now(:secs),      do: :os.system_time(:seconds)
       def now(type),       do: now(:timestamp) |> convert(type)
     _ ->
       def now(:timestamp), do: :os.timestamp
