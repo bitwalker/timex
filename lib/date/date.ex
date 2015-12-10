@@ -38,9 +38,10 @@ defmodule Timex.Date do
   @type timestamp :: {megaseconds, seconds, microseconds }
   @type megaseconds :: non_neg_integer
   @type seconds :: non_neg_integer
+  @type milliseconds :: non_neg_integer
   @type microseconds :: non_neg_integer
   # Complex types
-  @type time :: { hour, minute, second }
+  @type time :: { hour, minute, second } | { hour, minute, second, milliseconds }
   @type date :: { year, month, day }
   @type datetime :: { date, time }
   @type dtz :: { datetime, TimezoneInfo.t }
