@@ -103,8 +103,12 @@ defmodule Timex.Timezone do
         end
       true  ->
         seconds_from_zeroyear = :calendar.datetime_to_gregorian_seconds(datetime)
-        [period | _] = Tzdata.periods_for_time(timezone, seconds_from_zeroyear, :wall)
-        period |> tzdata_to_timezone(timezone)
+        case Tzdata.periods_for_time(timezone, seconds_from_zeroyear, :wall) do
+          [] ->
+            {:error, "The provided date is not valid for #{timezone}. It may represent a time during a zone transition."}
+          [period | _] ->
+            period |> tzdata_to_timezone(timezone)
+        end
     end
   end
 
@@ -125,8 +129,12 @@ defmodule Timex.Timezone do
         end
       true  ->
         seconds_from_zeroyear = dt |> Date.to_secs(:zero)
-        [period | _] = Tzdata.periods_for_time(timezone, seconds_from_zeroyear, :wall)
-        period |> tzdata_to_timezone(timezone)
+        case Tzdata.periods_for_time(timezone, seconds_from_zeroyear, :wall) do
+          [] ->
+            {:error, "The provided date is not valid for #{timezone}. It may represent a time during a zone transition."}
+          [period | _] ->
+            period |> tzdata_to_timezone(timezone)
+        end
     end
   end
 
