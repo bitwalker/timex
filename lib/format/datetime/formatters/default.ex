@@ -159,7 +159,6 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   end
 
   defp do_format(_date, [], result),             do: {:ok, result}
-  defp do_format(_date, _, {:error, _} = error), do: error
   defp do_format(date, [%Directive{type: :literal, value: char} | dirs], result) when is_binary(char) do
     do_format(date, dirs, <<result::binary, char::binary>>)
   end
