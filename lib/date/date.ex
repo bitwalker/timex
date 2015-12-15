@@ -292,20 +292,30 @@ defmodule Timex.Date do
   @spec from(datetime | date) :: DateTime.t
   @spec from(datetime | date, :utc | :local | TimezoneInfo.t | binary) :: DateTime.t
 
-  def from({y,m,d} = date) when is_integer(y) and is_integer(m) and is_integer(d), do: from(date, :utc)
-  def from({{_,_,_},{_,_,_}} = datetime),          do: from(datetime, :utc)
-  def from({{_,_,_},{_,_,_,_}} = datetime),        do: from(datetime, :utc)
-  def from({_,_,_} = date, :utc),                  do: construct({date, {0,0,0}}, %TimezoneInfo{})
-  def from({{_,_,_},{_,_,_}} = datetime, :utc),    do: construct(datetime, %TimezoneInfo{})
-  def from({{_,_,_},{_,_,_,_}} = datetime, :utc),  do: construct(datetime, %TimezoneInfo{})
-  def from({_,_,_} = date, :local),                do: from({date, {0,0,0}}, timezone(:local, {date, {0,0,0}}))
-  def from({{_,_,_},{_,_,_}} = datetime, :local),  do: from(datetime, timezone(:local, datetime))
-  def from({{_,_,_}=date,{h,min,sec,_}} = datetime, :local),do: from(datetime, timezone(:local, {date,{h, min, sec}}))
-  def from({_,_,_} = date, %TimezoneInfo{} = tz),  do: from({date, {0,0,0}}, tz)
-  def from({{_,_,_},{_,_,_}} = datetime, %TimezoneInfo{} = tz), do: construct(datetime, tz)
-  def from({{_,_,_},{_,_,_,_}} = datetime, %TimezoneInfo{} = tz), do: construct(datetime, tz)
-  def from({_,_,_} = date, tz) when is_binary(tz), do: from({date, {0, 0, 0}}, tz)
-  def from({{_,_,_}=d,{h,m,s}}, tz) when is_binary(tz), do: from({d,{h,m,s,0}},tz)
+  def from(datetime), do: from(datetime, :utc)
+
+  def from({y,m,d} = date, :utc) when is_integer(y) and is_integer(m) and is_integer(d),
+    do: construct({date, {0,0,0}}, %TimezoneInfo{})
+  def from({{_,_,_},{_,_,_}} = datetime, :utc),
+    do: construct(datetime, %TimezoneInfo{})
+  def from({{_,_,_},{_,_,_,_}} = datetime, :utc),
+    do: construct(datetime, %TimezoneInfo{})
+  def from({_,_,_} = date, :local),
+    do: from({date, {0,0,0}}, timezone(:local, {date, {0,0,0}}))
+  def from({{_,_,_},{_,_,_}} = datetime, :local),
+    do: from(datetime, timezone(:local, datetime))
+  def from({{_,_,_}=date,{h,min,sec,_}} = datetime, :local),
+    do: from(datetime, timezone(:local, {date,{h, min, sec}}))
+  def from({_,_,_} = date, %TimezoneInfo{} = tz),
+    do: from({date, {0,0,0}}, tz)
+  def from({{_,_,_},{_,_,_}} = datetime, %TimezoneInfo{} = tz),
+    do: construct(datetime, tz)
+  def from({{_,_,_},{_,_,_,_}} = datetime, %TimezoneInfo{} = tz),
+    do: construct(datetime, tz)
+  def from({_,_,_} = date, tz) when is_binary(tz),
+    do: from({date, {0, 0, 0}}, tz)
+  def from({{_,_,_}=d,{h,m,s}}, tz) when is_binary(tz),
+    do: from({d,{h,m,s,0}},tz)
   def from({{_,_,_}=date,{h,min,sec,_}} = datetime, tz) when is_binary(tz) do
     case timezone(tz, {date, {h,min,sec}}) do
       %TimezoneInfo{} = tzinfo ->
