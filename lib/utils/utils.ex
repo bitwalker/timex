@@ -19,6 +19,7 @@ defmodule Timex.Utils do
             Process.put(:current_otp_release, ver)
             ver
           _ ->
+            nil
         end
       ver -> ver
     end

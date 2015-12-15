@@ -19,7 +19,7 @@ defmodule Timex.DateFormat do
   Converts date values to strings according to the given template (aka format string).
   """
   @spec format(%DateTime{}, String.t) :: {:ok, String.t} | {:error, String.t}
-  defdelegate format(%DateTime{} = date, format_string), to: Formatter
+  defdelegate format(date, format_string), to: Formatter
 
   @doc """
   Same as `format/2`, but takes a custom formatter.
@@ -37,7 +37,7 @@ defmodule Timex.DateFormat do
   Raising version of `format/2`. Returns a string with formatted date or raises a `FormatError`.
   """
   @spec format!(%DateTime{}, String.t) :: String.t | no_return
-  defdelegate format!(%DateTime{} = date, format_string), to: Formatter
+  defdelegate format!(date, format_string), to: Formatter
 
   @doc """
   Raising version of `format/3`. Returns a string with formatted date or raises a `FormatError`.
@@ -47,7 +47,7 @@ defmodule Timex.DateFormat do
     do: Formatter.format!(date, format_string)
   def format!(%DateTime{} = date, format_string, :strftime),
     do: Formatter.format!(date, format_string, Strftime)
-  defdelegate format!(%DateTime{} = date, format_string, formatter), to: Formatter
+  defdelegate format!(date, format_string, formatter), to: Formatter
 
   @doc """
   Parses the date encoded in `string` according to the template.
