@@ -574,7 +574,7 @@ defmodule Timex.Date do
 
   """
   @spec day_to_num(binary | atom()) :: integer
-  @weekdays |> Enum.each fn {day_name, day_num} ->
+  Enum.each(@weekdays, fn {day_name, day_num} ->
     lower      = day_name |> String.downcase
     abbr_cased = day_name |> String.slice(0..2)
     abbr_lower = lower |> String.slice(0..2)
@@ -588,7 +588,7 @@ defmodule Timex.Date do
       def day_to_num(unquote(symbol)),     do: unquote(day_num)
     end
     Module.eval_quoted __MODULE__, day_quoted, [], __ENV__
-  end
+  end)
   # Make an attempt at cleaning up the provided string
   def day_to_num(x), do: {:error, "Invalid day name: #{x}"}
 
@@ -603,9 +603,9 @@ defmodule Timex.Date do
       {:error, "Invalid day num: 0"}
   """
   @spec day_name(weekday) :: binary
-  @weekdays |> Enum.each fn {name, day_num} ->
+  Enum.each(@weekdays, fn {name, day_num} ->
     def day_name(unquote(day_num)), do: unquote(name)
-  end
+  end)
   def day_name(x), do: {:error, "Invalid day num: #{x}"}
 
   @doc """
@@ -619,9 +619,9 @@ defmodule Timex.Date do
       {:error, "Invalid day num: 0"}
   """
   @spec day_shortname(weekday) :: binary
-  @weekdays |> Enum.each fn {name, day_num} ->
+  Enum.each(@weekdays, fn {name, day_num} ->
     def day_shortname(unquote(day_num)), do: String.slice(unquote(name), 0..2)
-  end
+  end)
   def day_shortname(x), do: {:error, "Invalid day num: #{x}"}
 
   @doc """
@@ -641,7 +641,7 @@ defmodule Timex.Date do
       1
   """
   @spec month_to_num(binary) :: integer
-  @months |> Enum.each fn {month_name, month_num} ->
+  Enum.each(@months, fn {month_name, month_num} ->
     lower      = month_name |> String.downcase
     abbr_cased = month_name |> String.slice(0..2)
     abbr_lower = lower |> String.slice(0..2)
@@ -659,7 +659,7 @@ defmodule Timex.Date do
       def month_to_num(unquote(abbr_chars)), do: unquote(month_num)
     end
     Module.eval_quoted __MODULE__, month_quoted, [], __ENV__
-  end
+  end)
   # Make an attempt at cleaning up the provided string
   def month_to_num(x), do: {:error, "Invalid month name: #{x}"}
 
@@ -674,9 +674,9 @@ defmodule Timex.Date do
       {:error, "Invalid month num: 0"}
   """
   @spec month_name(month) :: binary
-  @months |> Enum.each fn {name, month_num} ->
+  Enum.each(@months, fn {name, month_num} ->
     def month_name(unquote(month_num)), do: unquote(name)
-  end
+  end)
   def month_name(x), do: {:error, "Invalid month num: #{x}"}
 
   @doc """
@@ -690,9 +690,9 @@ defmodule Timex.Date do
       {:error, "Invalid month num: 0"}
   """
   @spec month_shortname(month) :: binary
-  @months |> Enum.each fn {name, month_num} ->
+  Enum.each(@months, fn {name, month_num} ->
     def month_shortname(unquote(month_num)), do: String.slice(unquote(name), 0..2)
-  end
+  end)
   def month_shortname(x), do: {:error, "Invalid month num: #{x}"}
 
   @doc """
