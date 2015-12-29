@@ -121,6 +121,12 @@ defmodule DateTests do
     assert -Date.epoch(:secs) === {0,0,0} |> Date.from(:timestamp, :zero) |> Date.to_secs
   end
 
+  test "from milliseconds" do
+    msecs = 1451425764069
+    date = Date.from({{2015, 12, 29}, {21, 49, 24, 69}})
+    assert date == Date.from(msecs, :msecs)
+  end
+
   test "from seconds" do
     now_sec = trunc(Time.now(:secs))
     assert now_sec === now_sec |> Date.from(:secs) |> Date.to_secs

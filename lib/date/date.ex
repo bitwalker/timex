@@ -339,20 +339,26 @@ defmodule Timex.Date do
 
   """
   @spec from(timestamp, :timestamp) :: DateTime.t
-  @spec from(number, :us | :secs | :days)  :: DateTime.t
+  @spec from(number, :us | :msecs | :secs | :days)  :: DateTime.t
   @spec from(timestamp, :timestamp, :epoch | :zero) :: DateTime.t
-  @spec from(number, :us | :secs | :days, :epoch | :zero)  :: DateTime.t
+  @spec from(number, :us | :msecs | :secs | :days, :epoch | :zero)  :: DateTime.t
   def from(value, type, reference \\ :epoch)
 
   def from({mega, sec, us}, :timestamp, :epoch), do: from((mega * @million + sec) * @million + us, :us)
   def from({mega, sec, us}, :timestamp, :zero) do
     from((mega * @million + sec) * @million + us, :us, :zero)
   end
-  def from(us, :us,   :epoch) do
+  def from(us, :us, :epoch) do
     construct(calendar_gregorian_microseconds_to_datetime(us, epoch(:secs)), %TimezoneInfo{})
   end
-  def from(us, :us,   :zero) do
+  def from(us, :us, :zero) do
     construct(calendar_gregorian_microseconds_to_datetime(us, 0), %TimezoneInfo{})
+  end
+  def from(ms, :msecs, :epoch) do
+    Time.from(ms, :msecs) |> from(:timestamp, :epoch)
+  end
+  def from(ms, :msecs, :zero) do
+    Time.from(ms, :msecs) |> from(:timestamp, :zero)
   end
   def from(sec, :secs, :epoch) do
     construct(:calendar.gregorian_seconds_to_datetime(trunc(sec) + epoch(:secs)), %TimezoneInfo{})
