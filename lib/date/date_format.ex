@@ -25,7 +25,7 @@ defmodule Timex.DateFormat do
   Same as `format/2`, but takes a custom formatter.
   """
   @spec format(%DateTime{}, String.t, :default | :strftime | atom()) :: {:ok, String.t} | {:error, String.t}
-  def format(%DateTime{} = date, format_string, formatter) when is_binary(format_string) do
+  def format(date, format_string, formatter) when is_binary(format_string) do
     case formatter do
       :default  -> Formatter.format(date, format_string)
       :strftime -> Formatter.format(date, format_string, Strftime)

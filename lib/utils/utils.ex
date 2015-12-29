@@ -19,7 +19,7 @@ defmodule Timex.Utils do
             Process.put(:current_otp_release, ver)
             ver
           _ ->
-            nil
+            raise RuntimeError, message: "Unable to determine Erlang version"
         end
       ver -> ver
     end
