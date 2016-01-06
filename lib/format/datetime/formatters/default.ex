@@ -74,8 +74,7 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   formats is that these directives convert the date to UTC for you.
 
   * `{ISO:Basic}`      - `<date>T<time><offset>`. Full date and time
-                         specification without separators. This is equivalent
-                         to `{ISO}`. (e.g. `20070813T164801+0300`)
+                         specification without separators.
 
   * `{ISO:Basic:Z}`    - `<date>T<time>Z`. Full date and time in UTC without
                          separators (e.g. `20070813T134801Z`)
