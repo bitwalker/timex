@@ -30,6 +30,17 @@ defmodule TimeTests do
     assert Time.diff(timestamp2, timestamp1, :hours) == 55.587139 / 3600
   end
 
+  test "diff fix" do 
+    timestamp1 = {1450,746582,000000}
+    timestamp2 = {1451,981376,368306}
+    assert Time.diff(timestamp2, timestamp1) == {1, 234794, 368306}
+    assert Time.diff(timestamp2, timestamp1, :usecs) == 1234794368306
+    assert Time.diff(timestamp2, timestamp1, :msecs) == 1234794368.306
+    assert Time.diff(timestamp2, timestamp1, :secs)  == 1234794.368306
+    assert Time.diff(timestamp2, timestamp1, :mins)  == 1234794.368306 / 60
+    assert Time.diff(timestamp2, timestamp1, :hours) == 1234794.368306 / 3600
+  end
+
   test "measure/2" do
     {{_, _, _}, result} = Time.measure(fn x -> x end, [:nothing])
     assert result == :nothing
