@@ -284,7 +284,7 @@ defmodule Timex.Time do
   def diff({_,_,_} = t1, {_,_,_} = t2, :timestamp) do
     microsecs = :timer.now_diff(t1, t2)
     mega  = div(microsecs, 1_000_000_000_000)
-    secs  = div(microsecs, 1_000_000 - mega*1_000_000)
+    secs  = div(microsecs - mega*1_000_000_000_000, 1_000_000)
     micro = rem(microsecs, 1_000_000)
     {mega, secs, micro}
   end
