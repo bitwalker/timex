@@ -522,7 +522,7 @@ defmodule Timex.Date do
 
       # Creating a DateTime from the given day
       iex> expected = #{__MODULE__}.from({{2015, 6, 29}, {0,0,0}})
-      iex> (#{__MODULE__}.from_iso_day(180) === expected)
+      iex> (expected === #{__MODULE__}.from_iso_day(180, #{__MODULE__}.from({{2015,1,1}, {0,0,0}})))
       true
 
       # Shifting a DateTime to the given day
