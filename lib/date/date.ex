@@ -289,9 +289,10 @@ defmodule Timex.Date do
       > Date.from({2014,3,16}, "America/Chicago")    #=> %DateTime{...}
 
   """
-  @spec from(datetime | date) :: DateTime.t
-  @spec from(datetime | date, :utc | :local | TimezoneInfo.t | binary) :: DateTime.t
+  @spec from(DateTime.t | datetime | date) :: DateTime.t
+  @spec from(DateTime.t | datetime | date, :utc | :local | TimezoneInfo.t | binary) :: DateTime.t
 
+  def from(%DateTime{} = date), do: date
   def from(datetime), do: from(datetime, :utc)
 
   def from({y,m,d} = date, :utc) when is_integer(y) and is_integer(m) and is_integer(d),
