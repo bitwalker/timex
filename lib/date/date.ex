@@ -1088,14 +1088,31 @@ defmodule Timex.Date do
     diff(this, other, :days) |> div(7)
   end
   def diff(this, other, :months) do
-    %DateTime{:year => y1, :month => m1} = universal(this)
-    %DateTime{:year => y2, :month => m2} = universal(other)
-    ((y2 - y1) * 12) + (m2 - m1)
+    days_between = diff(this, other, :days)
+    cond do
+      days_between < 0 && days_between <= -30 ->
+        div(days_between, 30)
+      days_between > 0 && days_between >= 30 ->
+        div(days_between, 30)
+      days_between < 0 && days_between > -28 ->
+        0
+      days_between > 0 && days_between < 28 ->
+        0
+      :else ->
+        # TODO: No special handling of variable days in month
+        0
+    end
   end
   def diff(this, other, :years) do
-    %DateTime{:year => y1} = universal(this)
-    %DateTime{:year => y2} = universal(other)
-    y2 - y1
+    days_between = diff(this, other, :days)
+    cond do
+      days_between > 0 && days_between >= 365 ->
+        div(days_between, 365)
+      days_between < 0 && days_between <= -365 ->
+        div(days_between, 365)
+      :else ->
+        0
+    end
   end
 
   @doc """
