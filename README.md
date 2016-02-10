@@ -21,7 +21,7 @@ defp deps do
 end
 
 defp application do
-  [applications: [:tzdata]]
+  [applications: [:timex]]
 end
 ```
 
