@@ -45,17 +45,18 @@ defmodule Timex.Timezone.Local do
 
   def lookup(), do: Date.now |> lookup
   def lookup(%DateTime{} = date) do
-    tz = Application.get_env(:timex, :local_timezone)
-    if tz == nil do
-      tz = case :os.type() do
-        {:unix, :darwin} -> localtz(:osx, date)
-        {:unix, _}       -> localtz(:unix, date)
-        {:win32, :nt}    -> localtz(:win, date)
-        _                -> raise "Unsupported operating system!"
-      end
-      Application.put_env(:timex, :local_timezone, tz)
+    case Application.get_env(:timex, :local_timezone) do
+      nil ->
+        tz = case :os.type() do
+          {:unix, :darwin} -> localtz(:osx, date)
+          {:unix, _}       -> localtz(:unix, date)
+          {:win32, :nt}    -> localtz(:win, date)
+          _                -> raise "Unsupported operating system!"
+        end
+        Application.put_env(:timex, :local_timezone, tz)
+        tz
+      tz -> tz
     end
-    tz
   end
 
   # Get the locally configured timezone on OSX systems

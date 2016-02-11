@@ -347,13 +347,9 @@ defmodule Timex.Time do
 
   defp normalize({mega, sec, micro}) do
     # TODO: check for negative values
-    if micro >= @million do
-      { sec, micro } = mdivmod(sec, micro)
-    end
+    { sec, micro } = mdivmod(sec, micro)
 
-    if sec >= @million do
-      { mega, sec } = mdivmod(mega, sec)
-    end
+    { mega, sec } = mdivmod(mega, sec)
 
     { mega, sec, micro }
   end
