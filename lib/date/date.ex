@@ -1293,10 +1293,7 @@ defmodule Timex.Date do
   defp validate({year, month, day}) do
     # Check if we got past the last day of the month
     max_day = days_in_month(year, month)
-    if day > max_day do
-      day = max_day
-    end
-    {year, month, day}
+    {year, month, min(day, max_day)}
   end
 
   defp mod(a, b), do: rem(rem(a, b) + b, b)
