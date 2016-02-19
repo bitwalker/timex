@@ -138,6 +138,11 @@ defmodule DateTests do
     assert %DateTime{year: 1970, month: 2, day: 1, hour: 0, minute: 0, second: 0} = Date.from(31, :days)
   end
 
+  test "from datetime_select" do
+    date = %{"day" => "05", "hour" => "12", "min" => "35", "month" => "2", "year" => "2016"}
+    assert %DateTime{year: 2016, month: 2, day: 05, hour: 12, minute: 35, second: 0} = date |> Date.from
+  end
+
   test "to timestamp" do
     assert {0,0,0} === Date.epoch |> Date.to_timestamp
     assert {62167,219200,0} === Date.epoch |> Date.to_timestamp(:zero)
