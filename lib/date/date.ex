@@ -46,6 +46,7 @@ defmodule Timex.Date do
   @type datetime :: { date, time }
   @type dtz :: { datetime, TimezoneInfo.t }
   @type iso_triplet :: { year, weeknum, weekday }
+  @type phoenix_datetime_select_params :: %{String.t => String.t}
 
   # Constants
   @valid_months 1..12
@@ -287,10 +288,11 @@ defmodule Timex.Date do
       > Date.from(:erlang.localtime)                 #=> %Datetime{...}
       > Date.from(:erlang.localtime, :local)         #=> %DateTime{...}
       > Date.from({2014,3,16}, "America/Chicago")    #=> %DateTime{...}
+      > Date.from(phoenix_datetime_select_params)    #=> %DateTime{...}
 
   """
   @spec from(DateTime.t | datetime | date) :: DateTime.t
-  @spec from(DateTime.t | datetime | date, :utc | :local | TimezoneInfo.t | binary) :: DateTime.t
+  @spec from(DateTime.t | datetime | date, :utc | :local | TimezoneInfo.t | binary | phoenix_datetime_select_params) :: DateTime.t
 
   def from(%DateTime{} = date), do: date
   def from(datetime), do: from(datetime, :utc)
@@ -323,6 +325,22 @@ defmodule Timex.Date do
         construct(datetime, tzinfo)
       {:error, _} = error ->
         error
+    end
+  end
+  def from(%{"year" => _, "month" => _, "day" => _, "hour" => _, "min" => _} = dt, tz) do
+    validated = Enum.reduce(dt, %{}, fn 
+      _, :error -> :error
+      {key, value}, acc ->
+        case Integer.parse(value) do
+          {v, _} -> Map.put(acc, key, v)
+          :error -> :error
+        end
+    end)
+    case {validated, tz} do
+      {%{"year" => y, "month" => m, "day" => d, "hour" => h, "min" => mm}, tz} ->
+        from({{y,m,d},{h,mm,0}}, tz)
+      {:error, _} ->
+        {:error, :invalid}
     end
   end
 
