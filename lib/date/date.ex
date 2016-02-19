@@ -284,6 +284,7 @@ defmodule Timex.Date do
   ## Examples
 
       > Date.from(:erlang.universaltime)             #=> %DateTime{...}
+      > Date.from(datetime_select params)            #=> %DateTime{...}
       > Date.from(:erlang.localtime)                 #=> %Datetime{...}
       > Date.from(:erlang.localtime, :local)         #=> %DateTime{...}
       > Date.from({2014,3,16}, "America/Chicago")    #=> %DateTime{...}
@@ -297,6 +298,9 @@ defmodule Timex.Date do
 
   def from({y,m,d} = date, :utc) when is_integer(y) and is_integer(m) and is_integer(d),
     do: construct({date, {0,0,0}}, %TimezoneInfo{})
+  def from(%{"day" => _, "hour" => _, "min" => _, "month" => _, "year" => _} = dtm, :utc) do
+    construct({{String.to_integer(dtm["year"]),String.to_integer(dtm["month"]),String.to_integer(dtm["day"])},{String.to_integer(dtm["hour"]),String.to_integer(dtm["min"]),00}}, %TimezoneInfo{})
+  end
   def from({{_,_,_},{_,_,_}} = datetime, :utc),
     do: construct(datetime, %TimezoneInfo{})
   def from({{_,_,_},{_,_,_,_}} = datetime, :utc),
