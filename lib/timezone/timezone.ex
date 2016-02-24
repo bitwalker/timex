@@ -17,6 +17,9 @@ defmodule Timex.Timezone do
   alias Timex.TimezoneInfo,   as: TimezoneInfo
   alias Timex.Timezone.Local, as: Local
 
+  # Start :tzdata application with disabled auto-updates so that it
+  # doesn't run during compilation.
+  Application.put_env(:tzdata, :autoupdate, :disabled, persistent: true)
   Application.ensure_all_started(:tzdata)
 
   @abbreviations Tzdata.canonical_zone_list
