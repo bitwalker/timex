@@ -17,22 +17,21 @@ defmodule Timex.Timezone do
   alias Timex.TimezoneInfo,   as: TimezoneInfo
   alias Timex.Timezone.Local, as: Local
 
-  # Start :tzdata application with disabled auto-updates so that it
-  # doesn't run during compilation.
-  Application.put_env(:tzdata, :autoupdate, :disabled, persistent: true)
-  Application.ensure_all_started(:tzdata)
-
-  @abbreviations Tzdata.canonical_zone_list
-                 |> Enum.flat_map(fn name -> {:ok, periods} = Tzdata.periods(name); periods end)
-                 |> Enum.map(fn %{:zone_abbr => abbr} -> abbr end)
-                 |> Enum.uniq
-                 |> Enum.filter(fn abbr -> abbr != "" end)
-
   @doc """
   Determines if a given zone name exists
   """
   @spec exists?(String.t) :: boolean
-  def exists?(zone), do: Tzdata.zone_exists?(zone) || Enum.member?(@abbreviations, zone)
+  def exists?(zone) when is_binary(zone) do
+    case Tzdata.zone_exists?(zone) do
+      true ->
+        true
+      false ->
+        case lookup_posix(zone) do
+          tz when is_binary(tz) -> true
+          _ -> false
+        end
+    end
+  end
 
   @doc """
   Gets the local timezone configuration for the current date and time.
@@ -47,8 +46,10 @@ defmodule Timex.Timezone do
   @spec local(Date.datetime | %DateTime{}) :: %TimezoneInfo{}
   def local(date)
 
-  def local({{y,m,d}, {h,min,s}}), do: %DateTime{year: y, month: m, day: d, hour: h, minute: min, second: s, timezone: %TimezoneInfo{}} |> local
-  def local(%DateTime{} = date),   do: get(Local.lookup(date), date)
+  def local({{y,m,d}, {h,min,s}}) do
+    local(%DateTime{year: y, month: m, day: d, hour: h, minute: min, second: s, timezone: %TimezoneInfo{}})
+  end
+  def local(%DateTime{} = date), do: get(Local.lookup(date), date)
 
   @doc """
   Gets timezone info for a given zone name and date. The date provided
@@ -56,51 +57,58 @@ defmodule Timex.Timezone do
   is not provided, then the current date and time is returned.
   """
   @spec get(String.t | integer | :utc, Date.datetime | %DateTime{} | nil) :: %TimezoneInfo{} | {:error, String.t}
-  def get(tz, for \\ Date.now)
+  def get(tz, datetime \\ Date.now)
 
-  def get(tz, for) when tz in ["Z", "UT", "GMT"], do: get(:utc, for)
+  def get(tz, datetime) when tz in ["Z", "UT", "GMT"], do: get(:utc, datetime)
   def get(:utc, _),   do: %TimezoneInfo{}
-  def get(0, for),    do: get("UTC", for)
+  def get(0, datetime),    do: get("UTC", datetime)
   # These are shorthand for specific time zones
-  def get("A", for),  do: get(+1, for)
-  def get("M", for),  do: get(+12, for)
-  def get("N", for),  do: get(-1, for)
-  def get("Y", for),  do: get(-12, for)
+  def get("A", datetime),  do: get(+1, datetime)
+  def get("M", datetime),  do: get(+12, datetime)
+  def get("N", datetime),  do: get(-1, datetime)
+  def get("Y", datetime),  do: get(-12, datetime)
   # Allow querying by offset
-  def get(offset, for) when is_number(offset) do
+  def get(offset, datetime) when is_number(offset) do
     if offset > 0 do
-      get("Etc/GMT-#{offset}", for)
+      get("Etc/GMT-#{offset}", datetime)
     else
-      get("Etc/GMT+#{offset * -1}", for)
+      get("Etc/GMT+#{offset * -1}", datetime)
     end
   end
-  def get(<<?+, offset :: binary>>, for) do
-    {num, _} = Integer.parse(offset)
-    cond do
-      num >= 100 -> get(trunc(num/100), for)
-      true      -> get(num, for)
+  def get(<<?+, offset :: binary>> = tz, datetime) do
+    case Integer.parse(offset) do
+      {num, _} ->
+        cond do
+          num >= 100 -> get(trunc(num/100), datetime)
+          true      -> get(num, datetime)
+        end
+      :error ->
+        {:error, "No timezone found for: #{tz}"}
     end
   end
-  def get(<<?-, offset :: binary>>, for) do
-    {num, _} = Integer.parse(offset)
-    cond do
-      num >= 100 -> get(trunc(num/100) * -1, for)
-      true      -> get(num * -1, for)
+  def get(<<?-, offset :: binary>> = tz, datetime) do
+    case Integer.parse(offset) do
+      {num, _} ->
+        cond do
+          num >= 100 -> get(trunc(num/100) * -1, datetime)
+          true      -> get(num * -1, datetime)
+        end
+      :error ->
+        {:error, "No timezone found for: #{tz}"}
     end
   end
+  def get(<<"GMT", ?+, offset::binary>>, datetime), do: get("Etc/GMT+#{offset}", datetime)
+  def get(<<"GMT", ?-, offset::binary>>, datetime), do: get("Etc/GMT-#{offset}", datetime)
 
   # Gets a timezone for an Erlang datetime tuple
   def get(timezone, {{_,_,_}, {_,_,_}} = datetime) do
      case Tzdata.zone_exists?(timezone) do
       false ->
-        case @abbreviations |> Enum.member?(timezone) do
-          true ->
-            # Lookup the real timezone for this abbreviation and date
-            seconds_from_zeroyear = :calendar.datetime_to_gregorian_seconds(datetime)
-            case lookup_timezone_by_abbreviation(timezone, seconds_from_zeroyear) do
-              {:error, _}           -> {:error, "No timezone found for: #{timezone}"}
-              {:ok, {name, period}} -> tzdata_to_timezone(period, name)
-            end
+        # Lookup the real timezone for this abbreviation and date
+        seconds_from_zeroyear = :calendar.datetime_to_gregorian_seconds(datetime)
+        case lookup_timezone_by_abbreviation(timezone, seconds_from_zeroyear) do
+          %TimezoneInfo{} = tz ->
+            tz
           false ->
             {:error, "No timezone found for: #{timezone}"}
         end
@@ -110,7 +118,7 @@ defmodule Timex.Timezone do
           [] ->
             {:error, "The provided date is not valid for #{timezone}. It may represent a time during a zone transition."}
           [period | _] ->
-            period |> tzdata_to_timezone(timezone)
+            tzdata_to_timezone(period, timezone)
         end
     end
   end
@@ -119,24 +127,20 @@ defmodule Timex.Timezone do
   def get(timezone, %DateTime{} = dt) do
     case Tzdata.zone_exists?(timezone) do
       false ->
-        case @abbreviations |> Enum.member?(timezone) do
-          true ->
-            # Lookup the real timezone for this abbreviation and date
-            seconds_from_zeroyear = dt |> Date.to_secs(:zero)
-            case lookup_timezone_by_abbreviation(timezone, seconds_from_zeroyear) do
-              {:error, _}           -> {:error, "No timezone found for: #{timezone}"}
-              {:ok, {name, period}} -> tzdata_to_timezone(period, name)
-            end
-          false ->
+        seconds_from_zeroyear = Date.to_secs(dt, :zero)
+        case lookup_timezone_by_abbreviation(timezone, seconds_from_zeroyear) do
+          %TimezoneInfo{} = tz ->
+            tz
+          _ ->
             {:error, "No timezone found for: #{timezone}"}
         end
       true  ->
-        seconds_from_zeroyear = dt |> Date.to_secs(:zero)
+        seconds_from_zeroyear = Date.to_secs(dt, :zero)
         case Tzdata.periods_for_time(timezone, seconds_from_zeroyear, :wall) do
           [] ->
             {:error, "The provided date is not valid for #{timezone}. It may represent a time during a zone transition."}
           [period | _] ->
-            period |> tzdata_to_timezone(timezone)
+            tzdata_to_timezone(period, timezone)
         end
     end
   end
@@ -152,13 +156,12 @@ defmodule Timex.Timezone do
     # Offset the provided date's time by the difference
     shifted = Date.shift(date, mins: difference) |> Map.put(:timezone, tz)
     # Check the shifted datetime to make sure it's in the right zone
-    seconds_from_zeroyear = shifted |> Date.to_secs(:zero, utc: false)
+    seconds_from_zeroyear = Date.to_secs(shifted, :zero, utc: false)
     [period | _] = Tzdata.periods_for_time(name, seconds_from_zeroyear, :wall)
-    case period |> tzdata_to_timezone(name) do
+    case tzdata_to_timezone(period, name) do
       # No change, we're valid
-      ^tz         ->
-        shifted
-        |> Map.put(:ms, ms)
+      ^tz ->
+        Map.put(shifted, :ms, ms)
       # The shift put us in a new timezone, so shift by the updated
       # difference, and set the zone
       new_zone    ->
@@ -191,28 +194,16 @@ defmodule Timex.Timezone do
   # Fetches the first timezone period which matches the abbreviation and is
   # valid for the given moment in time (secs from :zero)
   defp lookup_timezone_by_abbreviation(abbr, secs) do
-    result = Tzdata.canonical_zone_list
-    |> Stream.map(fn name -> {:ok, periods} = Tzdata.periods(name); {name, periods} end)
-    |> Stream.map(fn {name, periods} ->
-        p = periods |> Enum.drop_while(fn %{:from => %{:wall => from}, :until => %{:wall => until}, :zone_abbr => abbrev} ->
-          cond do
-            from == :min && until >= secs && abbrev == abbr -> false
-            from == :min && until == :max && abbrev == abbr -> false
-            from <= secs && until == :max && abbrev == abbr -> false
-            from <= secs && until >= secs && abbrev == abbr -> false
-            true -> true
-          end
-        end)
-        case p do
-          [x|_] -> {name, x}
-          []    -> {name, nil}
+    case lookup_posix(abbr) do
+      full_name when is_binary(full_name) ->
+        case Tzdata.periods_for_time(full_name, secs, :wall) do
+          [] ->
+            {:error, "The provided date is not valid for #{abbr} (#{full_name}). It may represent a time during a zone transition."}
+          [period | _] ->
+            tzdata_to_timezone(period, full_name)
         end
-      end)
-    |> Stream.filter(fn {_, nil} -> false; {_, _} -> true end)
-    |> Enum.take(1)
-    case result do
-      [x] -> {:ok, x}
-      []  -> {:error, :not_found}
+      nil ->
+        {:error, "The provided timezone abbreviation #{abbr} does not exist. Please use a valid POSIX or Olson timezone name."}
     end
   end
 
@@ -247,5 +238,57 @@ defmodule Timex.Timezone do
     end
     {dow, date}
   end
+
+  defp lookup_posix(timezone) when is_binary(timezone) do
+    Tzdata.zone_list
+    # Filter out zones which definitely don't match
+    |> Enum.filter(&String.contains?(&1, timezone))
+    # For each candidate, attempt to parse as POSIX
+    # if the parse succeeds, and the timezone name requested
+    # is one of the parts, then that's our zone, otherwise, keep searching
+    |> Enum.find(fn probable_zone ->
+      case parse_posix(probable_zone) do
+        {:ok, %{:standard => std, :dst => dst}} ->
+          cond do
+            std == timezone || dst == timezone -> true
+            :else -> false
+          end
+        {:error, _reason} ->
+          false
+      end
+    end)
+  end
+
+  # Start parsing provided zone name
+  defp parse_posix(tz) when is_binary(tz) do
+    parse_posix(tz, :standard, %{:standard => <<>>, :dst => <<>>, :diff_from_utc => <<>>})
+  end
+  # Alpha character for standard name
+  defp parse_posix(<<c::utf8, rest::binary>>, :standard, %{:standard => acc} = result) when c in ?A..?Z do
+    parse_posix(rest, :standard, %{result | :standard => <<acc::binary, c::utf8>>})
+  end
+  # Transition from standard name to diff from UTC
+  defp parse_posix(<<c::utf8, rest::binary>>, :standard, %{:diff_from_utc => acc} = result) when c in ?0..?9 do
+    parse_posix(rest, :diff, %{result | :diff_from_utc => <<acc::binary, c::utf8>>})
+  end
+  # Digit for diff from UTC
+  defp parse_posix(<<c::utf8, rest::binary>>, :diff, %{:diff_from_utc => acc} = result) when c in ?0..?9 do
+    parse_posix(rest, :diff, %{result | :diff_from_utc => <<acc::binary, c::utf8>>})
+  end
+  # Transition from diff to DST name
+  defp parse_posix(<<c::utf8, rest::binary>>, :diff, %{:diff_from_utc => diff, :dst => acc} = result) when c in ?A..?Z do
+    # Convert diff to integer value
+    parse_posix(rest, :dst, %{result | :diff_from_utc => String.to_integer(diff), :dst => <<acc::binary, c::utf8>>})
+  end
+  # Alpha character for DST name
+  defp parse_posix(<<c::utf8, rest::binary>>, :dst, %{:dst => acc} = result) when c in ?A..?Z do
+    parse_posix(rest, :dst, %{result | :dst => <<acc::binary, c::utf8>>})
+  end
+  # Reached end of input with all parts parsed
+  defp parse_posix(<<>>, :dst, result), do: {:ok, result}
+  # Invalid character for current state
+  defp parse_posix(<<_c::utf8, _rest::binary>>, _, _result), do: {:error, :not_posix}
+  # Empty before all parts are processed
+  defp parse_posix(<<>>, _, _result), do: {:error, :not_posix}
 
 end

@@ -162,11 +162,11 @@ defmodule DateFormatTest.ParseDefault do
   test "parse RFC1123" do
     date_gmt = Date.from({{2013,3,5},{23,25,19}}, "GMT")
     date_utc = Date.from({{2013,3,5},{23,25,19}}, "UTC")
-    date_eet = Date.from({{2013,3,5},{23,25,19}}, "EEST")
+    date_est = Date.from({{2013,3,5},{23,25,19}}, "EST")
 
     # * `{RFC1123}`     - e.g. `Tue, 05 Mar 2013 23:25:19 GMT`
     assert { :ok, ^date_gmt } = parse("Tue, 05 Mar 2013 23:25:19 GMT", "{RFC1123}")
-    assert { :ok, ^date_eet } = parse("Tue, 05 Mar 2013 23:25:19 EEST", "{RFC1123}")
+    assert { :ok, ^date_est } = parse("Tue, 05 Mar 2013 23:25:19 EST", "{RFC1123}")
 
     # * `{RFC1123z}`    - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
     assert { :ok, ^date_utc } = parse("Tue, 05 Mar 2013 23:25:19 Z", "{RFC1123z}")
@@ -204,9 +204,9 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "parse UNIX" do
-    # * `{UNIX}`        - e.g. `Tue Mar  5 23:25:19 EET 2013`
-    date = Date.from({{2013, 3, 5}, {23, 25, 19}}, "EET")
-    assert { :ok, ^date } = parse("Tue Mar  5 23:25:19 EET 2013", "{UNIX}")
+    # * `{UNIX}`        - e.g. `Tue Mar  5 23:25:19 EST 2013`
+    date = Date.from({{2013, 3, 5}, {23, 25, 19}}, "EST")
+    assert { :ok, ^date } = parse("Tue Mar  5 23:25:19 EST 2013", "{UNIX}")
 
 
     date = Date.from({{2015, 10, 5}, {0, 7, 11}}, "PST")

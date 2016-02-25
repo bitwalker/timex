@@ -8,11 +8,11 @@ defmodule DateFormatTest.ParseStrftime do
   end
 
   test "issue #66" do
-    date = Date.from({{2015,7,6}, {0,0,0}}, "CEST")
-    assert {:ok, ^date} = parse("Mon Jul 06 2015 00:00:00 GMT+0200 (CEST)", "%a %b %d %Y %H:%M:%S %Z%z (%Z)")
+    date = Date.from({{2015,7,6}, {0,0,0}}, "CST")
+    assert {:ok, ^date} = parse("Mon Jul 06 2015 00:00:00 GMT+0200 (CST)", "%a %b %d %Y %H:%M:%S %Z%z (%Z)")
 
-    date2 = Date.from({{2015,7,6}, {0,0,0}}, "CEST")
-    assert {:ok, ^date2} = parse("Mon Jul 06 2015 00:00:00 GMT +0200 (CEST)", "%a %b %d %Y %H:%M:%S %Z %z (%Z)")
+    date2 = Date.from({{2015,7,6}, {0,0,0}}, "CST")
+    assert {:ok, ^date2} = parse("Mon Jul 06 2015 00:00:00 GMT +0200 (CST)", "%a %b %d %Y %H:%M:%S %Z %z (%Z)")
   end
 
   test "parse format with microseconds" do

@@ -1397,9 +1397,9 @@ defmodule Timex.Date do
   @doc """
   Given a date returns a date at the beginning of the quarter.
 
-    iex> date = #{__MODULE__}.from {{2015, 6, 15}, {12,30,0}}, "CEST"
+    iex> date = #{__MODULE__}.from {{2015, 6, 15}, {12,30,0}}, "CST"
     iex> #{__MODULE__}.beginning_of_quarter date
-    #{__MODULE__}.from {{2015, 4, 1}, {0, 0, 0}}, "CEST"
+    #{__MODULE__}.from {{2015, 4, 1}, {0, 0, 0}}, "CST"
 
   """
   @spec beginning_of_quarter(DateTime.t) :: DateTime.t
@@ -1415,9 +1415,9 @@ defmodule Timex.Date do
   @doc """
   Given a date or a year and month returns a date at the end of the quarter.
 
-    iex> date = #{__MODULE__}.from {{2015, 6, 15}, {12,30,0}}, "CEST"
+    iex> date = #{__MODULE__}.from {{2015, 6, 15}, {12,30,0}}, "CST"
     iex> #{__MODULE__}.end_of_quarter date
-    #{__MODULE__}.from {{2015, 6, 30}, {23, 59, 59}}, "CEST"
+    #{__MODULE__}.from {{2015, 6, 30}, {23, 59, 59}}, "CST"
 
     iex> #{__MODULE__}.end_of_quarter 2015, 4
     #{__MODULE__}.from {{2015, 6, 30}, {23, 59, 59}}
