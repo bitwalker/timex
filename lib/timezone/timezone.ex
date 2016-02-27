@@ -16,6 +16,8 @@ defmodule Timex.Timezone do
   alias Timex.DateTime,       as: DateTime
   alias Timex.TimezoneInfo,   as: TimezoneInfo
   alias Timex.Timezone.Local, as: Local
+  alias Timex.Parse.Timezones.Posix
+  alias Timex.Parse.Timezones.Posix.PosixTimezone, as: PosixTz
 
   @doc """
   Determines if a given zone name exists
@@ -247,48 +249,14 @@ defmodule Timex.Timezone do
     # if the parse succeeds, and the timezone name requested
     # is one of the parts, then that's our zone, otherwise, keep searching
     |> Enum.find(fn probable_zone ->
-      case parse_posix(probable_zone) do
-        {:ok, %{:standard => std, :dst => dst}} ->
-          cond do
-            std == timezone || dst == timezone -> true
-            :else -> false
-          end
+      case Posix.parse(probable_zone) do
+        {:ok, %PosixTz{:std_name => ^timezone}} -> true
+        {:ok, %PosixTz{:dst_name => ^timezone}} -> true
+        {:ok, %PosixTz{}}                       -> false
         {:error, _reason} ->
           false
       end
     end)
   end
-
-  # Start parsing provided zone name
-  defp parse_posix(tz) when is_binary(tz) do
-    parse_posix(tz, :standard, %{:standard => <<>>, :dst => <<>>, :diff_from_utc => <<>>})
-  end
-  # Alpha character for standard name
-  defp parse_posix(<<c::utf8, rest::binary>>, :standard, %{:standard => acc} = result) when c in ?A..?Z do
-    parse_posix(rest, :standard, %{result | :standard => <<acc::binary, c::utf8>>})
-  end
-  # Transition from standard name to diff from UTC
-  defp parse_posix(<<c::utf8, rest::binary>>, :standard, %{:diff_from_utc => acc} = result) when c in ?0..?9 do
-    parse_posix(rest, :diff, %{result | :diff_from_utc => <<acc::binary, c::utf8>>})
-  end
-  # Digit for diff from UTC
-  defp parse_posix(<<c::utf8, rest::binary>>, :diff, %{:diff_from_utc => acc} = result) when c in ?0..?9 do
-    parse_posix(rest, :diff, %{result | :diff_from_utc => <<acc::binary, c::utf8>>})
-  end
-  # Transition from diff to DST name
-  defp parse_posix(<<c::utf8, rest::binary>>, :diff, %{:diff_from_utc => diff, :dst => acc} = result) when c in ?A..?Z do
-    # Convert diff to integer value
-    parse_posix(rest, :dst, %{result | :diff_from_utc => String.to_integer(diff), :dst => <<acc::binary, c::utf8>>})
-  end
-  # Alpha character for DST name
-  defp parse_posix(<<c::utf8, rest::binary>>, :dst, %{:dst => acc} = result) when c in ?A..?Z do
-    parse_posix(rest, :dst, %{result | :dst => <<acc::binary, c::utf8>>})
-  end
-  # Reached end of input with all parts parsed
-  defp parse_posix(<<>>, :dst, result), do: {:ok, result}
-  # Invalid character for current state
-  defp parse_posix(<<_c::utf8, _rest::binary>>, _, _result), do: {:error, :not_posix}
-  # Empty before all parts are processed
-  defp parse_posix(<<>>, _, _result), do: {:error, :not_posix}
 
 end
