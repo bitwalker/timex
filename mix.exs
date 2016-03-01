@@ -23,33 +23,43 @@ defmodule Timex.Mixfile do
     """
     A date/time library for Elixir
 
-    - Fully timezone-aware, using the Olson Timezone database
-      - Supports local-timezone lookups
-      - Supports POSIX-style timezones
-    - Provides a broad array of Date helper functions
-      - shifting/adding/subtracting
-      - diffing
-      - comparing
-      - conversions
-      - get day of week, week of year, ISO dates, and names for each
-      - get the beginning or ending of a given week
-      - get the beginning or ending of a year, quarter, week, or month
-      - get days in a given month
-      - normalization
-    - Provides a broad array of Time helpers
-      - convert to and from units: weeks, days, hours, seconds, ms, and nanoseconds
-      - measure execution time
-      - diff/compare
-      - to/from 12/24 hour clock times
-      - add/subtract
-    - Safe DateTime string formatting and parsing
-      - Informative parser errors
-      - Supports strftime, as well as an easier to read formatter, i.e. `{ISO:Basic}`, `{YYYY}`
-      - Supports many formats out of the box: ISO8601 basic and extended, RFC822, RFC1123, RFC3339, ANSIC, UNIX
-    - Extendable
-      - Protocols for core modules like the parser tokenizer
-      - Easy to wrap to add extra functionality
-    - Can be used with Phoenix and Ecto when used with timex_ecto package
+    Fully timezone-aware, using the Olson Timezone database
+
+    - Supports local-timezone lookups
+    - Supports POSIX-style timezones
+
+    Provides a broad array of Date helper functions
+
+    - shifting/adding/subtracting
+    - diffing
+    - comparing
+    - conversions
+    - get day of week, week of year, ISO dates, and names for each
+    - get the beginning or ending of a given week
+    - get the beginning or ending of a year, quarter, week, or month
+    - get days in a given month
+    - normalization
+
+    Provides a broad array of Time helpers
+
+    - convert to and from units: weeks, days, hours, seconds, ms, and nanoseconds
+    - measure execution time
+    - diff/compare
+    - to/from 12/24 hour clock times
+    - add/subtract
+
+    Safe DateTime string formatting and parsing
+
+    - Informative parser errors
+    - Supports strftime, as well as an easier to read formatter, i.e. `{ISO:Basic}`, `{YYYY}`
+    - Supports many formats out of the box: ISO8601 basic and extended, RFC822, RFC1123, RFC3339, ANSIC, UNIX
+
+    Extendable
+
+    - Protocols for core modules like the parser tokenizer
+    - Easy to wrap to add extra functionality
+
+    Can be used with Phoenix and Ecto when used with timex_ecto package
     """
   end
 
