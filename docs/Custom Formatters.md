@@ -82,13 +82,13 @@ end
 
 As you can see the implementation is pretty straightforward. You'll notice that the last `do_format` implementation calls an imported function `format_token/5`, this allows you to delegate the formatting of known directives to the formatter, which will use standard formatting rules. You can of course override the formatting of directives using the style above (pattern matching on the directive type and handling the formatting directly).
 
-To use our new formatter with `DateFormat`:
+To use our new formatter with `Timex.format`:
 
 ```elixir
 iex> use Timex
 iex> alias MyApp.DateTimeFormatters.Humanized, as: HumanFormat
 iex> alias MyApp.DateTimeTokenizers.Humanized
 iex> format = "{shift} the {day} of {month}, {year}"
-iex> DateFormat.format(Date.now, format, HumanFormat)
+iex> Timex.format(DateTime.now, format, HumanFormat)
 {:ok, "currently the eleventh of August, 2015"}
 ```

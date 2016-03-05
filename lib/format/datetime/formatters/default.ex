@@ -120,10 +120,10 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   alias Timex.Format.FormatError
   alias Timex.Parse.DateTime.Tokenizers.Default, as: Tokenizer
 
-  @spec tokenize(String.t) :: {:ok, [%Directive{}]} | {:error, term}
+  @spec tokenize(String.t) :: {:ok, [Directive.t]} | {:error, term}
   defdelegate tokenize(format_string), to: Tokenizer
 
-  @spec format!(%DateTime{}, String.t) :: String.t | no_return
+  @spec format!(DateTime.t, String.t) :: String.t | no_return
   def format!(%DateTime{} = date, format_string) do
     case format(date, format_string) do
       {:ok, result}    -> result
@@ -131,7 +131,7 @@ defmodule Timex.Format.DateTime.Formatters.Default do
     end
   end
 
-  @spec format(%DateTime{}, String.t) :: {:ok, String.t} | {:error, term}
+  @spec format(DateTime.t, String.t) :: {:ok, String.t} | {:error, term}
   def format(%DateTime{} = date, format_string) do
     case tokenize(format_string) do
       {:ok, []} ->
@@ -146,7 +146,7 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   If one wants to use the default formatting semantics with a different
   tokenizer, this is the way.
   """
-  @spec format(%DateTime{}, String.t, atom) :: {:ok, String.t} | {:error, term}
+  @spec format(DateTime.t, String.t, atom) :: {:ok, String.t} | {:error, term}
   def format(%DateTime{} = date, format_string, tokenizer) do
     case tokenizer.tokenize(format_string) do
       {:ok, []} ->

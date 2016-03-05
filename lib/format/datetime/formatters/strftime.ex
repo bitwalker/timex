@@ -99,13 +99,14 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
   use Timex.Format.DateTime.Formatter
 
   alias Timex.DateTime
+  alias Timex.Format.FormatError
   alias Timex.Format.DateTime.Formatters.Default
   alias Timex.Parse.DateTime.Tokenizers.Strftime
 
-  @spec tokenize(String.t) :: {:ok, [%Directive{}]} | {:error, term}
+  @spec tokenize(String.t) :: {:ok, [Directive.t]} | {:error, term}
   defdelegate tokenize(format_string), to: Strftime
 
-  @spec format!(%DateTime{}, String.t) :: String.t | no_return
+  @spec format!(DateTime.t, String.t) :: String.t | no_return
   def format!(%DateTime{} = date, format_string) do
     case format(date, format_string) do
       {:ok, result}    -> result
@@ -113,7 +114,7 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
     end
   end
 
-  @spec format(%DateTime{}, String.t) :: {:ok, String.t} | {:error, term}
+  @spec format(DateTime.t, String.t) :: {:ok, String.t} | {:error, term}
   def format(%DateTime{} = date, format_string) do
     Default.format(date, format_string, Strftime)
   end

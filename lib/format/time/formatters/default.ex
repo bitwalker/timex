@@ -38,8 +38,9 @@ defmodule Timex.Format.Time.Formatters.Default do
       "PT1M5S"
 
   """
-  @spec format(Date.timestamp) :: String.t
+  @spec format(Types.timestamp) :: String.t | {:error, term}
   def format({_,_,_} = timestamp), do: timestamp |> deconstruct |> do_format
+  def format(_), do: {:error, :invalid_timestamp}
 
   defp do_format(components), do: do_format(components, <<?P>>)
   defp do_format([], str),    do: str
@@ -61,7 +62,7 @@ defmodule Timex.Format.Time.Formatters.Default do
   defp format_component({:minutes, m}, str), do: str <> "#{m}M"
   defp format_component({:seconds, s}, str), do: str <> "#{s}S"
 
-  defp deconstruct({_, _, micro} = ts), do: deconstruct({ts |> Time.to_secs |> trunc, micro}, [])
+  defp deconstruct({_, _, micro} = ts), do: deconstruct({ts |> Time.to_seconds |> trunc, micro}, [])
   defp deconstruct({0, 0}, components), do: components |> Enum.reverse
   defp deconstruct({seconds, us}, components) when seconds > 0 do
     cond do
@@ -78,7 +79,7 @@ defmodule Timex.Format.Time.Formatters.Default do
   end
   defp get_fractional_seconds(seconds, 0, components), do: deconstruct({0, 0}, [{:seconds, seconds} | components])
   defp get_fractional_seconds(seconds, micro, components) when micro > 0 do
-    msecs = {0, 0, micro} |> Time.abs |> Time.to_msecs
+    msecs = {0, 0, micro} |> Time.abs |> Time.to_milliseconds
     cond do
       msecs >= 1.0 -> deconstruct({0, 0}, [{:seconds, seconds + (msecs * :math.pow(10, -3))} | components])
       true         -> deconstruct({0, 0}, [{:seconds, seconds + (micro * :math.pow(10, -6))} | components])

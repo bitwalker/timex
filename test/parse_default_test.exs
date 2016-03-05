@@ -2,6 +2,14 @@ defmodule DateFormatTest.ParseDefault do
   use ExUnit.Case, async: true
   use Timex
 
+  test "exceptions" do
+    date = "2013-03-02"
+    assert %DateTime{:year => 2013, :month => 3, :day => 2} = Timex.parse!(date, "{YYYY}-{0M}-{0D}")
+    assert_raise(Timex.Parse.ParseError, fn ->
+      Timex.parse!(date, "{FOO}")
+    end)
+  end
+
   test "produce an error if input string contains no directives" do
     err = {:error, {:format, "Invalid format string, must contain at least one directive."}}
     assert ^err = parse("hello", "hello")
@@ -12,9 +20,9 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "parse year4 and year2" do
-    date2013 = Date.from({2013,1,1})
-    date2003 = Date.from({2003,1,1})
-    date0003 = Date.from({3,1,1})
+    date2013 = Timex.datetime({2013,1,1})
+    date2003 = Timex.datetime({2003,1,1})
+    date0003 = Timex.datetime({3,1,1})
 
     assert { :ok, ^date2013 } = parse("2013", "{YYYY}")
     assert { :ok, ^date2013 } = parse("13", "{YY}")
@@ -32,9 +40,9 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "parse century" do
-    date2000 = Date.from({2000,1,1})
-    date1900 = Date.from({1900,1,1})
-    date0000 = Date.from({0,1,1})
+    date2000 = Timex.datetime({2000,1,1})
+    date1900 = Timex.datetime({1900,1,1})
+    date0000 = Timex.datetime({0,1,1})
     assert { :ok, ^date2000 } = parse("20", "{C}")
     assert { :ok, ^date1900 } = parse("19", "{C}")
     assert { :ok, ^date0000 } = parse("0", "{C}")
@@ -43,7 +51,7 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "parse month" do
-    date = Date.from({0,3,1})
+    date = Timex.datetime({0,3,1})
     assert { :ok, ^date } = parse("3", "{M}")
     assert { :ok, ^date } = parse("03", "{M}")
     assert {:error, "Expected `1-2 digit month` at line 1, column 1."} = parse(" 3", "{M}")
@@ -52,8 +60,8 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "parse day" do
-    date18 = Date.from({0,1,18})
-    date8 = Date.from({0,1,8})
+    date18 = Timex.datetime({0,1,18})
+    date8 = Timex.datetime({0,1,8})
 
     assert { :ok, ^date18 } = parse("18", "{D}")
     assert { :ok, ^date18 } = parse("18", "{0D}")
@@ -64,7 +72,7 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "parse simple format YYYY-M-D, with padding variations" do
-    date2013_11 = Date.from({2013,11,8})
+    date2013_11 = Timex.datetime({2013,11,8})
 
     assert { :ok, ^date2013_11 } = parse("2013-11-08", "{YYYY}-{M}-{D}")
     assert {:error, "Expected `1-2 digit month` at line 1, column 6."} = parse("2013- 1- 8", "{YYYY}-{0M}-{0D}")
@@ -72,7 +80,7 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "parse ISO year4/year2" do
-    date = Date.from({2007,1,1})
+    date = Timex.datetime({2007,1,1})
     year = date.year
     assert { :ok, %DateTime{year: ^year} } = parse("2007", "{WYYYY}")
     assert {:error, "Expected `2 digit year` at line 1, column 1."} = parse("7"   , "{WYY}")
@@ -81,11 +89,11 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "parse full and abbreviated month names" do
-    date_nov = Date.from({0,11,1})
+    date_nov = Timex.datetime({0,11,1})
     assert { :ok, ^date_nov } = parse("Nov", "{Mshort}")
     assert { :ok, ^date_nov } = parse("November", "{Mfull}")
 
-    date_mar = Date.from({0,3,1})
+    date_mar = Timex.datetime({0,3,1})
     assert { :ok, ^date_mar } = parse("Mar", "{Mshort}")
     assert { :ok, ^date_mar } = parse("March", "{Mfull}")
 
@@ -96,19 +104,19 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "parse simple variations of year, month, and day directives" do
-    date = Date.from({2013,8,18})
+    date = Timex.datetime({2013,8,18})
     assert { :ok, ^date } = parse("2013-8-18", "{YYYY}-{M}-{D}")
     assert { :ok, ^date } = parse("8 2013 18", "{M} {YYYY} {D}")
 
-    date0003 = Date.from({3,8,8})
-    date2003 = Date.from({2003,8,8})
+    date0003 = Timex.datetime({3,8,8})
+    date2003 = Timex.datetime({2003,8,8})
     assert { :ok, ^date0003 } = parse("3/08/08", "{YYYY}/{0M}/{0D}")
     assert { :ok, ^date2003 } = parse("03 8 8", "{0YY}{_M}{_D}")
     assert { :ok, ^date2003 } = parse(" 8/08/ 3", "{_D}/{0M}/{_YY}")
   end
 
   test "parse hour24" do
-    date_midnight = Date.from({0,1,1})
+    date_midnight = Timex.datetime({0,1,1})
     assert {:error, "Expected `hour between 0 and 24` at line 1, column 1."} = parse("0", "{h24}")
     assert { :ok, ^date_midnight } = parse("00", "{h24}")
     assert { :ok, ^date_midnight } = parse("00", "{0h24}")
@@ -118,19 +126,19 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "parse hour12 and am/AM" do
-    date_midnight = Date.from({0,1,1})
-    date_noon     = Date.set(date_midnight, hour: 12)
+    date_midnight = Timex.datetime({0,1,1})
+    date_noon     = Timex.set(date_midnight, hour: 12)
 
     assert { :ok, ^date_noon } = parse("am 12", "{am} {h12}")
     assert { :ok, ^date_midnight } = parse("PM 00", "{AM} {0h24}")
-    date = Date.from({{0,1,1}, {16,0,0}})
+    date = Timex.datetime({{0,1,1}, {16,0,0}})
     assert { :ok, ^date } = parse("4 pm", "{h12} {am}")
     assert { :ok, ^date } = parse("04 PM", "{0h12} {AM}")
     assert { :ok, ^date } = parse(" 4 pm", "{_h12} {am}")
   end
 
   test "parse simple time formats" do
-    date = Date.from({{0,1,1}, {12,3,4}})
+    date = Timex.datetime({{0,1,1}, {12,3,4}})
     assert { :ok, ^date } = parse("12: 3: 4", "{h24}:{_m}:{_s}")
     assert { :ok, ^date } = parse("12:03:04", "{h12}:{0m}:{0s}")
     assert { :ok, ^date } = parse("12:03:04 PM", "{h12}:{0m}:{0s} {AM}")
@@ -139,20 +147,20 @@ defmodule DateFormatTest.ParseDefault do
 
   test "parse fractional seconds" do
     str = "2015-11-07T13:45:02.060Z"
-    assert {:ok, %DateTime{second: 2, ms: 60}} = parse(str, "{ISOz}")
+    assert {:ok, %DateTime{second: 2, millisecond: 60}} = parse(str, "{ISOz}")
   end
 
   test "parse s-epoch" do
-    date = Date.epoch |> Date.shift(years: 3, days: 12)
-    secs = Date.to_secs(date, :epoch)
+    date = DateTime.epoch |> Timex.shift(years: 3, days: 12)
+    secs = DateTime.to_seconds(date, :epoch)
     assert { :ok, ^date } = parse("#{secs}", "{s-epoch}")
     assert { :ok, ^date } = parse("#{secs}", "{0s-epoch}")
     assert { :ok, ^date } = parse("#{secs}", "{_s-epoch}")
 
-    date = Date.from({{2001,9,9},{1,46,40}})
+    date = Timex.datetime({{2001,9,9},{1,46,40}})
     assert { :ok, ^date } = parse("1000000000", "{s-epoch}")
 
-    date = Date.epoch()
+    date = DateTime.epoch()
     assert { :ok, ^date } = parse("0", "{s-epoch}")
     assert { :ok, ^date } = parse("0000000000", "{0s-epoch}")
     assert {:error, "Expected `seconds since epoch` at line 1, column 1."} = parse("  0", "{s-epoch}")
@@ -160,9 +168,9 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "parse RFC1123" do
-    date_gmt = Date.from({{2013,3,5},{23,25,19}}, "GMT")
-    date_utc = Date.from({{2013,3,5},{23,25,19}}, "UTC")
-    date_est = Date.from({{2013,3,5},{23,25,19}}, "EST")
+    date_gmt = Timex.datetime({{2013,3,5},{23,25,19}}, "GMT")
+    date_utc = Timex.datetime({{2013,3,5},{23,25,19}}, "UTC")
+    date_est = Timex.datetime({{2013,3,5},{23,25,19}}, "EST")
 
     # * `{RFC1123}`     - e.g. `Tue, 05 Mar 2013 23:25:19 GMT`
     assert { :ok, ^date_gmt } = parse("Tue, 05 Mar 2013 23:25:19 GMT", "{RFC1123}")
@@ -170,61 +178,61 @@ defmodule DateFormatTest.ParseDefault do
 
     # * `{RFC1123z}`    - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
     assert { :ok, ^date_utc } = parse("Tue, 05 Mar 2013 23:25:19 Z", "{RFC1123z}")
-    date_utc_at_one = Date.from({{2013,3,6},{1,25,19}})
+    date_utc_at_one = Timex.datetime({{2013,3,6},{1,25,19}})
     assert { :ok, ^date_utc_at_one } = parse("Tue, 06 Mar 2013 01:25:19 Z", "{RFC1123z}")
   end
 
   test "parse RFC822" do
     # * `{RFC822}`      - e.g. `Mon, 05 Jun 14 23:20:59 UT`
-    date = Date.from({{2014, 6, 5}, {23, 20, 59}}, "Etc/GMT+12")
+    date = Timex.datetime({{2014, 6, 5}, {23, 20, 59}}, "Etc/GMT+12")
     assert { :ok, ^date } = parse("Mon, 05 Jun 14 23:20:59 Y", "{RFC822}")
 
     # * `{RFC822z}`     - e.g. `Mon, 05 Jun 14 23:20:59 Z`
-    date = Date.from({{2014, 6, 5}, {23, 20, 59}}, "UTC")
+    date = Timex.datetime({{2014, 6, 5}, {23, 20, 59}}, "UTC")
     assert { :ok, ^date } = parse("Mon, 05 Jun 14 23:20:59 Z", "{RFC822z}")
   end
 
   test "parse RFC3339" do
     # * `{RFC3339}`     - e.g. `2013-03-05T23:25:19+02:00`
-    date = Date.from({{2013, 3, 5}, {23, 25, 19}}, "GMT-2")
+    date = Timex.datetime({{2013, 3, 5}, {23, 25, 19}}, "GMT-2")
     assert { :ok, ^date } = parse("2013-03-05T23:25:19+02:00", "{RFC3339}")
 
     # * `{RFC3339z}`    - e.g. `2013-03-05T23:25:19Z`
-    date = Date.from({{2013, 3, 5}, {23, 25, 19}}, "UTC")
+    date = Timex.datetime({{2013, 3, 5}, {23, 25, 19}}, "UTC")
     assert { :ok, ^date } = parse("2013-03-05T23:25:19Z", "{RFC3339z}")
   end
 
   test "parse ANSIC" do
     # * `{ANSIC}`       - e.g. `Tue Mar  5 23:25:19 2013`
-    date = Date.from({{2013, 3, 5}, {23, 25, 19}})
+    date = Timex.datetime({{2013, 3, 5}, {23, 25, 19}})
     assert { :ok, ^date } = parse("Tue Mar  5 23:25:19 2013", "{ANSIC}")
 
-    date = Date.from({{2015, 11, 16}, {22, 23, 48}}, "UTC")
+    date = Timex.datetime({{2015, 11, 16}, {22, 23, 48}}, "UTC")
     assert { :ok, ^date } = parse("Mon Nov 16 22:23:48 2015", "{ANSIC}")
   end
 
   test "parse UNIX" do
     # * `{UNIX}`        - e.g. `Tue Mar  5 23:25:19 EST 2013`
-    date = Date.from({{2013, 3, 5}, {23, 25, 19}}, "EST")
+    date = Timex.datetime({{2013, 3, 5}, {23, 25, 19}}, "EST")
     assert { :ok, ^date } = parse("Tue Mar  5 23:25:19 EST 2013", "{UNIX}")
 
 
-    date = Date.from({{2015, 10, 5}, {0, 7, 11}}, "PST")
+    date = Timex.datetime({{2015, 10, 5}, {0, 7, 11}}, "PST")
     assert { :ok, ^date } = parse("Mon Oct 5 00:07:11 PST 2015", "{UNIX}")
 
-    date = Date.from({{2015, 11, 16}, {22, 23, 48}}, "UTC")
+    date = Timex.datetime({{2015, 11, 16}, {22, 23, 48}}, "UTC")
     assert { :ok, ^date } = parse("Mon Nov 16 22:23:48 UTC 2015", "{UNIX}")
   end
 
   test "parse kitchen" do
     # * `{kitchen}`     - e.g. `3:25PM`
-    date = Date.now |> Date.set(hour: 15, minute: 25, second: 0, ms: 0)
+    date = DateTime.now |> Timex.set(hour: 15, minute: 25, second: 0, millisecond: 0)
     assert { :ok, ^date } = parse("3:25PM", "{kitchen}")
   end
 
   test "parse ISO8601" do
-    date1 = Date.from({{2014, 8, 14}, {12, 34, 33}})
-    date2 = %{date1 | :ms => 199}
+    date1 = Timex.datetime({{2014, 8, 14}, {12, 34, 33}})
+    date2 = %{date1 | :millisecond => 199}
 
     assert { :ok, ^date1 } = parse("2014-08-14T12:34:33+00:00", "{ISO}")
     assert { :ok, ^date1 } = parse("2014-08-14T12:34:33+0000", "{ISO}")
@@ -238,21 +246,21 @@ defmodule DateFormatTest.ParseDefault do
     assert { :ok, ^date2 } = parse("2014-08-14T12:34:33.199Z", "{ISO}")
     assert { :ok, ^date2 } = parse("2014-08-14T12:34:33.199Z", "{ISOz}")
 
-    date3 = Date.from({{2014, 8, 14}, {12, 34, 33}}, "Etc/GMT+5")
+    date3 = Timex.datetime({{2014, 8, 14}, {12, 34, 33}}, "Etc/GMT+5")
     assert { :ok, ^date3 } = parse("2014-08-14T12:34:33-05:00", "{ISO}")
     assert { :ok, ^date3 } = parse("2014-08-14T12:34:33-0500", "{ISO}")
     assert { :ok, ^date3 } = parse("2014-08-14T12:34:33-05", "{ISO}")
 
-    date4 = Date.from({{2007, 4, 5}, {14, 30, 0}})
+    date4 = Timex.datetime({{2007, 4, 5}, {14, 30, 0}})
     assert { :ok, ^date4} = parse("2007-04-05T14:30Z", "{ISO}")
 
-    date5 = Date.from({{2007, 4, 5}, {14, 0, 0}})
+    date5 = Timex.datetime({{2007, 4, 5}, {14, 0, 0}})
     assert { :ok, ^date5} = parse("2007-04-05T14Z", "{ISO}")
   end
 
   test "parse ISO8601 (Extended)" do
-    date1 = Date.from({{2014, 8, 14}, {12, 34, 33}})
-    date2 = %{date1 | :ms => 199}
+    date1 = Timex.datetime({{2014, 8, 14}, {12, 34, 33}})
+    date2 = %{date1 | :millisecond => 199}
 
     assert { :ok, ^date1 } = parse("2014-08-14T12:34:33+00:00", "{ISO:Extended}")
     assert { :ok, ^date1 } = parse("2014-08-14T12:34:33+0000", "{ISO:Extended}")
@@ -266,21 +274,21 @@ defmodule DateFormatTest.ParseDefault do
     assert { :ok, ^date2 } = parse("2014-08-14T12:34:33.199Z", "{ISO:Extended}")
     assert { :ok, ^date2 } = parse("2014-08-14T12:34:33.199Z", "{ISO:Extended:Z}")
 
-    date3 = Date.from({{2014, 8, 14}, {12, 34, 33}}, "Etc/GMT+5")
+    date3 = Timex.datetime({{2014, 8, 14}, {12, 34, 33}}, "Etc/GMT+5")
     assert { :ok, ^date3 } = parse("2014-08-14T12:34:33-05:00", "{ISO:Extended}")
     assert { :ok, ^date3 } = parse("2014-08-14T12:34:33-0500", "{ISO:Extended}")
     assert { :ok, ^date3 } = parse("2014-08-14T12:34:33-05", "{ISO:Extended}")
 
-    date4 = Date.from({{2007, 4, 5}, {14, 30, 0}})
+    date4 = Timex.datetime({{2007, 4, 5}, {14, 30, 0}})
     assert { :ok, ^date4} = parse("2007-04-05T14:30Z", "{ISO:Extended}")
 
-    date5 = Date.from({{2007, 4, 5}, {14, 0, 0}})
+    date5 = Timex.datetime({{2007, 4, 5}, {14, 0, 0}})
     assert { :ok, ^date5} = parse("2007-04-05T14Z", "{ISO:Extended}")
   end
 
   test "parse ISO8601 (Basic)" do
-    date1 = Date.from({{2014, 8, 14}, {12, 34, 33}})
-    date2 = %{date1 | :ms => 199}
+    date1 = Timex.datetime({{2014, 8, 14}, {12, 34, 33}})
+    date2 = %{date1 | :millisecond => 199}
 
     assert { :ok, ^date1 } = parse("20140814T123433+0000", "{ISO:Basic}")
     assert { :ok, ^date1 } = parse("20140814T123433+00", "{ISO:Basic}")
@@ -292,18 +300,18 @@ defmodule DateFormatTest.ParseDefault do
     assert { :ok, ^date2 } = parse("20140814T123433.199Z", "{ISO:Basic}")
     assert { :ok, ^date2 } = parse("20140814T123433.199Z", "{ISO:Basic:Z}")
 
-    date3 = Date.from({{2014, 8, 14}, {12, 34, 33}}, "Etc/GMT+5")
+    date3 = Timex.datetime({{2014, 8, 14}, {12, 34, 33}}, "Etc/GMT+5")
     assert { :ok, ^date3 } = parse("20140814T123433-0500", "{ISO:Basic}")
     assert { :ok, ^date3 } = parse("20140814T123433-05", "{ISO:Basic}")
 
-    date4 = Date.from({{2007, 4, 5}, {14, 30, 0}})
+    date4 = Timex.datetime({{2007, 4, 5}, {14, 30, 0}})
     assert { :ok, ^date4} = parse("20070405T1430Z", "{ISO:Basic}")
 
-    date5 = Date.from({{2007, 4, 5}, {14, 0, 0}})
+    date5 = Timex.datetime({{2007, 4, 5}, {14, 0, 0}})
     assert { :ok, ^date5} = parse("20070405T14Z", "{ISO:Basic}")
   end
 
   defp parse(date, fmt) do
-    DateFormat.parse(date, fmt)
+    Timex.parse(date, fmt)
   end
 end

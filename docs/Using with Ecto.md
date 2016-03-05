@@ -32,10 +32,10 @@ defmodule User do
 
   schema "users" do
     field :name, :string
-    field :a_date,       Timex.Ecto.Date # Timex version of :date
-    field :a_time,       Timex.Ecto.Time # Timex version of :time
-    field :a_datetime,   Timex.Ecto.DateTime # Timex version of :datetime
-    field :a_datetimetz, Timex.Ecto.DateTimeWithTimezone # A custom datatype (:datetimetz) implemented by Timex
+    field :a_date,       Timex.Ecto.Date # Timex version of :date, will reify as a Timex.Date
+    field :a_time,       Timex.Ecto.Time # Timex version of :time, will reify as a Timex.DateTime
+    field :a_datetime,   Timex.Ecto.DateTime # Timex version of :datetime, will reify as a Timex.DateTime
+    field :a_datetimetz, Timex.Ecto.DateTimeWithTimezone # A custom datatype (:datetimetz) implemented by Timex, will reify as a Timex.DateTime
   end
 end
 ```
@@ -126,9 +126,10 @@ defmodule EctoTest do
 
   def seed do
     time       = Time.now
-    datetime   = Date.now
+    date       = Date.today
+    datetime   = DateTime.now
     datetimetz = Timezone.convert(datetime, "Europe/Copenhagen")
-    u = %User{name: "Paul", date_test: datetime, time_test: time, datetime_test: datetime, datetimetz_test: datetimetz}
+    u = %User{name: "Paul", date_test: date, time_test: time, datetime_test: datetime, datetimetz_test: datetimetz}
     Repo.insert!(u)
   end
 
@@ -159,16 +160,13 @@ iex(1)> EctoTest.seed
 14:45:43.461 [debug] INSERT INTO "users" ("date_test", "datetime_test", "datetimetz_test", "name", "time_test") VALUES ($1, $2, $3, $4, $5) RETURNING "id" [{2015, 6, 25}, {{2015, 6, 25}, {19, 45, 43, 457000}}, {{{2015, 6, 25}, {21, 45, 43, 457000}}, "Europe/Copenhagen"}, "Paul", {19, 45, 43, 457000}] OK query=3.9ms
 %EctoTest.User{__meta__: %Ecto.Schema.Metadata{source: "users",
   state: :loaded},
- date_test: %Timex.DateTime{calendar: :gregorian, day: 25, hour: 19, minute: 45,
-  month: 6, ms: 457, second: 43,
-  timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min,
-   full_name: "UTC", offset_std: 0, offset_utc: 0, until: :max}, year: 2015},
+ date_test: %Timex.Date{calendar: :gregorian, day: 25, month: 6, year: 2015},
  datetime_test: %Timex.DateTime{calendar: :gregorian, day: 25, hour: 19,
-  minute: 45, month: 6, ms: 457, second: 43,
+  minute: 45, month: 6, millisecond: 457, second: 43,
   timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min,
    full_name: "UTC", offset_std: 0, offset_utc: 0, until: :max}, year: 2015},
  datetimetz_test: %Timex.DateTime{calendar: :gregorian, day: 25, hour: 21,
-  minute: 45, month: 6, ms: 457, second: 43,
+  minute: 45, month: 6, millisecond: 457, second: 43,
   timezone: %Timex.TimezoneInfo{abbreviation: "CEST",
    from: {:sunday, {{2015, 3, 29}, {2, 0, 0}}}, full_name: "Europe/Copenhagen",
    offset_std: 60, offset_utc: 60,
@@ -179,16 +177,13 @@ iex(2)> EctoTest.all
 14:45:46.721 [debug] SELECT u0."id", u0."name", u0."date_test", u0."time_test", u0."datetime_test", u0."datetimetz_test" FROM "users" AS u0 [] OK query=0.7ms
 [%EctoTest.User{__meta__: %Ecto.Schema.Metadata{source: "users",
    state: :loaded},
-  date_test: %Timex.DateTime{calendar: :gregorian, day: 25, hour: 0, minute: 0,
-   month: 6, ms: 0, second: 0,
-   timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min,
-    full_name: "UTC", offset_std: 0, offset_utc: 0, until: :max}, year: 2015},
+  date_test: %Timex.Date{calendar: :gregorian, day: 25, month: 6, year: 2015},
   datetime_test: %Timex.DateTime{calendar: :gregorian, day: 25, hour: 19,
-   minute: 45, month: 6, ms: 457.0, second: 43,
+   minute: 45, month: 6, millisecond: 457.0, second: 43,
    timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min,
     full_name: "UTC", offset_std: 0, offset_utc: 0, until: :max}, year: 2015},
   datetimetz_test: %Timex.DateTime{calendar: :gregorian, day: 25, hour: 21,
-   minute: 45, month: 6, ms: 457.0, second: 43,
+   minute: 45, month: 6, millisecond: 457.0, second: 43,
    timezone: %Timex.TimezoneInfo{abbreviation: "CEST",
     from: {:sunday, {{2015, 3, 29}, {2, 0, 0}}}, full_name: "Europe/Copenhagen",
     offset_std: 60, offset_utc: 60,

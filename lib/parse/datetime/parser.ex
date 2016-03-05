@@ -5,14 +5,14 @@ defmodule Timex.Parse.DateTime.Parser do
   import Combine.Parsers.Base, only: [eof: 0, sequence: 1, map: 2, pipe: 2]
 
   alias Timex.Date
-  alias Timex.Time
   alias Timex.DateTime
-  alias Timex.TimezoneInfo
+  alias Timex.Time
   alias Timex.Timezone
+  alias Timex.TimezoneInfo
   alias Timex.Parse.ParseError
   alias Timex.Parse.DateTime.Tokenizers.Directive
-  alias Timex.Parse.DateTime.Tokenizers.Default, as: DefaultTokenizer
-  alias Timex.Date.Convert, as: DateConvert
+  alias Timex.Parse.DateTime.Tokenizers.Default
+  alias Timex.Parse.DateTime.Tokenizers.Strftime
 
 
   @doc """
@@ -32,10 +32,12 @@ defmodule Timex.Parse.DateTime.Parser do
       "UTC"
 
   """
-  @spec parse(binary, binary) :: {:ok, %DateTime{}} | {:error, term}
+  @spec parse(binary, binary) :: {:ok, DateTime.t} | {:error, term}
   def parse(date_string, format_string)
     when is_binary(date_string) and is_binary(format_string),
-    do: parse(date_string, format_string, DefaultTokenizer)
+    do: parse(date_string, format_string, Default)
+  def parse(_, _),
+    do: {:error, :badarg}
 
   @doc """
   Parses a date/time string using the provided tokenizer. Tokenizers must implement the
@@ -55,7 +57,9 @@ defmodule Timex.Parse.DateTime.Parser do
       "Etc/GMT+2"
 
   """
-  @spec parse(binary, binary, atom) :: {:ok, %DateTime{}} | {:error, term}
+  @spec parse(binary, binary, atom) :: {:ok, DateTime.t} | {:error, term}
+  def parse(date_string, format_string, :strftime),
+    do: parse(date_string, format_string, Strftime)
   def parse(date_string, format_string, tokenizer)
     when is_binary(date_string) and is_binary(format_string)
     do
@@ -69,12 +73,13 @@ defmodule Timex.Parse.DateTime.Parser do
           end
       end
   end
+  def parse(_, _, _), do: {:error, :badarg}
 
   @doc """
   Same as `parse/2` and `parse/3`, but raises on error.
   """
-  @spec parse!(String.t, String.t, atom | nil) :: %DateTime{} | no_return
-  def parse!(date_string, format_string, tokenizer \\ DefaultTokenizer)
+  @spec parse!(String.t, String.t, atom | nil) :: DateTime.t | no_return
+  def parse!(date_string, format_string, tokenizer \\ Default)
     when is_binary(date_string) and is_binary(format_string) and is_atom(tokenizer)
     do
       case parse(date_string, format_string, tokenizer) do
@@ -152,18 +157,18 @@ defmodule Timex.Parse.DateTime.Parser do
     case token do
       # Formats
       clock when clock in [:kitchen, :strftime_iso_kitchen] ->
-        case apply_directives(value, Date.now, tokenizer) do
+        case apply_directives(value, DateTime.now, tokenizer) do
           {:error, _} = err -> err
-          {:ok, date} when clock == :kitchen -> %{date | :second => 0, :ms => 0}
-          {:ok, date} -> %{date | :ms => 0}
+          {:ok, date} when clock == :kitchen -> %{date | :second => 0, :millisecond => 0}
+          {:ok, date} -> %{date | :millisecond => 0}
         end
       # Years
       :century   ->
-        century = Date.century(%{date | :year => year})
+        century = Timex.century(%{date | :year => year})
         year_shifted = year + ((value - century) * 100)
         %{date | :year => year_shifted}
       y when y in [:year2, :iso_year2] ->
-        current_century = Date.century(Date.now)
+        current_century = Timex.century(DateTime.now)
         year_shifted    = value + ((current_century - 1) * 100)
         %{date | :year => year_shifted}
       y when y in [:year4, :iso_year4] ->
@@ -171,7 +176,7 @@ defmodule Timex.Parse.DateTime.Parser do
         # so we must lookup the timezone again to ensure it's properly set
         case date do
           %DateTime{timezone: %Timex.TimezoneInfo{:full_name => tzname}} ->
-            zone_date = DateConvert.to_erlang_datetime(%{date | :year => value})
+            zone_date = Timex.to_erlang_datetime(%{date | :year => value})
             %{date | :year => value, :timezone => Timezone.get(tzname, zone_date)}
           %DateTime{timezone: nil} ->
             %{date | :year => value}
@@ -179,35 +184,35 @@ defmodule Timex.Parse.DateTime.Parser do
       # Months
       :month  -> %{date | :month => value}
       month when month in [:mshort, :mfull] ->
-        %{date | :month => Date.month_to_num(value)}
+        %{date | :month => Timex.month_to_num(value)}
       # Days
       :day      -> %{date | :day => value}
       :oday when is_integer(value) and value >= 0 ->
-        Date.from_iso_day(value, date)
+        Timex.from_iso_day(value, date)
       :wday_mon ->
         current_day = Date.weekday(date)
         cond do
           current_day == value -> date
-          current_day > value  -> Date.shift(date, days: current_day - value)
-          current_day < value  -> Date.shift(date, days: value - current_day)
+          current_day > value  -> Timex.shift(date, days: current_day - value)
+          current_day < value  -> Timex.shift(date, days: value - current_day)
         end
       :wday_sun ->
         current_day = Date.weekday(date) - 1
         cond do
           current_day == value -> date
-          current_day > value -> Date.shift(date, days: current_day - value)
-          current_day < value -> Date.shift(date, days: value - current_day)
+          current_day > value -> Timex.shift(date, days: current_day - value)
+          current_day < value -> Timex.shift(date, days: value - current_day)
         end
       day when day in [:wdshort, :wdfull] ->
-        %{date | :day => Date.day_to_num(value)}
+        %{date | :day => Timex.day_to_num(value)}
       # Weeks
       :iso_weeknum ->
-        {year, _, weekday} = Date.iso_triplet(date)
-        %DateTime{year: y, month: m, day: d} = Date.from_iso_triplet({year, value, weekday})
+        {year, _, weekday} = Timex.iso_triplet(date)
+        %DateTime{year: y, month: m, day: d} = Timex.from_iso_triplet({year, value, weekday})
         %{date | :year => y, :month => m, :day => d}
       week_num when week_num in [:week_mon, :week_sun] ->
         reset = %{date | :month => 1, :day => 1}
-        reset |> Date.shift(weeks: value)
+        reset |> Timex.shift(weeks: value)
       # Hours
       hour when hour in [:hour24, :hour12] ->
         %{date | :hour => value}
@@ -216,10 +221,10 @@ defmodule Timex.Parse.DateTime.Parser do
       :sec_fractional ->
         case value do
           "" -> date
-          n when is_number(n) -> %{date | :ms => n}
+          n when is_number(n) -> %{date | :millisecond => n}
         end
-      :us -> %{date | :ms => div(value, 1000)}
-      :sec_epoch -> Date.from(value, :secs, :epoch)
+      :us -> %{date | :millisecond => div(value, 1000)}
+      :sec_epoch -> DateTime.from_seconds(value, :epoch)
       am_pm when am_pm in [:am, :AM] ->
         {converted, hemisphere} = Time.to_12hour_clock(hh)
         case value do
@@ -235,18 +240,18 @@ defmodule Timex.Parse.DateTime.Parser do
         end
       # Timezones
       :zoffs ->
-        zone_date = DateConvert.to_erlang_datetime(date)
+        zone_date = Timex.to_erlang_datetime(date)
         %{date | :timezone => Timezone.get(value, zone_date)}
       :zname ->
-        zone_date = DateConvert.to_erlang_datetime(date)
+        zone_date = Timex.to_erlang_datetime(date)
         %{date | :timezone => Timezone.get(value, zone_date)}
       tz when tz in [:zoffs_colon, :zoffs_sec] ->
         case value do
           <<?-, h1::utf8, h2::utf8, _::binary>> ->
-            zone_date = DateConvert.to_erlang_datetime(date)
+            zone_date = Timex.to_erlang_datetime(date)
             %{date | :timezone => Timezone.get(<<?-, h1::utf8, h2::utf8>>, zone_date)}
           <<?+, h1::utf8, h2::utf8, _::binary>> ->
-            zone_date = DateConvert.to_erlang_datetime(date)
+            zone_date = Timex.to_erlang_datetime(date)
             %{date | :timezone => Timezone.get(<<?+, h1::utf8, h2::utf8>>, zone_date)}
           _ ->
             {:error, "#{token} not implemented"}

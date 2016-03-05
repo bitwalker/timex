@@ -24,8 +24,7 @@ defmodule Timex.Timezone.Local do
   Each location is tried, and if an error is encountered, the next is attempted,
   until either a successful lookup is performed, or we run out of locations to check.
   """
-  alias Timex.DateTime,              as: DateTime
-  alias Timex.Date,                  as: Date
+  alias Timex.DateTime
   alias Timex.Timezone.Database,     as: ZoneDatabase
   alias Timex.Parse.ZoneInfo.Parser, as: ZoneParser
   alias Timex.Parse.ZoneInfo.Parser.TransitionInfo
@@ -41,9 +40,9 @@ defmodule Timex.Timezone.Local do
   Looks up the local timezone configuration. Returns the name of a timezone
   in the Olson database.
   """
-  @spec lookup(DateTime.t | nil) :: String.t
+  @spec lookup(DateTime.t | nil) :: String.t | {:error, term}
 
-  def lookup(), do: Date.now |> lookup
+  def lookup(), do: lookup(DateTime.now)
   def lookup(%DateTime{} = date) do
     case Application.get_env(:timex, :local_timezone) do
       nil ->
@@ -51,7 +50,7 @@ defmodule Timex.Timezone.Local do
           {:unix, :darwin} -> localtz(:osx, date)
           {:unix, _}       -> localtz(:unix, date)
           {:win32, :nt}    -> localtz(:win, date)
-          _                -> raise "Unsupported operating system!"
+          _                -> {:error, {:localtz, :unsupported_operating_system}}
         end
         Application.put_env(:timex, :local_timezone, tz)
         tz
@@ -248,7 +247,7 @@ defmodule Timex.Timezone.Local do
   parses out the timezone for the provided reference date
   """
   @spec parse_tzfile(binary) :: {:ok, String.t} | {:error, term}
-  def parse_tzfile(tzdata), do: parse_tzfile(tzdata, Date.now)
+  def parse_tzfile(tzdata), do: parse_tzfile(tzdata, DateTime.now)
 
   @doc """
   Given a binary representing the data from a tzfile (not the source version),
@@ -259,7 +258,7 @@ defmodule Timex.Timezone.Local do
     # Parse file to Zone{}
     {:ok, %Zone{transitions: transitions}} = ZoneParser.parse(tzdata)
     # Get the zone for the current time
-    timestamp  = reference_date |> Date.to_secs
+    timestamp  = reference_date |> DateTime.to_seconds
     transition = transitions
       |> Enum.sort(fn %TransitionInfo{starts_at: utime1}, %TransitionInfo{starts_at: utime2} -> utime1 > utime2 end)
       |> Enum.reject(fn %TransitionInfo{starts_at: unix_time} -> unix_time > timestamp end)

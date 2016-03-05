@@ -3,8 +3,8 @@ defmodule Timex.Mixfile do
 
   def project do
     [ app: :timex,
-      version: "1.0.2",
-      elixir: "~> 1.0",
+      version: "2.0.0",
+      elixir: "~> 1.1",
       description: description,
       package: package,
       deps: deps,
@@ -27,12 +27,19 @@ defmodule Timex.Mixfile do
 
     - Supports local-timezone lookups
     - Supports POSIX-style timezones
+    - Supports lookups of any Olson tzdata timezones
+    - Supports arbitrary shifts across time and through timezones,
+      including ambiguous time periods, non-existent time periods, and leaps.
 
-    Provides a broad array of Date helper functions
+    Provides both Date and DateTime types, for use depending on your needs,
+    with an AmbiguousDateTime type for handling those DateTime values which fall on
+    an ambigouos timezone period.
+
+    Provides a broad array of date/time helper functions
 
     - shifting/adding/subtracting
     - diffing
-    - comparing
+    - comparing/before?/after?/between?
     - conversions
     - get day of week, week of year, ISO dates, and names for each
     - get the beginning or ending of a given week
@@ -40,15 +47,15 @@ defmodule Timex.Mixfile do
     - get days in a given month
     - normalization
 
-    Provides a broad array of Time helpers
+    Provides a broad array of time-specific helpers
 
-    - convert to and from units: weeks, days, hours, seconds, ms, and nanoseconds
+    - convert to and from units: weeks, days, hours, seconds, ms, and microseconds
     - measure execution time
     - diff/compare
     - to/from 12/24 hour clock times
     - add/subtract
 
-    Safe DateTime string formatting and parsing
+    Safe date/time string formatting and parsing
 
     - Informative parser errors
     - Supports strftime, as well as an easier to read formatter, i.e. `{ISO:Basic}`, `{YYYY}`
@@ -73,19 +80,20 @@ defmodule Timex.Mixfile do
   def deps do
     [{:tzdata, "~> 0.1.8 or ~> 0.5"},
      {:combine, "~> 0.7"},
-     {:ex_doc, "== 0.10.0", only: :dev},
-     {:earmark, "== 0.1.19", only: :dev},
+     {:ex_doc, "~> 0.11", only: :dev},
+     {:earmark, "~> 0.2", only: :dev},
      {:benchfella, "~> 0.3", only: :dev},
      {:dialyze, "~> 0.2", only: :dev},
-     {:excoveralls, "~> 0.4", only: :test},
-     {:inch_ex, "~> 0.4", only: :docs}]
+     {:excoveralls, "~> 0.4", only: [:dev, :test]},
+     {:inch_ex, "~> 0.4", only: [:dev, :test]}]
   end
 
   defp docs do
-    [main: "extra-getting-started",
+    [main: "getting-started",
      formatter_opts: [gfm: true],
      extras: [
        "docs/Getting Started.md",
+       "CHANGELOG.md",
        "docs/Basic Usage.md",
        "docs/Erlang Interop.md",
        "docs/Working with DateTime.md",

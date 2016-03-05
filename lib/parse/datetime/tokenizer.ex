@@ -5,7 +5,7 @@ defmodule Timex.Parse.DateTime.Tokenizer do
   use Behaviour
   alias Timex.Parse.DateTime.Tokenizers.Directive
 
-  defcallback tokenize(format_string :: String.t) :: [%Directive{}] | {:error, term}
+  defcallback tokenize(format_string :: String.t) :: [Directive.t] | {:error, term}
   defcallback apply(Timex.DateTime.t, token :: atom, value :: term) :: Timex.DateTime.t | {:error, term} | :unrecognized
 
   defmacro __using__(_) do
@@ -13,9 +13,9 @@ defmodule Timex.Parse.DateTime.Tokenizer do
       @behaviour Timex.Parse.DateTime.Tokenizer
 
       import Timex.Parse.DateTime.Tokenizer
-      alias Timex.Date
-      alias Timex.Time
+
       alias Timex.DateTime
+      alias Timex.Time
       alias Timex.Parse.DateTime.Tokenizers.Directive
     end
   end

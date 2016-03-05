@@ -1,4 +1,4 @@
-defmodule Timex.DateFormat.Bench do
+defmodule Timex.Timex.Bench do
     use Benchfella
     use Timex
     alias Timex.Parse.DateTime.Tokenizers.Strftime
@@ -8,29 +8,29 @@ defmodule Timex.DateFormat.Bench do
     @datetime_zoned "2014-07-22T12:30:05+02:00"
 
     bench "(default) parse ISO 8601 datetime" do
-      datetime = DateFormat.parse(@datetime, "{ISOz}")
-      datetime_zoned = DateFormat.parse(@datetime_zoned, "{ISO}")
+      datetime = Timex.parse(@datetime, "{ISOz}")
+      datetime_zoned = Timex.parse(@datetime_zoned, "{ISO}")
       {:ok, _} = datetime
       {:ok, _} = datetime_zoned
     end
 
     bench "(strftime) parse ISO 8601 datetime" do
-      datetime = DateFormat.parse(@datetime, "%FT%TZ", :strftime)
-      datetime_zoned = DateFormat.parse(@datetime_zoned, "%FT%T%z", :strftime)
+      datetime = Timex.parse(@datetime, "%FT%TZ", :strftime)
+      datetime_zoned = Timex.parse(@datetime_zoned, "%FT%T%z", :strftime)
       {:ok, _} = datetime
       {:ok, _} = datetime_zoned
     end
 
     bench "(default) format ISO 8601 datetime" do
-      date = Date.epoch
-      {:ok, _} = DateFormat.format(date, "{ISOz}")
-      {:ok, _} = DateFormat.format(date, "{ISO}")
+      date = DateTime.epoch
+      {:ok, _} = Timex.format(date, "{ISOz}")
+      {:ok, _} = Timex.format(date, "{ISO}")
     end
 
     bench "(strftime) format ISO 8601 datetime" do
-      date = Date.epoch
-      {:ok, _} = DateFormat.format(date, "%FT%TZ", :strftime)
-      {:ok, _} = DateFormat.format(date, "%FT%Tz", :strftime)
+      date = DateTime.epoch
+      {:ok, _} = Timex.format(date, "%FT%TZ", :strftime)
+      {:ok, _} = Timex.format(date, "%FT%Tz", :strftime)
     end
 
     bench "(strftime) tokenize ISO 8601" do
@@ -43,8 +43,8 @@ defmodule Timex.DateFormat.Bench do
       {:ok, _} = Default.tokenize("{YYYY}-{M}-{D}T{h24}:{m}:{s}{Z}")
     end
 
-    bench "Date.local" do
-      _ = Date.local
+    bench "DateTime.local" do
+      _ = DateTime.local
       :ok
     end
 end

@@ -1,17 +1,21 @@
 defmodule Timex.Format.DateTime.Formatter do
+  @moduledoc """
+  This module defines the behaviour for custom DateTime formatters.
+  """
   use Behaviour
 
   alias Timex.Date
+  alias Timex.DateTime
   alias Timex.Time
   alias Timex.Timezone
-  alias Timex.DateTime
   alias Timex.Format.FormatError
   alias Timex.Format.DateTime.Formatters.Default
+  alias Timex.Format.DateTime.Formatters.Strftime
   alias Timex.Parse.DateTime.Tokenizers.Directive
 
-  defcallback tokenize(format_string :: String.t) :: {:ok, [%Directive{}]} | {:error, term}
-  defcallback format(date :: %DateTime{}, format_string :: String.t)  :: {:ok, String.t} | {:error, term}
-  defcallback format!(date :: %DateTime{}, format_string :: String.t) :: String.t | no_return
+  defcallback tokenize(format_string :: String.t) :: {:ok, [Directive.t]} | {:error, term}
+  defcallback format(date :: DateTime.t, format_string :: String.t)  :: {:ok, String.t} | {:error, term}
+  defcallback format!(date :: DateTime.t, format_string :: String.t) :: String.t | no_return
 
   @doc false
   defmacro __using__(_opts) do
@@ -30,8 +34,12 @@ defmodule Timex.Format.DateTime.Formatter do
 
   If an error is encountered during formatting, `format!` will raise.
   """
-  @spec format!(%DateTime{}, String.t, atom | nil) :: String.t | no_return
-  def format!(%DateTime{} = date, format_string, formatter \\ Default)
+  @spec format!(Date.t | DateTime.t, String.t, atom | nil) :: String.t | no_return
+  def format!(date, format_string, formatter \\ Default)
+
+  def format!(%Date{} = date, format_string, formatter),
+    do: format!(Timex.to_datetime(date), format_string, formatter)
+  def format!(%DateTime{} = date, format_string, formatter)
     when is_binary(format_string) and is_atom(formatter)
     do
       case format(date, format_string, formatter) do
@@ -39,18 +47,25 @@ defmodule Timex.Format.DateTime.Formatter do
         {:error, reason} -> raise FormatError, message: reason
       end
   end
+  def format!(a,b,c), do: raise "invalid argument(s) to format!/3: #{inspect a}, #{inspect b}, #{inspect c}"
 
   @doc """
   Formats a DateTime struct as a string, using the provided format
   string and formatter. If a formatter is not provided, the formatter
   used is `Timex.DateFormat.Formatters.DefaultFormatter`.
   """
-  @spec format(%DateTime{}, String.t, atom | nil) :: {:ok, String.t} | {:error, term}
+  @spec format(Date.t | DateTime.t, String.t, atom | nil) :: {:ok, String.t} | {:error, term}
   def format(date, format_string, formatter \\ Default)
 
+  def format(%Date{} = date, format_string, formatter),
+    do: format(Timex.to_datetime(date), format_string, formatter)
+  def format(datetime, format_string, :strftime),
+    do: format(datetime, format_string, Strftime)
   def format(%DateTime{} = date, format_string, formatter)
-    when is_binary(format_string) and is_atom(formatter),
-    do: formatter.format(date, format_string)
+    when is_binary(format_string) and is_atom(formatter) do
+      formatter.format(date, format_string)
+  end
+  def format(_, _, _), do: {:error, :badarg}
 
   @doc """
   Validates the provided format string, using the provided formatter,
@@ -58,8 +73,13 @@ defmodule Timex.Format.DateTime.Formatter do
   or `{:error, reason}` if not valid.
   """
   @spec validate(String.t, atom | nil) :: :ok | {:error, term}
-  def validate(format_string, formatter \\ Default) when is_binary(format_string) do
+  def validate(format_string, formatter \\ Default)
+  def validate(format_string, formatter) when is_binary(format_string) and is_atom(formatter) do
     try do
+      formatter = case formatter do
+                    :strftime -> Strftime
+                    _         -> formatter
+                  end
       case formatter.tokenize(format_string) do
         {:error, _} = error -> error
         {:ok, []} -> {:error, "There were no formatting directives in the provided string."}
@@ -69,15 +89,18 @@ defmodule Timex.Format.DateTime.Formatter do
       x -> {:error, x}
     end
   end
+  def validate(_, _), do: {:error, :badarg}
 
   @doc """
   Given a token (as found in `Timex.Parsers.Directive`), and a DateTime struct,
   produce a string representation of the token using values from the struct.
   """
-  @spec format_token(atom, %DateTime{}, list(), list(), list()) :: String.t | {:error, term}
+  @spec format_token(atom, Date.t | DateTime.t, list(), list(), list()) :: String.t | {:error, term}
   def format_token(token, date, modifiers, flags, width)
 
   # Formats
+  def format_token(token, %Date{} = date, modifiers, flags, width),
+    do: format_token(token, Timex.to_datetime(date), modifiers, flags, width)
   def format_token(:iso_date, %DateTime{} = date, modifiers, _flags, _width) do
     flags = [padding: :zeroes]
     year  = format_token(:year4, date, modifiers, flags, width_spec(4..4))
@@ -325,36 +348,36 @@ defmodule Timex.Format.DateTime.Formatter do
   def format_token(:year2, %DateTime{year: year}, _modifiers, flags, width),   do: "#{pad_numeric(rem(year, 100), flags, width)}"
   def format_token(:century, %DateTime{year: year}, _modifiers, flags, width), do: "#{pad_numeric(div(year, 100), flags, width)}"
   def format_token(:iso_year4,  %DateTime{} = date, _modifiers, flags, width) do
-    {iso_year, _} = date |> Date.iso_week
+    {iso_year, _} = Timex.iso_week(date)
     "#{pad_numeric(iso_year, flags, width)}"
   end
   def format_token(:iso_year2,  %DateTime{} = date, _modifiers, flags, width) do
-    {iso_year, _} = date |> Date.iso_week
+    {iso_year, _} = Timex.iso_week(date)
     "#{pad_numeric(rem(iso_year, 100), flags, width)}"
   end
   # Months
   def format_token(:month, %DateTime{month: month}, _modifiers, flags, width), do: "#{pad_numeric(month, flags, width)}"
-  def format_token(:mshort, %DateTime{month: month}, _, _, _), do: Date.month_shortname(month)
-  def format_token(:mfull, %DateTime{month: month}, _, _, _),  do: Date.month_name(month)
+  def format_token(:mshort, %DateTime{month: month}, _, _, _), do: Timex.month_shortname(month)
+  def format_token(:mfull, %DateTime{month: month}, _, _, _),  do: Timex.month_name(month)
   # Days
   def format_token(:day, %DateTime{day: day}, _modifiers, flags, width), do: "#{pad_numeric(day, flags, width)}"
-  def format_token(:oday, %DateTime{} = date, _modifiers, flags, width), do: "#{pad_numeric(Date.day(date), flags, width)}"
+  def format_token(:oday, %DateTime{} = date, _modifiers, flags, width), do: "#{pad_numeric(Timex.day(date), flags, width)}"
   # Weeks
   def format_token(:iso_weeknum, %DateTime{} = date, _modifiers, flags, width) do
-    {_, week} = Date.iso_week(date)
+    {_, week} = Timex.iso_week(date)
     "#{pad_numeric(week, flags, width)}"
   end
   def format_token(:week_mon, %DateTime{} = date, _modifiers, flags, width) do
-    {_, week} = Date.iso_week(date)
+    {_, week} = Timex.iso_week(date)
     "#{pad_numeric(week, flags, width)}"
   end
   def format_token(:week_sun, %DateTime{year: year} = date, _modifiers, flags, width) do
-    weeks_in_year = case Date.iso_week({year, 12, 31}) do
+    weeks_in_year = case Timex.iso_week({year, 12, 31}) do
       {^year, 53} -> 53
       _           -> 52
     end
-    ordinal = Date.day(date)
-    weekday = case Date.weekday(date) do # shift back one since our week starts with Sunday instead of Monday
+    ordinal = Timex.day(date)
+    weekday = case Timex.weekday(date) do # shift back one since our week starts with Sunday instead of Monday
       7 -> 0
       x -> x
     end
@@ -368,19 +391,19 @@ defmodule Timex.Format.DateTime.Formatter do
     "#{pad_numeric(week, flags, width)}"
   end
   def format_token(:wday_mon, %DateTime{} = date, _modifiers, flags, width),
-    do: "#{Date.weekday(date) |> pad_numeric(flags, width)}"
+    do: "#{Timex.weekday(date) |> pad_numeric(flags, width)}"
   def format_token(:wday_sun, %DateTime{} = date, _modifiers, flags, width) do
     # from 1..7 to 0..6
-    weekday = case Date.weekday(date) do
+    weekday = case Timex.weekday(date) do
       7   -> 0
       day -> day
     end
     "#{pad_numeric(weekday, flags, width)}"
   end
   def format_token(:wdshort, %DateTime{} = date, _modifiers, _flags, _width),
-    do: "#{Date.weekday(date) |> Date.day_shortname}"
+    do: "#{Timex.weekday(date) |> Timex.day_shortname}"
   def format_token(:wdfull, %DateTime{} = date, _modifiers, _flags, _width),
-    do: "#{Date.weekday(date) |> Date.day_name}"
+    do: "#{Timex.weekday(date) |> Timex.day_name}"
   # Hours
   def format_token(:hour24, %DateTime{hour: hour}, _modifiers, flags, width), do: "#{pad_numeric(hour, flags, width)}"
   def format_token(:hour12, %DateTime{hour: hour}, _modifiers, flags, width) do
@@ -389,12 +412,12 @@ defmodule Timex.Format.DateTime.Formatter do
   end
   def format_token(:min, %DateTime{minute: min}, _modifiers, flags, width), do: "#{pad_numeric(min, flags, width)}"
   def format_token(:sec, %DateTime{second: sec}, _modifiers, flags, width), do: "#{pad_numeric(sec, flags, width)}"
-  def format_token(:sec_fractional, %DateTime{ms: 0}, _modifiers, _flags, _width), do: <<>>
-  def format_token(:sec_fractional, %DateTime{ms: ms}, _modifiers, _flags, _width)
+  def format_token(:sec_fractional, %DateTime{millisecond: 0}, _modifiers, _flags, _width), do: <<>>
+  def format_token(:sec_fractional, %DateTime{millisecond: ms}, _modifiers, _flags, _width)
     when ms < 10, do: ".00#{trunc(ms)}"
-  def format_token(:sec_fractional, %DateTime{ms: ms}, _modifiers, _flags, _width)
+  def format_token(:sec_fractional, %DateTime{millisecond: ms}, _modifiers, _flags, _width)
     when ms < 100, do: ".0#{trunc(ms)}"
-  def format_token(:sec_fractional, %DateTime{ms: ms}, _modifiers, _flags, _width),
+  def format_token(:sec_fractional, %DateTime{millisecond: ms}, _modifiers, _flags, _width),
     do: ".#{trunc(ms)}"
 
   def format_token(:sec_epoch, %DateTime{} = date, _modifiers, flags, width) do
@@ -402,10 +425,10 @@ defmodule Timex.Format.DateTime.Formatter do
       padding when padding in [:zeroes, :spaces] ->
         {:error, {:formatter, "Invalid directive flag: Cannot pad seconds from epoch, as it is not a fixed width integer."}}
       _ ->
-        "#{Date.to_secs(date, :epoch) |> pad_numeric(flags, width)}"
+        "#{DateTime.to_seconds(date, :epoch) |> pad_numeric(flags, width)}"
     end
   end
-  def format_token(:us, %DateTime{ms: ms}, _modifiers, flags, width) do
+  def format_token(:us, %DateTime{millisecond: ms}, _modifiers, flags, width) do
     "#{pad_numeric(ms, flags, width)}000"
   end
   def format_token(:am, %DateTime{hour: hour}, _modifiers, _flags, _width),
@@ -447,7 +470,7 @@ defmodule Timex.Format.DateTime.Formatter do
     end
   end
   def format_token(token, _, _, _, _) do
-    {:error, {:formatter, "Unsupported token: #{token}"}}
+    {:error, {:formatter, :unsupported_token, token}}
   end
 
   defp pad_numeric(number, flags, width) when is_integer(number), do: pad_numeric("#{number}", flags, width)

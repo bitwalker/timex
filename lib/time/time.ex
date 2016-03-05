@@ -5,87 +5,136 @@ defmodule Timex.Time do
   it provides an easy way to wrap the measurement of function
   execution time (via `measure`).
   """
+  alias Timex.Types
+  use Timex.Constants
+  import Timex.Macros
 
-  @type units :: :usecs | :msecs | :secs | :mins | :hours | :days | :weeks | :hms
-
-  @usecs_in_sec  1_000_000
-  @usecs_in_msec 1_000
-  @msecs_in_sec  1_000
-  @secs_in_min   60
-  @secs_in_hour  @secs_in_min * 60
-  @secs_in_day   @secs_in_hour * 24
-  @secs_in_week  @secs_in_day * 7
-  @million       1_000_000
+  @type units :: :microseconds | :milliseconds | :seconds | :minutes | :hours | :days | :weeks | :hms
 
   @doc """
   Converts a timestamp to its value in microseconds
   """
-  @spec to_usecs(Date.timestamp) :: integer
-  def to_usecs({mega, sec, micro}), do: mega * @million * @million + sec * @million + micro
+  @spec to_microseconds(Types.timestamp) :: integer
+  def to_microseconds({mega, sec, micro}) do
+    total_seconds = (mega * @million) + sec
+    total_microseconds = (total_seconds * 1_000 * 1_000) + micro
+    total_microseconds
+  end
+  defdeprecated to_usecs(timestamp), "use to_microseconds/1 instead", do: to_microseconds(timestamp)
   @doc """
   Converts a timestamp to its value in milliseconds
   """
-  @spec to_msecs(Date.timestamp) :: float
-  def to_msecs({_, _, _} = ts), do: to_usecs(ts) / @usecs_in_msec
+  @spec to_milliseconds(Types.timestamp) :: float
+  def to_milliseconds({_, _, _} = ts), do: to_microseconds(ts) / 1_000
+  defdeprecated to_msecs(timestamp), "use to_milliseconds/1 instead", do: to_milliseconds(timestamp)
   @doc """
   Converts a timestamp to its value in seconds
   """
-  @spec to_secs(Date.timestamp) :: float
-  def to_secs({_, _, _} = ts), do: to_usecs(ts) / @usecs_in_sec
+  @spec to_seconds(Types.timestamp) :: float
+  def to_seconds({_, _, _} = ts), do: to_milliseconds(ts) / 1_000
+  defdeprecated to_secs(timestamp), "use to_seconds/1 instead", do: to_seconds(timestamp)
   @doc """
   Converts a timestamp to its value in minutes
   """
-  @spec to_mins(Date.timestamp) :: float
-  def to_mins(timestamp), do: to_secs(timestamp) / @secs_in_min
+  @spec to_minutes(Types.timestamp) :: float
+  def to_minutes(timestamp), do: to_seconds(timestamp) / 60
+  defdeprecated to_mins(timestamp), "use to_minutes/1 instead", do: to_minutes(timestamp)
   @doc """
   Converts a timestamp to its value in hours
   """
-  @spec to_hours(Date.timestamp) :: float
-  def to_hours(timestamp), do: to_secs(timestamp) / @secs_in_hour
+  @spec to_hours(Types.timestamp) :: float
+  def to_hours(timestamp), do: to_minutes(timestamp) / 60
   @doc """
   Converts a timestamp to its value in days
   """
-  @spec to_days(Date.timestamp) :: float
-  def to_days(timestamp), do: to_secs(timestamp) / @secs_in_day
+  @spec to_days(Types.timestamp) :: float
+  def to_days(timestamp), do: to_hours(timestamp) / 24
   @doc """
   Converts a timestamp to its value in weeks
   """
-  @spec to_weeks(Date.timestamp) :: float
-  def to_weeks(timestamp), do: to_secs(timestamp) / @secs_in_week
+  @spec to_weeks(Types.timestamp) :: float
+  def to_weeks(timestamp), do: (to_days(timestamp) / 365) * 52
 
-  Enum.each [usecs: 1 / @usecs_in_sec,
-             msecs: 1 / @msecs_in_sec,
-             secs:  1,
-             mins:  @secs_in_min,
-             hours: @secs_in_hour,
-             days:  @secs_in_day,
-             weeks: @secs_in_week], fn {type, coef} ->
-    @spec to_usecs(integer | float, unquote(type)) :: float
-    def to_usecs(value, unquote(type)), do: do_round(value * unquote(coef) * @usecs_in_sec)
+  Enum.each [{:microseconds, 1 / @usecs_in_sec, :usecs},
+             {:milliseconds, 1 / @msecs_in_sec, :msecs},
+             {:seconds, 1, :secs},
+             {:minutes, @secs_in_min, :mins},
+             {:hours, @secs_in_hour, :hours},
+             {:days, @secs_in_day, :days},
+             {:weeks, @secs_in_week, :weeks}], fn {type, coef, type_alias} ->
+    @spec to_microseconds(integer | float, unquote(type)) :: float
+    def to_microseconds(value, unquote(type)), do: do_round(value * unquote(coef) * @usecs_in_sec)
+    if not type in [:hours, :days, :weeks] do
+      def to_microseconds(value, unquote(type_alias)) do
+        IO.write :stderr, "warning: #{unquote(type_alias)} is a deprecated unit name, use #{unquote(type)} instead\n"
+        to_microseconds(value, unquote(type))
+      end
+    end
 
-    @spec to_msecs(integer | float, unquote(type)) :: float
-    def to_msecs(value, unquote(type)), do: do_round(value * unquote(coef) * @msecs_in_sec)
+    @spec to_milliseconds(integer | float, unquote(type)) :: float
+    def to_milliseconds(value, unquote(type)), do: do_round(value * unquote(coef) * @msecs_in_sec)
+    if not type in [:hours, :days, :weeks] do
+      def to_milliseconds(value, unquote(type_alias)) do
+        IO.write :stderr, "warning: #{unquote(type_alias)} is a deprecated unit name, use #{unquote(type)} instead\n"
+        to_milliseconds(value, unquote(type))
+      end
+    end
 
-    @spec to_secs(integer | float, unquote(type)) :: float
-    def to_secs(value, unquote(type)),  do: do_round(value * unquote(coef))
+    @spec to_seconds(integer | float, unquote(type)) :: float
+    def to_seconds(value, unquote(type)),  do: do_round(value * unquote(coef))
+    if not type in [:hours, :days, :weeks] do
+      def to_seconds(value, unquote(type_alias)) do
+        IO.write :stderr, "warning: #{unquote(type_alias)} is a deprecated unit name, use #{unquote(type)} instead\n"
+        to_seconds(value, unquote(type))
+      end
+    end
 
-    @spec to_mins(integer | float, unquote(type)) :: float
-    def to_mins(value, unquote(type)),  do: do_round(value * unquote(coef) / @secs_in_min)
+    @spec to_minutes(integer | float, unquote(type)) :: float
+    def to_minutes(value, unquote(type)),  do: do_round(value * unquote(coef) / @secs_in_min)
+    if not type in [:hours, :days, :weeks] do
+      def to_minutes(value, unquote(type_alias)) do
+        IO.write :stderr, "warning: #{unquote(type_alias)} is a deprecated unit name, use #{unquote(type)} instead\n"
+        to_minutes(value, unquote(type))
+      end
+    end
 
     @spec to_hours(integer | float, unquote(type)) :: float
     def to_hours(value, unquote(type)), do: do_round(value * unquote(coef) / @secs_in_hour)
+    if not type in [:hours, :days, :weeks] do
+      def to_hours(value, unquote(type_alias)) do
+        IO.write :stderr, "warning: #{unquote(type_alias)} is a deprecated unit name, use #{unquote(type)} instead\n"
+        to_hours(value, unquote(type))
+      end
+    end
 
     @spec to_days(integer | float, unquote(type)) :: float
     def to_days(value, unquote(type)),  do: do_round(value * unquote(coef) / @secs_in_day)
+    if not type in [:hours, :days, :weeks] do
+      def to_days(value, unquote(type_alias)) do
+        IO.write :stderr, "warning: #{unquote(type_alias)} is a deprecated unit name, use #{unquote(type)} instead\n"
+        to_days(value, unquote(type))
+      end
+    end
 
     @spec to_weeks(integer | float, unquote(type)) :: float
     def to_weeks(value, unquote(type)), do: do_round(value * unquote(coef) / @secs_in_week)
+    if not type in [:hours, :days, :weeks] do
+      def to_weeks(value, unquote(type_alias)) do
+        IO.write :stderr, "warning: #{unquote(type_alias)} is a deprecated unit name, use #{unquote(type)} instead\n"
+        to_weeks(value, unquote(type))
+      end
+    end
   end
 
-  Enum.each [:to_usecs, :to_msecs, :to_secs, :to_mins, :to_hours, :to_days, :to_weeks], fn name ->
+  Enum.each [:to_microseconds, :to_milliseconds, :to_seconds, :to_minutes, :to_hours, :to_days, :to_weeks], fn name ->
     @spec unquote(name)({integer | float, integer | float, integer | float}, :hms) :: float
-    def unquote(name)({hours, minutes, seconds}, :hms), do: unquote(name)(hours * @secs_in_hour + minutes * @secs_in_min + seconds, :secs)
+    def unquote(name)({hours, minutes, seconds}, :hms), do: unquote(name)(hours * @secs_in_hour + minutes * @secs_in_min + seconds, :seconds)
   end
+
+  defdeprecated to_usecs(value, type), "use to_microseconds/2 instead", do: to_microseconds(value, type)
+  defdeprecated to_msecs(value, type), "use to_milliseconds/2 instead", do: to_milliseconds(value, type)
+  defdeprecated to_secs(value, type), "use to_seconds/2 instead", do: to_seconds(value, type)
+  defdeprecated to_mins(value, type), "use to_minutes/2 intead", do: to_minutes(value, type)
 
   @doc """
   Converts an hour between 0..24 to {1..12, :am/:pm}
@@ -128,39 +177,66 @@ defmodule Timex.Time do
 
   ## Example
 
-      iex> Timex.Time.from(1500, :secs)
+      iex> Timex.Time.from(1500, :seconds)
       {0, 1500, 0}
 
   """
-  @spec from(integer | Date.time, units) :: Date.timestamp
+  @spec from(integer | Types.time, units) :: Types.timestamp
   def from(value, :usecs) do
+    IO.write :stderr, "warning: :usecs is a deprecated unit name, use :microseconds instead\n"
+    from(value, :microseconds)
+  end
+  def from(value, :msecs) do
+    IO.write :stderr, "warning: :msecs is a deprecated unit name, use :milliseconds instead\n"
+    from(value, :milliseconds)
+  end
+  def from(value, :secs) do
+    IO.write :stderr, "warning: :secs is a deprecated unit name, use :seconds instead\n"
+    from(value, :seconds)
+  end
+  def from(value, :mins) do
+    IO.write :stderr, "warning: :mins is a deprecated unit name, use :minutes instead\n"
+    from(value, :minutes)
+  end
+  def from(value, :microseconds) do
     value = round(value)
     { sec, micro } = mdivmod(value)
     { mega, sec }  = mdivmod(sec)
     { mega, sec, micro }
   end
-  def from(value, :msecs), do: from(value * @usecs_in_msec, :usecs)
-  def from(value, :secs),  do: from(value * @usecs_in_sec, :usecs)
-  def from(value, :mins),  do: from(value * @secs_in_min, :secs)
-  def from(value, :hours), do: from(value * @secs_in_hour, :secs)
-  def from(value, :days),  do: from(value * @secs_in_day, :secs)
-  def from(value, :weeks), do: from(value * @secs_in_week, :secs)
-  def from(value, :hms),   do: from(to_secs(value, :hms), :secs)
+  def from(value, :milliseconds), do: from(value * @usecs_in_msec, :microseconds)
+  def from(value, :seconds),      do: from(value * @usecs_in_sec, :microseconds)
+  def from(value, :minutes),      do: from(value * @secs_in_min, :seconds)
+  def from(value, :hours),        do: from(value * @secs_in_hour, :seconds)
+  def from(value, :days),         do: from(value * @secs_in_day, :seconds)
+  def from(value, :weeks),        do: from(value * @secs_in_week, :seconds)
+  def from(value, :hms),          do: from(to_seconds(value, :hms), :seconds)
 
-  Enum.each [:usecs, :msecs, :secs, :mins, :hours, :days, :weeks, :hms], fn type ->
-    def to_timestamp(value, unquote(type)), do: from(value, unquote(type))
+  Enum.each [{:microseconds, :usecs},
+             {:milliseconds, :msecs},
+             {:seconds, :secs},
+             {:minutes, :mins},
+             :hours, :days, :weeks, :hms], fn
+    {type, type_alias} ->
+      def to_timestamp(value, unquote(type)), do: from(value, unquote(type))
+      def to_timestamp(value, unquote(type_alias)) do
+        IO.write :stderr, "warning: #{unquote(type_alias)} is a deprecated unit name, use #{unquote(type)} instead\n"
+        from(value, unquote(type))
+      end
+    type ->
+      def to_timestamp(value, unquote(type)), do: from(value, unquote(type))
   end
 
   def add({mega1,sec1,micro1}, {mega2,sec2,micro2}) do
-    normalize { mega1+mega2, sec1+sec2, micro1+micro2 }
+    normalize({ mega1+mega2, sec1+sec2, micro1+micro2 })
   end
 
   def sub({mega1,sec1,micro1}, {mega2,sec2,micro2}) do
-    normalize { mega1-mega2, sec1-sec2, micro1-micro2 }
+    normalize({ mega1-mega2, sec1-sec2, micro1-micro2 })
   end
 
   def scale({mega, secs, micro}, coef) do
-    normalize { mega*coef, secs*coef, micro*coef }
+    normalize({ mega*coef, secs*coef, micro*coef })
   end
 
   def invert({mega, sec, micro}) do
@@ -184,12 +260,15 @@ defmodule Timex.Time do
   @doc """
   Return a timestamp representing a time lapse of length 0.
 
-      Time.convert(Time.zero, :secs)
+      Time.convert(Time.zero, :seconds)
       #=> 0
 
   Can be useful for operations on collections of timestamps. For instance,
 
-      Enum.reduce timestamps, Time.zero, Time.add(&1, &2)
+      Enum.reduce(timestamps, Time.zero, Time.add(&1, &2))
+
+  Can also be used to represent the timestamp of the start of the UNIX epoch,
+  as all Erlang timestamps are relative to this point.
 
   """
   def zero, do: {0, 0, 0}
@@ -198,18 +277,42 @@ defmodule Timex.Time do
   Convert timestamp in the form { megasecs, seconds, microsecs } to the
   specified time units.
 
-  Supported units: microseconds (:usecs), milliseconds (:msecs), seconds (:secs),
-  minutes (:mins), hours (:hours), days (:days), or weeks (:weeks).
+  ## Supported units
+
+  - :microseconds
+  - :milliseconds
+  - :seconds
+  - :minutes
+  - :hours
+  - :days
+  - :weeks
   """
   def convert(timestamp, type \\ :timestamp)
-  def convert(timestamp, :timestamp), do: timestamp
-  def convert(timestamp, :usecs), do: to_usecs(timestamp)
-  def convert(timestamp, :msecs), do: to_msecs(timestamp)
-  def convert(timestamp, :secs),  do: to_secs(timestamp)
-  def convert(timestamp, :mins),  do: to_mins(timestamp)
-  def convert(timestamp, :hours), do: to_hours(timestamp)
-  def convert(timestamp, :days),  do: to_days(timestamp)
-  def convert(timestamp, :weeks), do: to_weeks(timestamp)
+  def convert(timestamp, :timestamp),    do: timestamp
+  def convert(timestamp, :microseconds), do: to_microseconds(timestamp)
+  def convert(timestamp, :milliseconds), do: to_milliseconds(timestamp)
+  def convert(timestamp, :seconds),      do: to_seconds(timestamp)
+  def convert(timestamp, :minutes),      do: to_minutes(timestamp)
+  def convert(timestamp, :hours),        do: to_hours(timestamp)
+  def convert(timestamp, :days),         do: to_days(timestamp)
+  def convert(timestamp, :weeks),        do: to_weeks(timestamp)
+
+  def convert(timestamp, :usecs) do
+    IO.write :stderr, "warning: :usecs is a deprecated unit name, use :microseconds instead\n"
+    to_microseconds(timestamp)
+  end
+  def convert(timestamp, :msecs) do
+    IO.write :stderr, "warning: :msecs is a deprecated unit name, use :milliseconds instead\n"
+    to_milliseconds(timestamp)
+  end
+  def convert(timestamp, :secs) do
+    IO.write :stderr, "warning: :secs is a deprecated unit name, use :seconds instead\n"
+    to_seconds(timestamp)
+  end
+  def convert(timestamp, :mins) do
+    IO.write :stderr, "warning: :mins is a deprecated unit name, use :minutes instead\n"
+    to_minutes(timestamp)
+  end
 
   @doc """
   Return time interval since the first day of year 0 to Epoch.
@@ -233,13 +336,29 @@ defmodule Timex.Time do
   """
   def now(type \\ :timestamp)
 
+  def now(:usecs) do
+    IO.write :stderr, "warning: :usecs is a deprecated unit name, use :microseconds instead\n"
+    now(:microseconds)
+  end
+  def now(:msecs) do
+    IO.write :stderr, "warning: :msecs is a deprecated unit name, use :milliseconds instead\n"
+    now(:milliseconds)
+  end
+  def now(:secs) do
+    IO.write :stderr, "warning: :secs is a deprecated unit name, use :seconds instead\n"
+    now(:seconds)
+  end
+  def now(:mins) do
+    IO.write :stderr, "warning: :mins is a deprecated unit name, use :mins instead\n"
+    now(:minutes)
+  end
   case Timex.Utils.get_otp_release do
     ver when ver >= 18 ->
-      def now(:timestamp), do: :os.system_time(:micro_seconds) |> from(:usecs)
-      def now(:usecs),     do: :os.system_time(:micro_seconds)
-      def now(:msecs),     do: :os.system_time(:milli_seconds)
-      def now(:secs),      do: :os.system_time(:seconds)
-      def now(type),       do: now(:timestamp) |> convert(type)
+      def now(:timestamp),    do: :os.system_time(:micro_seconds) |> from(:microseconds)
+      def now(:microseconds), do: :os.system_time(:micro_seconds)
+      def now(:milliseconds), do: :os.system_time(:milli_seconds)
+      def now(:seconds),      do: :os.system_time(:seconds)
+      def now(type),          do: now(:timestamp) |> convert(type)
     _ ->
       def now(:timestamp), do: :os.timestamp
       def now(type),       do: :os.timestamp |> convert(type)
@@ -247,15 +366,17 @@ defmodule Timex.Time do
 
   @doc """
   Time interval between timestamp and now. If timestamp is after now in time, the
-  return value will be negative. Timestamp must be in format { megasecs, seconds,
-  microseconds }.
+  return value will be negative. Timestamp must be in format:
+
+      { megasecs, seconds, microseconds }.
 
   The second argument is an atom indicating the type of time units to return:
-  microseconds (:usecs), milliseconds (:msecs), seconds (:secs), minutes (:mins),
-  or hours (:hours).
 
-  When the second argument is omitted, the return value's format is { megasecs,
-  seconds, microsecs }.
+      :microseconds, :milliseconds, :seconds, :minutes, or hours (:hours).
+
+  When the second argument is omitted, the return value's format is
+
+      { megasecs, seconds, microsecs }.
   """
   def elapsed(timestamp, type \\ :timestamp)
 
@@ -269,15 +390,24 @@ defmodule Timex.Time do
 
   @doc """
   Time interval between two timestamps. If the first timestamp comes before the
-  second one in time, the return value will be negative. Timestamp must be in format
-  { megasecs, seconds, microseconds }.
+  second one in time, the return value will be negative. Timestamp must be in format:
+
+      { megasecs, seconds, microseconds }.
 
   The third argument is an atom indicating the type of time units to return:
-  microseconds (:usecs), milliseconds (:msecs), seconds (:secs), minutes (:mins),
-  or hours (:hours).
 
-  When the third argument is omitted, the return value's format is { megasecs,
-  seconds, microsecs }.
+      :microseconds, :milliseconds, :seconds, :minutes, or :hours
+
+  When the third argument is omitted, the return value's format is:
+
+      { megasecs, seconds, microsecs }.
+
+
+  ## Examples
+
+      iex> use Timex
+      ...> Time.diff({1457, 136000, 785000}, Time.zero, :days)
+      16865
   """
   def diff(t1, t2, type \\ :timestamp)
 
@@ -290,7 +420,7 @@ defmodule Timex.Time do
   end
 
   def diff(t1 = {_,_,_}, t2 = {_,_,_}, type) do
-    convert(diff(t1, t2), type)
+    trunc(convert(diff(t1, t2), type))
   end
 
   @doc """
@@ -305,19 +435,19 @@ defmodule Timex.Time do
       true
 
   """
-  @spec measure((() -> any)) :: { Date.timestamp, any }
+  @spec measure((() -> any)) :: { Types.timestamp, any }
   def measure(fun), do: do_measure(fun)
 
   @doc """
   Evaluates apply(fun, args). Otherwise works like measure/1
   """
-  @spec measure(fun, [any]) :: { Date.timestamp, any }
+  @spec measure(fun, [any]) :: { Types.timestamp, any }
   def measure(fun, args), do: do_measure(fun, args)
 
   @doc """
   Evaluates apply(module, fun, args). Otherwise works like measure/1
   """
-  @spec measure(module, atom, [any]) :: { Date.timestamp, any }
+  @spec measure(module, atom, [any]) :: { Types.timestamp, any }
   def measure(module, fun, args), do: do_measure(module, fun, args)
 
   case Timex.Utils.get_otp_release do
@@ -331,7 +461,7 @@ defmodule Timex.Time do
           true -> {:error, "Invalid arguments for do_measure!"}
         end
         end_time   = :erlang.monotonic_time(:micro_seconds)
-        {(end_time - start_time) |> to_timestamp(:usecs), result}
+        {(end_time - start_time) |> to_timestamp(:microseconds), result}
       end
     _ ->
       defp do_measure(m, f \\ nil, a \\ []) do
@@ -341,7 +471,7 @@ defmodule Timex.Time do
           is_atom(m) && is_atom(f) && is_list(a) -> :timer.tc(m, f, a)
           true -> {:error, "Invalid arguments for do_measure!"}
         end
-        {to_timestamp(time, :usecs), result}
+        {to_timestamp(time, :microseconds), result}
       end
   end
 

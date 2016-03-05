@@ -15,6 +15,6 @@ defmodule DateFormatTest.ValidateStrftime do
   end
 
   defp validate(fmt) do
-    DateFormat.validate(fmt, :strftime)
+    Timex.validate_format(fmt, :strftime)
   end
 end

@@ -60,7 +60,7 @@ defmodule MyApp.DateTimeTokenizers.Humanized do
           :none ->
             {:ok, date}
           [{shift, n}] when is_integer(n) ->
-            {:ok, Date.shift(date, [{shift, n}])}
+            {:ok, Timex.shift(date, [{shift, n}])}
           shift ->
             {:error, "Unrecognized shift operation: #{Macro.to_string(shift)}"}
         end
@@ -112,8 +112,8 @@ defmodule MyApp.DateTimeTokenizers.Humanized do
       [n, shift, "after"]  -> [date_shift: [{to_shift(shift), n}]]
     end)
   end
-  defp to_shift("seconds"), do: :secs
-  defp to_shift("minutes"), do: :mins
+  defp to_shift("seconds"), do: :seconds
+  defp to_shift("minutes"), do: :minutes
   defp to_shift(shift),     do: String.to_atom(shift)
 
   # Get the ordinal day value based on the ordinal day name

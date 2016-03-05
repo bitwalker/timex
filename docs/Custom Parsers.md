@@ -107,9 +107,7 @@ defmodule MyApp.DateTimeTokenizers.Humanized do
       [n, shift, "after"]  -> [date_shift: [{to_shift(shift), n}]]
     end)
   end
-  defp to_shift("seconds"), do: :secs
-  defp to_shift("minutes"), do: :mins
-  defp to_shift(shift),     do: String.to_atom(shift)
+  defp to_shift(shift), do: String.to_atom(shift)
 
   # Get the ordinal day value based on the ordinal day name
   defp to_day(name), do: Enum.find_index(@days, fn (n) -> n == name end) + 1
@@ -151,7 +149,7 @@ defmodule MyApp.DateTimeTokenizers.Humanized do
       :date_shift ->
         case value do
           [{shift, n}] when is_integer(n) ->
-            {:ok, Date.shift(date, [{shift, n}])}
+            {:ok, Timex.shift(date, [{shift, n}])}
           shift ->
             {:error, "Unrecognized shift operation: #{Macro.to_string(shift)}"}
         end
@@ -172,10 +170,10 @@ After all this, we're now ready to use our custom parser!
 > alias MyApp.DateTimeTokenizers.Humanized
 > phrase = "3 days before the second of July, 2015"
 > format = "{shift} the {day} of {month}, {year}"
-> DateFormat.parse(phrase, format, Humanized)
+> Timex.parse(phrase, format, Humanized)
 {:ok,
  %Timex.DateTime{calendar: :gregorian, day: 1, hour: 0, minute: 0, month: 7,
-  ms: 0, second: 0,
+  millisecond: 0, second: 0,
   timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min,
    full_name: "UTC", offset_std: 0, offset_utc: 0, until: :max}, year: 2015}}
 ```

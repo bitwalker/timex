@@ -26,10 +26,14 @@ defmodule PosixTimezoneParsing.Tests do
       {head, tail}  = String.split_at(base, variant)
       {new_head, _} = String.split_at(head, String.length(head) - 1)
       tz = new_head <> tail
-      case Posix.parse(tz) do
-        {:ok, _}    -> assert true
-        res         -> assert {:error, _} = res
+      result = case Posix.parse(tz) do
+        {:ok, _} ->
+          true
+        res ->
+          assert {:error, _} = res
+          true
       end
+      assert true === result
     end
   end
 end

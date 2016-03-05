@@ -16,7 +16,7 @@ Use functions from the `Time` module for time interval arithmetic.
 
 **How do I find the time interval between two dates?**
 
-Use `Date.diff` to obtain the number of milliseconds, seconds, minutes, hours, days, months, weeks, or years between two dates.
+Use `Timex.diff` to obtain the number of milliseconds, seconds, minutes, hours, days, months, weeks, or years between two dates.
 
 **What is the support for timezones?**
 

@@ -20,4 +20,6 @@ defmodule Timex.TimezoneInfo do
             offset_utc:       0,
             from:             :min,
             until:            :max
+
+  @type t :: %__MODULE__{}
 end

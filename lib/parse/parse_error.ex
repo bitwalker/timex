@@ -1,6 +1,6 @@
 defmodule Timex.Parse.ParseError do
   @moduledoc """
-  Used for errors encountered during date parsing.
+  Used for errors encountered during parsing.
   """
   alias Timex.Parse.ParseError
 

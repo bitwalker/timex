@@ -11,6 +11,8 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
             parser: nil,
             weight: 0
 
+  @type t :: %__MODULE__{}
+
   @doc """
   Gets a parsing directive for the given token name, where the token name
   is an atom.
@@ -23,7 +25,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
       {:year4, [padding: :zeros]}
 
   """
-  @spec get(atom, String.t, [{atom, term}] | []) :: %Directive{}
+  @spec get(atom, String.t, [{atom, term}] | []) :: Directive.t
   def get(type, directive, opts \\ []) do
     width     = Keyword.get(opts, :width, [min: 1, max: nil])
     flags     = Keyword.merge(Keyword.get(opts, :flags, []), width)

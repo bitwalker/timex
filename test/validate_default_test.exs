@@ -18,6 +18,6 @@ defmodule DateFormatTest.ValidateDefault do
   end
 
   defp validate(fmt) do
-    DateFormat.validate(fmt)
+    Timex.validate_format(fmt)
   end
 end

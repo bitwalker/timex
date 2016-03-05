@@ -104,18 +104,13 @@ in making it happen.
 
 Timex is composed of the following general components:
 
-- The tzdata Parser Expression Grammar (PEG), its associated mix task, and the
-  current tzdata Erlang module produced by the PEG. This is used for parsing the
-  raw Olson Timezone Database. (not yet on master)
-- The `Timex.Date` namespace, containing the `DateTime` struct, `DateTime` conversions,
-  and the `Date` API.
+- The `Timex` module, which is the primary API for the library
+- The `Timex.Date` module, which is where all `Date` specific APIs reside
+- The `Timex.DateTime` module, which is where all `DateTime` specific APIs reside
 - The `Timex.Time` namespace, containing the `Time` API as well as the Time formatting API.
-- The `Timex.DateFormat` namespace, containing all code related to formatting `DateTime` values.
+- The `Timex.Format` namespace, containing all code related to string formatting.
   This includes the behavior for custom formatting plugins.
-- The `Timex.Parsers.DateFormat` namespace, containing all code related to parsing `DateTime` values
-  from other formats (namely strings at this point). This includes the behavior for custom parsing plugins.
-- The `Timex.Parsers.ZoneInfo` namespace, containing all code related to parsing zoneinfo files.
-- The `Timex.Utils` namespace, containing all general utility code used throughout Timex.
+- The `Timex.Parse` namespace, containing all code related to parsing.
 - The `Timex.Timezone` namespace, containing all code related to the parsing of tzdata, querying timezones,
   determining the local timezone for a given date, etc.
 

@@ -1,6 +1,6 @@
 defmodule Timex.Format.FormatError do
   @moduledoc """
-  Used for errors encountered during date formatting.
+  Used for errors encountered during string formatting.
   """
   alias Timex.Format.FormatError
 

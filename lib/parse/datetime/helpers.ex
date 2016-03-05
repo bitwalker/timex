@@ -3,20 +3,12 @@ defmodule Timex.Parse.DateTime.Helpers do
   import Combine.Parsers.Base
   import Combine.Parsers.Text, except: [integer: 0, integer: 1]
   alias Combine.Parsers.Text
+  use Timex.Constants
 
-  @weekdays_abbr ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
-  @weekdays      ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-
-  @months [
-    "January", "February", "March", "April",
-    "May", "June", "July", "August",
-    "September", "October", "November", "December"
-  ]
-  def months, do: @months
+  def months, do: @month_names
 
   def to_month(month) when is_integer(month), do: [month: month]
 
-  def to_month_num(nil), do: fail("Invalid month value.")
   def to_month_num(m) when m in ["January", "Jan"],   do: to_month(1)
   def to_month_num(m) when m in ["February", "Feb"],  do: to_month(2)
   def to_month_num(m) when m in ["March", "Mar"],     do: to_month(3)
@@ -33,9 +25,9 @@ defmodule Timex.Parse.DateTime.Helpers do
   def is_weekday(name) do
     n = String.downcase(name)
     cond do
-      n in @weekdays_abbr -> true
-      n in @weekdays      -> true
-      true                -> false
+      n in @weekday_abbrs_lower -> true
+      n in @weekday_names_lower -> true
+      true                      -> false
     end
   end
 
