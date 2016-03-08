@@ -323,34 +323,16 @@ defmodule Timex.Date do
   end
 
   @doc """
-  Compare two dates returning one of the following values:
-
-  * `-1` -- the first date comes before the second one
-  * `0`  -- both arguments represent the same date when coalesced to the same timezone.
-  * `1`  -- the first date comes after the second one
-
-  See the docs for Timex.compare/2 or Timex.compare/3 for more details.
+  See docs for `Timex.compare/3`
   """
-  @spec compare(Date.t, Date.t | :epoch | :zero | :distant_past | :distant_future) :: -1 | 0 | 1 | {:error, term}
-  @spec compare(Date.t, Date.t, :years | :months | :weeks | :days | :hours | :minutes | :seconds | :timestamp) :: -1 | 0 | 1 | {:error, term}
-  def compare(date, :epoch),       do: compare(date, epoch())
-  def compare(date, :zero),        do: compare(date, zero())
-  def compare(_, :distant_past),   do: +1
-  def compare(_, :distant_future), do: -1
-  def compare(a, b),               do: DateTime.compare(to_datetime(a), to_datetime(b))
-  def compare(a, b, granularity),  do: DateTime.compare(to_datetime(a), to_datetime(b), granularity)
+  defdelegate compare(a, b), to: Timex.Comparable
+  defdelegate compare(a, b, granularity), to: Timex.Comparable
 
   @doc """
-  Calculate time interval between two dates. If the second date comes after the
-  first one in time, return value will be positive; and negative otherwise.
-
-  See docs for Timex.diff/3 for more details.
+  See docs for `Timex.diff/3`
   """
-  @spec diff(Date.t, Date.t, :timestamp) :: Types.timestamp | {:error, term}
-  @spec diff(Date.t, Date.t, :seconds | :minutes | :hours | :days | :weeks | :months | :years) :: integer | {:error, term}
-  def diff(this, other, type) do
-    DateTime.diff(to_datetime(this), to_datetime(other), type)
-  end
+  defdelegate diff(a, b), to: Timex.Comparable
+  defdelegate diff(a, b, granularity), to: Timex.Comparable
 
   @doc """
   Shifts the given Date based on the provided options.

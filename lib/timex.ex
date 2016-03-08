@@ -23,6 +23,7 @@ defmodule Timex do
   alias Timex.Types
   alias Timex.Convertable
   alias Timex.Helpers
+  alias Timex.Comparable
   use Timex.Constants
   import Timex.Macros
 
@@ -536,29 +537,21 @@ defmodule Timex do
 
 
   @doc """
-  Returns a boolean indicating whether the first Date/DateTime occurs before the second
+  Returns a boolean indicating whether the first `Timex.Comparable` occurs before the second
   """
-  @spec before?(Date.t | DateTime.t, Date.t | DateTime.t) :: boolean | {:error, term}
-  def before?(%Date{} = a, %Date{} = b),         do: Date.compare(a, b) == -1
-  def before?(%DateTime{} = a, %DateTime{} = b), do: DateTime.compare(a, b) == -1
-  def before?(%Date{} = a, %DateTime{} = b),     do: before?(a, Date.from(b))
-  def before?(%DateTime{} = a, %Date{} = b),     do: before?(Date.from(a), b)
-  def before?(_, _), do: {:error, :badarg}
+  @spec before?(Comparable.comparable, Comparable.comparable) :: boolean | {:error, term}
+  def before?(a, b), do: Comparable.compare(a, b) == -1
 
   @doc """
-  Returns a boolean indicating whether the first Date/DateTime occurs after the second
+  Returns a boolean indicating whether the first `Timex.Comparable` occurs after the second
   """
-  @spec after?(Date.t | DateTime.t, Date.t | DateTime.t) :: boolean | {:error, term}
-  def after?(%Date{} = a, %Date{} = b),         do: Date.compare(a, b) == 1
-  def after?(%DateTime{} = a, %DateTime{} = b), do: DateTime.compare(a, b) == 1
-  def after?(%Date{} = a, %DateTime{} = b),     do: after?(a, Date.from(b))
-  def after?(%DateTime{} = a, %Date{} = b),     do: after?(Date.from(a), b)
-  def after?(_, _), do: {:error, :badarg}
+  @spec after?(Comparable.comparable, Comparable.comparable) :: boolean | {:error, term}
+  def after?(a, b), do: Comparable.compare(a, b) == 1
 
   @doc """
-  Returns a boolean indicating whether the first Date/DateTime occurs between the second and third
+  Returns a boolean indicating whether the first `Timex.Comparable` occurs between the second and third
   """
-  @spec between?(Date.t | DateTime.t, Date.t | DateTime.t, Date.t | DateTime.t) :: boolean | {:error, term}
+  @spec between?(Comparable.comparable, Comparable.comparable, Comparable.comparable) :: boolean | {:error, term}
   def between?(a, start, ending) do
     is_after_start? = after?(a, start)
     is_before_end?  = before?(a, ending)
@@ -571,10 +564,9 @@ defmodule Timex do
   end
 
   @doc """
-  Returns a boolean indicating whether the two Date/DateTime values are equivalent.
-  If a Date and a DateTime are compared, the Date will be coerced to a DateTime and
-  compared. Therefore, a Date and a DateTime are equal if they represent the same day
-  at midnight, and only then.
+  Returns a boolean indicating whether the two `Timex.Comparable` values are equivalent.
+  Equality here implies that the two Comparables represent the same moment in time,
+  not equality of the data structure.
 
   ## Examples
 
@@ -589,14 +581,17 @@ defmodule Timex do
       true
   """
   @spec equal?(Date.t | DateTime.t, Date.t | DateTime.t) :: boolean | {:error, :badarg}
-  def equal?(%Date{} = a, %Date{} = b),         do: Date.compare(a, b) == 0
-  def equal?(%DateTime{} = a, %DateTime{} = b), do: DateTime.compare(a, b) == 0
-  def equal?(%Date{} = a, %DateTime{} = b),     do: DateTime.compare(DateTime.from(a), b) == 0
-  def equal?(%DateTime{} = a, %Date{} = b),     do: DateTime.compare(a, DateTime.from(b)) == 0
-  def equal?(_, _), do: {:error, :badarg}
+  def equal?(a, a), do: true
+  def equal?(a, b), do: Comparable.compare(a, b, :seconds) == 0
 
   @doc """
-  Compare two Dates or two DateTimes returning one of the following values:
+  See docs for `compare/3`
+  """
+  @spec compare(Comparable.comparable, Comparable.comparable) :: Comparable.compare_result | {:error, term}
+  defdelegate compare(a, b), to: Timex.Comparable
+
+  @doc """
+  Compare two `Timex.Comparable` values, returning one of the following values:
 
    * `-1` -- the first date comes before the second one
    * `0`  -- both arguments represent the same date when coalesced to the same timezone.
@@ -609,11 +604,12 @@ defmodule Timex do
   - :distant_past will compare the first parameter against a date/time infinitely in the past (i.e. it will always return 1)
   - :distant_future will compare the first parameter against a date/time infinitely in the future (i.e. it will always return -1)
 
-  You can optionality specify a granularity of any of:
+  You can optionally specify a comparison granularity, any of the following:
 
   - :years
   - :months
   - :weeks
+  - :calendar_weeks (weeks of the calendar as opposed to actual weeks in terms of days)
   - :days
   - :hours
   - :minutes
@@ -635,32 +631,15 @@ defmodule Timex do
       0
 
   """
-  @spec compare(Date.t | DateTime.t, Date.t | DateTime.t | :epoch | :zero | :distant_past | :distant_future) :: -1 | 0 | 1 | {:error, term}
-  @spec compare(DateTime.t, DateTime.t, :years | :months | :weeks | :days | :hours | :minutes | :seconds | :timestamp) :: -1 | 0 | 1 | {:error, term}
-  def compare(%Date{} = a, %Date{} = b),               do: Date.compare(a, b)
-  def compare(%Date{} = a, %DateTime{} = b),           do: DateTime.compare(DateTime.from(a), b)
-  def compare(%Date{} = a, ref) when is_atom(ref),     do: Date.compare(a, ref)
-  def compare(%DateTime{} = a, %DateTime{} = b),       do: DateTime.compare(a, b)
-  def compare(%DateTime{} = a, %Date{} = b),           do: DateTime.compare(a, DateTime.from(b))
-  def compare(%DateTime{} = a, ref) when is_atom(ref), do: DateTime.compare(a, ref)
-  def compare({:error, _} = err, _), do: err
-  def compare(_, {:error, _} = err), do: err
-  def compare(_, _), do: {:error, :badarg}
-  def compare(%Date{} = a, %Date{} = b, granularity) when is_atom(granularity),
-    do: Date.compare(a, b, granularity)
-  def compare(%Date{} = a, %DateTime{} = b, granularity) when is_atom(granularity),
-    do: DateTime.compare(DateTime.from(a), b, granularity)
-  def compare(%DateTime{} = a, %DateTime{} = b, granularity) when is_atom(granularity),
-    do: Date.compare(a, b, granularity)
-  def compare(%DateTime{} = a, %Date{} = b, granularity) when is_atom(granularity),
-    do: DateTime.compare(a, DateTime.from(b), granularity)
-  def compare(%Date{} = a, ref, granularity) when is_atom(ref) and is_atom(granularity),
-    do: Date.compare(a, ref, granularity)
-  def compare(%DateTime{} = a, ref, granularity) when is_atom(ref) and is_atom(granularity),
-    do: DateTime.compare(a, ref, granularity)
-  def compare({:error, _} = err, _, _), do: err
-  def compare(_, {:error, _} = err, _), do: err
-  def compare(_, _, _), do: {:error, :badarg}
+
+  @spec compare(Comparable.comparable, Comparable.comparable, Comparable.granularity) :: Comparable.compare_result | {:error, term}
+  defdelegate compare(a, b, granularity), to: Timex.Comparable
+
+  @doc """
+  See docs for `diff/3`
+  """
+  @spec diff(Comparable.comparable, Comparable.comparable) :: Types.timestamp | {:error, term}
+  defdelegate diff(a, b), to: Timex.Comparable
 
   @doc """
   Calculate time interval between two dates. If the second date comes after the
@@ -680,20 +659,8 @@ defmodule Timex do
 
   and the result will be an integer value of those units or a timestamp.
   """
-  @spec diff(Date.t | DateTime.t, Date.t | DateTime.t, :timestamp) :: Types.timestamp | {:error, term}
-  @spec diff(Date.t | DateTime.t, Date.t | DateTime.t, :seconds | :minutes | :hours | :days | :weeks | :calendar_weeks | :months | :years) :: integer | {:error, term}
-  def diff(%Date{} = this, %Date{} = other),                      do: Date.diff(this, other)
-  def diff(%Date{} = this, %DateTime{} = other),                  do: DateTime.diff(DateTime.from(this), other)
-  def diff(%DateTime{} = this, %DateTime{} = other),              do: DateTime.diff(this, other)
-  def diff(%DateTime{} = this, %Date{} = other),                  do: DateTime.diff(this, DateTime.from(other))
-  def diff({:error, _} = err, _), do: err
-  def diff(_, {:error, _} = err), do: err
-  def diff(_, _), do: {:error, :badarg}
-  def diff(%Date{} = this, %Date{} = other, granularity),         do: Date.diff(this, other, granularity)
-  def diff(%DateTime{} = this, %DateTime{} = other, granularity), do: DateTime.diff(this, other, granularity)
-  def diff({:error, _} = err, _, _), do: err
-  def diff(_, {:error, _} = err, _), do: err
-  def diff(_, _, _), do: {:error, :badarg}
+  @spec diff(Timex.Comparable.comparable, Timex.Comparable.comparable, Timex.Comparable.granularity) :: Types.timestamp | integer | {:error, term}
+  defdelegate diff(a, b, granularity), to: Timex.Comparable
 
 
   @doc """

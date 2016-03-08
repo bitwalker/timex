@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+
+### Changed
+- Moved comparison and diffing behaviour into a new protocol, `Timex.Comparable`, which allows you to now
+  provide your own implementations for comparing other date or datetime types against Timex ones. This
+  makes the API more flexible, and also cleaned up the code quite a bit.
+- Provided implementations of `Timex.Comparable` for `Tuple`, `Map`, `Date`, `DateTime`, `AmbiguousDateTime`
+
 ## 2.0.0
 
 **READ THIS**: This release contains breaking changes from the previous API. The changes are easy to make,
