@@ -12,6 +12,9 @@ defimpl Timex.Convertable, for: Map do
   def to_unix(map),      do: try_convert(map, &Convertable.to_unix/1)
   def to_timestamp(map), do: try_convert(map, &Convertable.to_timestamp/1)
 
+  defp try_convert(%{"year" => y, "month" => m, "day" => d, "hour" => h, "minute" => mm, "second" => s}, fun) do
+    try_convert(%{:year => y, :month => m, :day => d, :hour => h, :minute => mm, :second => s}, fun)
+  end
   defp try_convert(%{:year => y, :month => m, :day => d, :hour => h, :minute => mm, :second => s} = datetime, fun)
     when is_datetime(y,m,d,h,mm,s)
     do
@@ -31,6 +34,9 @@ defimpl Timex.Convertable, for: Map do
       %AmbiguousDateTime{} = ambiguous ->
         {:error, {:ambiguous_datetime, ambiguous}}
     end
+  end
+  defp try_convert(%{"year" => y, "month" => m, "day" => d}, fun) when is_date(y,m,d) do
+    try_convert(%{:year => y, :month => m, :day => d}, fun)
   end
   defp try_convert(%{:year => y, :month => m, :day => d}, fun) when is_date(y,m,d) do
     case Convertable.to_datetime({y,m,d}) do

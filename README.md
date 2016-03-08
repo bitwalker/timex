@@ -97,6 +97,18 @@ true
 There are a ton of other functions for Dates, Times, and DateTimes, way more than can be covered here. Hopefully the above
 gives you a taste of what the API is like!
 
+## Extensibility
+
+Timex exposes a number of extension points for you, in order to accomodate different use cases:
+
+You can use custom Date/DateTime types with Timex via the `Timex.Convertable` protocol, which gives you a way to convert your type to various Timex types, and then use the Timex API to manipulate them, for example, you could use the Calendar library's types with Timex via Comparable, or Ecto's, or your own!
+
+You can compare/diff custom Date/DateTime types with Timex via the `Timex.Comparable` protocol, which also understands types which implement `Timex.Convertable`, allowing you to use Comparable as soon as you've implemented Convertable!
+
+The same is true for Timex's API in general - if you pass a type which implements `Timex.Convertable`, and the type is not a native Timex one, it will be coerced to one via that protocol.
+
+You can provide your own formatter/parser for Date/DateTime strings by implementing the `Timex.Format.DateTime.Formatter` and/or `Timex.Parse.DateTime.Parser` behaviours, depending on your needs.
+
 ## Common Issues
 
 **Warning**: Timex functions of the form `iso_*` behave based on how the ISO calendar represents dates/times and not the ISO8601 date format. This confusion has occured before, and it's important to note this!
