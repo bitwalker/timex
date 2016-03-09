@@ -35,6 +35,9 @@ defmodule Timex.Mixfile do
     with an AmbiguousDateTime type for handling those DateTime values which fall on
     an ambigouos timezone period.
 
+    Extendable via Convertable and Comparable protocols, so you can use Timex with
+    your own types!
+
     Provides a broad array of date/time helper functions
 
     - shifting/adding/subtracting
