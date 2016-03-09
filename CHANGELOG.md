@@ -3,13 +3,34 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 2.1.0
 
+### Added
+- Two new protocols, `Timex.Comparable` and `Timex.Convertable`, implementing these two for your own date/time types
+  will allow you to use the Timex API with your own types, just be aware that only Dates, DateTimes, or AmbiguousDateTimes
+  will be returned as date/time representations, but it should be trivial to add a function in your implementation to
+  convert back.
+- Basic Julian calendar implementation, which allows you to get the Julian date for a given Convertable, see
+  `Timex.to_julian/1`, you can also get the day of the week number for a Julian date, via `Timex.Calendar.Julian`
+- `to_julian` function to the `Timex.Convertable` protocol
+- `Timex.timezones` to get a list of all valid timezones
 ### Changed
+- **POTENTIALLY BREAKING** The `{Zname}` format token was formatting with the abbreviation, which is incorrect. It
+  has been changed to format with the full name, use `{Zabbr}` if you want the abbreviation.
 - Moved comparison and diffing behaviour into a new protocol, `Timex.Comparable`, which allows you to now
   provide your own implementations for comparing other date or datetime types against Timex ones. This
   makes the API more flexible, and also cleaned up the code quite a bit.
-- Provided implementations of `Timex.Comparable` for `Tuple`, `Map`, `Date`, `DateTime`, `AmbiguousDateTime`
+- Modified Timex API to accept Comparables for just about all functions
+- Added implementations of `Timex.Comparable` for `Tuple`, `Date`, `DateTime`, `AmbiguousDateTime`
+- Added implementations of `Timex.Convertable` for `Map` and `Atom`. The former will accept any map with either
+  DateTime-like keys (i.e. year/month/day/hour/minute/etc.) as strings or atoms, or any Date-like keys (year/month/day),
+  as strings or atoms. The latter will accept only two atoms which represent Dates/DateTimes right now, :epoch, and :zero.
+- Modified `Timex.Comparable` to take any `Timex.Convertable`
+## Fixed
+- A number of performance enhancements due to refactoring for `Convertable` and `Comparable`, particularly with diffing
+- The `%Z` strftime format token was formatting timezones as abbreviations, which is not round-trippable due to timezone
+  ambiguity. This token now formats using the full timezone name, which is valid according to the strftime standard.
+- The `{Zname}` token had the same problem as above, and has been fixed to use the full name
 
 ## 2.0.0
 
