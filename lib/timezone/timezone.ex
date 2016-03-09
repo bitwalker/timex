@@ -60,6 +60,70 @@ defmodule Timex.Timezone do
     do: {:error, :invalid_datetime}
 
   @doc """
+  This function takes one of the varying timezone representations (atoms, offset integers, shortcut names),
+  and resolves the full name of the timezone if it's able.
+
+  If a string is provided which isn't recognized, it is returned untouched, only when `get/2` is called will
+  the timezone lookup fail.
+  """
+  @spec name_of(Types.valid_timezone) :: String.t | {:error, {:invalid_timezone, term}}
+  def name_of(%TimezoneInfo{:full_name => name}), do: name
+  def name_of(:utc),   do: "UTC"
+  def name_of(:local), do: local(DateTime.now) |> name_of
+  def name_of(0),      do: "UTC"
+  def name_of("A"),    do: name_of(1)
+  def name_of("M"),    do: name_of(12)
+  def name_of("N"),    do: name_of(-1)
+  def name_of("Y"),    do: name_of(-12)
+  def name_of("Z"),    do: "UTC"
+  def name_of("UT"),   do: "UTC"
+  def name_of(offset) when is_integer(offset) do
+    if offset > 0 do
+      "Etc/GMT-#{offset}"
+    else
+      "Etc/GMT+#{offset * -1}"
+    end
+  end
+  def name_of(<<?+, offset :: binary>> = tz) do
+    case Integer.parse(offset) do
+      {num, _} ->
+        cond do
+          num >= 100 -> name_of(trunc(num/100))
+          true      ->  name_of(num)
+        end
+      :error ->
+        {:error, {:no_such_zone, tz}}
+    end
+  end
+  def name_of(<<?-, offset :: binary>> = tz) do
+    case Integer.parse(offset) do
+      {num, _} ->
+        cond do
+          num >= 100 -> name_of(trunc(num/100) * -1)
+          true       -> name_of(num * -1)
+        end
+      :error ->
+        {:error, {:no_such_zone, tz}}
+    end
+  end
+  def name_of(<<"GMT", ?+, offset::binary>>), do: "Etc/GMT+#{offset}"
+  def name_of(<<"GMT", ?-, offset::binary>>), do: "Etc/GMT-#{offset}"
+  def name_of(tz) when is_binary(tz) do
+    case Tzdata.zone_exists?(tz) do
+      true -> tz
+      false ->
+        case lookup_posix(tz) do
+          full_name when is_binary(full_name) ->
+            full_name
+          nil ->
+            {:error, {:invalid_timezone, tz}}
+        end
+    end
+  end
+  def name_of(tz), do: {:error, {:invalid_timezone, tz}}
+
+
+  @doc """
   Gets timezone info for a given zone name and date. The date provided
   can either be an Erlang datetime tuple, or a DateTime struct, and if one
   is not provided, then the current date and time is returned.
@@ -67,70 +131,42 @@ defmodule Timex.Timezone do
   @spec get(Types.valid_timezone, Types.datetime | DateTime.t | nil) :: TimezoneInfo.t | AmbiguousTimezoneInfo.t | {:error, term}
   def get(tz, datetime \\ DateTime.now)
 
-  def get(tz, datetime) when tz in ["Z", "UT", "GMT"], do: get(:utc, datetime)
-  def get(:utc, _),        do: %TimezoneInfo{}
-  def get(:local, date),   do: local(date)
-  def get(0, datetime),    do: get("UTC", datetime)
-  # These are shorthand for specific time zones
-  def get("A", datetime),  do: get(+1, datetime)
-  def get("M", datetime),  do: get(+12, datetime)
-  def get("N", datetime),  do: get(-1, datetime)
-  def get("Y", datetime),  do: get(-12, datetime)
-  # Allow querying by offset
-  def get(offset, datetime) when is_number(offset) do
-    if offset > 0 do
-      get("Etc/GMT-#{offset}", datetime)
-    else
-      get("Etc/GMT+#{offset * -1}", datetime)
+  def get(:utc, _datetime),  do: %TimezoneInfo{}
+  def get(:local, datetime), do: local(datetime)
+  def get(tz, datetime) do
+    case name_of(tz) do
+      {:error, _} = err ->
+        err
+      "UTC" ->
+        %TimezoneInfo{}
+      name ->
+        do_get(name, datetime)
     end
   end
-  def get(<<?+, offset :: binary>> = tz, datetime) do
-    case Integer.parse(offset) do
-      {num, _} ->
-        cond do
-          num >= 100 -> get(trunc(num/100), datetime)
-          true      -> get(num, datetime)
-        end
-      :error ->
-        {:error, "No timezone found for: #{tz}"}
-    end
-  end
-  def get(<<?-, offset :: binary>> = tz, datetime) do
-    case Integer.parse(offset) do
-      {num, _} ->
-        cond do
-          num >= 100 -> get(trunc(num/100) * -1, datetime)
-          true      -> get(num * -1, datetime)
-        end
-      :error ->
-        {:error, {:no_such_timezone, tz}}
-    end
-  end
-  def get(<<"GMT", ?+, offset::binary>>, datetime), do: get("Etc/GMT+#{offset}", datetime)
-  def get(<<"GMT", ?-, offset::binary>>, datetime), do: get("Etc/GMT-#{offset}", datetime)
-
   # Gets a timezone for an Erlang datetime tuple
-  def get(timezone, {{_,_,_}, {_,_,_}} = datetime) do
-     case Tzdata.zone_exists?(timezone) do
+  defp do_get(timezone, {{_,_,_}, {_,_,_}} = datetime) do
+    name = name_of(timezone)
+    case Tzdata.zone_exists?(name) do
       false ->
         # Lookup the real timezone for this abbreviation and date
         seconds_from_zeroyear = :calendar.datetime_to_gregorian_seconds(datetime)
-        lookup_timezone_by_abbreviation(timezone, seconds_from_zeroyear)
+        lookup_timezone_by_abbreviation(name, seconds_from_zeroyear)
       true  ->
-         seconds_from_zeroyear = :calendar.datetime_to_gregorian_seconds(datetime)
-         resolve(timezone, seconds_from_zeroyear)
+        seconds_from_zeroyear = :calendar.datetime_to_gregorian_seconds(datetime)
+        resolve(name, seconds_from_zeroyear)
     end
   end
 
   # Gets a timezone for a DateTime struct
-  def get(timezone, %DateTime{} = dt) do
-    case Tzdata.zone_exists?(timezone) do
+  defp do_get(timezone, %DateTime{} = dt) do
+    name = name_of(timezone)
+    case Tzdata.zone_exists?(name) do
       false ->
         seconds_from_zeroyear = DateTime.to_seconds(dt, :zero)
-        lookup_timezone_by_abbreviation(timezone, seconds_from_zeroyear)
+        lookup_timezone_by_abbreviation(name, seconds_from_zeroyear)
       true  ->
         seconds_from_zeroyear = DateTime.to_seconds(dt, :zero)
-        resolve(timezone, seconds_from_zeroyear)
+        resolve(name, seconds_from_zeroyear)
     end
   end
 

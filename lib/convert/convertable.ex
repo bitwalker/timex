@@ -16,6 +16,17 @@ defprotocol Timex.Convertable do
   def to_gregorian(date)
 
   @doc """
+  Converts a date/time representation to a Julian date number
+
+  ## Examples:
+
+      iex> use Timex
+      ...> Timex.to_julian({{2016,3,9}, {11,0,0}})
+      2457457.4
+  """
+  def to_julian(date)
+
+  @doc """
   Converts a date/time representation to the number of seconds since the start of
   year zero of the Gregorian calendar.
 
@@ -80,7 +91,7 @@ defprotocol Timex.Convertable do
 
   iex> use Timex
   ...> Timex.to_timestamp({{2015, 3, 5}, {12, 0, 0}})
-  {1425, 513600, 0}
+  {1425, 556800, 0}
   """
   def to_timestamp(date)
 end

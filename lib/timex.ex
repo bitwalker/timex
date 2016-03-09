@@ -20,35 +20,56 @@ defmodule Timex do
   alias Timex.AmbiguousDateTime
   alias Timex.Timezone
   alias Timex.TimezoneInfo
+  alias Timex.AmbiguousTimezoneInfo
   alias Timex.Types
-  alias Timex.Convertable
   alias Timex.Helpers
+  alias Timex.Convertable
   alias Timex.Comparable
   use Timex.Constants
   import Timex.Macros
-
-  @typep convertable :: Date.t | DateTime.t | Types.datetime | Types.date
 
   @doc """
   Creates a new Date value, which represents the first day of year zero.
 
   If a date/time value is provided, it will convert it to a Date struct.
   """
-  @spec date(Types.all_valid_datetime) :: Date.t | {:error, term}
-  defdelegate date(from),               to: Date, as: :from
+  @spec date(Timex.Convertable) :: Date.t | {:error, term}
+  defdelegate date(from), to: Timex.Convertable, as: :to_date
 
   @doc """
   Creates a new DateTime value, which represents the first moment of the first day of year zero.
 
-  If a date/time value is provided, it will convert it to a DateTime struct.
-
-  There is also a third variant which will take a date/time value and a timezone value, and return
-  a DateTime representing that moment in the provided timezone
+  The provided date/time value will be converted via the `Timex.Convertable` protocol.
   """
-  @spec datetime(Types.all_valid_datetime) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
-  @spec datetime(Types.all_valid_datetime, Types.valid_timezone) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
-  defdelegate datetime(from),           to: DateTime, as: :from
-  defdelegate datetime(from, timezone), to: DateTime, as: :from
+  @spec datetime(Convertable) :: DateTime.t | {:error, term}
+  defdelegate datetime(from), to: Timex.Convertable, as: :to_datetime
+
+  @doc """
+  Same as `datetime/1`, except this version returns a DateTime or AmbiguousDateTime in the provided timezone.
+  """
+  @spec datetime(Convertable, Types.valid_timezone) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
+  def datetime(from, timezone) do
+    case Convertable.to_datetime(from) do
+      {:error, _} = err ->
+        err
+      %DateTime{} = datetime ->
+        case Timezone.name_of(timezone) do
+          {:error, _} = err ->
+            err
+          name ->
+            seconds_from_zeroyear = DateTime.to_seconds(datetime, :zero)
+            case Timezone.resolve(name, seconds_from_zeroyear) do
+              {:error, _} = err ->
+                err
+              %TimezoneInfo{} = tzinfo ->
+                %{datetime | :timezone => tzinfo}
+              %AmbiguousTimezoneInfo{:before => b, :after => a} ->
+                %AmbiguousDateTime{:before => %{datetime | :timezone => b},
+                                   :after  => %{datetime | :timezone => a}}
+            end
+        end
+    end
+  end
 
   @doc """
   WARNING: Added to ease the migration to 2.x, but it is deprecated.
@@ -57,7 +78,7 @@ defmodule Timex do
   """
   def from(from) do
     IO.write :stderr, "warning: Timex.from/1 is deprecated, use Timex.date/1 or Timex.datetime/1 instead\n"
-    Timex.datetime(from)
+    Convertable.to_datetime(from)
   end
   @doc """
   WARNING: Added to ease the migration to 2.x, but it is deprecated.
@@ -71,51 +92,57 @@ defmodule Timex do
   end
 
   @doc """
-  Convert a date/time value to a gregorian calendar datetme+timezone tuple.
+  Convert a date/time value to a Gregorian calendar datetme+timezone tuple.
   i.e. { {year, month, day}, {hour, minute, second}, {offset_hours, timezone_abbreviation}}
   """
-  @spec to_gregorian(convertable) :: Types.gregorian | {:error, term}
+  @spec to_gregorian(Convertable) :: Types.gregorian | {:error, term}
   defdelegate to_gregorian(datetime), to: Convertable
+
+  @doc """
+  Convert a date/time value to a Julian calendar date number
+  """
+  @spec to_julian(Convertable) :: float
+  defdelegate to_julian(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to gregorian seconds (seconds since start of year zero)
   """
-  @spec to_gregorian_seconds(convertable) :: non_neg_integer | {:error, term}
+  @spec to_gregorian_seconds(Convertable) :: non_neg_integer | {:error, term}
   defdelegate to_gregorian_seconds(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to a standard Erlang datetme tuple.
   i.e. { {year, month, day}, {hour, minute, second} }
   """
-  @spec to_erlang_datetime(convertable) :: Types.datetime | {:error, term}
+  @spec to_erlang_datetime(Convertable) :: Types.datetime | {:error, term}
   defdelegate to_erlang_datetime(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to a Date struct
   """
-  @spec to_date(convertable) :: Date.t | {:error, term}
+  @spec to_date(Convertable) :: Date.t | {:error, term}
   defdelegate to_date(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to a DateTime struct
   """
-  @spec to_datetime(convertable) :: DateTime.t | {:error, term}
+  @spec to_datetime(Convertable) :: DateTime.t | {:error, term}
   defdelegate to_datetime(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to seconds since the UNIX epoch
   """
-  @spec to_unix(convertable) :: non_neg_integer | {:error, term}
+  @spec to_unix(Convertable) :: non_neg_integer | {:error, term}
   defdelegate to_unix(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to an Erlang timestamp
   """
-  @spec to_timestamp(convertable) :: Types.timestamp | {:error, term}
+  @spec to_timestamp(Convertable) :: Types.timestamp | {:error, term}
   defdelegate to_timestamp(datetime), to: Convertable
 
   @doc """
-  Formats a Date/DateTime using the given format string (and optional formatter).
+  Formats a date/time value using the given format string (and optional formatter).
 
   See Timex.Format.DateTime.Formatters.Default or Timex.Format.DateTime.Formatters.Strftime
   for documentation on the syntax supported by those formatters.
@@ -124,33 +151,47 @@ defmodule Timex do
   can either alias and pass Strftime by module name, or as a shortcut, you can pass :strftime
   instead.
 
+  Formatting uses the Convertable protocol to convert non-DateTime structs to DateTime structs.
+
   ## Examples
 
       iex> date = Timex.date({2016, 2, 29})
       ...> Timex.format!(date, "{YYYY}-{0M}-{D}")
       "2016-02-29"
 
-      iex> datetime = Timex.datetime({{2016, 2, 29}, {22, 25, 0}}, "America/Chicago")
-      ...> Timex.format!(datetime, "{ISO:Extended}")
-      "2016-02-29T22:25:00-06:00"
+      iex> Timex.format!({{2016,2,29},{22,25,0}}, "{ISO:Extended}")
+      "2016-02-29T22:25:00+00:00"
+  """
+  @spec format(Convertable, format :: String.t) :: {:ok, String.t} | {:error, term}
+  defdelegate format(datetime, format_string), to: Timex.Format.DateTime.Formatter
 
-      iex> datetime = Timex.datetime({{2016, 2, 29}, {22, 25, 0}}, "America/Chicago")
-      ...> Timex.format!(datetime, "%FT%T%:z", :strftime)
+  @doc """
+  Same as format/2, except using a custom formatter
+
+  ## Examples
+
+      iex> use Timex
+      ...> datetime = Timex.datetime({{2016,2,29},{22,25,0}}, "America/Chicago")
+      iex> Timex.format!(datetime, "%FT%T%:z", :strftime)
       "2016-02-29T22:25:00-06:00"
   """
-  @spec format(Date.t | DateTime.t, format :: String.t) :: {:ok, String.t} | {:error, term}
-  @spec format(Date.t | DateTime.t, format :: String.t, formatter :: atom) :: {:ok, String.t} | {:error, term}
-  defdelegate format(datetime, format_string), to: Timex.Format.DateTime.Formatter
+  @spec format(Convertable, format :: String.t, formatter :: atom) :: {:ok, String.t} | {:error, term}
   defdelegate format(datetime, format_string, formatter), to: Timex.Format.DateTime.Formatter
 
   @doc """
-  Same as format/2 and format/3, except format! raises on error.
+  Same as format/2, except format! raises on error.
 
-  See format/2 or format/3 docs for usage examples.
+  See format/2 docs for usage examples.
   """
-  @spec format!(Date.t | DateTime.t, format :: String.t) :: String.t | no_return
-  @spec format!(Date.t | DateTime.t, format :: String.t, formatter :: atom) :: String.t | no_return
+  @spec format!(Convertable, format :: String.t) :: String.t | no_return
   defdelegate format!(datetime, format_string), to: Timex.Format.DateTime.Formatter
+
+  @doc """
+  Same as format/3, except format! raises on error.
+
+  See format/3 docs for usage examples
+  """
+  @spec format!(Convertable, format :: String.t, formatter :: atom) :: String.t | no_return
   defdelegate format!(datetime, format_string, formatter), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -282,9 +323,13 @@ defmodule Timex do
   21
 
   """
-  @spec century(Date.t | DateTime.t | Types.year) :: non_neg_integer | {:error, term}
-  def century(%Date{:year => y}),     do: century(y)
-  def century(%DateTime{:year => y}), do: century(y)
+  @spec century(Convertable | Types.year) :: non_neg_integer | {:error, term}
+  def century(date) when not is_integer(date) do
+    case Convertable.to_date(date) do
+      {:error, _} = err    -> err
+      %Date{:year => year} -> century(year)
+    end
+  end
   def century(year) when is_integer(year) do
     base_century = div(year, 100)
     years_past   = rem(year, 100)
@@ -297,43 +342,56 @@ defmodule Timex do
   @doc """
   Convert an iso ordinal day number to the day it represents in the current year.
 
-  If the second parameter is provided, you can expect the following based on what is provided:
+   ## Examples
+
+      iex> use Timex
+      iex> %Date{:year => year} = Timex.from_iso_day(180)
+      ...> %Date{:year => todays_year} = Date.today
+      ...> year == todays_year
+      true
+  """
+  @spec from_iso_day(non_neg_integer) :: Date.t | {:error, term}
+  def from_iso_day(day) when is_day_of_year(day) do
+    {{year,_,_},_} = :calendar.universal_time
+    from_iso_day(day, year)
+  end
+  def from_iso_day(_), do: {:error, {:from_iso_day, :invalid_iso_day}}
+
+  @doc """
+  Same as from_iso_day/1, except you can expect the following based on the second parameter:
 
   - If an integer year is given, the result will be a Date struct
   - If a Date struct is given, the result will be a Date struct
   - If a DateTime struct is given, the result will be a DateTime struct
+  - If a Convertable is given, the result will be a DateTime struct
 
   In all cases, the resulting value will be the date representation of the provided ISO day in that year
 
   ## Examples
 
-      # Creating a Date from the given day
+  ### Creating a Date from the given day
+
       iex> use Timex
       ...> expected = Timex.date({2015, 6, 29})
       ...> (expected === Timex.from_iso_day(180, 2015))
       true
 
-      # Creating a Date/DateTime from the given day
+  ### Creating a Date/DateTime from the given day
+
       iex> use Timex
       ...> expected = Timex.datetime({{2015, 6, 29}, {0,0,0}})
       ...> (expected === Timex.from_iso_day(180, Timex.datetime({{2015,1,1}, {0,0,0}})))
       true
 
-      # Shifting a Date/DateTime to the given day
+  ### Shifting a Date/DateTime to the given day
+
       iex> use Timex
       ...> date = Timex.datetime({{2015,6,26}, {12,0,0}})
       ...> expected = Timex.datetime({{2015, 6, 29}, {12,0,0}})
       ...> (Timex.from_iso_day(180, date) === expected)
       true
   """
-  @spec from_iso_day(non_neg_integer) :: Date.t | {:error, term}
-  @spec from_iso_day(non_neg_integer, Types.year) :: Date.t | {:error, term}
-  @spec from_iso_day(non_neg_integer, Date.t | DateTime.t | nil) :: Date.t | DateTime.t | {:error, term}
-  def from_iso_day(day) when is_day_of_year(day) do
-    {{year,_,_},_} = :calendar.universal_time
-    from_iso_day(day, year)
-  end
-  def from_iso_day(_), do: {:error, {:from_iso_day, :invalid_iso_day}}
+  @spec from_iso_day(non_neg_integer, Types.year | Date.t | DateTime.t | Convertable) :: Date.t | DateTime.t | {:error, term}
   def from_iso_day(day, year) when is_day_of_year(day) and is_year(year) do
     datetime = Helpers.iso_day_to_date_tuple(year, day)
     Timex.date(datetime)
@@ -346,8 +404,13 @@ defmodule Timex do
     {year, month, day_of_month} = Helpers.iso_day_to_date_tuple(year, day)
     %{date | :year => year, :month => month, :day => day_of_month}
   end
-  def from_iso_day(day, _) when is_day_of_year(day),
-    do: {:error, {:from_iso_day, :invalid_date}}
+  def from_iso_day(day, date) when is_day_of_year(day) do
+    case Convertable.to_datetime(date) do
+      {:error, _} = err -> err
+      %DateTime{} = datetime ->
+        from_iso_day(day, datetime)
+    end
+  end
   def from_iso_day(_, _),
     do: {:error, {:from_iso_day, :invalid_iso_day}}
 
@@ -357,21 +420,33 @@ defmodule Timex do
 
   ## Examples
 
-      iex> Timex.Date.epoch |> #{__MODULE__}.iso_week
-      {1970,1}
-
-      iex> #{__MODULE__}.iso_week(1970, 1, 1)
+      iex> #{__MODULE__}.iso_week({1970, 1, 1})
       {1970,1}
   """
-  @spec iso_week(Date.t | DateTime.t) :: {Types.year, Types.weeknum} | {:error, term}
-  @spec iso_week(Types.year, Types.month, Types.day) :: {Types.year, Types.weeknum} | {:error, term}
+  @spec iso_week(Convertable) :: {Types.year, Types.weeknum} | {:error, term}
 
   def iso_week(%Date{:year => y, :month => m, :day => d}) when is_date(y,m,d),
     do: iso_week(y, m, d)
   def iso_week(%DateTime{:year => y, :month => m, :day => d}) when is_date(y,m,d),
     do: iso_week(y, m, d)
-  def iso_week(date),
-    do: iso_week(DateTime.from_erl(date, :utc))
+  def iso_week(date) do
+    case Convertable.to_date(date) do
+      {:error, _} = err ->
+        err
+      %Date{} = d ->
+        iso_week(d)
+    end
+  end
+
+  @doc """
+  Same as iso_week/1, except this takes a year, month, and day as distinct arguments.
+
+  ## Examples
+
+      iex> #{__MODULE__}.iso_week(1970, 1, 1)
+      {1970,1}
+  """
+  @spec iso_week(Types.year, Types.month, Types.day) :: {Types.year, Types.weeknum} | {:error, term}
   def iso_week(year, month, day) when is_date(year, month, day),
     do: :calendar.iso_week_number({year, month, day})
   def iso_week(_, _, _),
@@ -382,20 +457,20 @@ defmodule Timex do
 
   ## Examples
 
-      iex> Date.epoch |> #{__MODULE__}.iso_triplet
+      iex> #{__MODULE__}.iso_triplet(Timex.DateTime.epoch)
       {1970, 1, 4}
 
   """
-  @spec iso_triplet(Date.t | DateTime.t) :: {Types.year, Types.weeknum, Types.weekday} | {:error, term}
-  def iso_triplet(%Date{} = date) do
-    { iso_year, iso_week } = iso_week(date)
-    { iso_year, iso_week, Timex.weekday(date) }
+  @spec iso_triplet(Convertable) :: {Types.year, Types.weeknum, Types.weekday} | {:error, term}
+  def iso_triplet(datetime) do
+    case Convertable.to_date(datetime) do
+      {:error, _} = err ->
+        err
+      %Date{} = d ->
+        {iso_year, iso_week} = iso_week(d)
+        {iso_year, iso_week, Timex.weekday(d)}
+    end
   end
-  def iso_triplet(%DateTime{} = datetime) do
-    { iso_year, iso_week } = iso_week(datetime)
-    { iso_year, iso_week, Timex.weekday(datetime) }
-  end
-  def iso_triplet(_), do: {:error, {:iso_triplet, :badarg}}
 
   @doc """
   Given an ISO triplet `{year, week number, weekday}`, convert it to a Date struct.
@@ -420,6 +495,12 @@ defmodule Timex do
   def from_iso_triplet(_, _, _), do: {:error, {:from_iso_triplet, :invalid_triplet}}
 
   @doc """
+  Returns a list of all valid timezone names in the Olson database
+  """
+  @spec timezones() :: [String.t]
+  def timezones(), do: Tzdata.zone_list
+
+  @doc """
   Get a TimezoneInfo object for the specified offset or name.
 
   When offset or name is invalid, exception is raised.
@@ -432,35 +513,47 @@ defmodule Timex do
   ## Examples
 
       iex> date = Timex.datetime({2015, 4, 12})
-      iex> tz = Timex.timezone(:utc, date)
-      iex> tz.full_name
+      ...> tz = Timex.timezone(:utc, date)
+      ...> tz.full_name
       "UTC"
 
-      iex> date = Timex.datetime({2015, 4, 12})
-      iex> tz = Timex.timezone("America/Chicago", date)
-      iex> {tz.full_name, tz.abbreviation}
+      iex> tz = Timex.timezone("America/Chicago", {2015,4,12})
+      ...> {tz.full_name, tz.abbreviation}
       {"America/Chicago", "CDT"}
 
-      iex> date = Timex.datetime({2015, 4, 12})
-      iex> tz = #{__MODULE__}.timezone(+2, date)
-      iex> {tz.full_name, tz.abbreviation}
+      iex> tz = #{__MODULE__}.timezone(+2, {2015, 4, 12})
+      ...> {tz.full_name, tz.abbreviation}
       {"Etc/GMT-2", "GMT-2"}
 
   """
-  @spec timezone(Types.valid_timezone, DateTime.t | Types.datetime | Types.gregorian) :: TimezoneInfo.t
+  @spec timezone(Types.valid_timezone, Convertable) :: TimezoneInfo.t | AmbiguousTimezoneInfo.t
 
-  def timezone(%TimezoneInfo{} = tz, _), do: tz
-  def timezone(:local, {{y,m,d},{h,mm,s}} = datetime) when is_datetime(y,m,d,h,mm,s),
-    do: Timezone.local(Timex.datetime(datetime))
-  def timezone(:local, {{y,m,d},{h,mm,s,ms}} = datetime) when is_datetime(y,m,d,h,mm,s,ms),
-    do: Timezone.local(Timex.datetime(datetime))
-  def timezone(:local, {{y,m,d}=date,{h,mm,s}=time, {offset, tz}}) when is_gregorian(y,m,d,h,mm,s,offset,tz),
-    do: Timezone.local(Timex.datetime({date, time}, offset))
-  def timezone(:local, %DateTime{}=date),
-    do: Timezone.local(date)
-  def timezone(:utc, _),
-    do: %TimezoneInfo{}
-  defdelegate timezone(name, datetime), to: Timezone, as: :get
+  def timezone(:utc, _),                 do: %TimezoneInfo{}
+  def timezone(%TimezoneInfo{full_name: name}, datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err ->
+        err
+      %DateTime{} = d ->
+        seconds_from_zeroyear = DateTime.to_seconds(d, :zero)
+        Timezone.resolve(name, seconds_from_zeroyear)
+    end
+  end
+  def timezone(:local, datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err ->
+        err
+      %DateTime{} = d ->
+        Timezone.local(d)
+    end
+  end
+  def timezone(tz, datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err ->
+        err
+      %DateTime{} = d ->
+        Timezone.get(tz, d)
+    end
+  end
 
   @doc """
   Return a boolean indicating whether the given date is valid.
@@ -468,7 +561,7 @@ defmodule Timex do
   ## Examples
 
       iex> use Timex
-      ...> Timex.datetime({{1,1,1}, {1,1,1}}) |> Timex.is_valid?
+      ...> Timex.is_valid?({{1,1,1},{1,1,1}})
       true
 
       iex> use Timex
@@ -480,29 +573,19 @@ defmodule Timex do
       false
 
   """
-  @spec is_valid?(term) :: boolean
+  @spec is_valid?(Convertable) :: boolean
   def is_valid?(%Date{:year => y, :month => m, :day => d}) do
     :calendar.valid_date({y,m,d})
   end
   def is_valid?(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => sec, :timezone => tz}) do
     :calendar.valid_date({y,m,d}) and is_valid_time?({h,min,sec}) and is_valid_timezone?(tz)
   end
-  def is_valid?({{_,_,_} = date, {_,_,_} = time, %TimezoneInfo{} = tz}) do
-    :calendar.valid_date(date) and is_valid_time?(time) and is_valid_timezone?(tz)
+  def is_valid?(datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} -> false
+      %DateTime{} -> true
+    end
   end
-  def is_valid?({{_,_,_} = date, {_,_,_} = time, {offset, tz}}) when is_gregorian_tz(offset, tz) do
-    :calendar.valid_date(date) and is_valid_time?(time) and is_valid_timezone?(tz)
-  end
-  def is_valid?({{_,_,_} = date, {_,_,_} = time}) do
-    :calendar.valid_date(date) and is_valid_time?(time)
-  end
-  def is_valid?({{_,_,_} = date, {_,_,_,_} = time}) do
-    :calendar.valid_date(date) and is_valid_time?(time)
-  end
-  def is_valid?({y,m,d} = date) when is_date(y,m,d) do
-    :calendar.valid_date(date)
-  end
-  def is_valid?(_), do: false
 
   @doc """
   Returns a boolean indicating whether the provided term represents a valid time,
@@ -529,12 +612,12 @@ defmodule Timex do
 
   """
   @spec is_valid_timezone?(term) :: boolean
-  def is_valid_timezone?(%TimezoneInfo{:full_name => tzname}), do: Timezone.exists?(tzname)
-  def is_valid_timezone?(name) when is_binary(name), do: Timezone.exists?(name)
-  def is_valid_timezone?(name) when name in [:utc, :local], do: true
-  def is_valid_timezone?(offset) when is_tz_offset(offset), do: true
-  def is_valid_timezone?(_), do: false
-
+  def is_valid_timezone?(timezone) do
+    case Timezone.name_of(timezone) do
+      {:error, _} -> false
+      _name       -> true
+    end
+  end
 
   @doc """
   Returns a boolean indicating whether the first `Timex.Comparable` occurs before the second
@@ -667,19 +750,29 @@ defmodule Timex do
   Add time to a date using a timestamp, i.e. {megasecs, secs, microsecs}
   Same as shift(date, Time.to_timestamp(5, :minutes), :timestamp).
   """
-  @spec add(Date.t | DateTime.t, Types.timestamp) :: DateTime.t | {:error, term}
+  @spec add(Convertable, Types.timestamp) :: DateTime.t | {:error, term}
   def add(%Date{} = date, {mega,sec,_}),     do: shift(date, [seconds: (mega * @million) + sec])
   def add(%DateTime{} = date, {mega,sec,_}), do: shift(date, [seconds: (mega * @million) + sec])
-  def add(_, _), do: {:error, :badarg}
+  def add(datetime, {_,_,_} = timestamp) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d   -> add(d, timestamp)
+    end
+  end
 
   @doc """
   Subtract time from a date using a timestamp, i.e. {megasecs, secs, microsecs}
   Same as shift(date, Time.to_timestamp(5, :minutes) |> Time.invert, :timestamp).
   """
-  @spec subtract(Date.t | DateTime.t, Types.timestamp) :: DateTime.t | {:error, term}
+  @spec subtract(Convertable, Types.timestamp) :: DateTime.t | {:error, term}
   def subtract(%Date{} = date, {mega,sec,_}),     do: shift(date, [seconds: (-mega * @million) - sec])
   def subtract(%DateTime{} = date, {mega,sec,_}), do: shift(date, [seconds: (-mega * @million) - sec])
-  def subtract(_, _), do: {:error, :badarg}
+  def subtract(datetime, {_,_,_} = timestamp) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d   -> subtract(d, timestamp)
+    end
+  end
 
   @doc """
   A single function for adjusting the date using various units: timestamp,
@@ -724,6 +817,12 @@ defmodule Timex do
   @spec shift(Date.t | DateTime.t, list({Types.shift_units, term})) :: DateTime.t | {:error, term}
   def shift(%Date{} = date, options),         do: Date.shift(date, options)
   def shift(%DateTime{} = datetime, options), do: DateTime.shift(datetime, options)
+  def shift(datetime, options) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d   -> shift(d, options)
+    end
+  end
 
   @doc """
   Get the day of the week corresponding to the given name.
@@ -873,13 +972,16 @@ defmodule Timex do
   4 # (i.e. Thursday)
 
   """
-  @spec weekday(Types.valid_datetime) :: Types.weekday | {:error, term}
+  @spec weekday(Convertable) :: Types.weekday | {:error, term}
 
   def weekday(%Date{:year => y, :month => m, :day => d}),     do: :calendar.day_of_the_week({y, m, d})
   def weekday(%DateTime{:year => y, :month => m, :day => d}), do: :calendar.day_of_the_week({y, m, d})
-  def weekday({y,m,d} = date) when is_date(y,m,d),            do: :calendar.day_of_the_week(date)
-  def weekday({{y,m,d} = date, _}) when is_date(y,m,d),       do: :calendar.day_of_the_week(date)
-  def weekday(_),                                             do: {:error, :invalid_date}
+  def weekday(datetime) do
+    case Convertable.to_date(datetime) do
+      {:error, _} = err -> err
+      %Date{} = d       -> weekday(d)
+    end
+  end
 
   @doc """
   Returns the ordinal day number of the date.
@@ -889,16 +991,19 @@ defmodule Timex do
   iex> Timex.datetime({{2015,6,26},{0,0,0}}) |> Timex.day
   177
   """
-  @spec day(Types.valid_datetime) :: Types.daynum | {:error, term}
+  @spec day(Convertable) :: Types.daynum | {:error, term}
 
   def day(%Date{} = date), do: day(to_datetime(date))
   def day(%DateTime{} = date) do
     start_of_year = DateTime.set(date, [month: 1, day: 1])
     1 + diff(start_of_year, date, :days)
   end
-  def day({y,m,d} = date) when is_date(y,m,d),      do: day(Date.from(date))
-  def day({{y,m,d} = date, _}) when is_date(y,m,d), do: day(Date.from(date))
-  def day(_), do: {:error, :invalid_date}
+  def day(datetime) do
+    case Convertable.to_date(datetime) do
+      {:error, _} = err -> err
+      %Date{} = d -> day(d)
+    end
+  end
 
   @doc """
   Return the number of days in the month which the date falls on.
@@ -909,34 +1014,52 @@ defmodule Timex do
       31
 
   """
-  @spec days_in_month(Types.valid_datetime | {Types.year, Types.month}) :: Types.num_of_days | {:error, term}
+  @spec days_in_month(Convertable) :: Types.num_of_days | {:error, term}
   def days_in_month(%DateTime{:year => y, :month => m}), do: days_in_month(y, m)
   def days_in_month(%Date{:year => y, :month => m}),     do: days_in_month(y, m)
-  def days_in_month({y,m,d}) when is_date(y,m,d),        do: days_in_month(y, m)
-  def days_in_month({{y,m,d}, _}) when is_date(y,m,d),   do: days_in_month(y, m)
+  def days_in_month(date) do
+    case Convertable.to_date(date) do
+      {:error, _} = err -> err
+      %Date{} = d -> days_in_month(d)
+    end
+  end
+
+  @doc """
+  Same as days_in_month/2, except takes year and month as distinct arguments
+  """
+  @spec days_in_month(Types.year, Types.month) :: Types.num_of_days | {:error, term}
   defdelegate days_in_month(year, month), to: Timex.Helpers
 
   @doc """
-  Given a Date, DateTime, or year, month, and day, this function returns the
-  week number of the date provided, starting at 1.
+  Given a Convertable, this function returns the week number of the date provided, starting at 1.
 
   ## Examples
 
-      iex> Timex.week_of_month(Timex.date({2016,3,5}))
+      iex> Timex.week_of_month({2016,3,5})
       1
 
       iex> Timex.week_of_month(Timex.datetime({2016, 3, 14}))
       3
+  """
+  @spec week_of_month(Convertable) :: Types.week_of_month
+  def week_of_month(%DateTime{:year => y, :month => m, :day => d}), do: week_of_month(y,m,d)
+  def week_of_month(%Date{:year => y, :month => m, :day => d}),     do: week_of_month(y,m,d)
+  def week_of_month(datetime) do
+    case Convertable.to_date(datetime) do
+      {:error, _} = err -> err
+      %Date{} = d -> week_of_month(d)
+    end
+  end
+
+  @doc """
+  Same as week_of_month/1, except takes year, month, and day as distinct arguments
+
+  ## Examples
 
       iex> Timex.week_of_month(2016, 3, 30)
       5
-
   """
-  @spec week_of_month(Date.t | DateTime.t) :: Types.week_of_month
-  def week_of_month(%DateTime{:year => y, :month => m, :day => d}), do: week_of_month(y,m,d)
-  def week_of_month(%Date{:year => y, :month => m, :day => d}),     do: week_of_month(y,m,d)
-  def week_of_month(_),
-    do: {:error, :invalid_date}
+  @spec week_of_month(Types.year, Types.month, Types.day) :: Types.week_of_month
   def week_of_month(year, month, day) when is_date(year, month, day) do
     {_, week_index_of_given_date} = iso_week(year, month, day)
     {_, week_index_of_first_day_of_given_month} = iso_week(year, month, 1)
@@ -952,18 +1075,27 @@ defmodule Timex do
     Timex.datetime({{2015, 6, 1}, {0, 0, 0}}, "Europe/Paris")
 
   """
-  @spec beginning_of_month(Date.t | DateTime.t) :: Date.t | DateTime.t | {:error, term}
-  @spec beginning_of_month(Types.year, Types.month) :: DateTime.t
+  @spec beginning_of_month(Date.t | DateTime.t | Comparable) :: Date.t | DateTime.t | {:error, term}
   def beginning_of_month(%Date{year: year, month: month}),
     do: Timex.date({year, month, 1})
   def beginning_of_month(%DateTime{year: year, month: month, timezone: tz}) when not is_nil(tz),
     do: Timex.datetime({{year, month, 1},{0, 0, 0}}, tz)
   def beginning_of_month(%DateTime{year: year, month: month}),
     do: Timex.datetime({{year, month, 1},{0, 0, 0}})
-  def beginning_of_month(_),
-    do: {:error, :badarg}
+  def beginning_of_month(datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d ->
+        %{d | :day => 1, :hour => 0, :minute => 0, :second => 0, :millisecond => 0}
+    end
+  end
+
+  @doc """
+  Same as beginning_of_month/1, except takes year and month as distinct arguments
+  """
+  @spec beginning_of_month(Types.year, Types.month) :: Date.t | {:error, term}
   def beginning_of_month(year, month) when is_year(month) and is_month(month),
-    do: Timex.datetime({year, month, 1})
+    do: Timex.date({year, month, 1})
   def beginning_of_month(_, _),
     do: {:error, :invalid_year_or_month}
 
@@ -974,26 +1106,36 @@ defmodule Timex do
     iex> Timex.end_of_month(date)
     Timex.datetime({{2015, 6, 30}, {23, 59, 59}}, "Europe/London")
 
-    iex> Timex.end_of_month(2016, 2)
-    Timex.date({2016, 2, 29})
-
   """
   @spec end_of_month(Date.t | DateTime.t) :: Date.t | DateTime.t | {:error, term}
-  @spec end_of_month(Types.year, Types.month) :: DateTime.t
   def end_of_month(%Date{year: year, month: month} = date),
     do: Timex.date({year, month, days_in_month(date)})
   def end_of_month(%DateTime{year: year, month: month, timezone: tz} = date) when not is_nil(tz),
     do: Timex.datetime({{year, month, days_in_month(date)},{23, 59, 59}}, tz)
   def end_of_month(%DateTime{year: year, month: month} = date),
     do: Timex.datetime({{year, month, days_in_month(date)},{23, 59, 59}})
-  def end_of_month(_),
-    do: {:error, :badarg}
+  def end_of_month(datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d   -> end_of_month(d)
+    end
+  end
+
+  @doc """
+  Same as end_of_month/1, except takes year and month as distinct arguments
+
+  ## Examples
+
+      iex> Timex.end_of_month(2016, 2)
+      Timex.date({2016, 2, 29})
+  """
+  @spec end_of_month(Types.year, Types.month) :: Date.t
   def end_of_month(year, month) when is_year(year) and is_month(month),
     do: end_of_month(Timex.date({year, month, 1}))
   def end_of_month(_, _),
     do: {:error, :invalid_year_or_month}
 
-  @spec quarter(Date.t | DateTime.t | Types.month) :: integer | {:error, term}
+  @spec quarter(Convertable | Types.month) :: integer | {:error, term}
   defp quarter(month) when is_month(month) do
     case month do
       m when m in 1..3   -> 1
@@ -1005,7 +1147,12 @@ defmodule Timex do
   defp quarter(m) when is_integer(m),    do: {:error, :invalid_month}
   defp quarter(%Date{month: month}),     do: quarter(month)
   defp quarter(%DateTime{month: month}), do: quarter(month)
-  defp quarter(_),                       do: {:error, :badarg}
+  defp quarter(datetime) do
+    case Convertable.to_date(datetime) do
+      {:error, _} = err   -> err
+      %Date{month: month} -> quarter(month)
+    end
+  end
 
   @doc """
   Given a date returns a date at the beginning of the quarter.
@@ -1015,7 +1162,7 @@ defmodule Timex do
     Timex.datetime({{2015, 4, 1}, {0, 0, 0}}, "CST")
 
   """
-  @spec beginning_of_quarter(Date.t | DateTime.t) :: Date.t | DateTime.t | {:error, term}
+  @spec beginning_of_quarter(Date.t | Convertable) :: Date.t | DateTime.t | {:error, term}
   def beginning_of_quarter(%Date{year: year, month: month}) when is_year(year) and is_month(month) do
     month = 1 + (3 * (quarter(month) - 1))
     Timex.date({year, month, 1})
@@ -1030,7 +1177,12 @@ defmodule Timex do
     month = 1 + (3 * (quarter(month) - 1))
     Timex.datetime({{year, month, 1},{0, 0, 0}})
   end
-  def beginning_of_quarter(_), do: {:error, :invalid_date}
+  def beginning_of_quarter(datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d -> beginning_of_quarter(d)
+    end
+  end
 
   @doc """
   Given a date or a year and month returns a date at the end of the quarter.
@@ -1043,8 +1195,7 @@ defmodule Timex do
     Timex.date({{2015, 6, 30}, {23, 59, 59}})
 
   """
-  @spec end_of_quarter(Date.t | DateTime.t) :: Date.t | DateTime.t | {:error, term}
-  @spec end_of_quarter(Types.year, Types.month) :: Date.t | {:error, term}
+  @spec end_of_quarter(Convertable) :: Date.t | DateTime.t | {:error, term}
   def end_of_quarter(%Date{year: year, month: month}) when is_year(year) and is_month(month) do
     month = 3 * quarter(month)
     end_of_month(Timex.date({year, month, 1}))
@@ -1053,12 +1204,32 @@ defmodule Timex do
     when is_year(year) and is_month(month) and not is_nil(tz)
     do
       month = 3 * quarter(month)
-      end_of_month(Timex.datetime({{year, month, 1},{0, 0, 0}}, tz))
+      case Timex.datetime({{year,month,1},{0,0,0}}, tz) do
+        {:error, _} = err -> err
+        %DateTime{} = d -> end_of_month(d)
+        %AmbiguousDateTime{:before => b, :after => a} ->
+          %AmbiguousDateTime{:before => end_of_month(b),
+                             :after => end_of_month(a)}
+      end
   end
   def end_of_quarter(%DateTime{year: year, month: month}) when is_year(year) and is_month(month) do
     month = 3 * quarter(month)
     end_of_month(Timex.datetime({year, month, 1}))
   end
+  def end_of_quarter(datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d   -> end_of_quarter(d)
+      %AmbiguousDateTime{:before => b, :after => a} ->
+        %AmbiguousDateTime{:before => end_of_quarter(b),
+                           :after => end_of_quarter(a)}
+    end
+  end
+
+  @doc """
+  Same as end_of_quarter/1, except takes year and month as distinct arguments
+  """
+  @spec end_of_quarter(Types.year, Types.month) :: Date.t | {:error, term}
   def end_of_quarter(year, month) when is_year(year) and is_month(month) do
     end_of_month(Timex.date({year, 3 * quarter(month), 1}))
   end
@@ -1080,8 +1251,7 @@ defmodule Timex do
       Timex.datetime({{2015, 1, 1}, {0, 0, 0, 0}}, "Europe/London")
 
   """
-  @spec beginning_of_year(Date.t | DateTime.t) :: Date.t | DateTime.t | {:error, term}
-  @spec beginning_of_year(Types.year, Types.valid_timezone) :: DateTime.t | {:error, term}
+  @spec beginning_of_year(Date.t | Comparable | Types.year) :: Date.t | DateTime.t | {:error, term}
   def beginning_of_year(%Date{year: year}) when is_year(year),
     do: Timex.date({year, 1, 1})
   def beginning_of_year(%DateTime{year: year, timezone: tz}) when is_year(year) and not is_nil(tz),
@@ -1090,8 +1260,17 @@ defmodule Timex do
     do: Timex.datetime({year, 1, 1})
   def beginning_of_year(year) when is_year(year),
     do: Timex.date({year, 1, 1})
-  def beginning_of_year(_),
-    do: {:error, :badarg}
+  def beginning_of_year(datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d   -> beginning_of_year(d)
+    end
+  end
+
+  @doc """
+  Same as beginning_of_year, except takes an integer year + timezone as arguments.
+  """
+  @spec beginning_of_year(Types.year, Types.valid_timezone) :: DateTime.t | {:error, term}
   def beginning_of_year(year, %TimezoneInfo{} = tz) when is_year(year) and is_binary(tz),
     do: Timex.datetime({year, 1, 1}, tz)
   def beginning_of_year(year, tz) when is_year(year) and is_tz_value(tz),
@@ -1115,9 +1294,7 @@ defmodule Timex do
       Timex.datetime {{2015, 12, 31}, {23, 59, 59}}, "Europe/London"
 
   """
-  @spec end_of_year(Date.t | DateTime.t) :: Date.t | DateTime.t | {:error, term}
-  @spec end_of_year(Types.year, Types.valid_timezone) :: DateTime.t | {:error, term}
-
+  @spec end_of_year(Date.t | Types.year | Comparable) :: Date.t | DateTime.t | {:error, term}
   def end_of_year(%Date{year: year}) when is_year(year),
     do: Timex.date({year, 12, 31})
   def end_of_year(%DateTime{year: year, timezone: tz}) when is_year(year) and not is_nil(tz),
@@ -1126,8 +1303,17 @@ defmodule Timex do
     do: Timex.datetime({{year, 12, 31}, {23, 59, 59}})
   def end_of_year(year) when is_year(year),
     do: Timex.date({{year, 12, 31}, {23, 59, 59}})
-  def end_of_year(_),
-    do: {:error, :badarg}
+  def end_of_year(datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d -> end_of_year(d)
+    end
+  end
+
+  @doc """
+  Same as end_of_year/1, except takes an integer year + timezone as arguments
+  """
+  @spec end_of_year(Types.year, Types.valid_timezone) :: DateTime.t | {:error, term}
   def end_of_year(year, %TimezoneInfo{} = tz) when is_year(year),
     do: Timex.datetime({{year, 12, 31}, {23, 59, 59}}, tz)
   def end_of_year(year, tz) when is_year(year) and is_tz_value(tz),
@@ -1193,7 +1379,7 @@ defmodule Timex do
       5
 
   """
-  @spec days_to_end_of_week(Types.valid_datetime, Types.weekday) :: integer | {:error, term}
+  @spec days_to_end_of_week(Convertable, Types.weekday) :: integer | {:error, term}
   def days_to_end_of_week(date, weekstart \\ :mon) do
     case days_to_beginning_of_week(date, weekstart) do
       {:error, _} = err -> err
@@ -1240,16 +1426,13 @@ defmodule Timex do
         |> beginning_of_day
     end
   end
-  def beginning_of_week({y,m,d} = date, weekstart) when is_date(y,m,d),
-    do: beginning_of_week(Date.from(date), weekstart)
-  def beginning_of_week({{y,m,d},{h,mm,s}} = datetime, weekstart) when is_datetime(y,m,d,h,mm,s),
-    do: beginning_of_week(DateTime.from(datetime), weekstart)
-  def beginning_of_week({{y,m,d},{h,mm,s,ms}} = datetime, weekstart) when is_datetime(y,m,d,h,mm,s,ms),
-    do: beginning_of_week(DateTime.from(datetime), weekstart)
-  def beginning_of_week({{y,m,d} = date,{h,mm,s} = time, {offset,tz}}, weekstart) when is_gregorian(y,m,d,h,mm,s,offset,tz),
-    do: beginning_of_week(DateTime.from({date, time}), weekstart)
-  def beginning_of_week(_, _),
-    do: {:error, :badarg}
+  def beginning_of_week(datetime, weekstart) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d ->
+        beginning_of_week(d, weekstart)
+    end
+  end
 
   @doc """
   Returns a Date or a DateTime representing the end of the week, depending on the input,
@@ -1269,7 +1452,7 @@ defmodule Timex do
       Timex.date({2015, 12, 5})
 
   """
-  @spec end_of_week(Types.valid_datetime, Types.weekday) :: Date.t | DateTime.t | {:error, term}
+  @spec end_of_week(Convertable, Types.weekday) :: Date.t | DateTime.t | {:error, term}
   def end_of_week(datetime, weekstart \\ 1)
 
   def end_of_week(%Date{} = date, weekstart) do
@@ -1292,16 +1475,12 @@ defmodule Timex do
         |> end_of_day
     end
   end
-  def end_of_week({y,m,d} = date, weekstart) when is_date(y,m,d),
-    do: end_of_week(Date.from(date), weekstart)
-  def end_of_week({{y,m,d},{h,mm,s}} = datetime, weekstart) when is_datetime(y,m,d,h,mm,s),
-    do: end_of_week(DateTime.from(datetime), weekstart)
-  def end_of_week({{y,m,d},{h,mm,s,ms}} = datetime, weekstart) when is_datetime(y,m,d,h,mm,s,ms),
-    do: end_of_week(DateTime.from(datetime), weekstart)
-  def end_of_week({{y,m,d} = date,{h,mm,s} = time, {offset,tz}}, weekstart) when is_gregorian(y,m,d,h,mm,s,offset,tz),
-    do: end_of_week(DateTime.from({date, time}), weekstart)
-  def end_of_week(_, _),
-    do: {:error, :badarg}
+  def end_of_week(datetime, weekstart) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d -> end_of_week(d, weekstart)
+    end
+  end
 
   @doc """
   Returns a DateTime representing the beginning of the day
@@ -1317,21 +1496,17 @@ defmodule Timex do
       Timex.date({{2015,1,1}, {0,0,0}})
 
   """
-  @spec beginning_of_day(Types.valid_datetime) :: DateTime.t | {:error, term}
+  @spec beginning_of_day(Convertable) :: DateTime.t | {:error, term}
   def beginning_of_day(%Date{} = date), do: date
   def beginning_of_day(%DateTime{} = datetime) do
     DateTime.set(datetime, [hour: 0, minute: 0, second: 0])
   end
-  def beginning_of_day({y,m,d} = date) when is_date(y,m,d),
-    do: beginning_of_day(DateTime.from(date))
-  def beginning_of_day({{y,m,d},{h,mm,s}} = datetime) when is_datetime(y,m,d,h,mm,s),
-    do: beginning_of_day(DateTime.from(datetime))
-  def beginning_of_day({{y,m,d},{h,mm,s,ms}} = datetime) when is_datetime(y,m,d,h,mm,s,ms),
-    do: beginning_of_day(DateTime.from(datetime))
-  def beginning_of_day({{y,m,d} = date,{h,mm,s} = time,{offset,tz}}) when is_gregorian(y,m,d,h,mm,s,offset,tz),
-    do: beginning_of_day(DateTime.from({date, time}))
-  def beginning_of_day(_),
-    do: {:error, :badarg}
+  def beginning_of_day(datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d -> beginning_of_day(d)
+    end
+  end
 
   @doc """
   Returns a DateTime representing the end of the day
@@ -1347,21 +1522,17 @@ defmodule Timex do
       Timex.date({{2015,1,1}, {23,59,59}})
 
   """
-  @spec end_of_day(Types.valid_datetime) :: DateTime.t | {:error, term}
+  @spec end_of_day(Convertable) :: DateTime.t | {:error, term}
   def end_of_day(%Date{} = date), do: date
   def end_of_day(%DateTime{} = datetime) do
     DateTime.set(datetime, [hour: 23, minute: 59, second: 59])
   end
-  def end_of_day({y,m,d} = date) when is_date(y,m,d),
-    do: end_of_day(DateTime.from(date))
-  def end_of_day({{y,m,d},{h,mm,s}} = datetime) when is_datetime(y,m,d,h,mm,s),
-    do: end_of_day(DateTime.from(datetime))
-  def end_of_day({{y,m,d},{h,mm,s,ms}} = datetime) when is_datetime(y,m,d,h,mm,s,ms),
-    do: end_of_day(DateTime.from(datetime))
-  def end_of_day({{y,m,d} = date,{h,mm,s} = time,{offset,tz}}) when is_gregorian(y,m,d,h,mm,s,offset,tz),
-    do: end_of_day(DateTime.from({date, time}))
-  def end_of_day(_),
-    do: {:error, :badarg}
+  def end_of_day(datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d -> end_of_day(d)
+    end
+  end
 
   @doc """
   Return a boolean indicating whether the given year is a leap year. You may
@@ -1382,12 +1553,12 @@ defmodule Timex do
     do: is_leap?(year)
   def is_leap?(%DateTime{:year => year}),
     do: is_leap?(year)
-  def is_leap?({y,m,d}) when is_date(y,m,d),
-    do: is_leap?(y)
-  def is_leap?({{y,m,d},_}) when is_date(y,m,d),
-    do: is_leap?(y)
-  def is_leap?(_),
-    do: {:error, :badarg}
+  def is_leap?(datetime) do
+    case Convertable.to_date(datetime) do
+      {:error, _} = err -> err
+      %Date{:year => y} -> :calendar.is_leap_year(y)
+    end
+  end
 
   @doc """
   Produces a valid Date or DateTime object based on a date or datetime tuple respectively.
@@ -1407,23 +1578,35 @@ defmodule Timex do
 
   """
   @spec normalize(Types.valid_datetime) :: Date.t | DateTime.t | {:error, term}
-  @spec normalize(:date, {integer,integer,integer}) :: {Types.year, Types.month, Types.day}
-  @spec normalize(:time, {integer,integer,integer} | {integer,integer,integer,integer}) :: Types.time
-  @spec normalize(:year | :month | :day | :hour | :minute | :second | :millisecond, integer) :: integer
-  @spec normalize(:timezone, term) :: TimezoneInfo.t
 
   def normalize({{_,_,_} = date, {_,_,_} = time}),
     do: Timex.datetime({normalize(:date, date), normalize(:time, time)})
   def normalize({y,m,d} = date) when is_integer(y) and is_integer(m) and is_integer(d),
     do: Timex.date(normalize(:date, date))
-  def normalize({{_,_,_}=date, time, tz}) do
-    Timex.datetime({normalize(:date, date), normalize(:time, time), tz})
-  end
+  def normalize({{_,_,_}=date, time, {_offset, tz}}),
+    do: Timex.datetime({normalize(:date, date), normalize(:time, time), tz})
+  def normalize({{_,_,_}=date, time, %TimezoneInfo{} = tz}),
+    do: Timex.datetime({normalize(:date, date), normalize(:time, time), tz})
+  def normalize({{_,_,_}=date, time, tz}) when is_tz_value(tz),
+    do: Timex.datetime({normalize(:date, date), normalize(:time, time), tz})
   def normalize(%Date{:year => y, :month => m, :day => d}),
     do: Timex.date(normalize(:date, {y,m,d}))
   def normalize(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => m, :second => s, :millisecond => ms, :timezone => tz}),
     do: Timex.datetime({normalize(:date, {y,m,d}), normalize(:time, {h,m,s,ms}), normalize(:timezone, tz)})
+  def normalize(datetime) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d   -> normalize(d)
+    end
+  end
 
+  @doc """
+  Like normalize/1, but for specific types of values.
+  """
+  @spec normalize(:date, {integer,integer,integer}) :: {Types.year, Types.month, Types.day}
+  @spec normalize(:time, {integer,integer,integer} | {integer,integer,integer,integer}) :: Types.time
+  @spec normalize(:year | :month | :day | :hour | :minute | :second | :millisecond, integer) :: integer
+  @spec normalize(:timezone, term) :: TimezoneInfo.t
   def normalize(:date, {year, month, day}) do
     year  = normalize(:year, year)
     month = normalize(:month, month)
@@ -1508,7 +1691,7 @@ defmodule Timex do
       true
 
       iex> use Timex
-      ...> expected = Timex.datetime({{2015, 2, 29}, {23, 30, 0}})
+      ...> expected = Timex.datetime({{2016, 2, 29}, {23, 30, 0}})
       ...> result = Timex.set(expected, [hour: 30])
       ...> result === expected
       true
@@ -1516,6 +1699,11 @@ defmodule Timex do
   """
   def set(%Date{} = date, options),         do: Date.set(date, options)
   def set(%DateTime{} = datetime, options), do: DateTime.set(datetime, options)
-  def set(_, _),                            do: {:error, :invalid_date}
+  def set(datetime, options) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = d -> DateTime.set(d, options)
+    end
+  end
 
 end

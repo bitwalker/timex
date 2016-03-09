@@ -5,6 +5,8 @@ defimpl Timex.Convertable, for: Atom do
 
   def to_gregorian(:epoch),         do: Convertable.to_gregorian(DateTime.epoch)
   def to_gregorian(:zero),          do: Convertable.to_gregorian(DateTime.zero)
+  def to_julian(:epoch),            do: Convertable.to_julian(DateTime.epoch)
+  def to_julian(:zero),             do: Convertable.to_julian(DateTime.zero)
   def to_gregorian_seconds(:epoch), do: Convertable.to_gregorian_seconds(DateTime.epoch)
   def to_gregorian_seconds(:zero),  do: Convertable.to_gregorian_seconds(DateTime.zero)
   def to_erlang_datetime(:epoch),   do: Convertable.to_erlang_datetime(DateTime.epoch)

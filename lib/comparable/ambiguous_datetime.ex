@@ -1,5 +1,7 @@
 defimpl Timex.Comparable, for: Timex.AmbiguousDateTime do
   alias Timex.Comparable
+  alias Timex.Convertable
+  alias Timex.DateTime
   alias Timex.AmbiguousDateTime
 
   @doc """
@@ -10,12 +12,27 @@ defimpl Timex.Comparable, for: Timex.AmbiguousDateTime do
   def compare(%AmbiguousDateTime{:after => a}, %AmbiguousDateTime{:after => b}, granularity) do
     Comparable.compare(a, b, granularity)
   end
-  def compare(a, _b, _granularity),
-    do: {:error, {:ambiguous_comparison, a}}
+  def compare(a, b, granularity) do
+    case Convertable.to_datetime(b) do
+      {:error, _} = err ->
+        err
+      %DateTime{}  ->
+        {:error, {:ambiguous_comparison, a}}
+      %AmbiguousDateTime{} = adt ->
+        compare(a, adt, granularity)
+    end
+  end
 
   def diff(%AmbiguousDateTime{:after => a}, %AmbiguousDateTime{:after => b}, granularity) do
-    Comparable.compare(a, b, granularity)
+    Comparable.diff(a, b, granularity)
   end
-  def diff(a, _b, _granularity),
-    do: {:error, {:ambiguous_comparison, a}}
+  def diff(a, b, granularity) do
+    case Convertable.to_datetime(b) do
+      {:error, _} = err -> err
+      %DateTime{} ->
+        {:error, {:ambiguous_comparison, a}}
+      %AmbiguousDateTime{} = adt ->
+        diff(a, adt, granularity)
+    end
+  end
 end

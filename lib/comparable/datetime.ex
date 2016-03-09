@@ -22,7 +22,7 @@ defimpl Timex.Comparable, for: Timex.DateTime do
   def compare(_, %AmbiguousDateTime{} = b, _granularity),
     do: {:error, {:ambiguous_comparison, b}}
   def compare(%DateTime{} = this, %DateTime{} = other, granularity) when granularity in @units do
-    case {ok!(DateTime.to_seconds(this)), ok!(DateTime.to_seconds(other))} do
+    case {ok!(DateTime.to_seconds(this, :zero)), ok!(DateTime.to_seconds(other, :zero))} do
       {{:error, _} = err, _} ->
         err
       {_, {:error, _} = err} ->
@@ -81,8 +81,8 @@ defimpl Timex.Comparable, for: Timex.DateTime do
         diff_secs = this_secs - other_secs
         cond do
           diff_secs == 0 -> 0
-          diff_secs > 0  -> do_diff(other, this, type)
-          diff_secs < 0  -> do_diff(this, other, type)
+          diff_secs > 0  -> do_diff(this, this_secs, other, other_secs, type)
+          diff_secs < 0  -> do_diff(other, other_secs, this, this_secs, type)
         end
     end
   end
@@ -92,109 +92,73 @@ defimpl Timex.Comparable, for: Timex.DateTime do
       {:error, _} = err ->
         err
       %DateTime{} = datetime ->
-        compare(a, datetime, granularity)
+        diff(a, datetime, granularity)
       %AmbiguousDateTime{} = ambiguous ->
         {:error, {:ambiguous_comparison, ambiguous}}
     end
   end
-  defp do_diff(this, other, :timestamp) do
-    case ok!(do_diff(this, other, :seconds)) do
+  defp do_diff(_, a, _, a, _), do: 0
+  defp do_diff(_adate, a, _bdate, b, :timestamp) do
+    seconds = a - b
+    case ok!(Time.from(seconds, :seconds)) do
       {:error, _} = err -> err
-      {:ok, seconds} ->
-        case ok!(Time.from(seconds, :seconds)) do
-          {:error, _} = err -> err
-          {:ok, timestamp} -> timestamp
-        end
+      {:ok, timestamp} -> timestamp
     end
   end
-  defp do_diff(this, other, :seconds) do
-    case {ok!(DateTime.to_seconds(this, :zero)), ok!(DateTime.to_seconds(other, :zero))} do
+  defp do_diff(_adate, a, _bdate, b, :seconds), do: a - b
+  defp do_diff(_adate, a, _bdate, b, :minutes), do: div(a - b, 60)
+  defp do_diff(adate, a, bdate, b, :hours) do
+    minutes = do_diff(adate, a, bdate, b, :minutes)
+    div(minutes, 60)
+  end
+  defp do_diff(%DateTime{:year => ay, :month => am, :day => ad}, _, %DateTime{:year => by, :month => bm, :day => bd}, _, :days) do
+    a_days = :calendar.date_to_gregorian_days({ay,am,ad})
+    b_days = :calendar.date_to_gregorian_days({by,bm,bd})
+    a_days - b_days
+  end
+  defp do_diff(adate, a, bdate, b, :weeks) do
+    days = do_diff(adate, a, bdate, b, :days)
+    weeks = div(days, 7)
+    extra_days = rem(days, 7)
+    actual_weeks = (if extra_days == 0, do: weeks, else: weeks + 1)
+    cond do
+      actual_weeks == 1 && extra_days < 7 -> 0
+      :else -> actual_weeks
+    end
+  end
+  defp do_diff(adate, _, bdate, _, :calendar_weeks) do
+    case {ok!(Timex.end_of_week(adate)), ok!(Timex.beginning_of_week(bdate))} do
       {{:error, _} = err, _} -> err
       {_, {:error, _} = err} -> err
-      {{:ok, this_secs}, {:ok, other_secs}} ->
-        other_secs - this_secs
-    end
-  end
-  defp do_diff(this, other, :minutes) do
-    case ok!(do_diff(this, other, :seconds)) do
-      {:ok, seconds}    -> div(seconds, 60)
-      {:error, _} = err -> err
-    end
-  end
-  defp do_diff(this, other, :hours) do
-    case ok!(do_diff(this, other, :minutes)) do
-      {:ok, minutes}    -> div(minutes, 60)
-      {:error, _} = err -> err
-    end
-  end
-  defp do_diff(this, other, :days) do
-    case {ok!(DateTime.to_days(this, :zero)), ok!(DateTime.to_days(other, :zero))} do
-      {{:error, _} = err, _} -> err
-      {_, {:error, _} = err} -> err
-      {{:ok, this_days}, {:ok, other_days}} ->
-        other_days - this_days
-    end
-  end
-  defp do_diff(this, other, :weeks) do
-    case ok!(do_diff(this, other, :days)) do
-      {:error, _} = err -> err
-      {:ok, days} ->
+      {{:ok, ending}, {:ok, start}} ->
+        end_secs = DateTime.to_seconds(ending, :zero)
+        start_secs = DateTime.to_seconds(start, :zero)
+        days = do_diff(ending, end_secs, start, start_secs, :days)
         weeks = div(days, 7)
         extra_days = rem(days, 7)
         actual_weeks = (if extra_days == 0, do: weeks, else: weeks + 1)
-        cond do
+        result = cond do
           actual_weeks == 1 && extra_days < 7 -> 0
           :else -> actual_weeks
         end
+        result
     end
   end
-  defp do_diff(this, other, :calendar_weeks) do
-    case {ok!(Timex.beginning_of_week(this)), ok!(Timex.end_of_week(other))} do
-      {{:error, _} = err, _} -> err
-      {_, {:error, _} = err} -> err
-      {{:ok, start}, {:ok, ending}} ->
-        case ok!(do_diff(start, ending, :days)) do
-          {:error, _} = err -> err
-          {:ok, days} ->
-            weeks = div(days, 7)
-            extra_days = rem(days, 7)
-            actual_weeks = (if extra_days == 0, do: weeks, else: weeks + 1)
-            cond do
-              actual_weeks == 1 && extra_days < 7 -> 0
-              :else -> actual_weeks
-            end
-        end
+  defp do_diff(%DateTime{:year => ly, :month => lm, :day => ld}, _, %DateTime{:year => ey, :month => em, :day => ed}, _, :months) do
+    x = cond do
+      ld >= ed -> 0
+      :else -> -1
     end
+    y = ly - ey
+    z = lm - em
+    x+y*12+z
   end
-  defp do_diff(this, other, :months) do
-    result = case compare(this, other, :seconds) do
-      0  -> 0
-      -1 -> {this, other}
-      1  -> {other, this}
-      {:error, _} = err -> err
-    end
-    case result do
-      {:error, _} = err -> err
-      0 -> 0
-      {%DateTime{year: eyear, month: emonth, day: eday}, %DateTime{year: lyear, month: lmonth, day: lday}} ->
-        x = cond do
-          lday >= eday -> 0
-          :else -> -1
-        end
-        y = lyear - eyear
-        z = lmonth - emonth
-        x+y*12+z
-    end
+  defp do_diff(adate, a, bdate, b, :years) do
+    months = do_diff(adate, a, bdate, b, :months)
+    years = div(months, 12)
+    years
   end
-  defp do_diff(this, other, :years) do
-    case ok!(do_diff(this, other, :months)) do
-      {:error, _} = err -> err
-      {:ok, months} ->
-        years = div(months, 12)
-        years
-    end
-  end
-  defp do_diff(_, _, unit) when not unit in @units,
+  defp do_diff(_, _, _, _, unit) when not unit in @units,
     do: {:error, {:invalid_granularity, unit}}
 
 end

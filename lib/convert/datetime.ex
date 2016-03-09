@@ -14,6 +14,10 @@ defimpl Timex.Convertable, for: Timex.DateTime do
     end
   end
 
+  def to_julian(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => sec}) do
+    Timex.Calendar.Julian.julian_date({{y,m,d}, {h,min,sec}})
+  end
+
   def to_gregorian_seconds(%DateTime{} = date), do: DateTime.to_seconds(date, :zero)
 
   def to_erlang_datetime(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => min, :second => sec}) do
