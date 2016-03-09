@@ -93,6 +93,8 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
   # Timezones
   def get(:zname, directive, flags, mods, width),
     do: %Directive{type: :zname, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.zname(flags)}
+  def get(:zabbr, directive, flags, mods, width),
+    do: %Directive{type: :zabbr, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.zname(flags)}
   def get(:zoffs, directive, flags, mods, width),
     do: %Directive{type: :zoffs, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.zoffs(flags)}
   def get(:zoffs_colon, directive, flags, mods, width),

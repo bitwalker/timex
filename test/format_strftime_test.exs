@@ -285,19 +285,19 @@ defmodule DateFormatTest.FormatStrftime do
 
   test "format timezones" do
     date = Timex.datetime({2007,11,19}, "Europe/Athens")
-    assert { :ok, "EET" } = format(date, "%Z")
+    assert { :ok, "Europe/Athens" } = format(date, "%Z")
     assert { :ok, "+0200" } = format(date, "%z")
     assert { :ok, "+02:00" } = format(date, "%:z")
     assert { :ok, "+02:00:00" } = format(date, "%::z")
 
     date = Timex.datetime({2007,11,19}, "America/Los_Angeles")
-    assert { :ok, "PST" } = format(date, "%Z")
+    assert { :ok, "America/Los_Angeles" } = format(date, "%Z")
     assert { :ok, "-0800" } = format(date, "%z")
     assert { :ok, "-08:00" } = format(date, "%:z")
     assert { :ok, "-08:00:00" } = format(date, "%::z")
 
-    assert { :ok, "PST" } = format(date, "%0Z")
-    assert { :ok, "PST" } = format(date, "%_Z")
+    assert { :ok, "America/Los_Angeles" } = format(date, "%0Z")
+    assert { :ok, "America/Los_Angeles" } = format(date, "%_Z")
     assert { :ok, "-08:00"} = format(date, "%0:z")
     assert {:error, {:formatter, "Invalid directive flag: Timezone offsets require 0-padding to remain unambiguous."}} = format(date, "%_::z")
   end

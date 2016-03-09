@@ -219,18 +219,21 @@ defmodule DateFormatTest.FormatDefault do
 
   test "format timezone name/offset" do
     date = Timex.datetime({2007,11,19}, "Europe/Athens")
-    assert { :ok, "EET" } = format(date, "{Zname}")
+    assert { :ok, "Europe/Athens" } = format(date, "{Zname}")
+    assert { :ok, "EET" } = format(date, "{Zabbr}")
     assert { :ok, "+0200" } = format(date, "{Z}")
     assert { :ok, "+02:00" } = format(date, "{Z:}")
     assert { :ok, "+02:00:00" } = format(date, "{Z::}")
 
     date = Timex.datetime({2007,11,19}, "America/New_York")
-    assert { :ok, "EST" } = format(date, "{Zname}")
+    assert { :ok, "America/New_York" } = format(date, "{Zname}")
+    assert { :ok, "EST" } = format(date, "{Zabbr}")
     assert { :ok, "-0500" } = format(date, "{Z}")
     assert { :ok, "-05:00" } = format(date, "{Z:}")
     assert { :ok, "-05:00:00" } = format(date, "{Z::}")
 
-    assert { :ok, "EST" } = format(date, "{0Zname}")
+    assert { :ok, "America/New_York" } = format(date, "{0Zname}")
+    assert { :ok, "EST" } = format(date, "{0Zabbr}")
     assert {:error,
             {:formatter,
              "Invalid directive flag: Timezone offsets require 0-padding to remain unambiguous."}} = format(date, "{_Z}")
@@ -376,7 +379,7 @@ defmodule DateFormatTest.FormatDefault do
     assert { :ok, "2007-11-09T08:37" } = format(date, "{YYYY}-{M}-{0D}T{0h24}:{m}")
 
     assert { :ok, "Fri Nov  9 08:37:48 2007" } = format(date, "{WDshort} {Mshort} {_D} {0h24}:{0m}:{0s} {YYYY}")
-    assert { :ok, "Fri Nov  9 08:37:48 MST 2007" } = format(date, "{WDshort} {Mshort} {_D} {0h24}:{0m}:{0s} {Zname} {YYYY}")
+    assert { :ok, "Fri Nov  9 08:37:48 MST 2007" } = format(date, "{WDshort} {Mshort} {_D} {0h24}:{0m}:{0s} {Zabbr} {YYYY}")
     assert { :ok, "Fri Nov  9 08:37:48 -0700 2007" } = format(date, "{WDshort} {Mshort} {_D} {0h24}:{0m}:{0s} {Z} {YYYY}")
     assert { :ok, "09 Nov 07 08:37" } = format(date, "{0D} {Mshort} {0YY} {0h24}:{0m}")
 

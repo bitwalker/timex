@@ -47,7 +47,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
         # Time
         "h24", "h12", "m", "ss", "s-epoch", "s", "am", "AM",
         # Timezones
-        "Zname", "Z::", "Z:", "Z",
+        "Zname", "Zabbr", "Z::", "Z:", "Z",
         # Compound
         "ISOord", "ISOweek-day", "ISOweek", "ISOdate", "ISOtime", "ISOz", "ISO",
         "ISO:Extended", "ISO:Extended:Z", "ISO:Basic", "ISO:Basic:Z", "RFC822z",
@@ -116,6 +116,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
       "AM"      -> Directive.get(:AM, directive, opts)
       # Timezones
       "Zname" -> Directive.get(:zname, directive, opts)
+      "Zabbr" -> Directive.get(:zabbr, directive, opts)
       "Z"     -> Directive.get(:zoffs, directive, opts)
       "Z:"    -> Directive.get(:zoffs_colon, directive, opts)
       "Z::"   -> Directive.get(:zoffs_sec, directive, opts)

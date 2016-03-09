@@ -8,6 +8,7 @@ defmodule Timex.Format.DateTime.Formatter do
   alias Timex.DateTime
   alias Timex.Time
   alias Timex.Timezone
+  alias Timex.Convertable
   alias Timex.Format.FormatError
   alias Timex.Format.DateTime.Formatters.Default
   alias Timex.Format.DateTime.Formatters.Strftime
@@ -28,17 +29,15 @@ defmodule Timex.Format.DateTime.Formatter do
   end
 
   @doc """
-  Formats a DateTime struct as a string, using the provided format
+  Formats a Convertable (using to_datetime) as a string, using the provided format
   string and formatter. If a formatter is not provided, the formatter
-  used is `Timex.DateFormat.Formatters.DefaultFormatter`.
+  used is `Timex.Format.DateTime.Formatters.DefaultFormatter`.
 
   If an error is encountered during formatting, `format!` will raise.
   """
-  @spec format!(Date.t | DateTime.t, String.t, atom | nil) :: String.t | no_return
+  @spec format!(Convertable, String.t, atom | nil) :: String.t | no_return
   def format!(date, format_string, formatter \\ Default)
 
-  def format!(%Date{} = date, format_string, formatter),
-    do: format!(Timex.to_datetime(date), format_string, formatter)
   def format!(%DateTime{} = date, format_string, formatter)
     when is_binary(format_string) and is_atom(formatter)
     do
@@ -47,25 +46,44 @@ defmodule Timex.Format.DateTime.Formatter do
         {:error, reason} -> raise FormatError, message: reason
       end
   end
-  def format!(a,b,c), do: raise "invalid argument(s) to format!/3: #{inspect a}, #{inspect b}, #{inspect c}"
+  def format!(datetime, format_string, formatter)
+    when is_binary(format_string) and is_atom(formatter)
+    do
+      case Convertable.to_datetime(datetime) do
+        {:error, reason} ->
+          raise "unable to convert datetime value in format!/3: #{inspect reason}"
+        %DateTime{} = d ->
+          format!(d, format_string, formatter)
+      end
+  end
+  def format!(a,b,c),
+    do: raise "invalid argument(s) to format!/3: #{inspect a}, #{inspect b}, #{inspect c}"
 
   @doc """
-  Formats a DateTime struct as a string, using the provided format
+  Formats a Convertable (using to_datetime) as a string, using the provided format
   string and formatter. If a formatter is not provided, the formatter
-  used is `Timex.DateFormat.Formatters.DefaultFormatter`.
+  used is `Timex.Format.DateTime.Formatters.DefaultFormatter`.
   """
-  @spec format(Date.t | DateTime.t, String.t, atom | nil) :: {:ok, String.t} | {:error, term}
+  @spec format(Convertable, String.t, atom | nil) :: {:ok, String.t} | {:error, term}
   def format(date, format_string, formatter \\ Default)
 
-  def format(%Date{} = date, format_string, formatter),
-    do: format(Timex.to_datetime(date), format_string, formatter)
   def format(datetime, format_string, :strftime),
     do: format(datetime, format_string, Strftime)
   def format(%DateTime{} = date, format_string, formatter)
     when is_binary(format_string) and is_atom(formatter) do
       formatter.format(date, format_string)
   end
-  def format(_, _, _), do: {:error, :badarg}
+  def format(datetime, format_string, formatter)
+    when is_binary(format_string) and is_atom(formatter)
+    do
+      case Convertable.to_datetime(datetime) do
+        {:error, _} = err -> err
+        %DateTime{} = d ->
+          format(d, format_string, formatter)
+      end
+  end
+  def format(_, _, _),
+    do: {:error, :badarg}
 
   @doc """
   Validates the provided format string, using the provided formatter,
@@ -262,7 +280,7 @@ defmodule Timex.Format.DateTime.Formatter do
     min   = format_token(:min, date, modifiers, [padding: :zeroes], width_spec(2..2))
     sec   = format_token(:sec, date, modifiers, [padding: :zeroes], width_spec(2..2))
     wday  = format_token(:wdshort, date, modifiers, flags, width_spec(-1, nil))
-    tz    = format_token(:zname, date, modifiers, flags, width_spec(-1, nil))
+    tz    = format_token(:zabbr, date, modifiers, flags, width_spec(-1, nil))
     "#{wday} #{month} #{day} #{hour}:#{min}:#{sec} #{tz} #{year}"
   end
   def format_token(:ansic, %DateTime{} = date, modifiers, flags, _width) do
@@ -437,6 +455,8 @@ defmodule Timex.Format.DateTime.Formatter do
     do: format_token(:am, date, modifiers, flags, width) |> String.upcase
   # Timezones
   def format_token(:zname, %DateTime{timezone: tz}, _modifiers, _flags, _width),
+    do: tz.full_name
+  def format_token(:zabbr, %DateTime{timezone: tz}, _modifiers, _flags, _width),
     do: tz.abbreviation
   def format_token(:zoffs, %DateTime{timezone: tz}, _modifiers, flags, _width) do
     case get_in(flags, [:padding]) do
