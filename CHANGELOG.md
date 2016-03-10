@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.1.1
+
+### Added
+- Implementations of the Inspect protocol for Date, DateTime, AmbiguousDateTime, TimezoneInfo, and AmbiguousTimezoneInfo
+### Changed
+- When inspecting any Timex types, the compact view will be used, pass structs: false to view the raw data structures if needed.
+
 ## 2.1.0
 
 ### Added
