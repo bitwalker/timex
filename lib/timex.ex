@@ -25,6 +25,7 @@ defmodule Timex do
   alias Timex.Helpers
   alias Timex.Convertable
   alias Timex.Comparable
+  alias Timex.Translator
   use Timex.Constants
   import Timex.Macros
 
@@ -179,6 +180,24 @@ defmodule Timex do
   defdelegate format(datetime, format_string, formatter), to: Timex.Format.DateTime.Formatter
 
   @doc """
+  Same as format/2, except takes a locale name to translate text to.
+
+  Translations only apply to units, relative time phrases, and only for the locales in the
+  list of supported locales in the Timex documentation.
+  """
+  @spec lformat(Convertable, format :: String.t, locale :: String.t) :: {:ok, String.t} | {:error, term}
+  defdelegate lformat(datetime, format_string, locale), to: Timex.Format.DateTime.Formatter
+
+  @doc """
+  Same as lformat/3, except takes a formatter as it's last argument.
+
+  Translations only apply to units, relative time phrases, and only for the locales in the
+  list of supported locales in the Timex documentation.
+  """
+  @spec lformat(Convertable, format :: String.t, locale :: String.t, formatter :: atom) :: {:ok, String.t} | {:error, term}
+  defdelegate lformat(datetime, format_string, locale, formatter), to: Timex.Format.DateTime.Formatter
+
+  @doc """
   Same as format/2, except format! raises on error.
 
   See format/2 docs for usage examples.
@@ -193,6 +212,91 @@ defmodule Timex do
   """
   @spec format!(Convertable, format :: String.t, formatter :: atom) :: String.t | no_return
   defdelegate format!(datetime, format_string, formatter), to: Timex.Format.DateTime.Formatter
+
+  @doc """
+  Same as lformat/3, except local_format! raises on error.
+
+  See lformat/3 docs for usage examples.
+  """
+  @spec lformat!(Convertable, format :: String.t, locale :: String.t) :: String.t | no_return
+  defdelegate lformat!(datetime, format_string, locale), to: Timex.Format.DateTime.Formatter
+
+  @doc """
+  Same as lformat/4, except local_format! raises on error.
+
+  See lformat/4 docs for usage examples
+  """
+  @spec lformat!(Convertable, format :: String.t, locale :: String.t, formatter :: atom) :: String.t | no_return
+  defdelegate lformat!(datetime, format_string, locale, formatter), to: Timex.Format.DateTime.Formatter
+
+  @doc """
+  Formats a DateTime using a fuzzy relative duration, from now.
+
+  ## Examples
+
+
+      iex> use Timex
+      ...> Timex.from_now(Timex.shift(DateTime.now, days: 2))
+      "in 2 days"
+
+      iex> use Timex
+      ...> Timex.from_now(Timex.shift(DateTime.now, days: -2))
+      "2 days ago"
+  """
+  @spec from_now(Convertable) :: String.t | {:error, term}
+  def from_now(datetime), do: from_now(datetime, Timex.Translator.default_locale)
+
+  @doc """
+  Formats a DateTime using a fuzzy relative duration, translated using given locale
+
+  ## Examples
+
+      iex> use Timex
+      ...> Timex.from_now(Timex.shift(DateTime.now, days: 2), "ru_RU")
+      "через 2 дней"
+
+      iex> use Timex
+      ...> Timex.from_now(Timex.shift(DateTime.now, days: -2), "ru_RU")
+      "2 дня назад"
+
+  """
+  @spec from_now(Convertable, String.t) :: String.t | {:error, term}
+  def from_now(datetime, locale) when is_binary(locale) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = dt ->
+        case lformat(dt, "{relative}", locale, :relative) do
+          {:ok, formatted}  -> formatted
+          {:error, _} = err -> err
+        end
+    end
+  end
+
+  @doc """
+  Formats a DateTime using a fuzzy relative duration, with a reference datetime other than now
+  """
+  @spec from_now(Convertable, Convertable) :: String.t | {:error, term}
+  def from_now(datetime, reference_date), do: from_now(datetime, reference_date, Timex.Translator.default_locale)
+
+  @doc """
+  Formats a DateTime using a fuzzy relative duration, with a reference datetime other than now,
+  translated using the given locale
+  """
+  @spec from_now(Convertable, Convertable, String.t) :: String.t | {:error, term}
+  def from_now(datetime, reference_date, locale) when is_binary(locale) do
+    case Convertable.to_datetime(datetime) do
+      {:error, _} = err -> err
+      %DateTime{} = dt ->
+        case Convertable.to_datetime(reference_date) do
+          {:error, _} = err -> err
+          %DateTime{} = ref ->
+            case Timex.Format.DateTime.Formatters.Relative.relative_to(dt, ref, "{relative}", locale) do
+              {:ok, formatted}  -> formatted
+              {:error, _} = err -> err
+            end
+        end
+    end
+  end
 
   @doc """
   Formats an Erlang timestamp using the ISO-8601 duration format, or optionally, with a custom
@@ -224,9 +328,28 @@ defmodule Timex do
 
   """
   @spec format_time(Types.timestamp) :: String.t | {:error, term}
-  @spec format_time(Types.timestamp | atom) :: String.t | {:error, term}
   defdelegate format_time(timestamp), to: Timex.Format.Time.Formatter, as: :format
-  defdelegate format_time(timestamp, formatter), to: Timex.Format.Time.Formatter, as: :format
+
+  @doc """
+  Same as format_time/1, except it also accepts a formatter
+  """
+  @spec format_time(Types.timestamp, atom) :: String.t | {:error, term}
+  defdelegate format_time(timestamp, formatter),
+    to: Timex.Format.Time.Formatter, as: :format
+
+  @doc """
+  Same as format_time/1, except takes a locale for use in translation
+  """
+  @spec lformat_time(Types.timestamp, locale :: String.t) :: String.t | {:error, term}
+  defdelegate lformat_time(timestamp, locale),
+    to: Timex.Format.Time.Formatter, as: :lformat
+
+  @doc """
+  Same as lformat_time/2, except takes a formatter as an argument
+  """
+  @spec lformat_time(Types.timestamp, locale :: String.t, atom) :: String.t | {:error, term}
+  defdelegate lformat_time(timestamp, locale, formatter),
+    to: Timex.Format.Time.Formatter, as: :lformat
 
   @doc """
   Parses a datetime string into a DateTime struct, using the provided format string (and optional tokenizer).
@@ -871,9 +994,10 @@ defmodule Timex do
       {:error, :invalid_weekday_number}
   """
   @spec day_name(Types.weekday) :: String.t | {:error, :invalid_weekday_number}
-  Enum.each(@weekdays, fn {name, day_num} ->
-    def day_name(unquote(day_num)), do: unquote(name)
-  end)
+  def day_name(num) when num in 1..7 do
+    weekdays = Translator.get_weekdays(Translator.default_locale)
+    Map.get(weekdays, num)
+  end
   def day_name(_), do: {:error, :invalid_weekday_number}
 
   @doc """
@@ -887,9 +1011,10 @@ defmodule Timex do
       {:error, :invalid_weekday_number}
   """
   @spec day_shortname(Types.weekday) :: String.t | {:error, :invalid_weekday_number}
-  Enum.each(@weekdays, fn {name, day_num} ->
-    def day_shortname(unquote(day_num)), do: String.slice(unquote(name), 0..2)
-  end)
+  def day_shortname(num) when num in 1..7 do
+    weekdays = Translator.get_weekdays_abbreviated(Translator.default_locale)
+    Map.get(weekdays, num)
+  end
   def day_shortname(_), do: {:error, :invalid_weekday_number}
 
   @doc """
@@ -942,9 +1067,10 @@ defmodule Timex do
       {:error, :invalid_month_number}
   """
   @spec month_name(Types.month) :: String.t | {:error, :invalid_month_number}
-  Enum.each(@months, fn {name, month_num} ->
-    def month_name(unquote(month_num)), do: unquote(name)
-  end)
+  def month_name(num) when num in 1..12 do
+    months = Translator.get_months(Translator.default_locale)
+    Map.get(months, num)
+  end
   def month_name(_), do: {:error, :invalid_month_number}
 
   @doc """
@@ -958,9 +1084,10 @@ defmodule Timex do
       {:error, :invalid_month_number}
   """
   @spec month_shortname(Types.month) :: String.t | {:error, :invalid_month_number}
-  Enum.each(@months, fn {name, month_num} ->
-    def month_shortname(unquote(month_num)), do: String.slice(unquote(name), 0..2)
-  end)
+  def month_shortname(num) when num in 1..12 do
+    months = Translator.get_months_abbreviated(Translator.default_locale)
+    Map.get(months, num)
+  end
   def month_shortname(_), do: {:error, :invalid_month_number}
 
   @doc """

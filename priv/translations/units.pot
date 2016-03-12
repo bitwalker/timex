@@ -1,0 +1,92 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: INSERT LANGUAGE HERE\n"
+
+#: lib/i10n/translator.ex:131
+msgid "day"
+msgstr ""
+
+#: lib/i10n/translator.ex:132
+msgid "days"
+msgstr ""
+
+#: lib/i10n/translator.ex:129
+msgid "hour"
+msgstr ""
+
+#: lib/i10n/translator.ex:130
+msgid "hours"
+msgstr ""
+
+#: lib/i10n/translator.ex:121
+msgid "microsecond"
+msgstr ""
+
+#: lib/i10n/translator.ex:122
+msgid "microseconds"
+msgstr ""
+
+#: lib/i10n/translator.ex:123
+msgid "millisecond"
+msgstr ""
+
+#: lib/i10n/translator.ex:124
+msgid "milliseconds"
+msgstr ""
+
+#: lib/i10n/translator.ex:127
+msgid "minute"
+msgstr ""
+
+#: lib/i10n/translator.ex:128
+msgid "minutes"
+msgstr ""
+
+#: lib/i10n/translator.ex:135
+msgid "month"
+msgstr ""
+
+#: lib/i10n/translator.ex:136
+msgid "months"
+msgstr ""
+
+#: lib/i10n/translator.ex:119
+msgid "nanosecond"
+msgstr ""
+
+#: lib/i10n/translator.ex:120
+msgid "nanoseconds"
+msgstr ""
+
+#: lib/i10n/translator.ex:125
+msgid "second"
+msgstr ""
+
+#: lib/i10n/translator.ex:126
+msgid "seconds"
+msgstr ""
+
+#: lib/i10n/translator.ex:133
+msgid "week"
+msgstr ""
+
+#: lib/i10n/translator.ex:134
+msgid "weeks"
+msgstr ""
+
+#: lib/i10n/translator.ex:137
+msgid "year"
+msgstr ""
+
+#: lib/i10n/translator.ex:138
+msgid "years"
+msgstr ""

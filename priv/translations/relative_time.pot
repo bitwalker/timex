@@ -1,0 +1,256 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: INSERT LANGUAGE HERE\n"
+
+#: lib/i10n/translator.ex:78
+msgid "%{n} day ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:79
+msgid "%{n} days ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:105
+msgid "%{n} hour ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:106
+msgid "%{n} hours ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:110
+msgid "%{n} minute ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:111
+msgid "%{n} minutes ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:62
+msgid "%{n} month ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:63
+msgid "%{n} months ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:115
+msgid "%{n} second ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:116
+msgid "%{n} seconds ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:70
+msgid "%{n} week ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:71
+msgid "%{n} weeks ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:54
+msgid "%{n} year ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:55
+msgid "%{n} years ago"
+msgstr ""
+
+#: lib/i10n/translator.ex:76
+msgid "in %{n} day"
+msgstr ""
+
+#: lib/i10n/translator.ex:77
+msgid "in %{n} days"
+msgstr ""
+
+#: lib/i10n/translator.ex:103
+msgid "in %{n} hour"
+msgstr ""
+
+#: lib/i10n/translator.ex:104
+msgid "in %{n} hours"
+msgstr ""
+
+#: lib/i10n/translator.ex:108
+msgid "in %{n} minute"
+msgstr ""
+
+#: lib/i10n/translator.ex:109
+msgid "in %{n} minutes"
+msgstr ""
+
+#: lib/i10n/translator.ex:60
+msgid "in %{n} month"
+msgstr ""
+
+#: lib/i10n/translator.ex:61
+msgid "in %{n} months"
+msgstr ""
+
+#: lib/i10n/translator.ex:113
+msgid "in %{n} second"
+msgstr ""
+
+#: lib/i10n/translator.ex:114
+msgid "in %{n} seconds"
+msgstr ""
+
+#: lib/i10n/translator.ex:68
+msgid "in %{n} week"
+msgstr ""
+
+#: lib/i10n/translator.ex:69
+msgid "in %{n} weeks"
+msgstr ""
+
+#: lib/i10n/translator.ex:52
+msgid "in %{n} year"
+msgstr ""
+
+#: lib/i10n/translator.ex:53
+msgid "in %{n} years"
+msgstr ""
+
+#: lib/i10n/translator.ex:93
+msgid "last Friday"
+msgstr ""
+
+#: lib/i10n/translator.ex:81
+msgid "last Monday"
+msgstr ""
+
+#: lib/i10n/translator.ex:96
+msgid "last Saturday"
+msgstr ""
+
+#: lib/i10n/translator.ex:99
+msgid "last Sunday"
+msgstr ""
+
+#: lib/i10n/translator.ex:90
+msgid "last Thursday"
+msgstr ""
+
+#: lib/i10n/translator.ex:84
+msgid "last Tuesday"
+msgstr ""
+
+#: lib/i10n/translator.ex:87
+msgid "last Wednesday"
+msgstr ""
+
+#: lib/i10n/translator.ex:57
+msgid "last month"
+msgstr ""
+
+#: lib/i10n/translator.ex:65
+msgid "last week"
+msgstr ""
+
+#: lib/i10n/translator.ex:49
+msgid "last year"
+msgstr ""
+
+#: lib/i10n/translator.ex:95
+msgid "next Friday"
+msgstr ""
+
+#: lib/i10n/translator.ex:83
+msgid "next Monday"
+msgstr ""
+
+#: lib/i10n/translator.ex:98
+msgid "next Saturday"
+msgstr ""
+
+#: lib/i10n/translator.ex:101
+msgid "next Sunday"
+msgstr ""
+
+#: lib/i10n/translator.ex:92
+msgid "next Thursday"
+msgstr ""
+
+#: lib/i10n/translator.ex:86
+msgid "next Tuesday"
+msgstr ""
+
+#: lib/i10n/translator.ex:89
+msgid "next Wednesday"
+msgstr ""
+
+#: lib/i10n/translator.ex:59
+msgid "next month"
+msgstr ""
+
+#: lib/i10n/translator.ex:67
+msgid "next week"
+msgstr ""
+
+#: lib/i10n/translator.ex:51
+msgid "next year"
+msgstr ""
+
+#: lib/i10n/translator.ex:94
+msgid "this Friday"
+msgstr ""
+
+#: lib/i10n/translator.ex:82
+msgid "this Monday"
+msgstr ""
+
+#: lib/i10n/translator.ex:97
+msgid "this Saturday"
+msgstr ""
+
+#: lib/i10n/translator.ex:100
+msgid "this Sunday"
+msgstr ""
+
+#: lib/i10n/translator.ex:91
+msgid "this Thursday"
+msgstr ""
+
+#: lib/i10n/translator.ex:85
+msgid "this Tuesday"
+msgstr ""
+
+#: lib/i10n/translator.ex:88
+msgid "this Wednesday"
+msgstr ""
+
+#: lib/i10n/translator.ex:58
+msgid "this month"
+msgstr ""
+
+#: lib/i10n/translator.ex:66
+msgid "this week"
+msgstr ""
+
+#: lib/i10n/translator.ex:50
+msgid "this year"
+msgstr ""
+
+#: lib/i10n/translator.ex:74
+msgid "today"
+msgstr ""
+
+#: lib/i10n/translator.ex:75
+msgid "tomorrow"
+msgstr ""
+
+#: lib/i10n/translator.ex:73
+msgid "yesterday"
+msgstr ""

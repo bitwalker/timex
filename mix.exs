@@ -9,19 +9,20 @@ defmodule Timex.Mixfile do
       package: package,
       deps: deps,
       docs: docs,
+      compilers: [:gettext] ++ Mix.compilers,
       test_coverage: [tool: ExCoveralls] ]
 
   end
 
   def application do
-    [applications: [:logger, :tzdata],
+    [applications: [:logger, :tzdata, :gettext],
      included_applications: [:combine],
-     env: [local_timezone: nil]]
+     env: [local_timezone: nil, default_locale: "en"]]
   end
 
   defp description do
     """
-    A date/time library for Elixir
+    A comprehensive date/time library for Elixir
 
     Fully timezone-aware, using the Olson Timezone database
 
@@ -37,6 +38,8 @@ defmodule Timex.Mixfile do
 
     Extendable via Convertable and Comparable protocols, so you can use Timex with
     your own types!
+
+    Locale-aware, currently only supports "ru_RU" and "en", but more will be added over time.
 
     Provides a broad array of date/time helper functions
 
@@ -63,6 +66,7 @@ defmodule Timex.Mixfile do
     - Informative parser errors
     - Supports strftime, as well as an easier to read formatter, i.e. `{ISO:Basic}`, `{YYYY}`
     - Supports many formats out of the box: ISO8601 basic and extended, RFC822, RFC1123, RFC3339, ANSIC, UNIX
+    - Relative time formatter (i.e. "2 years from now")
 
     Extendable
 
@@ -83,6 +87,7 @@ defmodule Timex.Mixfile do
   def deps do
     [{:tzdata, "~> 0.1.8 or ~> 0.5"},
      {:combine, "~> 0.7"},
+     {:gettext, "~> 0.10"},
      {:ex_doc, "~> 0.11", only: :dev},
      {:earmark, "~> 0.2", only: :dev},
      {:benchfella, "~> 0.3", only: :dev},

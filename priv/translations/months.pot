@@ -1,0 +1,104 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: INSERT LANGUAGE HERE\n"
+
+#: lib/i10n/translator.ex:26
+msgid "Apr"
+msgstr ""
+
+#: lib/i10n/translator.ex:25
+msgid "April"
+msgstr ""
+
+#: lib/i10n/translator.ex:33
+msgid "Aug"
+msgstr ""
+
+#: lib/i10n/translator.ex:32
+msgid "August"
+msgstr ""
+
+#: lib/i10n/translator.ex:41
+msgid "Dec"
+msgstr ""
+
+#: lib/i10n/translator.ex:40
+msgid "December"
+msgstr ""
+
+#: lib/i10n/translator.ex:22
+msgid "Feb"
+msgstr ""
+
+#: lib/i10n/translator.ex:21
+msgid "February"
+msgstr ""
+
+#: lib/i10n/translator.ex:20
+msgid "Jan"
+msgstr ""
+
+#: lib/i10n/translator.ex:19
+msgid "January"
+msgstr ""
+
+#: lib/i10n/translator.ex:31
+msgid "Jul"
+msgstr ""
+
+#: lib/i10n/translator.ex:30
+msgid "July"
+msgstr ""
+
+#: lib/i10n/translator.ex:29
+msgid "Jun"
+msgstr ""
+
+#: lib/i10n/translator.ex:28
+msgid "June"
+msgstr ""
+
+#: lib/i10n/translator.ex:24
+msgid "Mar"
+msgstr ""
+
+#: lib/i10n/translator.ex:23
+msgid "March"
+msgstr ""
+
+#: lib/i10n/translator.ex:27
+msgid "May"
+msgstr ""
+
+#: lib/i10n/translator.ex:39
+msgid "Nov"
+msgstr ""
+
+#: lib/i10n/translator.ex:38
+msgid "November"
+msgstr ""
+
+#: lib/i10n/translator.ex:37
+msgid "Oct"
+msgstr ""
+
+#: lib/i10n/translator.ex:36
+msgid "October"
+msgstr ""
+
+#: lib/i10n/translator.ex:35
+msgid "Sep"
+msgstr ""
+
+#: lib/i10n/translator.ex:34
+msgid "September"
+msgstr ""

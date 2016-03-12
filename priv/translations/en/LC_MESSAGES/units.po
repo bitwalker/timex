@@ -1,0 +1,91 @@
+## `msgid`s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove `msgid`s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use `mix gettext.extract --merge` or `mix gettext.merge`
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: en\n"
+
+#: lib/i10n/translator.ex:131
+msgid "day"
+msgstr ""
+
+#: lib/i10n/translator.ex:132
+msgid "days"
+msgstr ""
+
+#: lib/i10n/translator.ex:129
+msgid "hour"
+msgstr ""
+
+#: lib/i10n/translator.ex:130
+msgid "hours"
+msgstr ""
+
+#: lib/i10n/translator.ex:121
+msgid "microsecond"
+msgstr ""
+
+#: lib/i10n/translator.ex:122
+msgid "microseconds"
+msgstr ""
+
+#: lib/i10n/translator.ex:123
+msgid "millisecond"
+msgstr ""
+
+#: lib/i10n/translator.ex:124
+msgid "milliseconds"
+msgstr ""
+
+#: lib/i10n/translator.ex:127
+msgid "minute"
+msgstr ""
+
+#: lib/i10n/translator.ex:128
+msgid "minutes"
+msgstr ""
+
+#: lib/i10n/translator.ex:135
+msgid "month"
+msgstr ""
+
+#: lib/i10n/translator.ex:136
+msgid "months"
+msgstr ""
+
+#: lib/i10n/translator.ex:119
+msgid "nanosecond"
+msgstr ""
+
+#: lib/i10n/translator.ex:120
+msgid "nanoseconds"
+msgstr ""
+
+#: lib/i10n/translator.ex:125
+msgid "second"
+msgstr ""
+
+#: lib/i10n/translator.ex:126
+msgid "seconds"
+msgstr ""
+
+#: lib/i10n/translator.ex:133
+msgid "week"
+msgstr ""
+
+#: lib/i10n/translator.ex:134
+msgid "weeks"
+msgstr ""
+
+#: lib/i10n/translator.ex:137
+msgid "year"
+msgstr ""
+
+#: lib/i10n/translator.ex:138
+msgid "years"
+msgstr ""

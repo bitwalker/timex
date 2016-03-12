@@ -1,0 +1,67 @@
+## `msgid`s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove `msgid`s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use `mix gettext.extract --merge` or `mix gettext.merge`
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: en\n"
+
+#: lib/i10n/translator.ex:13
+msgid "Fri"
+msgstr ""
+
+#: lib/i10n/translator.ex:12
+msgid "Friday"
+msgstr ""
+
+#: lib/i10n/translator.ex:5
+msgid "Mon"
+msgstr ""
+
+#: lib/i10n/translator.ex:4
+msgid "Monday"
+msgstr ""
+
+#: lib/i10n/translator.ex:15
+msgid "Sat"
+msgstr ""
+
+#: lib/i10n/translator.ex:14
+msgid "Saturday"
+msgstr ""
+
+#: lib/i10n/translator.ex:17
+msgid "Sun"
+msgstr ""
+
+#: lib/i10n/translator.ex:16
+msgid "Sunday"
+msgstr ""
+
+#: lib/i10n/translator.ex:11
+msgid "Thu"
+msgstr ""
+
+#: lib/i10n/translator.ex:10
+msgid "Thursday"
+msgstr ""
+
+#: lib/i10n/translator.ex:7
+msgid "Tue"
+msgstr ""
+
+#: lib/i10n/translator.ex:6
+msgid "Tuesday"
+msgstr ""
+
+#: lib/i10n/translator.ex:9
+msgid "Wed"
+msgstr ""
+
+#: lib/i10n/translator.ex:8
+msgid "Wednesday"
+msgstr ""

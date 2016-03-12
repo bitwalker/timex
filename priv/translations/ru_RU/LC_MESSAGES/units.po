@@ -1,0 +1,100 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ru_RU\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+
+#: lib/i10n/translator.ex:131
+msgid "day"
+msgstr "день"
+
+#: lib/i10n/translator.ex:132
+msgid "days"
+msgstr "днем"
+
+#: lib/i10n/translator.ex:129
+msgid "hour"
+msgstr "час"
+
+#: lib/i10n/translator.ex:130
+msgid "hours"
+msgstr "часа"
+
+#: lib/i10n/translator.ex:121
+msgid "microsecond"
+msgstr "микросекунда"
+
+#: lib/i10n/translator.ex:122
+msgid "microseconds"
+msgstr "микросекунды"
+
+#: lib/i10n/translator.ex:123
+msgid "millisecond"
+msgstr "миллисекунда"
+
+#: lib/i10n/translator.ex:124
+msgid "milliseconds"
+msgstr "миллисекунды"
+
+#: lib/i10n/translator.ex:127
+msgid "minute"
+msgstr "минута"
+
+#: lib/i10n/translator.ex:128
+msgid "minutes"
+msgstr "минуты"
+
+#: lib/i10n/translator.ex:135
+msgid "month"
+msgstr "месяц"
+
+#: lib/i10n/translator.ex:136
+msgid "months"
+msgstr "месяца"
+
+#: lib/i10n/translator.ex:119
+msgid "nanosecond"
+msgstr "наносекунда"
+
+#: lib/i10n/translator.ex:120
+msgid "nanoseconds"
+msgstr "наносекунды"
+
+#: lib/i10n/translator.ex:125
+msgid "second"
+msgstr "секунда"
+
+#: lib/i10n/translator.ex:126
+msgid "seconds"
+msgstr "секунды"
+
+#: lib/i10n/translator.ex:133
+msgid "week"
+msgstr "неделя"
+
+#: lib/i10n/translator.ex:134
+msgid "weeks"
+msgstr "недели"
+
+#: lib/i10n/translator.ex:137
+msgid "year"
+msgstr "год"
+
+#: lib/i10n/translator.ex:138
+msgid "years"
+msgstr "года"

@@ -119,25 +119,30 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   alias Timex.DateTime
   alias Timex.Format.FormatError
   alias Timex.Parse.DateTime.Tokenizers.Default, as: Tokenizer
+  alias Timex.Translator
 
   @spec tokenize(String.t) :: {:ok, [Directive.t]} | {:error, term}
   defdelegate tokenize(format_string), to: Tokenizer
 
-  @spec format!(DateTime.t, String.t) :: String.t | no_return
-  def format!(%DateTime{} = date, format_string) do
-    case format(date, format_string) do
+  def format!(date, format_string),           do: lformat!(date, format_string, Translator.default_locale)
+  def format(date, format_string),            do: lformat(date, format_string, Translator.default_locale)
+  def format(date, format_string, tokenizer), do: lformat(date, format_string, tokenizer, Translator.default_locale)
+
+  @spec lformat!(DateTime.t, String.t, String.t) :: String.t | no_return
+  def lformat!(%DateTime{} = date, format_string, locale) do
+    case lformat(date, format_string, locale) do
       {:ok, result}    -> result
       {:error, reason} -> raise FormatError, message: reason
     end
   end
 
-  @spec format(DateTime.t, String.t) :: {:ok, String.t} | {:error, term}
-  def format(%DateTime{} = date, format_string) do
+  @spec lformat(DateTime.t, String.t, String.t) :: {:ok, String.t} | {:error, term}
+  def lformat(%DateTime{} = date, format_string, locale) do
     case tokenize(format_string) do
       {:ok, []} ->
         {:error, "There were no formatting directives in the provided string."}
       {:ok, dirs} when is_list(dirs) ->
-        do_format(date, dirs, <<>>)
+        do_format(locale, date, dirs, <<>>)
       {:error, reason} -> {:error, {:format, reason}}
     end
   end
@@ -146,25 +151,25 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   If one wants to use the default formatting semantics with a different
   tokenizer, this is the way.
   """
-  @spec format(DateTime.t, String.t, atom) :: {:ok, String.t} | {:error, term}
-  def format(%DateTime{} = date, format_string, tokenizer) do
+  @spec lformat(DateTime.t, String.t, atom, String.t) :: {:ok, String.t} | {:error, term}
+  def lformat(%DateTime{} = date, format_string, tokenizer, locale) do
     case tokenizer.tokenize(format_string) do
       {:ok, []} ->
         {:error, "There were no formatting directives in the provided string."}
       {:ok, dirs} when is_list(dirs) ->
-        do_format(date, dirs, <<>>)
+        do_format(locale, date, dirs, <<>>)
       {:error, reason} -> {:error, {:format, reason}}
     end
   end
 
-  defp do_format(_date, [], result), do: {:ok, result}
-  defp do_format(date, [%Directive{type: :literal, value: char} | dirs], result) when is_binary(char) do
-    do_format(date, dirs, <<result::binary, char::binary>>)
+  defp do_format(_locale, _date, [], result), do: {:ok, result}
+  defp do_format(locale, date, [%Directive{type: :literal, value: char} | dirs], result) when is_binary(char) do
+    do_format(locale, date, dirs, <<result::binary, char::binary>>)
   end
-  defp do_format(date, [%Directive{type: type, modifiers: mods, flags: flags, width: width} | dirs], result) do
-    case format_token(type, date, mods, flags, width) do
+  defp do_format(locale, date, [%Directive{type: type, modifiers: mods, flags: flags, width: width} | dirs], result) do
+    case format_token(locale, type, date, mods, flags, width) do
       {:error, _} = err -> err
-      formatted         -> do_format(date, dirs, <<result::binary, formatted::binary>>)
+      formatted         -> do_format(locale, date, dirs, <<result::binary, formatted::binary>>)
     end
   end
 

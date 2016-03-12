@@ -19,6 +19,7 @@ defmodule Timex.Format.Time.Formatters.Default do
   - S is the second designator that follows the value for the number of seconds.
   """
   use Timex.Format.Time.Formatter
+  alias Timex.Translator
 
   @minute 60
   @hour   @minute * 60
@@ -39,8 +40,15 @@ defmodule Timex.Format.Time.Formatters.Default do
 
   """
   @spec format(Types.timestamp) :: String.t | {:error, term}
-  def format({_,_,_} = timestamp), do: timestamp |> deconstruct |> do_format
+  def format({_,_,_} = timestamp), do: lformat(timestamp, Translator.default_locale)
   def format(_), do: {:error, :invalid_timestamp}
+
+  def lformat({_,_,_} = timestamp, _locale) do
+    timestamp
+    |> deconstruct
+    |> do_format
+  end
+  def lformat(_, _locale), do: {:error, :invalid_timestamp}
 
   defp do_format(components), do: do_format(components, <<?P>>)
   defp do_format([], str),    do: str

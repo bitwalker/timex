@@ -1,0 +1,103 @@
+## `msgid`s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove `msgid`s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use `mix gettext.extract --merge` or `mix gettext.merge`
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: en\n"
+
+#: lib/i10n/translator.ex:26
+msgid "Apr"
+msgstr ""
+
+#: lib/i10n/translator.ex:25
+msgid "April"
+msgstr ""
+
+#: lib/i10n/translator.ex:33
+msgid "Aug"
+msgstr ""
+
+#: lib/i10n/translator.ex:32
+msgid "August"
+msgstr ""
+
+#: lib/i10n/translator.ex:41
+msgid "Dec"
+msgstr ""
+
+#: lib/i10n/translator.ex:40
+msgid "December"
+msgstr ""
+
+#: lib/i10n/translator.ex:22
+msgid "Feb"
+msgstr ""
+
+#: lib/i10n/translator.ex:21
+msgid "February"
+msgstr ""
+
+#: lib/i10n/translator.ex:20
+msgid "Jan"
+msgstr ""
+
+#: lib/i10n/translator.ex:19
+msgid "January"
+msgstr ""
+
+#: lib/i10n/translator.ex:31
+msgid "Jul"
+msgstr ""
+
+#: lib/i10n/translator.ex:30
+msgid "July"
+msgstr ""
+
+#: lib/i10n/translator.ex:29
+msgid "Jun"
+msgstr ""
+
+#: lib/i10n/translator.ex:28
+msgid "June"
+msgstr ""
+
+#: lib/i10n/translator.ex:24
+msgid "Mar"
+msgstr ""
+
+#: lib/i10n/translator.ex:23
+msgid "March"
+msgstr ""
+
+#: lib/i10n/translator.ex:27
+msgid "May"
+msgstr ""
+
+#: lib/i10n/translator.ex:39
+msgid "Nov"
+msgstr ""
+
+#: lib/i10n/translator.ex:38
+msgid "November"
+msgstr ""
+
+#: lib/i10n/translator.ex:37
+msgid "Oct"
+msgstr ""
+
+#: lib/i10n/translator.ex:36
+msgid "October"
+msgstr ""
+
+#: lib/i10n/translator.ex:35
+msgid "Sep"
+msgstr ""
+
+#: lib/i10n/translator.ex:34
+msgid "September"
+msgstr ""

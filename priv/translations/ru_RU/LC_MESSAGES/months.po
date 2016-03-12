@@ -1,0 +1,112 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ru_RU\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+
+#: lib/i10n/translator.ex:26
+msgid "Apr"
+msgstr "апр."
+
+#: lib/i10n/translator.ex:25
+msgid "April"
+msgstr "апрель"
+
+#: lib/i10n/translator.ex:33
+msgid "Aug"
+msgstr "авг."
+
+#: lib/i10n/translator.ex:32
+msgid "August"
+msgstr "августа"
+
+#: lib/i10n/translator.ex:41
+msgid "Dec"
+msgstr "дек."
+
+#: lib/i10n/translator.ex:40
+msgid "December"
+msgstr "декабря"
+
+#: lib/i10n/translator.ex:22
+msgid "Feb"
+msgstr "фев."
+
+#: lib/i10n/translator.ex:21
+msgid "February"
+msgstr "февраля"
+
+#: lib/i10n/translator.ex:20
+msgid "Jan"
+msgstr "янв."
+
+#: lib/i10n/translator.ex:19
+msgid "January"
+msgstr "января"
+
+#: lib/i10n/translator.ex:31
+msgid "Jul"
+msgstr "июля"
+
+#: lib/i10n/translator.ex:30
+msgid "July"
+msgstr "июля"
+
+#: lib/i10n/translator.ex:29
+msgid "Jun"
+msgstr "июня"
+
+#: lib/i10n/translator.ex:28
+msgid "June"
+msgstr "июня"
+
+#: lib/i10n/translator.ex:24
+msgid "Mar"
+msgstr "марта"
+
+#: lib/i10n/translator.ex:23
+msgid "March"
+msgstr "марта"
+
+#: lib/i10n/translator.ex:27
+msgid "May"
+msgstr "мая"
+
+#: lib/i10n/translator.ex:39
+msgid "Nov"
+msgstr "нояб."
+
+#: lib/i10n/translator.ex:38
+msgid "November"
+msgstr "ноября"
+
+#: lib/i10n/translator.ex:37
+msgid "Oct"
+msgstr "окт."
+
+#: lib/i10n/translator.ex:36
+msgid "October"
+msgstr "октября"
+
+#: lib/i10n/translator.ex:35
+msgid "Sep"
+msgstr "сент."
+
+#: lib/i10n/translator.ex:34
+msgid "September"
+msgstr "сентября"

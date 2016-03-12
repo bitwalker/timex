@@ -5,6 +5,7 @@ defmodule Timex.Format.Time.Formatter do
   use Behaviour
   use Timex
   import Timex.Macros
+  alias Timex.Translator
   alias Timex.Format.Time.Formatters.Default
   alias Timex.Format.Time.Formatters.Humanized
 
@@ -16,6 +17,7 @@ defmodule Timex.Format.Time.Formatter do
   end
 
   defcallback format(timestamp :: Types.timestamp) :: String.t | {:error, term}
+  defcallback lformat(timestamp :: Types.timestamp, locale :: String.t) :: String.t | {:error, term}
 
   @doc """
   Formats a Time tuple/Erlang timestamp, as a string, using the provided
@@ -27,17 +29,39 @@ defmodule Timex.Format.Time.Formatter do
 
       iex> #{__MODULE__}.format({1435, 180354, 590264})
       "P45Y6M5DT21H12M34.590264S"
-      iex> #{__MODULE__}.format({1435, 180354, 590264}, :humanized)
-      "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds, 590.264 milliseconds"
+  """
+  @spec format(Types.timestamp) :: String.t | {:error, term}
+  def format(timestamp), do: lformat(timestamp, Translator.default_locale, Default)
+
+  @doc """
+  Same as format/1, but takes a formatter name as an argument
+
+  ## Examples
+
+    iex> #{__MODULE__}.format({1435, 180354, 590264}, :humanized)
+    "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds, 590.264 milliseconds"
   """
   @spec format(Types.timestamp, atom) :: String.t | {:error, term}
-  def format(timestamp, formatter \\ Default)
+  def format(timestamp, formatter), do: lformat(timestamp, Translator.default_locale, formatter)
 
-  def format({mega,s,micro} = timestamp, formatter) when is_timestamp(mega,s,micro) and is_atom(formatter) do
-    case formatter do
-      :humanized -> Humanized.format(timestamp)
-      _          -> formatter.format(timestamp)
-    end
+  @doc """
+  Same as format/1, but takes a locale name as an argument, and translates the format string,
+  if the locale has translations.
+  """
+  @spec lformat(Types.timestamp, String.t) :: String.t | {:error, term}
+  def lformat(timestamp, locale), do: lformat(timestamp, locale, Default)
+
+  @doc """
+  Same as lformat/2, but takes a formatter as an argument
+  """
+  @spec lformat(Types.timestamp, String.t, atom) :: String.t | {:error, term}
+  def lformat({mega,s,micro} = timestamp, locale, formatter)
+    when is_timestamp(mega,s,micro) and is_binary(locale) and is_atom(formatter) do
+      case formatter do
+        :humanized -> Humanized.lformat(timestamp, locale)
+        _          -> formatter.lformat(timestamp, locale)
+      end
   end
-  def format(_, _), do: {:error, :invalid_timestamp}
+  def lformat(_, _, _), do: {:error, :invalid_timestamp}
+
 end

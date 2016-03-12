@@ -1,0 +1,264 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ru_RU\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+
+#: lib/i10n/translator.ex:78
+msgid "%{n} day ago"
+msgstr "%{n} день назад"
+
+#: lib/i10n/translator.ex:79
+msgid "%{n} days ago"
+msgstr "%{n} дня назад"
+
+#: lib/i10n/translator.ex:105
+msgid "%{n} hour ago"
+msgstr "%{n} час назад"
+
+#: lib/i10n/translator.ex:106
+msgid "%{n} hours ago"
+msgstr "%{n} часа назад"
+
+#: lib/i10n/translator.ex:110
+msgid "%{n} minute ago"
+msgstr "%{n} минуту назад"
+
+#: lib/i10n/translator.ex:111
+msgid "%{n} minutes ago"
+msgstr "%{n} минуты назад"
+
+#: lib/i10n/translator.ex:62
+msgid "%{n} month ago"
+msgstr "%{n} месяц назад"
+
+#: lib/i10n/translator.ex:63
+msgid "%{n} months ago"
+msgstr "%{n} месяца назад"
+
+#: lib/i10n/translator.ex:115
+msgid "%{n} second ago"
+msgstr "%{n} секунду назад"
+
+#: lib/i10n/translator.ex:116
+msgid "%{n} seconds ago"
+msgstr "%{n} секунды назад"
+
+#: lib/i10n/translator.ex:70
+msgid "%{n} week ago"
+msgstr "%{n} неделю назад"
+
+#: lib/i10n/translator.ex:71
+msgid "%{n} weeks ago"
+msgstr "%{n} недели назад"
+
+#: lib/i10n/translator.ex:54
+msgid "%{n} year ago"
+msgstr "%{n} год назад"
+
+#: lib/i10n/translator.ex:55
+msgid "%{n} years ago"
+msgstr "%{n} года назад"
+
+#: lib/i10n/translator.ex:76
+msgid "in %{n} day"
+msgstr "через %{n} день"
+
+#: lib/i10n/translator.ex:77
+msgid "in %{n} days"
+msgstr "через %{n} дней"
+
+#: lib/i10n/translator.ex:103
+msgid "in %{n} hour"
+msgstr "через %{n} час"
+
+#: lib/i10n/translator.ex:104
+msgid "in %{n} hours"
+msgstr "через {0} часа"
+
+#: lib/i10n/translator.ex:108
+msgid "in %{n} minute"
+msgstr "через %{n} минуту"
+
+#: lib/i10n/translator.ex:109
+msgid "in %{n} minutes"
+msgstr "через %{n} минуты"
+
+#: lib/i10n/translator.ex:60
+msgid "in %{n} month"
+msgstr "через %{n} месяц"
+
+#: lib/i10n/translator.ex:61
+msgid "in %{n} months"
+msgstr "через %{n} месяца"
+
+#: lib/i10n/translator.ex:113
+msgid "in %{n} second"
+msgstr "через %{n} секунду"
+
+#: lib/i10n/translator.ex:114
+msgid "in %{n} seconds"
+msgstr "через %{n} секунды"
+
+#: lib/i10n/translator.ex:68
+msgid "in %{n} week"
+msgstr "через %{n} неделю"
+
+#: lib/i10n/translator.ex:69
+msgid "in %{n} weeks"
+msgstr "через %{n} недели"
+
+#: lib/i10n/translator.ex:52
+msgid "in %{n} year"
+msgstr "через %{n} год"
+
+#: lib/i10n/translator.ex:53
+msgid "in %{n} years"
+msgstr "через %{n} года"
+
+#: lib/i10n/translator.ex:93
+msgid "last Friday"
+msgstr "в прошлую пятницу"
+
+#: lib/i10n/translator.ex:81
+msgid "last Monday"
+msgstr "в прошлый понедельник"
+
+#: lib/i10n/translator.ex:96
+msgid "last Saturday"
+msgstr "в прошлую субботу"
+
+#: lib/i10n/translator.ex:99
+msgid "last Sunday"
+msgstr "в прошлое воскресенье"
+
+#: lib/i10n/translator.ex:90
+msgid "last Thursday"
+msgstr "в прошлый четверг"
+
+#: lib/i10n/translator.ex:84
+msgid "last Tuesday"
+msgstr "в прошлый вторник"
+
+#: lib/i10n/translator.ex:87
+msgid "last Wednesday"
+msgstr "в прошлую среду"
+
+#: lib/i10n/translator.ex:57
+msgid "last month"
+msgstr "в прошлом месяце"
+
+#: lib/i10n/translator.ex:65
+msgid "last week"
+msgstr "на прошлой неделе"
+
+#: lib/i10n/translator.ex:49
+msgid "last year"
+msgstr "в прошлом году"
+
+#: lib/i10n/translator.ex:95
+msgid "next Friday"
+msgstr "в следующую пятницу"
+
+#: lib/i10n/translator.ex:83
+msgid "next Monday"
+msgstr "в следующий понедельник"
+
+#: lib/i10n/translator.ex:98
+msgid "next Saturday"
+msgstr "в следующую субботу"
+
+#: lib/i10n/translator.ex:101
+msgid "next Sunday"
+msgstr "в следующее воскресенье"
+
+#: lib/i10n/translator.ex:92
+msgid "next Thursday"
+msgstr "в следующий четверг"
+
+#: lib/i10n/translator.ex:86
+msgid "next Tuesday"
+msgstr "в следующий вторник"
+
+#: lib/i10n/translator.ex:89
+msgid "next Wednesday"
+msgstr "в следующую среду"
+
+#: lib/i10n/translator.ex:59
+msgid "next month"
+msgstr "в следующем месяце"
+
+#: lib/i10n/translator.ex:67
+msgid "next week"
+msgstr "на следующей неделе"
+
+#: lib/i10n/translator.ex:51
+msgid "next year"
+msgstr "в следующем году"
+
+#: lib/i10n/translator.ex:94
+msgid "this Friday"
+msgstr "в эту пятницу"
+
+#: lib/i10n/translator.ex:82
+msgid "this Monday"
+msgstr "в этот понедельник"
+
+#: lib/i10n/translator.ex:97
+msgid "this Saturday"
+msgstr "в эту субботу"
+
+#: lib/i10n/translator.ex:100
+msgid "this Sunday"
+msgstr "в это воскресенье"
+
+#: lib/i10n/translator.ex:91
+msgid "this Thursday"
+msgstr "в этот четверг"
+
+#: lib/i10n/translator.ex:85
+msgid "this Tuesday"
+msgstr "в этот вторник"
+
+#: lib/i10n/translator.ex:88
+msgid "this Wednesday"
+msgstr "в эту среду"
+
+#: lib/i10n/translator.ex:58
+msgid "this month"
+msgstr "в этом месяце"
+
+#: lib/i10n/translator.ex:66
+msgid "this week"
+msgstr "на этой неделе"
+
+#: lib/i10n/translator.ex:50
+msgid "this year"
+msgstr "в этому году"
+
+#: lib/i10n/translator.ex:74
+msgid "today"
+msgstr "сегодня"
+
+#: lib/i10n/translator.ex:75
+msgid "tomorrow"
+msgstr "завтра"
+
+#: lib/i10n/translator.ex:73
+msgid "yesterday"
+msgstr "вчера"

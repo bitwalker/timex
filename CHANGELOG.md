@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.1.2
+
+This release adds the base for locale-awareness in Timex, including one locale ("ru_RU"), support for formatting datetimes
+in another locale, and functions which return names of things will now use the default locale. To configure Timex's default
+locale, put the following in config.exs:
+
+```elixir
+config :timex, default_locale: "ru_RU" # or whatever locale you want
+```
+
+### Added
+- The ability to configure a default locale (the default is "en" if no config is provided) for formatting/translation of strings
+- The ability to format a string using a given locale, otherwise the default locale is used
+- Translations for the "ru_RU" locale, more to come
+- Locale awareness throughout the core API, so functions such as `day_name` will return the day name in the configured locale,
+  if translations for that locale were provided
+- `Timex.lformat`, and `Timex.lformat!` variants of the formatting functions, which take a locale to use in formatting
+- Added a relative time formatter, which functions very similarily to Moment.js's relative time formatting
+  You can use it with `Timex.format!` or `Timex.format`, by providing :relative as the formatter, and using the `{relative}` token in your
+  format string. NOTE: The relative formatter does not support other tokens, only `{relative}` for now, if it seems like there
+  is a use case where `{relative}` should support other tokens, I'll consider adding that.
+- Added `Timex.from_now`, which takes:
+  - A single Convertable, which returns the relative time between that date/time value and now
+  - Two Convertables, which returns the relative time between the first date/time value, and the reference date (provided as the 2nd)
+  - Two variants of the above which also take a locale as the last argument, and results in the string being translated to that locale
+### Changed
+- All functions which return strings, and all formatting functions, will use the default locale for translation, which is "en" unless another was configured, or one was provided if the function takes a locale as an argument.
+
 ## 2.1.1
 
 ### Added

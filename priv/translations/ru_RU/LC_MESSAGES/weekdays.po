@@ -1,0 +1,76 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ru_RU\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+
+#: lib/i10n/translator.ex:13
+msgid "Fri"
+msgstr "пт"
+
+#: lib/i10n/translator.ex:12
+msgid "Friday"
+msgstr "пятница"
+
+#: lib/i10n/translator.ex:5
+msgid "Mon"
+msgstr "пн"
+
+#: lib/i10n/translator.ex:4
+msgid "Monday"
+msgstr "понедельник"
+
+#: lib/i10n/translator.ex:15
+msgid "Sat"
+msgstr "сб"
+
+#: lib/i10n/translator.ex:14
+msgid "Saturday"
+msgstr "суббота"
+
+#: lib/i10n/translator.ex:17
+msgid "Sun"
+msgstr "вс"
+
+#: lib/i10n/translator.ex:16
+msgid "Sunday"
+msgstr "воскресенье"
+
+#: lib/i10n/translator.ex:11
+msgid "Thu"
+msgstr "чт"
+
+#: lib/i10n/translator.ex:10
+msgid "Thursday"
+msgstr "четверг"
+
+#: lib/i10n/translator.ex:7
+msgid "Tue"
+msgstr "вт"
+
+#: lib/i10n/translator.ex:6
+msgid "Tuesday"
+msgstr "вт"
+
+#: lib/i10n/translator.ex:9
+msgid "Wed"
+msgstr "ср"
+
+#: lib/i10n/translator.ex:8
+msgid "Wednesday"
+msgstr "среда"
