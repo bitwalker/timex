@@ -39,7 +39,7 @@ defmodule Timex.Mixfile do
     Extendable via Convertable and Comparable protocols, so you can use Timex with
     your own types!
 
-    Locale-aware, currently only supports "ru_RU" and "en", but more will be added over time.
+    Locale-aware, currently only supports "ru" and "en", but more will be added over time.
 
     Provides a broad array of date/time helper functions
 

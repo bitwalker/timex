@@ -1,67 +1,76 @@
-## `msgid`s in this file come from POT (.pot) files.
-##
-## Do not add, change, or remove `msgid`s manually here as
-## they're tied to the ones in the corresponding POT file
-## (with the same domain).
-##
-## Use `mix gettext.extract --merge` or `mix gettext.merge`
-## to merge POT files into PO files.
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
 msgid ""
 msgstr ""
 "Language: en\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
 
-#: lib/i10n/translator.ex:13
+#: lib/i10n/translator.ex:239
 msgid "Fri"
-msgstr ""
+msgstr "Fri"
 
-#: lib/i10n/translator.ex:12
+#: lib/i10n/translator.ex:247
 msgid "Friday"
-msgstr ""
+msgstr "Friday"
 
-#: lib/i10n/translator.ex:5
+#: lib/i10n/translator.ex:235
 msgid "Mon"
-msgstr ""
+msgstr "Mon"
 
-#: lib/i10n/translator.ex:4
+#: lib/i10n/translator.ex:243
 msgid "Monday"
-msgstr ""
+msgstr "Monday"
 
-#: lib/i10n/translator.ex:15
+#: lib/i10n/translator.ex:240
 msgid "Sat"
-msgstr ""
+msgstr "Sat"
 
-#: lib/i10n/translator.ex:14
+#: lib/i10n/translator.ex:248
 msgid "Saturday"
-msgstr ""
+msgstr "Saturday"
 
-#: lib/i10n/translator.ex:17
+#: lib/i10n/translator.ex:241
 msgid "Sun"
-msgstr ""
+msgstr "Sun"
 
-#: lib/i10n/translator.ex:16
+#: lib/i10n/translator.ex:249
 msgid "Sunday"
-msgstr ""
+msgstr "Sunday"
 
-#: lib/i10n/translator.ex:11
+#: lib/i10n/translator.ex:238
 msgid "Thu"
-msgstr ""
+msgstr "Thu"
 
-#: lib/i10n/translator.ex:10
+#: lib/i10n/translator.ex:246
 msgid "Thursday"
-msgstr ""
+msgstr "Thursday"
 
-#: lib/i10n/translator.ex:7
+#: lib/i10n/translator.ex:236
 msgid "Tue"
-msgstr ""
+msgstr "Tue"
 
-#: lib/i10n/translator.ex:6
+#: lib/i10n/translator.ex:244
 msgid "Tuesday"
-msgstr ""
+msgstr "Tuesday"
 
-#: lib/i10n/translator.ex:9
+#: lib/i10n/translator.ex:237
 msgid "Wed"
-msgstr ""
+msgstr "Wed"
 
-#: lib/i10n/translator.ex:8
+#: lib/i10n/translator.ex:245
 msgid "Wednesday"
-msgstr ""
+msgstr "Wednesday"

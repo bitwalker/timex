@@ -252,11 +252,11 @@ defmodule Timex do
   ## Examples
 
       iex> use Timex
-      ...> Timex.from_now(Timex.shift(DateTime.now, days: 2), "ru_RU")
+      ...> Timex.from_now(Timex.shift(DateTime.now, days: 2), "ru")
       "через 2 дней"
 
       iex> use Timex
-      ...> Timex.from_now(Timex.shift(DateTime.now, days: -2), "ru_RU")
+      ...> Timex.from_now(Timex.shift(DateTime.now, days: -2), "ru")
       "2 дня назад"
 
   """

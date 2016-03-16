@@ -98,50 +98,50 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
     phrase = cond do
       # future
       diff >= 0 && diff <= 45 ->
-        Translator.translate(locale, "relative_time", "in %{n} seconds", n: diff)
+        Translator.translate_plural(locale, "relative_time", "in %{count} second", "in %{count} seconds", diff)
       diff > 45 && diff < @minute * 2 ->
-        Translator.translate(locale, "relative_time", "in %{n} minute", n: 1)
+        Translator.translate_plural(locale, "relative_time", "in %{count} minute", "in %{count} minutes", 1)
       diff >= (@minute * 2) && diff < @hour ->
-        Translator.translate(locale, "relative_time", "in %{n} minutes", n: div(diff, @minute))
+        Translator.translate_plural(locale, "relative_time", "in %{count} minute", "in %{count} minutes", div(diff, @minute))
       diff >= @hour && diff < (@hour * 2) ->
-        Translator.translate(locale, "relative_time", "in %{n} hour", n: 1)
+        Translator.translate_plural(locale, "relative_time", "in %{count} hour", "in %{count} hours", 1)
       diff >= (@hour * 2) && diff < @day ->
-        Translator.translate(locale, "relative_time", "in %{n} hours", n: div(diff, @hour))
+        Translator.translate_plural(locale, "relative_time", "in %{count} hour", "in %{count} hours", div(diff, @hour))
       diff >= @day && diff < (@day * 2) ->
-        Translator.translate(locale, "relative_time", "in %{n} day", n: 1)
+        Translator.translate_plural(locale, "relative_time", "in %{count} day", "in %{count} days", 1)
       diff >= (@day * 2) && diff < @month ->
-        Translator.translate(locale, "relative_time", "in %{n} days", n: div(diff, @day))
+        Translator.translate_plural(locale, "relative_time", "in %{count} day", "in %{count} days", div(diff, @day))
       diff >= @month && diff < (@month * 2) ->
-        Translator.translate(locale, "relative_time", "in %{n} month", n: 1)
+        Translator.translate_plural(locale, "relative_time", "in %{count} month", "in %{count} months", 1)
       diff >= (@month * 2) && diff < @year ->
-        Translator.translate(locale, "relative_time", "in %{n} month", n: div(diff, @month))
+        Translator.translate_plural(locale, "relative_time", "in %{count} month", "in %{count} months", div(diff, @month))
       diff >= @year && diff < (@year * 2) ->
-        Translator.translate(locale, "relative_time", "in %{n} year", n: 1)
+        Translator.translate_plural(locale, "relative_time", "in %{count} year", "in %{count} years", 1)
       diff >= (@year * 2) ->
-        Translator.translate(locale, "relative_time", "in %{n} years", n: div(diff, @year))
+        Translator.translate_plural(locale, "relative_time", "in %{count} year", "in %{count} years", div(diff, @year))
       # past
       diff <= 0 && diff >= -45 ->
-        Translator.translate(locale, "relative_time", "%{n} seconds ago", n: diff * -1)
+        Translator.translate_plural(locale, "relative_time", "%{count} second ago", "%{count} seconds ago", diff * -1)
       diff < -45 && diff > @minute * 2 * -1 ->
-        Translator.translate(locale, "relative_time", "%{n} minute ago", n: 1)
+        Translator.translate_plural(locale, "relative_time", "%{count} minute ago", "%{count} minutes ago", -1)
       diff <= (@minute * 2) && diff > @hour * -1 ->
-        Translator.translate(locale, "relative_time", "%{n} minutes ago", n: div(diff * -1, @minute))
+        Translator.translate_plural(locale, "relative_time", "%{count} minute ago", "%{count} minutes ago", div(diff * -1, @minute))
       diff <= @hour && diff > (@hour * 2 * -1) ->
-        Translator.translate(locale, "relative_time", "%{n} hour ago", n: 1)
+        Translator.translate_plural(locale, "relative_time", "%{count} hour ago", "%{count} hours ago", 1)
       diff <= (@hour * 2) && diff > (@day * -1) ->
-        Translator.translate(locale, "relative_time", "%{n} hours ago", n: div(diff * -1, @hour))
+        Translator.translate_plural(locale, "relative_time", "%{count} hour ago", "%{count} hours ago", div(diff * -1, @hour))
       diff <= @day && diff > (@day * 2 * -1) ->
-        Translator.translate(locale, "relative_time", "%{n} day ago", n: 1)
+        Translator.translate_plural(locale, "relative_time", "%{count} day ago", "%{count} days ago", 1)
       diff <= (@day * 2) && diff > (@month * -1) ->
-        Translator.translate(locale, "relative_time", "%{n} days ago", n: div(diff * -1, @day))
+        Translator.translate_plural(locale, "relative_time", "%{count} day ago", "%{count} days ago", div(diff * -1, @day))
       diff <= @month && diff > (@month * 2 * -1) ->
-        Translator.translate(locale, "relative_time", "%{n} month ago", n: 1)
+        Translator.translate_plural(locale, "relative_time", "%{count} month ago", "%{count} months ago", 1)
       diff <= (@month * 2) && diff > (@year * -1) ->
-        Translator.translate(locale, "relative_time", "%{n} month ago", n: div(diff * -1, @month))
+        Translator.translate_plural(locale, "relative_time", "%{count} month ago", "%{count} months ago", div(diff * -1, @month))
       diff <= @year && diff > (@year * 2 * -1) ->
-        Translator.translate(locale, "relative_time", "%{n} year ago", n: 1)
+        Translator.translate_plural(locale, "relative_time", "%{count} year ago", "%{count} years ago", 1)
       diff <= (@year * 2 * -1) ->
-        Translator.translate(locale, "relative_time", "%{n} years ago", n: div(diff * -1, @year))
+        Translator.translate_plural(locale, "relative_time", "%{count} year ago", "%{count} years ago", div(diff * -1, @year))
     end
     do_format(locale, date, relative, dirs, <<result::binary, phrase::binary>>)
   end

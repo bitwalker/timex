@@ -11,30 +11,30 @@ msgid ""
 msgstr ""
 "Language: INSERT LANGUAGE HERE\n"
 
-#: lib/i10n/translator.ex:144
+#: lib/i10n/translator.ex:337
 msgid "+"
 msgstr ""
 
-#: lib/i10n/translator.ex:142
+#: lib/i10n/translator.ex:335
 msgid ","
 msgstr ""
 
-#: lib/i10n/translator.ex:145
+#: lib/i10n/translator.ex:338
 msgid "-"
 msgstr ""
 
-#: lib/i10n/translator.ex:141
+#: lib/i10n/translator.ex:334
 msgid "."
 msgstr ""
 
-#: lib/i10n/translator.ex:147
+#: lib/i10n/translator.ex:340
 msgid ":"
 msgstr ""
 
-#: lib/i10n/translator.ex:143
+#: lib/i10n/translator.ex:336
 msgid ";"
 msgstr ""
 
-#: lib/i10n/translator.ex:146
+#: lib/i10n/translator.ex:339
 msgid "E"
 msgstr ""

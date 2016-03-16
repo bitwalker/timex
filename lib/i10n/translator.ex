@@ -19,11 +19,11 @@ defmodule Timex.Translator do
 
   ## Examples
 
-  iex> Timex.Translator.translate("ru_RU", "units", "year")
-  "год"
+      iex> Timex.Translator.translate("ru", "weekdays", "Saturday")
+      "суббота"
 
-  iex> Timex.Translator.translate("invalid_locale", "units", "year")
-  "year"
+      iex> Timex.Translator.translate("invalid_locale", "weekdays", "Saturday")
+      "Saturday"
 
   """
   @spec translate(locale :: String.t, domain :: String.t, msgid :: String.t) :: String.t
@@ -32,19 +32,20 @@ defmodule Timex.Translator do
   end
 
   @doc """
-  Same as translate/3, except takes bindings for use in an interpolated translation
+  Translates a string for a given locale and domain, following the pluralization rules of that
+  language.
 
   ## Examples
 
-  iex> Timex.Translator.translate("ru_RU", "relative_time", "in %{n} seconds", n: 5)
-  "через 5 секунды"
+      iex> Timex.Translator.translate_plural("ru", "relative_time", "in %{count} second", "in %{count} seconds", 5)
+      "через 5 секунды"
 
-  iex> Timex.Translator.translate("invalid_locale", "relative_time", "in %{n} seconds", n: 5)
-  "in 5 seconds"
+      iex> Timex.Translator.translate_plural("invalid_locale", "relative_time", "in %{count} second", "in %{count} seconds", 5)
+      "in 5 seconds"
   """
-  @spec translate(locale :: String.t, domain :: String.t, msgid :: String.t, bindings :: Map.t) :: String.t
-  def translate(locale, domain, msgid, bindings) do
-    get_domain_text(locale, domain, msgid, bindings)
+  @spec translate_plural(locale :: String.t, domain :: String.t, msgid :: String.t, msgid_plural :: String.t, n :: integer) :: String.t
+  def translate_plural(locale, domain, msgid, msgid_plural, n) do
+    get_plural_domain_text(locale, domain, msgid, msgid_plural, n)
   end
 
   @doc """
@@ -144,53 +145,6 @@ defmodule Timex.Translator do
       :pm => get_domain_text(locale, "day_periods", "pm")}
   end
 
-  @doc """
-  Returns a map of unit types to translated unit names
-
-  ## Examples
-
-      iex> units = Timex.Translator.get_units("en")
-      ...> {units[:second], units[:years]}
-      {"second", "years"}
-  """
-  @spec get_units(locale :: String.t) :: %{atom() => String.t}
-  def get_units(locale) do
-    %{:nanosecond => get_domain_text(locale, "units", "nanosecond"),
-      :nanoseconds => get_domain_text(locale, "units", "nanoseconds"),
-      :microsecond => get_domain_text(locale, "units", "microsecond"),
-      :microseconds => get_domain_text(locale, "units", "microseconds"),
-      :millisecond => get_domain_text(locale, "units", "millisecond"),
-      :milliseconds => get_domain_text(locale, "units", "milliseconds"),
-      :second => get_domain_text(locale, "units", "second"),
-      :seconds => get_domain_text(locale, "units", "seconds"),
-      :minute => get_domain_text(locale, "units", "minute"),
-      :minutes => get_domain_text(locale, "units", "minutes"),
-      :hour => get_domain_text(locale, "units", "hour"),
-      :hours => get_domain_text(locale, "units", "hours"),
-      :day => get_domain_text(locale, "units", "day"),
-      :days => get_domain_text(locale, "units", "days"),
-      :week => get_domain_text(locale, "units", "week"),
-      :weeks => get_domain_text(locale, "units", "weeks"),
-      :month => get_domain_text(locale, "units", "month"),
-      :months => get_domain_text(locale, "units", "months"),
-      :year => get_domain_text(locale, "units", "year"),
-      :years => get_domain_text(locale, "units", "years")}
-  end
-
-  @doc """
-  Returns a map of symbol names to symbol strings for the given locale
-  """
-  @spec get_symbols(String.t) :: %{atom() => String.t}
-  def get_symbols(locale) do
-    %{:decimal        => get_domain_text(locale, "symbols", "."),
-      :group          => get_domain_text(locale, "symbols", ","),
-      :list           => get_domain_text(locale, "symbols", ";"),
-      :plus           => get_domain_text(locale, "symbols", "+"),
-      :minus          => get_domain_text(locale, "symbols", "-"),
-      :exponent       => get_domain_text(locale, "symbols", "E"),
-      :time_separator => get_domain_text(locale, "symbols", ":")}
-  end
-
   @spec get_domain_text(locale :: String.t, domain :: String.t, msgid :: String.t) :: String.t
   defp get_domain_text(locale, domain, msgid) do
     case Timex.Gettext.lgettext(locale, domain, msgid) do
@@ -198,9 +152,10 @@ defmodule Timex.Translator do
       {:default, default} -> default
     end
   end
-  @spec get_domain_text(locale :: String.t, domain :: String.t, msgid :: String.t, Map.t) :: String.t
-  defp get_domain_text(locale, domain, msgid, bindings) do
-    case Timex.Gettext.lgettext(locale, domain, msgid, Enum.into(bindings, %{})) do
+
+  @spec get_plural_domain_text(locale :: String.t, domain :: String.t, msgid :: String.t, msgid_plural :: String.t, n :: integer) :: String.t
+  defp get_plural_domain_text(locale, domain, msgid, msgid_plural, n) do
+    case Timex.Gettext.lngettext(locale, domain, msgid, msgid_plural, n, %{}) do
       {:ok, translated}   -> translated
       {:default, default} -> default
     end
@@ -208,26 +163,16 @@ defmodule Timex.Translator do
 
   ### After this point, all gettext calls are here for use with compile-time tooling
 
-  dgettext "units", "nanosecond"
-  dgettext "units", "nanoseconds"
-  dgettext "units", "microsecond"
-  dgettext "units", "microseconds"
-  dgettext "units", "millisecond"
-  dgettext "units", "milliseconds"
-  dgettext "units", "second"
-  dgettext "units", "seconds"
-  dgettext "units", "minute"
-  dgettext "units", "minutes"
-  dgettext "units", "hour"
-  dgettext "units", "hours"
-  dgettext "units", "day"
-  dgettext "units", "days"
-  dgettext "units", "week"
-  dgettext "units", "weeks"
-  dgettext "units", "month"
-  dgettext "units", "months"
-  dgettext "units", "year"
-  dgettext "units", "years"
+  dngettext "units", "%{count} nanosecond", "%{count} nanoseconds", 0
+  dngettext "units", "%{count} microsecond", "%{count} microseconds", 0
+  dngettext "units", "%{count} millisecond", "%{count} milliseconds", 0
+  dngettext "units", "%{count} second", "%{count} seconds", 0
+  dngettext "units", "%{count} minute", "%{count} minutes", 0
+  dngettext "units", "%{count} hour", "%{count} hours", 0
+  dngettext "units", "%{count} day", "%{count} days", 0
+  dngettext "units", "%{count} week", "%{count} weeks", 0
+  dngettext "units", "%{count} month", "%{count} months", 0
+  dngettext "units", "%{count} year", "%{count} years", 0
 
   dgettext "day_periods", "AM"
   dgettext "day_periods", "am"
@@ -277,37 +222,29 @@ defmodule Timex.Translator do
   dgettext "months", "December"
 
   # relative years
-  dgettext"relative_time", "last year"
-  dgettext"relative_time", "this year"
-  dgettext"relative_time", "next year"
-  dgettext"relative_time", "in %{n} year", n: 0
-  dgettext"relative_time", "in %{n} years", n: 0
-  dgettext"relative_time", "%{n} year ago", n: 0
-  dgettext"relative_time", "%{n} years ago", n: 0
+  dgettext "relative_time", "last year"
+  dgettext "relative_time", "this year"
+  dgettext "relative_time", "next year"
+  dngettext "relative_time", "in %{count} year", "in %{count} years", 0
+  dngettext "relative_time", "%{count} year ago", "%{count} years ago", 0
   # relative months
-  dgettext "relative_time", "last month", n: 0
-  dgettext "relative_time", "this month", n: 0
-  dgettext "relative_time", "next month", n: 0
-  dgettext "relative_time", "in %{n} month", n: 0
-  dgettext "relative_time", "in %{n} months", n: 0
-  dgettext "relative_time", "%{n} month ago", n: 0
-  dgettext "relative_time", "%{n} months ago", n: 0
+  dgettext "relative_time", "last month"
+  dgettext "relative_time", "this month"
+  dgettext "relative_time", "next month"
+  dngettext "relative_time", "in %{count} month", "in %{count} months", 0
+  dngettext "relative_time", "%{count} month ago", "%{count} months ago", 0
   # relative weeks
   dgettext "relative_time", "last week"
   dgettext "relative_time", "this week"
   dgettext "relative_time", "next week"
-  dgettext "relative_time", "in %{n} week", n: 0
-  dgettext "relative_time", "in %{n} weeks", n: 0
-  dgettext "relative_time", "%{n} week ago", n: 0
-  dgettext "relative_time", "%{n} weeks ago", n: 0
+  dngettext "relative_time", "in %{count} week", "in %{count} weeks", 0
+  dngettext "relative_time", "%{count} week ago", "%{count} weeks ago", 0
   # relative days
   dgettext "relative_time", "yesterday"
   dgettext "relative_time", "today"
   dgettext "relative_time", "tomorrow"
-  dgettext "relative_time", "in %{n} day", n: 0
-  dgettext "relative_time", "in %{n} days", n: 0
-  dgettext "relative_time", "%{n} day ago", n: 0
-  dgettext "relative_time", "%{n} days ago", n: 0
+  dngettext "relative_time", "in %{count} day", "in %{count} days", 0
+  dngettext "relative_time", "%{count} day ago", "%{count} days ago", 0
   # relative weekdays
   dgettext "relative_time", "last monday"
   dgettext "relative_time", "this monday"
@@ -331,20 +268,14 @@ defmodule Timex.Translator do
   dgettext "relative_time", "this sunday"
   dgettext "relative_time", "next sunday"
   # relative hours
-  dgettext "relative_time", "in %{n} hour", n: 0
-  dgettext "relative_time", "in %{n} hours", n: 0
-  dgettext "relative_time", "%{n} hour ago", n: 0
-  dgettext "relative_time", "%{n} hours ago", n: 0
+  dngettext "relative_time", "in %{count} hour", "in %{count} hours", 0
+  dngettext "relative_time", "%{count} hour ago", "%{count} hours ago", 0
   # relative minutes
-  dgettext "relative_time", "in %{n} minute", n: 0
-  dgettext "relative_time", "in %{n} minutes", n: 0
-  dgettext "relative_time", "%{n} minute ago", n: 0
-  dgettext "relative_time", "%{n} minutes ago", n: 0
+  dngettext "relative_time", "in %{count} minute", "in %{count} minutes", 0
+  dngettext "relative_time", "%{count} minute ago", "%{count} minutes ago", 0
   # relative seconds
-  dgettext "relative_time", "in %{n} second", n: 0
-  dgettext "relative_time", "in %{n} seconds", n: 0
-  dgettext "relative_time", "%{n} second ago", n: 0
-  dgettext "relative_time", "%{n} seconds ago", n: 0
+  dngettext "relative_time", "in %{count} second", "in %{count} seconds", 0
+  dngettext "relative_time", "%{count} second ago", "%{count} seconds ago", 0
 
   # symbols
   dgettext "symbols", "." # decimal

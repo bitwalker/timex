@@ -11,6 +11,6 @@ msgid ""
 msgstr ""
 "Language: INSERT LANGUAGE HERE\n"
 
-#: lib/i10n/translator.ex:150
+#: lib/i10n/translator.ex:343
 msgid "#,##0.###"
 msgstr ""

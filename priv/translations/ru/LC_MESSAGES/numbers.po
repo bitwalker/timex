@@ -8,8 +8,8 @@
 ## to merge POT files into PO files.
 msgid ""
 msgstr ""
-"Language: ru_RU\n"
+"Language: ru\n"
 
-#: lib/i10n/translator.ex:150
+#: lib/i10n/translator.ex:343
 msgid "#,##0.###"
 msgstr ""
