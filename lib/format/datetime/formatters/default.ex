@@ -101,17 +101,21 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   * `{ISOord}`         - `YYYY-DDD`. That is, year number, followed by the ordinal
                          day number (e.g. `2007-113`)
 
+  * `{ASN1:UTCtime}`    - `YYMMDD<time>Z`. Full 2-digit year date and time in UTC without
+                        separators (e.g. `070813134801Z`)
+
   These directives provide support for miscellaneous common formats:
 
-  * `{RFC822}`      - e.g. `Mon, 05 Jun 14 23:20:59 UT`
-  * `{RFC822z}`     - e.g. `Mon, 05 Jun 14 23:20:59 Z`
-  * `{RFC1123}`     - e.g. `Tue, 05 Mar 2013 23:25:19 GMT`
-  * `{RFC1123z}`    - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
-  * `{RFC3339}`     - e.g. `2013-03-05T23:25:19+02:00`
-  * `{RFC3339z}`    - e.g. `2013-03-05T23:25:19Z`
-  * `{ANSIC}`       - e.g. `Tue Mar  5 23:25:19 2013`
-  * `{UNIX}`        - e.g. `Tue Mar  5 23:25:19 PST 2013`
-  * `{kitchen}`     - e.g. `3:25PM`
+  * `{RFC822}`           - e.g. `Mon, 05 Jun 14 23:20:59 UT`
+  * `{RFC822z}`          - e.g. `Mon, 05 Jun 14 23:20:59 Z`
+  * `{RFC1123}`          - e.g. `Tue, 05 Mar 2013 23:25:19 GMT`
+  * `{RFC1123z}`         - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
+  * `{RFC3339}`          - e.g. `2013-03-05T23:25:19+02:00`
+  * `{RFC3339z}`         - e.g. `2013-03-05T23:25:19Z`
+  * `{ANSIC}`            - e.g. `Tue Mar  5 23:25:19 2013`
+  * `{UNIX}`             - e.g. `Tue Mar  5 23:25:19 PST 2013`
+  * `{ASN1:UTCtime}`    - e.g. `130305232519Z`
+  * `{kitchen}`          - e.g. `3:25PM`
 
   """
   use Timex.Format.DateTime.Formatter

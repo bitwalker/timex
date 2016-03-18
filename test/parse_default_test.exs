@@ -224,6 +224,16 @@ defmodule DateFormatTest.ParseDefault do
     assert { :ok, ^date } = parse("Mon Nov 16 22:23:48 UTC 2015", "{UNIX}")
   end
 
+
+  test "parse ASN1:UTCtime" do
+    # * `{ASN1:UTCtime}`       - e.g. `Tue Mar  5 23:25:19 2013`
+    date = Timex.datetime({{2009, 3, 5}, {23, 25, 19}})
+    assert { :ok, ^date } = parse("090305232519Z", "{ASN1:UTCtime}")
+
+    date = Timex.datetime({{2015, 11, 16}, {22, 23, 00}}, "UTC")
+    assert { :ok, ^date } = parse("1511162223Z", "{ASN1:UTCtime}")
+  end
+
   test "parse kitchen" do
     # * `{kitchen}`     - e.g. `3:25PM`
     date = DateTime.now |> Timex.set(hour: 15, minute: 25, second: 0, millisecond: 0)

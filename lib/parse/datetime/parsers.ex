@@ -483,6 +483,31 @@ defmodule Timex.Parse.DateTime.Parsers do
     ])
   end
   @doc """
+  ASN.1 UTCTime standard date/time format.
+  Example: `130305232519Z`
+  """
+  def asn1_utc_time(_) do
+    parts = [
+      sequence([
+        year2([padding: :zeroes, min: 2, max: 2]),
+        month2([padding: :zeroes, min: 2, max: 2]),
+        day_of_month([padding: :zeroes, min: 2, max: 2])
+      ]),
+      choice([
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+          minute([padding: :zeroes, min: 2, max: 2]),
+          second([padding: :zeroes, min: 2, max: 2])
+        ]),
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+          minute([padding: :zeroes, min: 2, max: 2]),
+        ])
+      ])
+    ]
+    sequence(parts ++ [literal(char("Z"))])
+  end
+  @doc """
   Kitchen clock time format.
   Example: `3:25PM`
   """

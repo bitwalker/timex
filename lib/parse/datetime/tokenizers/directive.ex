@@ -142,6 +142,8 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
     do: %Directive{type: :unix, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.unix(flags)}
   def get(:kitchen, directive, flags, mods, width),
     do: %Directive{type: :kitchen, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.kitchen(flags)}
+  def get(:asn1_utc_time, directive, flags, mods, width),
+    do: %Directive{type: :asn1_utc_time, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.asn1_utc_time(flags)}
   def get(:slashed, directive, flags, mods, width),
     do: %Directive{type: :slashed, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.slashed(flags)}
   def get(:strftime_iso_date, directive, flags, mods, width),

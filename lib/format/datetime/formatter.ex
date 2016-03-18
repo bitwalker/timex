@@ -346,6 +346,18 @@ defmodule Timex.Format.DateTime.Formatter do
     wday  = format_token(locale, :wdshort, date, modifiers, flags, width_spec(-1, nil))
     "#{wday} #{month} #{day} #{hour}:#{min}:#{sec} #{year}"
   end
+  def format_token(locale, :asn1_utc_time, %DateTime{} = date, modifiers, _flags, _width) do
+    # `130305232519Z`
+    date = Timezone.convert(date, "UTC")
+    flags = [padding: :zeroes]
+    year  = format_token(locale, :year2, date, modifiers, flags, width_spec(2..2))
+    month = format_token(locale, :month, date, modifiers, flags, width_spec(2..2))
+    day   = format_token(locale, :day, date, modifiers, flags, width_spec(2..2))
+    hour  = format_token(locale, :hour24, date, modifiers, flags, width_spec(2..2))
+    min   = format_token(locale, :min, date, modifiers, flags, width_spec(2..2))
+    sec   = format_token(locale, :sec, date, modifiers, flags, width_spec(2..2))
+    "#{year}#{month}#{day}#{hour}#{min}#{sec}Z"
+  end
   def format_token(locale, :kitchen, %DateTime{} = date, modifiers, _flags, _width) do
     # `3:25PM`
     hour  = format_token(locale, :hour12, date, modifiers, [], width_spec(2..2))
