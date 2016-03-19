@@ -338,6 +338,13 @@ defmodule DateFormatTest.FormatDefault do
     assert { :ok, "Tue Mar  5 23:25:19 2013" } = format(date, "{ANSIC}")
   end
 
+  test "format ASN1 UTC Time" do
+    local = {{2013,3,5},{23,25,19}}
+    date = Timex.datetime(local, :utc)
+
+    assert { :ok, "130305232519Z" } = format(date, "{ASN1:UTCtime}")
+  end
+
   test "format UNIX" do
     local = {{2013,3,5},{23,25,19}}
     date = Timex.datetime(local, :utc)
