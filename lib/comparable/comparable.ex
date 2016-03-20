@@ -52,10 +52,10 @@ defprotocol Timex.Comparable do
   - :seconds
   - :timestamp
 
-  and the result will be an integer value of those units or a timestamp.
+  and the result will be a non-negative integer value of those units or a timestamp.
 
 
   """
-  @spec diff(comparable, comparable, granularity) :: Types.timestamp | integer | {:error, term}
+  @spec diff(comparable, comparable, granularity) :: Types.timestamp | non_neg_integer | {:error, term}
   def diff(a, b, granularity \\ :seconds)
 end
