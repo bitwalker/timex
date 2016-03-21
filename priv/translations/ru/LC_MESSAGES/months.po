@@ -8,7 +8,7 @@
 # # to merge POT files into PO files.
 msgid ""
 msgstr ""
-"Language: ru_RU\n"
+"Language: ru\n"
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
@@ -19,94 +19,94 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.7\n"
 
-#: lib/i10n/translator.ex:26
+#: lib/i10n/translator.ex:254
 msgid "Apr"
 msgstr "апр."
 
-#: lib/i10n/translator.ex:25
+#: lib/i10n/translator.ex:267
 msgid "April"
 msgstr "апрель"
 
-#: lib/i10n/translator.ex:33
+#: lib/i10n/translator.ex:258
 msgid "Aug"
 msgstr "авг."
 
-#: lib/i10n/translator.ex:32
+#: lib/i10n/translator.ex:271
 msgid "August"
 msgstr "августа"
 
-#: lib/i10n/translator.ex:41
+#: lib/i10n/translator.ex:262
 msgid "Dec"
 msgstr "дек."
 
-#: lib/i10n/translator.ex:40
+#: lib/i10n/translator.ex:275
 msgid "December"
 msgstr "декабря"
 
-#: lib/i10n/translator.ex:22
+#: lib/i10n/translator.ex:252
 msgid "Feb"
 msgstr "фев."
 
-#: lib/i10n/translator.ex:21
+#: lib/i10n/translator.ex:265
 msgid "February"
 msgstr "февраля"
 
-#: lib/i10n/translator.ex:20
+#: lib/i10n/translator.ex:251
 msgid "Jan"
 msgstr "янв."
 
-#: lib/i10n/translator.ex:19
+#: lib/i10n/translator.ex:264
 msgid "January"
 msgstr "января"
 
-#: lib/i10n/translator.ex:31
+#: lib/i10n/translator.ex:257
 msgid "Jul"
 msgstr "июля"
 
-#: lib/i10n/translator.ex:30
+#: lib/i10n/translator.ex:270
 msgid "July"
 msgstr "июля"
 
-#: lib/i10n/translator.ex:29
+#: lib/i10n/translator.ex:256
 msgid "Jun"
 msgstr "июня"
 
-#: lib/i10n/translator.ex:28
+#: lib/i10n/translator.ex:269
 msgid "June"
 msgstr "июня"
 
-#: lib/i10n/translator.ex:24
+#: lib/i10n/translator.ex:253
 msgid "Mar"
 msgstr "марта"
 
-#: lib/i10n/translator.ex:23
+#: lib/i10n/translator.ex:266
 msgid "March"
 msgstr "марта"
 
-#: lib/i10n/translator.ex:27
+#: lib/i10n/translator.ex:255 lib/i10n/translator.ex:268
 msgid "May"
 msgstr "мая"
 
-#: lib/i10n/translator.ex:39
+#: lib/i10n/translator.ex:261
 msgid "Nov"
 msgstr "нояб."
 
-#: lib/i10n/translator.ex:38
+#: lib/i10n/translator.ex:274
 msgid "November"
 msgstr "ноября"
 
-#: lib/i10n/translator.ex:37
+#: lib/i10n/translator.ex:260
 msgid "Oct"
 msgstr "окт."
 
-#: lib/i10n/translator.ex:36
+#: lib/i10n/translator.ex:273
 msgid "October"
 msgstr "октября"
 
-#: lib/i10n/translator.ex:35
+#: lib/i10n/translator.ex:259
 msgid "Sep"
 msgstr "сент."
 
-#: lib/i10n/translator.ex:34
+#: lib/i10n/translator.ex:272
 msgid "September"
 msgstr "сентября"

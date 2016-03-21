@@ -5,18 +5,18 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 2.1.2
 
-This release adds the base for locale-awareness in Timex, including one locale ("ru_RU"), support for formatting datetimes
+This release adds the base for locale-awareness in Timex, including one locale ("ru"), support for formatting datetimes
 in another locale, and functions which return names of things will now use the default locale. To configure Timex's default
 locale, put the following in config.exs:
 
 ```elixir
-config :timex, default_locale: "ru_RU" # or whatever locale you want
+config :timex, default_locale: "ru" # or whatever locale you want
 ```
 
 ### Added
 - The ability to configure a default locale (the default is "en" if no config is provided) for formatting/translation of strings
 - The ability to format a string using a given locale, otherwise the default locale is used
-- Translations for the "ru_RU" locale, more to come
+- Translations for the "ru" locale, more to come
 - Locale awareness throughout the core API, so functions such as `day_name` will return the day name in the configured locale,
   if translations for that locale were provided
 - `Timex.lformat`, and `Timex.lformat!` variants of the formatting functions, which take a locale to use in formatting

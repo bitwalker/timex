@@ -11,58 +11,58 @@ msgid ""
 msgstr ""
 "Language: INSERT LANGUAGE HERE\n"
 
-#: lib/i10n/translator.ex:13
+#: lib/i10n/translator.ex:239
 msgid "Fri"
 msgstr ""
 
-#: lib/i10n/translator.ex:12
+#: lib/i10n/translator.ex:247
 msgid "Friday"
 msgstr ""
 
-#: lib/i10n/translator.ex:5
+#: lib/i10n/translator.ex:235
 msgid "Mon"
 msgstr ""
 
-#: lib/i10n/translator.ex:4
+#: lib/i10n/translator.ex:243
 msgid "Monday"
 msgstr ""
 
-#: lib/i10n/translator.ex:15
+#: lib/i10n/translator.ex:240
 msgid "Sat"
 msgstr ""
 
-#: lib/i10n/translator.ex:14
+#: lib/i10n/translator.ex:248
 msgid "Saturday"
 msgstr ""
 
-#: lib/i10n/translator.ex:17
+#: lib/i10n/translator.ex:241
 msgid "Sun"
 msgstr ""
 
-#: lib/i10n/translator.ex:16
+#: lib/i10n/translator.ex:249
 msgid "Sunday"
 msgstr ""
 
-#: lib/i10n/translator.ex:11
+#: lib/i10n/translator.ex:238
 msgid "Thu"
 msgstr ""
 
-#: lib/i10n/translator.ex:10
+#: lib/i10n/translator.ex:246
 msgid "Thursday"
 msgstr ""
 
-#: lib/i10n/translator.ex:7
+#: lib/i10n/translator.ex:236
 msgid "Tue"
 msgstr ""
 
-#: lib/i10n/translator.ex:6
+#: lib/i10n/translator.ex:244
 msgid "Tuesday"
 msgstr ""
 
-#: lib/i10n/translator.ex:9
+#: lib/i10n/translator.ex:237
 msgid "Wed"
 msgstr ""
 
-#: lib/i10n/translator.ex:8
+#: lib/i10n/translator.ex:245
 msgid "Wednesday"
 msgstr ""

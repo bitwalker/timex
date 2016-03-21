@@ -1,103 +1,112 @@
-## `msgid`s in this file come from POT (.pot) files.
-##
-## Do not add, change, or remove `msgid`s manually here as
-## they're tied to the ones in the corresponding POT file
-## (with the same domain).
-##
-## Use `mix gettext.extract --merge` or `mix gettext.merge`
-## to merge POT files into PO files.
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
 msgid ""
 msgstr ""
 "Language: en\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
 
-#: lib/i10n/translator.ex:26
+#: lib/i10n/translator.ex:254
 msgid "Apr"
-msgstr ""
+msgstr "Apr"
 
-#: lib/i10n/translator.ex:25
+#: lib/i10n/translator.ex:267
 msgid "April"
-msgstr ""
+msgstr "April"
 
-#: lib/i10n/translator.ex:33
+#: lib/i10n/translator.ex:258
 msgid "Aug"
-msgstr ""
+msgstr "Aug"
 
-#: lib/i10n/translator.ex:32
+#: lib/i10n/translator.ex:271
 msgid "August"
-msgstr ""
+msgstr "August"
 
-#: lib/i10n/translator.ex:41
+#: lib/i10n/translator.ex:262
 msgid "Dec"
-msgstr ""
+msgstr "Dec"
 
-#: lib/i10n/translator.ex:40
+#: lib/i10n/translator.ex:275
 msgid "December"
-msgstr ""
+msgstr "December"
 
-#: lib/i10n/translator.ex:22
+#: lib/i10n/translator.ex:252
 msgid "Feb"
-msgstr ""
+msgstr "Feb"
 
-#: lib/i10n/translator.ex:21
+#: lib/i10n/translator.ex:265
 msgid "February"
-msgstr ""
+msgstr "February"
 
-#: lib/i10n/translator.ex:20
+#: lib/i10n/translator.ex:251
 msgid "Jan"
-msgstr ""
+msgstr "Jan"
 
-#: lib/i10n/translator.ex:19
+#: lib/i10n/translator.ex:264
 msgid "January"
-msgstr ""
+msgstr "January"
 
-#: lib/i10n/translator.ex:31
+#: lib/i10n/translator.ex:257
 msgid "Jul"
-msgstr ""
+msgstr "Jul"
 
-#: lib/i10n/translator.ex:30
+#: lib/i10n/translator.ex:270
 msgid "July"
-msgstr ""
+msgstr "July"
 
-#: lib/i10n/translator.ex:29
+#: lib/i10n/translator.ex:256
 msgid "Jun"
-msgstr ""
+msgstr "Jun"
 
-#: lib/i10n/translator.ex:28
+#: lib/i10n/translator.ex:269
 msgid "June"
-msgstr ""
+msgstr "June"
 
-#: lib/i10n/translator.ex:24
+#: lib/i10n/translator.ex:253
 msgid "Mar"
-msgstr ""
+msgstr "Mar"
 
-#: lib/i10n/translator.ex:23
+#: lib/i10n/translator.ex:266
 msgid "March"
-msgstr ""
+msgstr "March"
 
-#: lib/i10n/translator.ex:27
+#: lib/i10n/translator.ex:255 lib/i10n/translator.ex:268
 msgid "May"
-msgstr ""
+msgstr "May"
 
-#: lib/i10n/translator.ex:39
+#: lib/i10n/translator.ex:261
 msgid "Nov"
-msgstr ""
+msgstr "Nov"
 
-#: lib/i10n/translator.ex:38
+#: lib/i10n/translator.ex:274
 msgid "November"
-msgstr ""
+msgstr "November"
 
-#: lib/i10n/translator.ex:37
+#: lib/i10n/translator.ex:260
 msgid "Oct"
-msgstr ""
+msgstr "Oct"
 
-#: lib/i10n/translator.ex:36
+#: lib/i10n/translator.ex:273
 msgid "October"
-msgstr ""
+msgstr "October"
 
-#: lib/i10n/translator.ex:35
+#: lib/i10n/translator.ex:259
 msgid "Sep"
-msgstr ""
+msgstr "Sep"
 
-#: lib/i10n/translator.ex:34
+#: lib/i10n/translator.ex:272
 msgid "September"
-msgstr ""
+msgstr "September"

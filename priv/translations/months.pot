@@ -11,94 +11,94 @@ msgid ""
 msgstr ""
 "Language: INSERT LANGUAGE HERE\n"
 
-#: lib/i10n/translator.ex:26
+#: lib/i10n/translator.ex:254
 msgid "Apr"
 msgstr ""
 
-#: lib/i10n/translator.ex:25
+#: lib/i10n/translator.ex:267
 msgid "April"
 msgstr ""
 
-#: lib/i10n/translator.ex:33
+#: lib/i10n/translator.ex:258
 msgid "Aug"
 msgstr ""
 
-#: lib/i10n/translator.ex:32
+#: lib/i10n/translator.ex:271
 msgid "August"
 msgstr ""
 
-#: lib/i10n/translator.ex:41
+#: lib/i10n/translator.ex:262
 msgid "Dec"
 msgstr ""
 
-#: lib/i10n/translator.ex:40
+#: lib/i10n/translator.ex:275
 msgid "December"
 msgstr ""
 
-#: lib/i10n/translator.ex:22
+#: lib/i10n/translator.ex:252
 msgid "Feb"
 msgstr ""
 
-#: lib/i10n/translator.ex:21
+#: lib/i10n/translator.ex:265
 msgid "February"
 msgstr ""
 
-#: lib/i10n/translator.ex:20
+#: lib/i10n/translator.ex:251
 msgid "Jan"
 msgstr ""
 
-#: lib/i10n/translator.ex:19
+#: lib/i10n/translator.ex:264
 msgid "January"
 msgstr ""
 
-#: lib/i10n/translator.ex:31
+#: lib/i10n/translator.ex:257
 msgid "Jul"
 msgstr ""
 
-#: lib/i10n/translator.ex:30
+#: lib/i10n/translator.ex:270
 msgid "July"
 msgstr ""
 
-#: lib/i10n/translator.ex:29
+#: lib/i10n/translator.ex:256
 msgid "Jun"
 msgstr ""
 
-#: lib/i10n/translator.ex:28
+#: lib/i10n/translator.ex:269
 msgid "June"
 msgstr ""
 
-#: lib/i10n/translator.ex:24
+#: lib/i10n/translator.ex:253
 msgid "Mar"
 msgstr ""
 
-#: lib/i10n/translator.ex:23
+#: lib/i10n/translator.ex:266
 msgid "March"
 msgstr ""
 
-#: lib/i10n/translator.ex:27
+#: lib/i10n/translator.ex:255 lib/i10n/translator.ex:268
 msgid "May"
 msgstr ""
 
-#: lib/i10n/translator.ex:39
+#: lib/i10n/translator.ex:261
 msgid "Nov"
 msgstr ""
 
-#: lib/i10n/translator.ex:38
+#: lib/i10n/translator.ex:274
 msgid "November"
 msgstr ""
 
-#: lib/i10n/translator.ex:37
+#: lib/i10n/translator.ex:260
 msgid "Oct"
 msgstr ""
 
-#: lib/i10n/translator.ex:36
+#: lib/i10n/translator.ex:273
 msgid "October"
 msgstr ""
 
-#: lib/i10n/translator.ex:35
+#: lib/i10n/translator.ex:259
 msgid "Sep"
 msgstr ""
 
-#: lib/i10n/translator.ex:34
+#: lib/i10n/translator.ex:272
 msgid "September"
 msgstr ""

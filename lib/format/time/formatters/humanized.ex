@@ -33,38 +33,31 @@ defmodule Timex.Format.Time.Formatters.Humanized do
   Return a human readable string representing the time interval, translated to the given locale
 
   ## Examples
-      iex> {1435, 180354, 590264} |> #{__MODULE__}.lformat("ru_RU")
-      "45 года  6 месяца  5 днем  21 часа  12 минуты  34 секунды  590.264 миллисекунды"
-      iex> {0, 65, 0} |> #{__MODULE__}.lformat("ru_RU")
+      iex> {1435, 180354, 590264} |> #{__MODULE__}.lformat("ru")
+      "45 года  6 месяца  5 днем  21 час  12 минуты  34 секунды  590.264 миллисекунды"
+      iex> {0, 65, 0} |> #{__MODULE__}.lformat("ru")
       "1 минута  5 секунды"
 
   """
   @spec lformat(Types.timestamp, String.t) :: String.t | {:error, term}
   def lformat({_,_,_} = timestamp, locale) do
-    units = Translator.get_units(locale)
-    symbols = Translator.get_symbols(locale)
-
     timestamp
     |> deconstruct
-    |> do_format(units, symbols)
+    |> do_format(locale)
   end
   def lformat(_, _locale), do: {:error, :invalid_timestamp}
 
-  defp do_format(components, units, symbols),
-    do: do_format(components, <<>>, units, symbols)
-  defp do_format([], str, _units, _symbols),
+  defp do_format(components, locale),
+    do: do_format(components, <<>>, locale)
+  defp do_format([], str, _locale),
     do: str
-  defp do_format([{unit, value}|rest], str, units, symbols) do
+  defp do_format([{unit, value}|rest], str, locale) do
     unit = Atom.to_string(unit)
-    unit = cond do
-      value > 1 -> :"#{unit}s"
-      :else     -> :"#{unit}"
-    end
-    unit_name = Map.get(units, unit)
-    separator = Map.get(symbols, :group)
+    unit_with_value = Translator.translate_plural(locale, "units", "%{count} #{unit}", "%{count} #{unit}s", value)
+    separator = Translator.translate(locale, "symbols", ",")
     case str do
-      <<>> -> do_format(rest, "#{value} #{unit_name}", units, symbols)
-      _    -> do_format(rest, str <> "#{separator} #{value} #{unit_name}", units, symbols)
+      <<>> -> do_format(rest, "#{unit_with_value}", locale)
+      _    -> do_format(rest, str <> "#{separator} #{unit_with_value}", locale)
     end
   end
 
