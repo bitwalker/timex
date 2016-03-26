@@ -382,8 +382,8 @@ defmodule Timex do
       true
 
   """
-  @spec parse(String.t, String.t) :: {:ok, String.t} | {:error, term}
-  @spec parse(String.t, String.t, atom) :: {:ok, String.t} | {:error, term}
+  @spec parse(String.t, String.t) :: {:ok, Timex.DateTime.t} | {:error, term}
+  @spec parse(String.t, String.t, atom) :: {:ok, Timex.DateTime.t} | {:error, term}
   defdelegate parse(datetime_string, format_string), to: Timex.Parse.DateTime.Parser
   defdelegate parse(datetime_string, format_string, tokenizer), to: Timex.Parse.DateTime.Parser
 
@@ -392,8 +392,8 @@ defmodule Timex do
 
   See parse/2 or parse/3 docs for usage examples.
   """
-  @spec parse!(String.t, String.t) :: String.t | no_return
-  @spec parse!(String.t, String.t, atom) :: String.t | no_return
+  @spec parse!(String.t, String.t) :: Timex.DateTime.t | no_return
+  @spec parse!(String.t, String.t, atom) :: Timex.DateTime.t | no_return
   defdelegate parse!(datetime_string, format_string), to: Timex.Parse.DateTime.Parser
   defdelegate parse!(datetime_string, format_string, tokenizer), to: Timex.Parse.DateTime.Parser
 
