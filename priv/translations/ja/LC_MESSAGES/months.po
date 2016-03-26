@@ -1,0 +1,114 @@
+# # This file is a PO Template file.
+# #
+# # `msgid`s here are often extracted from source code.
+# # Add new translations manually only if they're dynamic
+# # translations that can't be statically extracted.
+# #
+# # Run `mix gettext.extract` to bring this file up to
+# # date. Leave `msgstr`s empty as changing them here as no
+# # effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: ja\n"
+
+#: lib/i10n/translator.ex:254
+msgid "Apr"
+msgstr "4月"
+
+#: lib/i10n/translator.ex:267
+msgid "April"
+msgstr "4月"
+
+#: lib/i10n/translator.ex:258
+msgid "Aug"
+msgstr "8月"
+
+#: lib/i10n/translator.ex:271
+msgid "August"
+msgstr "8月"
+
+#: lib/i10n/translator.ex:262
+msgid "Dec"
+msgstr "12月"
+
+#: lib/i10n/translator.ex:275
+msgid "December"
+msgstr "12月"
+
+#: lib/i10n/translator.ex:252
+msgid "Feb"
+msgstr "2月"
+
+#: lib/i10n/translator.ex:265
+msgid "February"
+msgstr "2月"
+
+#: lib/i10n/translator.ex:251
+msgid "Jan"
+msgstr "1月"
+
+#: lib/i10n/translator.ex:264
+msgid "January"
+msgstr "1月"
+
+#: lib/i10n/translator.ex:257
+msgid "Jul"
+msgstr "7月"
+
+#: lib/i10n/translator.ex:270
+msgid "July"
+msgstr "7月"
+
+#: lib/i10n/translator.ex:256
+msgid "Jun"
+msgstr "6月"
+
+#: lib/i10n/translator.ex:269
+msgid "June"
+msgstr "6月"
+
+#: lib/i10n/translator.ex:253
+msgid "Mar"
+msgstr "3月"
+
+#: lib/i10n/translator.ex:266
+msgid "March"
+msgstr "3月"
+
+#: lib/i10n/translator.ex:255 lib/i10n/translator.ex:268
+msgid "May"
+msgstr "5月"
+
+#: lib/i10n/translator.ex:261
+msgid "Nov"
+msgstr "11月"
+
+#: lib/i10n/translator.ex:274
+msgid "November"
+msgstr "11月"
+
+#: lib/i10n/translator.ex:260
+msgid "Oct"
+msgstr "10月"
+
+#: lib/i10n/translator.ex:273
+msgid "October"
+msgstr "10月"
+
+#: lib/i10n/translator.ex:259
+msgid "Sep"
+msgstr "9月"
+
+#: lib/i10n/translator.ex:272
+msgid "September"
+msgstr "9月"

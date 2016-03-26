@@ -1,0 +1,223 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+
+#: lib/i10n/translator.ex:284
+msgid "last month"
+msgstr "先月"
+
+#: lib/i10n/translator.ex:290
+msgid "last week"
+msgstr "先週"
+
+#: lib/i10n/translator.ex:278
+msgid "last year"
+msgstr "去年"
+
+#: lib/i10n/translator.ex:286
+msgid "next month"
+msgstr "来月"
+
+#: lib/i10n/translator.ex:292
+msgid "next week"
+msgstr "来週"
+
+#: lib/i10n/translator.ex:280
+msgid "next year"
+msgstr "来年"
+
+#: lib/i10n/translator.ex:285
+msgid "this month"
+msgstr "今月"
+
+#: lib/i10n/translator.ex:291
+msgid "this week"
+msgstr "今週"
+
+#: lib/i10n/translator.ex:279
+msgid "this year"
+msgstr "今年"
+
+#: lib/i10n/translator.ex:297
+msgid "today"
+msgstr "今日"
+
+#: lib/i10n/translator.ex:298
+msgid "tomorrow"
+msgstr "明日"
+
+#: lib/i10n/translator.ex:296
+msgid "yesterday"
+msgstr "昨日"
+
+#: lib/i10n/translator.ex:300
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "%{count}日前"
+
+#: lib/i10n/translator.ex:325
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "%{count}時間前"
+
+#: lib/i10n/translator.ex:328
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "%{count}分前"
+
+#: lib/i10n/translator.ex:288
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "%{count}ヶ月前"
+
+#: lib/i10n/translator.ex:331
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "%{count}秒前"
+
+#: lib/i10n/translator.ex:294
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "%{count}週間前"
+
+#: lib/i10n/translator.ex:282
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "%{count}年前"
+
+#: lib/i10n/translator.ex:299
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "%{count}日後"
+
+#: lib/i10n/translator.ex:324
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "%{count}時間後"
+
+#: lib/i10n/translator.ex:327
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "%{count}分後"
+
+#: lib/i10n/translator.ex:287
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "%{count}ヶ月後"
+
+#: lib/i10n/translator.ex:330
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "%{count}秒後"
+
+#: lib/i10n/translator.ex:293
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "%{count}週間後"
+
+#: lib/i10n/translator.ex:281
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "%{count}年後"
+
+#: lib/i10n/translator.ex:314
+msgid "last friday"
+msgstr "先週の金曜日"
+
+#: lib/i10n/translator.ex:302
+msgid "last monday"
+msgstr "先週の月曜日"
+
+#: lib/i10n/translator.ex:317
+msgid "last saturday"
+msgstr "先週の土曜日"
+
+#: lib/i10n/translator.ex:320
+msgid "last sunday"
+msgstr "先週の日曜日"
+
+#: lib/i10n/translator.ex:311
+msgid "last thursday"
+msgstr "先週の木曜日"
+
+#: lib/i10n/translator.ex:305
+msgid "last tuesday"
+msgstr "先週の火曜日"
+
+#: lib/i10n/translator.ex:308
+msgid "last wednesday"
+msgstr "先週の水曜日"
+
+#: lib/i10n/translator.ex:316
+msgid "next friday"
+msgstr "来週の金曜日"
+
+#: lib/i10n/translator.ex:304
+msgid "next monday"
+msgstr "来週の月曜日"
+
+#: lib/i10n/translator.ex:319
+msgid "next saturday"
+msgstr "来週の土曜日"
+
+#: lib/i10n/translator.ex:322
+msgid "next sunday"
+msgstr "来週の日曜日"
+
+#: lib/i10n/translator.ex:313
+msgid "next thursday"
+msgstr "来週の木曜日"
+
+#: lib/i10n/translator.ex:307
+msgid "next tuesday"
+msgstr "来週の火曜日"
+
+#: lib/i10n/translator.ex:310
+msgid "next wednesday"
+msgstr "来週の水曜日"
+
+#: lib/i10n/translator.ex:315
+msgid "this friday"
+msgstr "今週の金曜日"
+
+#: lib/i10n/translator.ex:303
+msgid "this monday"
+msgstr "今週の月曜日"
+
+#: lib/i10n/translator.ex:318
+msgid "this saturday"
+msgstr "今週の土曜日"
+
+#: lib/i10n/translator.ex:321
+msgid "this sunday"
+msgstr "今週の日曜日"
+
+#: lib/i10n/translator.ex:312
+msgid "this thursday"
+msgstr "今週の木曜日"
+
+#: lib/i10n/translator.ex:306
+msgid "this tuesday"
+msgstr "今週の火曜日"
+
+#: lib/i10n/translator.ex:309
+msgid "this wednesday"
+msgstr "今週の水曜日"
