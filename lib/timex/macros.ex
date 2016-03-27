@@ -118,11 +118,21 @@ defmodule Timex.Macros do
   end
 
   @doc """
+  A guard macro which asserts that the given value is a float in between the values min and max,
+  where max is not included in the range (this is to account for fractions which can be arbitrarily precise)
+  """
+  defmacro is_float_in_range(n, min, max) do
+    quote do
+      (is_float(unquote(n)) and unquote(n) >= unquote(min) and unquote(n) < unquote(max))
+    end
+  end
+
+  @doc """
   A guard macro which asserts that the given value is an integer in the range of 0-999
   """
   defmacro is_millisecond(ms) do
     quote do
-      is_integer_in_range(unquote(ms), 0, 999)
+      (is_integer_in_range(unquote(ms), 0, 999) or is_float_in_range(unquote(ms), 0, 1000))
     end
   end
 
