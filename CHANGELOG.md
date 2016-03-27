@@ -28,8 +28,11 @@ config :timex, default_locale: "ru" # or whatever locale you want
   - A single Convertable, which returns the relative time between that date/time value and now
   - Two Convertables, which returns the relative time between the first date/time value, and the reference date (provided as the 2nd)
   - Two variants of the above which also take a locale as the last argument, and results in the string being translated to that locale
+- Added ASN.1 parsing/formatting support
 ### Changed
 - All functions which return strings, and all formatting functions, will use the default locale for translation, which is "en" unless another was configured, or one was provided if the function takes a locale as an argument.
+### Fixed
+- Milliseconds should be able to be fractional - the is_millisecond guard was only allowing integers
 
 ## 2.1.1
 
