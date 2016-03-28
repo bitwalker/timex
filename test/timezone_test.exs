@@ -121,4 +121,10 @@ defmodule TimezoneTests do
     datetime4 = {{2015,10,25},{1,12,34}}
     assert %AmbiguousDateTime{} = Timex.datetime(datetime4, "UTC") |> Timezone.convert("Europe/Zurich")
   end
+
+  test "another issue related to #142" do
+    datetime = {{2016,10,30}, {3,59,0}}
+
+    assert 63645015540 = DateTime.to_seconds(Timex.datetime(datetime, "Europe/Vienna"), :zero, [utc: true])
+  end
 end
