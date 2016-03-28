@@ -550,8 +550,8 @@ defmodule Timex.Format.DateTime.Formatter do
       padding when padding in [:spaces, :none] ->
         {:error, {:formatter, "Invalid directive flag: Timezone offsets require 0-padding to remain unambiguous."}}
       _ ->
-        offset_hours = div(tz.offset_std + tz.offset_utc, 60)
-        offset_mins  = rem(tz.offset_std + tz.offset_utc, 60)
+        offset_hours = div(Timezone.total_offset(tz), 60)
+        offset_mins  = rem(Timezone.total_offset(tz), 60)
         hour  = "#{pad_numeric(offset_hours, [padding: :zeroes], width_spec(2..2))}"
         min   = "#{pad_numeric(offset_mins, [padding: :zeroes], width_spec(2..2))}"
         cond do

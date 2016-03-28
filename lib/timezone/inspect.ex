@@ -4,13 +4,14 @@ defimpl Inspect, for: Timex.TimezoneInfo do
     Inspect.Algebra.to_doc(date, opts)
   end
   def inspect(tzinfo, _) do
-    offset = format_offset(tzinfo.offset_std, tzinfo.offset_utc)
+    total_offset = Timex.Timezone.total_offset(tzinfo)
+    offset = format_offset(total_offset)
     "#<Timezone(#{tzinfo.full_name} - #{tzinfo.abbreviation} (#{offset}))>"
   end
 
-  defp format_offset(offset_std, offset_utc) do
-    offset_hours = div(offset_std + offset_utc, 60)
-    offset_mins  = rem(offset_std + offset_utc, 60)
+  defp format_offset(total_offset) do
+    offset_hours = div(total_offset, 60)
+    offset_mins  = rem(total_offset, 60)
     hour  = "#{pad_numeric(offset_hours)}"
     min   = "#{pad_numeric(offset_mins)}"
     cond do

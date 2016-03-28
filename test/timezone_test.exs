@@ -98,4 +98,27 @@ defmodule TimezoneTests do
     assert ^cst_date = Timex.datetime({{2014,3,8}, {23,59,59}}, "America/Chicago")
     assert ^utc_date = cst_date |> Timezone.convert("UTC")
   end
+
+  test "issue #142 - invalid results produced when converting across DST in Europe/Zurich" do
+    # Hour of 2am is repeated twice for this change
+    datetime1 = {{2015,10,25}, {3,12,34}}
+
+    assert {{2015,10,25}, {2,12,34}} = Timex.datetime(datetime1, "Europe/Zurich") |> Timezone.convert("UTC") |> Timex.to_erlang_datetime
+
+    # Causes infinite loop
+    datetime2 = {{2015,10,25},{2,12,34}}
+    assert {{2015,10,25}, {3,12,34}} = Timex.datetime(datetime2, "UTC") |> Timezone.convert("Europe/Zurich") |> Timex.to_erlang_datetime
+
+    # Is not technically ambiguous, but we make it so because in general
+    # the date time represented here *is* ambiguous, i.e. 2AM is a repeat hour,
+    # but we have extra context when converting from UTC to disambiguate
+    datetime3 = {{2015,10,25},{0,12,34}}
+    #assert {{2015,10,25},{2,12,34}} = Timex.datetime(datetime3, "UTC") |> Timezone.convert("Europe/Zurich") |> Timex.to_erlang_datetime
+    assert %AmbiguousDateTime{} = Timex.datetime(datetime3, "UTC") |> Timezone.convert("Europe/Zurich")
+
+    # Should not error out about missing key
+    # Should be ambiguous, because 1AM in UTC is during the second 2AM hour of Europe/Zurich
+    datetime4 = {{2015,10,25},{1,12,34}}
+    assert %AmbiguousDateTime{} = Timex.datetime(datetime4, "UTC") |> Timezone.convert("Europe/Zurich")
+  end
 end
