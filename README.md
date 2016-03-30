@@ -1,4 +1,4 @@
-## Timex
+#accessed# Timex
 
 [![Master](https://travis-ci.org/bitwalker/timex.svg?branch=master)](https://travis-ci.org/bitwalker/timex)
 [![Hex.pm Version](http://img.shields.io/hexpm/v/timex.svg?style=flat)](https://hex.pm/packages/timex)
@@ -23,7 +23,7 @@ richer documentation on specific subjects such as custom formatters/parsers, etc
 
 ### Adding Timex To Your Project
 
-To use Timex with your projects, edit your `mix.exs` file and add it as a dependency:
+To use Timex with your projects, edit your `mix.exs` file and add it as a dependency. Add `:tzdata` to your applications list as well:
 
 ```elixir
 defp deps do
@@ -31,7 +31,7 @@ defp deps do
 end
 
 defp application do
-  [applications: [:timex]]
+  [applications: [:timex, :tzdata]]
 end
 ```
 
