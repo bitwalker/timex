@@ -764,24 +764,25 @@ defmodule Timex.DateTime do
         resolved
     end
   end
-  defp shift_by(%DateTime{:year => y, :millisecond => ms} = datetime, value, :years) do
+  defp shift_by(%DateTime{:year => y} = datetime, value, :years) do
     shifted = %{datetime | :year => y + value}
     # If a plain shift of the year fails, then it likely falls on a leap day,
-    # so add one day in seconds to the original date, and shift that instead
-    # if that still fails, an error tuple will be returned
+    # so set the day to the last day of that month
     case :calendar.valid_date({shifted.year,shifted.month,shifted.day}) do
       false ->
-        plus_one_day = :calendar.datetime_to_gregorian_seconds({
-          {datetime.year,datetime.month,datetime.day},
-          {datetime.hour,datetime.minute,datetime.second}
-        }) + (60 * 60 * 24)
-        {{y,m,d},{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(plus_one_day)
-        resolve_timezone_info(from_erl({{y+value,m,d}, {h,mm,s,ms}}, datetime.timezone))
+        last_day = :calendar.last_day_of_the_month(shifted.year, shifted.month)
+        shifted = cond do
+          shifted.day <= last_day ->
+            shifted
+          :else ->
+            %{shifted | :day => last_day}
+        end
+        resolve_timezone_info(shifted)
       true ->
         resolve_timezone_info(shifted)
     end
   end
-  defp shift_by(%DateTime{:year => year, :month => month, :millisecond => ms} = datetime, value, :months) do
+  defp shift_by(%DateTime{:year => year, :month => month} = datetime, value, :months) do
     m = month + value
     shifted = cond do
       value == 12  -> %{datetime | :year => year + 1}
@@ -791,22 +792,19 @@ defmodule Timex.DateTime do
       m < 0  -> %{datetime | :year => year + div(m, 12), :month => 12 + rem(m, 12)}
       :else  -> %{datetime | :month => m}
     end
-    # Again, if the shift fails, it likely falls on a leap day,
-    # so add one day in seconds to the original date, and shift that instead
-    # if that still fails, an error tuple will be returned
+    # If the shift fails, it's because it's a high day number, and the month
+    # shifted to does not have that many days. This will be handled by always
+    # shifting to the last day of the month shifted to.
     case :calendar.valid_date({shifted.year,shifted.month,shifted.day}) do
       false ->
-        plus_one_day = :calendar.datetime_to_gregorian_seconds({
-          {datetime.year,datetime.month,datetime.day},
-          {datetime.hour,datetime.minute,datetime.second}
-        }) + (60 * 60 * 24)
-        {{y,m,d},{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(plus_one_day)
-        case m + value do
-          months when months > 12 ->
-            resolve_timezone_info(from_erl({{y + div(months, 12), rem(months, 12), d}, {h,mm,s,ms}}))
-          months ->
-            resolve_timezone_info(from_erl({{y,months,d}, {h,mm,s,ms}}))
+        last_day = :calendar.last_day_of_the_month(shifted.year, shifted.month)
+        shifted = cond do
+          shifted.day <= last_day ->
+            shifted
+          :else ->
+            %{shifted | :day => last_day}
         end
+        resolve_timezone_info(shifted)
       true ->
         resolve_timezone_info(shifted)
     end

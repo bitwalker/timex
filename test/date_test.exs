@@ -345,8 +345,8 @@ defmodule DateTests do
     assert %Date{year: 2012, month: 3, day: 5} = shift(datetime, months: -12)
 
     datetime = { {2013,3,31}, time }
-    assert %Date{year: 2013, month: 5, day: 1} = shift(datetime, months: 1)
-    assert %Date{year: 2013, month: 3, day: 1} = shift(datetime, months: -1)
+    assert %Date{year: 2013, month: 4, day: 30} = shift(datetime, months: 1)
+    assert %Date{year: 2013, month: 2, day: 28} = shift(datetime, months: -1)
   end
 
   test "shift by years" do
@@ -361,9 +361,9 @@ defmodule DateTests do
     assert %Date{year: 2011, month: 3, day: 5} = shift(datetime, years: -2)
 
     datetime = { {2012,2,29}, time }
-    assert %Date{year: 2013, month: 3, day: 1} = shift(datetime, years: 1)
+    assert %Date{year: 2013, month: 2, day: 28} = shift(datetime, years: 1)
     assert %Date{year: 2016, month: 2, day: 29} = shift(datetime, years: 4)
-    assert %Date{year: 2011, month: 3, day: 1} = shift(datetime, years: -1)
+    assert %Date{year: 2011, month: 2, day: 28} = shift(datetime, years: -1)
     assert %Date{year: 2008, month: 2, day: 29} = shift(datetime, years: -4)
   end
 
@@ -374,9 +374,9 @@ defmodule DateTests do
     assert %Date{year: 2013, month: 3, day: 18} = shift(datetime, seconds: 13, days: -1, weeks: 2)
 
     datetime = { {2012,2,29}, {23,23,23} }
-    assert %Date{year: 2013, month: 3, day: 1} = shift(datetime, months: 12)
+    assert %Date{year: 2013, month: 2, day: 28} = shift(datetime, months: 12)
 
-    assert %Date{year: 2002, month: 3, day: 2} = shift(datetime, years: -10, days: 1)
+    assert %Date{year: 2002, month: 3, day: 1} = shift(datetime, years: -10, days: 1)
     assert %Date{year: 2012, month: 2, day: 29} = shift(datetime, minutes: 36, seconds: 36)
     assert %Date{year: 2012, month: 2, day: 29} = shift(datetime, minutes: 36, seconds: 37)
   end

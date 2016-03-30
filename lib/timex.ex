@@ -933,7 +933,7 @@ defmodule Timex do
       iex> use Timex
       ...> %DateTime{} = datetime = Timex.datetime({2016,2,29})
       ...> Timex.shift(datetime, years: -1)
-      Timex.datetime({2015, 3, 1})
+      Timex.datetime({2015, 2, 28})
 
   """
   @spec shift(Date.t | DateTime.t, list({Types.shift_units, term})) :: DateTime.t | {:error, term}
