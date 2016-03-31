@@ -241,6 +241,11 @@ defmodule TimexTests do
     assert Timex.diff(date2, date1, :months) === 25
   end
 
+  test "timestamp diff same datetime" do
+      dt = Timex.datetime({1984, 5, 10})
+      assert Timex.diff(dt, dt, :timestamp) === Time.zero
+  end
+
   test "beginning_of_year" do
     year_start = Timex.datetime({{2015, 1, 1},  {0, 0, 0}})
     assert Timex.beginning_of_year(2015) == Timex.to_date(year_start)

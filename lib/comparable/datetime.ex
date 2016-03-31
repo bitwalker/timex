@@ -80,7 +80,7 @@ defimpl Timex.Comparable, for: Timex.DateTime do
       {{:ok, this_secs}, {:ok, other_secs}} ->
         diff_secs = this_secs - other_secs
         cond do
-          diff_secs == 0 -> 0
+          diff_secs == 0 -> zero(type)
           diff_secs > 0  -> do_diff(this, this_secs, other, other_secs, type)
           diff_secs < 0  -> do_diff(other, other_secs, this, this_secs, type)
         end
@@ -97,7 +97,7 @@ defimpl Timex.Comparable, for: Timex.DateTime do
         {:error, {:ambiguous_comparison, ambiguous}}
     end
   end
-  defp do_diff(_, a, _, a, _), do: 0
+  defp do_diff(_, a, _, a, type), do: zero(type)
   defp do_diff(_adate, a, _bdate, b, :timestamp) do
     seconds = a - b
     case ok!(Time.from(seconds, :seconds)) do
@@ -160,5 +160,6 @@ defimpl Timex.Comparable, for: Timex.DateTime do
   end
   defp do_diff(_, _, _, _, unit) when not unit in @units,
     do: {:error, {:invalid_granularity, unit}}
-
+  defp zero(:timestamp), do: Time.zero
+  defp zero(_type), do: 0
 end
