@@ -359,7 +359,7 @@ defmodule Timex.Parse.DateTime.Parsers do
     parts = [
       weekday_short(opts),
       literal(string(", ")),
-      day_of_month([padding: :zeroes, min: 2, max: 2]),
+      day_of_month([padding: :zeroes, min: 1, max: 2]),
       literal(space),
       month_short(opts),
       literal(space),
@@ -405,7 +405,7 @@ defmodule Timex.Parse.DateTime.Parsers do
     parts = [
       weekday_short(opts),
       literal(string(", ")),
-      day_of_month([padding: :zeroes, min: 2, max: 2]),
+      day_of_month([padding: :zeroes, min: 1, max: 2]),
       literal(space),
       month_short(opts),
       literal(space),
