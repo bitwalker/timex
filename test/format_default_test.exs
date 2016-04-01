@@ -345,6 +345,35 @@ defmodule DateFormatTest.FormatDefault do
     assert { :ok, "130305232519Z" } = format(date, "{ASN1:UTCtime}")
   end
 
+  test "format ASN1 Generalized Time" do
+    local = {{2013,3,5},{23,25,19}}
+    date = Timex.datetime(local, :local)
+
+    assert { :ok, "20130305232519" } = format(date, "{ASN1:GeneralizedTime}")
+
+    date = Timex.datetime(local)
+
+    assert { :ok, "20130305232519" } = format(date, "{ASN1:GeneralizedTime}")
+  end
+
+  test "format ASN1 Generalized Time Z" do
+    local = {{2013,3,5},{23,25,19}}
+    date = Timex.datetime(local, :utc)
+
+    assert { :ok, "20130305232519Z" } = format(date, "{ASN1:GeneralizedTime:Z}")
+
+    date = Timex.datetime(local)
+
+    assert { :ok, "20130305232519Z" } = format(date, "{ASN1:GeneralizedTime:Z}")
+  end
+
+  test "format ASN1 Generalized Time TZ" do
+    local = {{2013,3,5},{23,25,19}}
+    date = Timex.datetime(local, "-0500")
+
+    assert { :ok, "20130305232519-0500" } = format(date, "{ASN1:GeneralizedTime:TZ}")
+  end
+
   test "format UNIX" do
     local = {{2013,3,5},{23,25,19}}
     date = Timex.datetime(local, :utc)
