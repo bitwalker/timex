@@ -175,21 +175,27 @@ defmodule DateFormatTest.ParseDefault do
     # * `{RFC1123}`     - e.g. `Tue, 05 Mar 2013 23:25:19 GMT`
     assert { :ok, ^date_gmt } = parse("Tue, 05 Mar 2013 23:25:19 GMT", "{RFC1123}")
     assert { :ok, ^date_est } = parse("Tue, 05 Mar 2013 23:25:19 EST", "{RFC1123}")
+    assert { :ok, ^date_gmt } = parse("Tue, 5 Mar 2013 23:25:19 GMT", "{RFC1123}")
+    assert { :ok, ^date_est } = parse("Tue, 5 Mar 2013 23:25:19 EST", "{RFC1123}")
 
     # * `{RFC1123z}`    - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
     assert { :ok, ^date_utc } = parse("Tue, 05 Mar 2013 23:25:19 Z", "{RFC1123z}")
+    assert { :ok, ^date_utc } = parse("Tue, 5 Mar 2013 23:25:19 Z", "{RFC1123z}")
     date_utc_at_one = Timex.datetime({{2013,3,6},{1,25,19}})
     assert { :ok, ^date_utc_at_one } = parse("Tue, 06 Mar 2013 01:25:19 Z", "{RFC1123z}")
+    assert { :ok, ^date_utc_at_one } = parse("Tue, 6 Mar 2013 01:25:19 Z", "{RFC1123z}")
   end
 
   test "parse RFC822" do
     # * `{RFC822}`      - e.g. `Mon, 05 Jun 14 23:20:59 UT`
     date = Timex.datetime({{2014, 6, 5}, {23, 20, 59}}, "Etc/GMT+12")
     assert { :ok, ^date } = parse("Mon, 05 Jun 14 23:20:59 Y", "{RFC822}")
+    assert { :ok, ^date } = parse("Mon, 5 Jun 14 23:20:59 Y", "{RFC822}")
 
     # * `{RFC822z}`     - e.g. `Mon, 05 Jun 14 23:20:59 Z`
     date = Timex.datetime({{2014, 6, 5}, {23, 20, 59}}, "UTC")
     assert { :ok, ^date } = parse("Mon, 05 Jun 14 23:20:59 Z", "{RFC822z}")
+    assert { :ok, ^date } = parse("Mon, 5 Jun 14 23:20:59 Z", "{RFC822z}")
   end
 
   test "parse RFC3339" do
