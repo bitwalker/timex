@@ -551,11 +551,11 @@ defmodule Timex.Format.DateTime.Formatter do
         {:error, {:formatter, "Invalid directive flag: Timezone offsets require 0-padding to remain unambiguous."}}
       _ ->
         offset_hours = div(Timezone.total_offset(tz), 60)
-        offset_mins  = rem(Timezone.total_offset(tz), 60)
+        offset_mins  = abs(rem(Timezone.total_offset(tz), 60))
         hour  = "#{pad_numeric(offset_hours, [padding: :zeroes], width_spec(2..2))}"
         min   = "#{pad_numeric(offset_mins, [padding: :zeroes], width_spec(2..2))}"
         cond do
-          (offset_hours + offset_mins) >= 0 -> "+#{hour}#{min}"
+          offset_hours >= 0 -> "+#{hour}#{min}"
           true -> "#{hour}#{min}"
         end
     end

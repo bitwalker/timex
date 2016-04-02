@@ -77,6 +77,19 @@ defmodule Timex.Timezone do
   def name_of("Y"),    do: name_of(-12)
   def name_of("Z"),    do: "UTC"
   def name_of("UT"),   do: "UTC"
+  def name_of("+0330"), do: "Asia/Tehran"
+  def name_of("+0430"), do: "Asia/Kabul"
+  def name_of("+0530"), do: "Asia/Colombo"
+  def name_of("+0545"), do: "Asia/Kathmandu"
+  def name_of("+0630"), do: "Asia/Rangoon"
+  def name_of("+0830"), do: "Asia/Pyongyang"
+  def name_of("+0845"), do: "Australia/Eucla"
+  def name_of("+0930"), do: "Australia/Darwin"
+  def name_of("+1245"), do: "Pacific/Chatham"
+  def name_of("+1345"), do: "Pacific/Chatham"
+  def name_of("-0430"), do: "America/Caracas"
+  def name_of("-0330"), do: "America/St_Johns"
+  def name_of("-0230"), do: "America/St_Johns"
   def name_of(offset) when is_integer(offset) do
     if offset > 0 do
       "Etc/GMT-#{offset}"
