@@ -15,8 +15,7 @@ defmodule Timex.Mixfile do
   end
 
   def application do
-    [applications: [:logger, :tzdata, :gettext],
-     included_applications: [:combine],
+    [applications: [:logger, :tzdata, :gettext, :combine],
      env: [local_timezone: nil, default_locale: "en"]]
   end
 
