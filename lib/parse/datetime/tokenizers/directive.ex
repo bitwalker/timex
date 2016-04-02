@@ -144,6 +144,12 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
     do: %Directive{type: :kitchen, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.kitchen(flags)}
   def get(:asn1_utc_time, directive, flags, mods, width),
     do: %Directive{type: :asn1_utc_time, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.asn1_utc_time(flags)}
+  def get(:asn1_generalized_time, directive, flags, mods, width),
+    do: %Directive{type: :asn1_generalized_time, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.asn1_generalized_time(flags)}
+  def get(:asn1_generalized_time_z, directive, flags, mods, width),
+    do: %Directive{type: :asn1_generalized_time_z, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.asn1_generalized_time([{:zulu, true}|flags])}
+  def get(:asn1_generalized_time_tz, directive, flags, mods, width),
+    do: %Directive{type: :asn1_generalized_time_tz, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.asn1_generalized_time([{:zoffs, true}|flags])}
   def get(:slashed, directive, flags, mods, width),
     do: %Directive{type: :slashed, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.slashed(flags)}
   def get(:strftime_iso_date, directive, flags, mods, width),

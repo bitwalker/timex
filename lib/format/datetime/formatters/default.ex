@@ -104,18 +104,28 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   * `{ASN1:UTCtime}`    - `YYMMDD<time>Z`. Full 2-digit year date and time in UTC without
                         separators (e.g. `070813134801Z`)
 
+  * `{ASN1:GeneralizedTime}` - `YYYYMMDD<time>`. Full 4-digit year date and time in local timezon without
+                        separators and with optional fractional seconds (e.g. `20070813134801.032`)
+  * `{ASN1:GeneralizedTime:Z}` - `YYYYMMDD<time>Z`. Full 4-digit year date and time in UTC without
+                        separators and with optional fractional seconds (e.g. `20070813134801.032Z`)
+  * `{ASN1:GeneralizedTime:TZ}` - `YYYYMMDD<time><offset>`. Full 4-digit year date and time in UTC without
+                        separators and with optional fractional seconds (e.g. `20070813134801.032-0500`)
+
   These directives provide support for miscellaneous common formats:
 
-  * `{RFC822}`           - e.g. `Mon, 05 Jun 14 23:20:59 UT`
-  * `{RFC822z}`          - e.g. `Mon, 05 Jun 14 23:20:59 Z`
-  * `{RFC1123}`          - e.g. `Tue, 05 Mar 2013 23:25:19 GMT`
-  * `{RFC1123z}`         - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
-  * `{RFC3339}`          - e.g. `2013-03-05T23:25:19+02:00`
-  * `{RFC3339z}`         - e.g. `2013-03-05T23:25:19Z`
-  * `{ANSIC}`            - e.g. `Tue Mar  5 23:25:19 2013`
-  * `{UNIX}`             - e.g. `Tue Mar  5 23:25:19 PST 2013`
-  * `{ASN1:UTCtime}`    - e.g. `130305232519Z`
-  * `{kitchen}`          - e.g. `3:25PM`
+  * `{RFC822}`                  - e.g. `Mon, 05 Jun 14 23:20:59 UT`
+  * `{RFC822z}`                 - e.g. `Mon, 05 Jun 14 23:20:59 Z`
+  * `{RFC1123}`                 - e.g. `Tue, 05 Mar 2013 23:25:19 GMT`
+  * `{RFC1123z}`                - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
+  * `{RFC3339}`                 - e.g. `2013-03-05T23:25:19+02:00`
+  * `{RFC3339z}`                - e.g. `2013-03-05T23:25:19Z`
+  * `{ANSIC}`                   - e.g. `Tue Mar  5 23:25:19 2013`
+  * `{UNIX}`                    - e.g. `Tue Mar  5 23:25:19 PST 2013`
+  * `{ASN1:UTCtime}`            - e.g. `130305232519Z`
+  * `{ASN1:GeneralizedTime}`    - e.g. `20130305232519.928`
+  * `{ASN1:GeneralizedTime:Z}`  - e.g. `20130305232519.928Z`
+  * `{ASN1:GeneralizedTime:TZ}` - e.g. `20130305232519.928-0500`
+  * `{kitchen}`                 - e.g. `3:25PM`
 
   """
   use Timex.Format.DateTime.Formatter

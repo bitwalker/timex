@@ -508,6 +508,49 @@ defmodule Timex.Parse.DateTime.Parsers do
     sequence(parts ++ [literal(char("Z"))])
   end
   @doc """
+  ASN.1 GeneralizedTime standard date/time format.
+  Example: `20130305232519`
+  asn1_generalized_time(zulu: true)
+  Example: `20130305232519Z`
+  asn1_generalized_time(zoffs: true)
+  Example: `20130305232519-0700`
+  """
+  def asn1_generalized_time(opts \\ []) do
+    is_zulu?  = get_in(opts, [:zulu])
+    is_zoffs? = get_in(opts, [:zoffs])
+    parts = [
+      sequence([
+        year4([padding: :zeroes, min: 4, max: 4]),
+        month2([padding: :zeroes, min: 2, max: 2]),
+        day_of_month([padding: :zeroes, min: 2, max: 2])
+      ]),
+      choice([
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+          minute([padding: :zeroes, min: 2, max: 2]),
+          second_fractional([padding: :zeroes]),
+        ]),
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+          minute([padding: :zeroes, min: 2, max: 2]),
+          second([padding: :zeroes, min: 2, max: 2]),
+        ]),
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+          minute([padding: :zeroes, min: 2, max: 2]),
+        ]),
+        sequence([
+          hour24([padding: :zeroes, min: 2, max: 2]),
+        ])
+      ])
+    ]
+    cond do
+      is_zulu?  == true -> sequence(parts ++ [literal(char("Z"))])
+      is_zoffs? == true -> sequence(parts ++ [zoffs(opts)])
+      true              -> sequence(parts)
+    end
+  end
+  @doc """
   Kitchen clock time format.
   Example: `3:25PM`
   """

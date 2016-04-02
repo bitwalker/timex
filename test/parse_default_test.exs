@@ -240,6 +240,66 @@ defmodule DateFormatTest.ParseDefault do
     assert { :ok, ^date } = parse("1511162223Z", "{ASN1:UTCtime}")
   end
 
+  test "parse ASN1:GeneralizedTime" do
+    # YYYYMMDDHH[MM[SS[.fff]]]
+    # * `{ASN1:GeneralizedTime}`       - e.g. `Tue Mar  5 23:25:19 2013`
+    timestamp = {1236, 295519, 456000}
+    {:ok, result} = parse("20090305232519.456", "{ASN1:GeneralizedTime}")
+    assert ^timestamp = Timex.to_timestamp(result)
+
+    date = Timex.datetime({{2009, 3, 5}, {23, 25, 19}})
+    assert { :ok, ^date } = parse("20090305232519.000", "{ASN1:GeneralizedTime}")
+
+    date = Timex.datetime({{2009, 3, 5}, {23, 25, 19}})
+    assert { :ok, ^date } = parse("20090305232519", "{ASN1:GeneralizedTime}")
+
+    date = Timex.datetime({{2015, 11, 16}, {22, 23, 00}})
+    assert { :ok, ^date } = parse("201511162223", "{ASN1:GeneralizedTime}")
+
+    date = Timex.datetime({{2015, 11, 16}, {22, 00, 00}})
+    assert { :ok, ^date } = parse("2015111622", "{ASN1:GeneralizedTime}")
+  end
+
+  test "parse ASN1:GeneralizedTime:Z" do
+    # YYYYMMDDHH[MM[SS[.fff]]]Z
+    # * `{ASN1:GeneralizedTime:Z}`       - e.g. `Tue Mar  5 23:25:19 2013`
+    timestamp = {1236, 295519, 456000}
+    {:ok, result} = parse("20090305232519.456Z", "{ASN1:GeneralizedTime:Z}")
+    assert ^timestamp = Timex.to_timestamp(result)
+
+    date = Timex.datetime({{2009, 3, 5}, {23, 25, 19}})
+    assert { :ok, ^date } = parse("20090305232519.000Z", "{ASN1:GeneralizedTime:Z}")
+
+    date = Timex.datetime({{2009, 3, 5}, {23, 25, 19}})
+    assert { :ok, ^date } = parse("20090305232519Z", "{ASN1:GeneralizedTime:Z}")
+
+    date = Timex.datetime({{2015, 11, 16}, {22, 23, 00}}, "UTC")
+    assert { :ok, ^date } = parse("201511162223Z", "{ASN1:GeneralizedTime:Z}")
+
+    date = Timex.datetime({{2015, 11, 16}, {22, 00, 00}}, "UTC")
+    assert { :ok, ^date } = parse("2015111622Z", "{ASN1:GeneralizedTime:Z}")
+  end
+
+  test "parse ASN1:GeneralizedTime:TZ" do
+    # YYYYMMDDHH[MM[SS[.fff]]]Z
+    # * `{ASN1:GeneralizedTime:TZ}`       - e.g. `Tue Mar  5 23:25:19 2013`
+    timestamp = {1236, 320719, 456000}
+    {:ok, result} = parse("20090305232519.456-0700", "{ASN1:GeneralizedTime:TZ}")
+    assert ^timestamp = Timex.to_timestamp(result)
+
+    date = Timex.datetime({{2009, 3, 5}, {23, 25, 19}}, "Etc/GMT+7")
+    assert { :ok, ^date } = parse("20090305232519.000-0700", "{ASN1:GeneralizedTime:TZ}")
+
+    date = Timex.datetime({{2009, 3, 5}, {23, 25, 19}}, "Etc/GMT+7")
+    assert { :ok, ^date } = parse("20090305232519-0700", "{ASN1:GeneralizedTime:TZ}")
+
+    date = Timex.datetime({{2015, 11, 16}, {22, 23, 00}}, "Etc/GMT+7")
+    assert { :ok, ^date } = parse("201511162223-0700", "{ASN1:GeneralizedTime:TZ}")
+
+    date = Timex.datetime({{2015, 11, 16}, {22, 00, 00}}, "Etc/GMT+7")
+    assert { :ok, ^date } = parse("2015111622-0700", "{ASN1:GeneralizedTime:TZ}")
+  end
+
   test "parse kitchen" do
     # * `{kitchen}`     - e.g. `3:25PM`
     date = DateTime.now |> Timex.set(hour: 15, minute: 25, second: 0, millisecond: 0)

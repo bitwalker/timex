@@ -52,7 +52,8 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
         "ISOord", "ISOweek-day", "ISOweek", "ISOdate", "ISOtime", "ISOz", "ISO",
         "ISO:Extended", "ISO:Extended:Z", "ISO:Basic", "ISO:Basic:Z", "RFC822z",
         "RFC822", "RFC1123z", "RFC1123", "RFC3339z", "RFC3339", "ANSIC", "UNIX",
-        "ASN1:UTCtime", "kitchen"
+        "ASN1:UTCtime", "ASN1:GeneralizedTime", "ASN1:GeneralizedTime:Z",
+        "ASN1:GeneralizedTime:TZ", "kitchen"
       ])],
       &coalesce_token/1
     )
@@ -141,6 +142,9 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
       "ANSIC"          -> Directive.get(:ansic, directive, opts)
       "UNIX"           -> Directive.get(:unix, directive, opts)
       "ASN1:UTCtime"   -> Directive.get(:asn1_utc_time, directive, opts)
+      "ASN1:GeneralizedTime" -> Directive.get(:asn1_generalized_time, directive, opts)
+      "ASN1:GeneralizedTime:Z" -> Directive.get(:asn1_generalized_time_z, directive, opts)
+      "ASN1:GeneralizedTime:TZ" -> Directive.get(:asn1_generalized_time_tz, directive, opts)
       "kitchen"        -> Directive.get(:kitchen, directive, opts)
     end
   end
