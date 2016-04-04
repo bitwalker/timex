@@ -239,6 +239,13 @@ defmodule TimexTests do
     date2 = Timex.datetime({1969,2,11})
     assert Timex.diff(date1, date2, :months) === 25
     assert Timex.diff(date2, date1, :months) === 25
+
+    date7 = Timex.date({2016, 3, 27})
+    date8 = Timex.date({2016, 4, 3})
+    assert Timex.diff(date7, date8, :days) == 7
+    assert Timex.diff(date8, date7, :days) == 7
+    assert Timex.diff(date7, date8, :weeks) == 1
+    assert Timex.diff(date8, date7, :weeks) == 1
   end
 
   test "timestamp diff same datetime" do
