@@ -148,6 +148,8 @@ defmodule DateFormatTest.ParseDefault do
   test "parse fractional seconds" do
     str = "2015-11-07T13:45:02.060Z"
     assert {:ok, %DateTime{second: 2, millisecond: 60}} = parse(str, "{ISOz}")
+    str = "2015-11-07T13:45:02.687"
+    assert {:ok, %DateTime{second: 2, millisecond: 687}} = parse(str, "{YYYY}-{M}-{0D}T{h24}:{m}:{ss}")
   end
 
   test "parse s-epoch" do

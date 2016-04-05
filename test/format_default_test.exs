@@ -440,6 +440,11 @@ defmodule DateFormatTest.FormatDefault do
     assert unexpected_end_err == format(date, "abc } def")
   end
 
+  test "milliseconds as fractional seconds via {ss}" do
+    date = Timex.datetime({{2015,11,9}, {8,37,48,655}})
+    assert { :ok, "2015-11-09T08:37:48.655" } = format(date, "{YYYY}-{0M}-{0D}T{h24}:{m}:{s}{ss}")
+  end
+
   test "issue #79 - invalid ISO 8601 string with fractional ms" do
     date = %DateTime{day: 14, hour: 12, month: 1, millisecond: 0.0, year: 2015, timezone: %TimezoneInfo{}}
     formatted = format(date, "{ISO}")
