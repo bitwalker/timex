@@ -129,7 +129,8 @@ defmodule DateFormatTest.ParseDefault do
     date_midnight = Timex.datetime({0,1,1})
     date_noon     = Timex.set(date_midnight, hour: 12)
 
-    assert { :ok, ^date_noon } = parse("am 12", "{am} {h12}")
+    assert { :ok, ^date_noon } = parse("pm 12", "{am} {h12}")
+    assert { :ok, ^date_midnight } = parse("12 am", "{h12} {am}")
     assert { :ok, ^date_midnight } = parse("PM 00", "{AM} {0h24}")
     date = Timex.datetime({{0,1,1}, {16,0,0}})
     assert { :ok, ^date } = parse("4 pm", "{h12} {am}")
