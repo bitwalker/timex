@@ -809,6 +809,19 @@ defmodule Timex.DateTime do
         resolve_timezone_info(shifted)
     end
   end
+  defp shift_by(%DateTime{} = datetime, value, :milliseconds) do
+    millisecs_from_zero = :calendar.datetime_to_gregorian_seconds({
+      {datetime.year,datetime.month,datetime.day},
+      {datetime.hour,datetime.minute,datetime.second}
+    }) * 1_000 + value
+
+    secs_from_zero = div(millisecs_from_zero, 1_000)
+    ms = rem(millisecs_from_zero, 1_000)
+
+    {{y,m,d}=date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs_from_zero)
+    Timezone.resolve(datetime.timezone.full_name, {date, {h,mm,s,ms}})
+    |> Map.merge(%{millisecond: ms})
+  end
   defp shift_by(%DateTime{millisecond: ms} = datetime, value, units) do
     secs_from_zero = :calendar.datetime_to_gregorian_seconds({
       {datetime.year,datetime.month,datetime.day},
