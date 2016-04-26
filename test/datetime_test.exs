@@ -195,6 +195,30 @@ defmodule DateTimeTests do
     assert DateTime.to_days(DateTime.epoch(), :zero) === 719528
   end
 
+  test "shift by milliseconds" do
+    date = {2013,3,5}
+    time = {23,23,23}
+    datetime = {date,time}
+
+    unchanged = datetime |> Timex.datetime
+    assert unchanged === shift(datetime, milliseconds: 0)
+
+    assert %DateTime{minute: 23, second: 23, millisecond: 1} = shift(datetime, milliseconds: 1)
+    assert %DateTime{minute: 23, second: 23, millisecond: 36} = shift(datetime, milliseconds: 36)
+    assert %DateTime{minute: 23, second: 24, millisecond: 0} = shift(datetime, milliseconds: 1000)
+    assert %DateTime{minute: 24, second: 24, millisecond: 38} = shift(datetime, milliseconds: 61038)
+    assert %DateTime{minute: 25, second: 1, millisecond: 45} = shift(datetime, milliseconds: (38+60)*1000+45)
+    assert %DateTime{minute: 59, second: 1, millisecond: 58} = shift(datetime, milliseconds: (38+60*35)*1000+58)
+    assert %DateTime{month: 3, day: 6, hour: 23, minute: 23, second: 23, millisecond: 20} = shift(datetime, milliseconds: 24*3600000 + 20)
+    assert %DateTime{month: 3, day: 5, hour: 23, minute: 23, second: 23, millisecond: 34} = shift(datetime, milliseconds: 24*3600000*365 + 34)
+
+    assert %DateTime{minute: 23, second: 22, millisecond: 999} = shift(datetime, milliseconds: -1)
+    assert %DateTime{minute: 23, second: 22, millisecond: 977} = shift(datetime, milliseconds: -23)
+    assert %DateTime{minute: 22, second: 58, millisecond: 0} = shift(datetime, seconds: -24, milliseconds: -1000)
+    assert %DateTime{minute: 23, second: 00, millisecond: 0} = shift(datetime, seconds: -24, milliseconds: 1000)
+    assert %DateTime{year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23, millisecond: 0} = shift(datetime, milliseconds: -24*3600*(365*2+1)*1000)   # +1 day for leap year 2012
+  end
+
   test "shift by seconds" do
     date = {2013,3,5}
     time = {23,23,23}
