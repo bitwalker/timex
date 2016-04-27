@@ -15,7 +15,7 @@ msgstr ""
 "Last-Translator: Martin Schurig <martin@schurig.pw>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.7\n"
 
@@ -29,8 +29,8 @@ msgstr "Abends"
 
 #: lib/i10n/translator.ex:231
 msgid "am"
-msgstr "Morgens"
+msgstr "morgens"
 
 #: lib/i10n/translator.ex:233
 msgid "pm"
-msgstr "Abends"
+msgstr "abends"

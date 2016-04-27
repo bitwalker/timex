@@ -15,7 +15,7 @@ msgstr ""
 "Last-Translator: Martin Schurig <martin@schurig.pw>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.7\n"
 
@@ -77,15 +77,15 @@ msgstr "Juni"
 
 #: lib/i10n/translator.ex:253
 msgid "Mar"
-msgstr "Mär"
+msgstr "Mrz"
 
 #: lib/i10n/translator.ex:266
 msgid "March"
-msgstr "März"
+msgstr "MÃ¤rz"
 
 #: lib/i10n/translator.ex:255 lib/i10n/translator.ex:268
 msgid "May"
-msgstr "May"
+msgstr "Mai"
 
 #: lib/i10n/translator.ex:261
 msgid "Nov"
@@ -93,7 +93,7 @@ msgstr "Nov"
 
 #: lib/i10n/translator.ex:274
 msgid "November"
-msgstr "Novmember"
+msgstr "November"
 
 #: lib/i10n/translator.ex:260
 msgid "Oct"
