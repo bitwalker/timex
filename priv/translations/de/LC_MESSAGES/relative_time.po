@@ -16,7 +16,7 @@ msgstr ""
 "Last-Translator: Martin Schurig <martin@schurig.pw>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.7\n"
 
@@ -34,15 +34,15 @@ msgstr "letztes Jahr"
 
 #: lib/i10n/translator.ex:286
 msgid "next month"
-msgstr "n‰chsten Monat"
+msgstr "n√§chsten Monat"
 
 #: lib/i10n/translator.ex:292
 msgid "next week"
-msgstr "n‰chste Woche"
+msgstr "n√§chste Woche"
 
 #: lib/i10n/translator.ex:280
 msgid "next year"
-msgstr "n‰chstes Jahr"
+msgstr "n√§chstes Jahr"
 
 #: lib/i10n/translator.ex:285
 msgid "this month"
@@ -131,7 +131,7 @@ msgstr[1] "in %{count} Minuten"
 #: lib/i10n/translator.ex:287
 msgid "in %{count} month"
 msgid_plural "in %{count} months"
-msgstr[0] "in  einem Monat"
+msgstr[0] "in einem Monat"
 msgstr[1] "in %{count} Monaten"
 
 #: lib/i10n/translator.ex:330
@@ -182,31 +182,31 @@ msgstr "letzten Mittwoch"
 
 #: lib/i10n/translator.ex:316
 msgid "next friday"
-msgstr "n‰chsten Freitag"
+msgstr "n√§chsten Freitag"
 
 #: lib/i10n/translator.ex:304
 msgid "next monday"
-msgstr "n‰chsten Montag"
+msgstr "n√§chsten Montag"
 
 #: lib/i10n/translator.ex:319
 msgid "next saturday"
-msgstr "n‰chsten Samstag"
+msgstr "n√§chsten Samstag"
 
 #: lib/i10n/translator.ex:322
 msgid "next sunday"
-msgstr "n‰chsten Sonntag"
+msgstr "n√§chsten Sonntag"
 
 #: lib/i10n/translator.ex:313
 msgid "next thursday"
-msgstr "n‰chsten Donnerstag"
+msgstr "n√§chsten Donnerstag"
 
 #: lib/i10n/translator.ex:307
 msgid "next tuesday"
-msgstr "n‰chsten Dienstag"
+msgstr "n√§chsten Dienstag"
 
 #: lib/i10n/translator.ex:310
 msgid "next wednesday"
-msgstr "n‰chsten Mittwoch"
+msgstr "n√§chsten Mittwoch"
 
 #: lib/i10n/translator.ex:315
 msgid "this friday"
