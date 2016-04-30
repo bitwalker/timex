@@ -229,7 +229,10 @@ defmodule Timex.Parse.DateTime.Parser do
         {converted, hemisphere} = Time.to_12hour_clock(hh)
         case value do
           am when am in ["am", "AM"]->
-            %{date | :hour => converted}
+            cond do
+              converted == 12 -> %{date | :hour => 0}
+              :else -> %{date | :hour => converted}
+            end
           pm when pm in ["pm", "PM"] and hemisphere == :am ->
             cond do
               converted + 12 == 24 -> %{date | :hour => 0}
