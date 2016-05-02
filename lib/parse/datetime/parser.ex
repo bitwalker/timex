@@ -226,17 +226,15 @@ defmodule Timex.Parse.DateTime.Parser do
       :us -> %{date | :millisecond => div(value, 1000)}
       :sec_epoch -> DateTime.from_seconds(value, :epoch)
       am_pm when am_pm in [:am, :AM] ->
-        {converted, hemisphere} = Time.to_12hour_clock(hh)
-        case value do
-          am when am in ["am", "AM"]->
-            %{date | :hour => converted}
-          pm when pm in ["pm", "PM"] and hemisphere == :am ->
-            cond do
-              converted + 12 == 24 -> %{date | :hour => 0}
-              :else -> %{date | :hour => converted + 12}
-            end
-          _ ->
-            %{date | :hour => converted}
+        cond do
+          hh == 24 ->
+            %{date | :hour => 0}
+          hh == 12 and (String.downcase(value) == "am") ->
+            %{date | :hour => 0}
+          hh in (1..11) and String.downcase(value) == "pm" ->
+            %{date | :hour => hh + 12} 
+          true ->
+            date
         end
       # Timezones
       :zoffs ->
