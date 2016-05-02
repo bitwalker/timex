@@ -150,6 +150,9 @@ defmodule Timex.Parse.DateTime.Parsers do
   def microseconds(_) do
     label(map(integer, fn us -> [us: us] end), "microseconds")
   end
+  def milliseconds(_) do
+    label(map(integer, fn ms -> [ms: ms] end), "milliseconds")
+  end
 
   def zname(_) do
     word_of(~r/[\/\w_]/)

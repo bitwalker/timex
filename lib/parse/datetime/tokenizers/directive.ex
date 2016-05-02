@@ -45,7 +45,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
     iso_weeknum: :week_of_year, week_mon: :week_of_year, week_sun: :week_of_year,
     wday_mon: :weekday, wday_sun: :weekday, wdshort: :weekday_short, wdfull: :weekday_full,
     min: :minute, sec: :second, sec_fractional: :second_fractional, sec_epoch: :seconds_epoch,
-    us: :microseconds, am: :ampm, AM: :ampm, zabbr: :zname,
+    us: :microseconds, ms: :milliseconds, am: :ampm, AM: :ampm, zabbr: :zname,
     iso_8601: :iso8601, iso_8601_extended: :iso8601_extended, iso_8601_basic: :iso8601_basic,
     rfc_822: :rfc822, rfc_1123: :rfc1123, rfc_3339: :rfc3339,
     strftime_iso_date: :iso_date,

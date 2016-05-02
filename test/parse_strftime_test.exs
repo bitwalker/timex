@@ -20,6 +20,11 @@ defmodule DateFormatTest.ParseStrftime do
     assert {:ok, ^date} = parse("20150713 14:01:21.053021", "%Y%m%d %H:%M:%S.%f")
   end
 
+  test "parse format with milliseconds" do
+    date = Timex.datetime({{2015,7,13}, {14,1,21,38}})
+    assert {:ok, ^date} = parse("20150713 14:01:21.038", "%Y%m%d %H:%M:%S.%L")
+  end
+
   defp parse(date, fmt) do
     Timex.parse(date, fmt, :strftime)
   end
