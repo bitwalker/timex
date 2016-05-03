@@ -128,13 +128,24 @@ defmodule DateFormatTest.ParseDefault do
   test "parse hour12 and am/AM" do
     date_midnight = Timex.datetime({0,1,1})
     date_noon     = Timex.set(date_midnight, hour: 12)
+    date_5a       = Timex.set(date_midnight, hour: 5)
+    date_4p       = Timex.set(date_midnight, hour: 16)
 
-    assert { :ok, ^date_noon } = parse("am 12", "{am} {h12}")
+    assert { :ok, ^date_midnight } = parse("12 am", "{h12} {am}")
+    assert { :ok, ^date_noon }     = parse("12 pm", "{h12} {am}")
+    assert { :ok, ^date_5a }       = parse("5 am",  "{h12} {am}")
+    assert { :ok, ^date_4p }       = parse("4 pm",  "{h12} {am}")
+    assert { :ok, ^date_4p }       = parse("04 PM", "{0h12} {AM}")
+    assert { :ok, ^date_4p }       = parse(" 4 pm", "{_h12} {am}")
+  end
+
+  test "parse hour24 and am/AM" do
+    date_midnight = Timex.datetime({0,1,1})
+    date_13 = Timex.datetime({{0,1,1}, {13,0,0}})
+    assert { :ok, ^date_13 }       = parse("13 am", "{h24} {am}")
+    assert { :ok, ^date_13 }       = parse("13 pm", "{h24} {am}")
     assert { :ok, ^date_midnight } = parse("PM 00", "{AM} {0h24}")
-    date = Timex.datetime({{0,1,1}, {16,0,0}})
-    assert { :ok, ^date } = parse("4 pm", "{h12} {am}")
-    assert { :ok, ^date } = parse("04 PM", "{0h12} {AM}")
-    assert { :ok, ^date } = parse(" 4 pm", "{_h12} {am}")
+    assert { :ok, ^date_midnight } = parse("24 pm", "{0h24} {am}")
   end
 
   test "parse simple time formats" do
