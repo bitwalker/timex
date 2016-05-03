@@ -145,6 +145,7 @@ defmodule DateFormatTest.ParseDefault do
     assert { :ok, ^date_13 }       = parse("13 am", "{h24} {am}")
     assert { :ok, ^date_13 }       = parse("13 pm", "{h24} {am}")
     assert { :ok, ^date_midnight } = parse("PM 00", "{AM} {0h24}")
+    assert { :ok, ^date_midnight } = parse("24 pm", "{0h24} {am}")
   end
 
   test "parse simple time formats" do
