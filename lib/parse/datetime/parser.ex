@@ -224,6 +224,7 @@ defmodule Timex.Parse.DateTime.Parser do
           n when is_number(n) -> %{date | :millisecond => n}
         end
       :us -> %{date | :millisecond => div(value, 1000)}
+      :ms -> %{date | :millisecond => value}
       :sec_epoch -> DateTime.from_seconds(value, :epoch)
       am_pm when am_pm in [:am, :AM] ->
         cond do
