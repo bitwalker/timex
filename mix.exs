@@ -21,58 +21,8 @@ defmodule Timex.Mixfile do
 
   defp description do
     """
-    A comprehensive date/time library for Elixir
-
-    Fully timezone-aware, using the Olson Timezone database
-
-    - Supports local-timezone lookups
-    - Supports POSIX-style timezones
-    - Supports lookups of any Olson tzdata timezones
-    - Supports arbitrary shifts across time and through timezones,
-      including ambiguous time periods, non-existent time periods, and leaps.
-
-    Provides both Date and DateTime types, for use depending on your needs,
-    with an AmbiguousDateTime type for handling those DateTime values which fall on
-    an ambigouos timezone period.
-
-    Extendable via Convertable and Comparable protocols, so you can use Timex with
-    your own types!
-
-    Locale-aware, currently only supports "ru" and "en", but more will be added over time.
-
-    Provides a broad array of date/time helper functions
-
-    - shifting/adding/subtracting
-    - diffing
-    - comparing/before?/after?/between?
-    - conversions
-    - get day of week, week of year, ISO dates, and names for each
-    - get the beginning or ending of a given week
-    - get the beginning or ending of a year, quarter, week, or month
-    - get days in a given month
-    - normalization
-
-    Provides a broad array of time-specific helpers
-
-    - convert to and from units: weeks, days, hours, seconds, ms, and microseconds
-    - measure execution time
-    - diff/compare
-    - to/from 12/24 hour clock times
-    - add/subtract
-
-    Safe date/time string formatting and parsing
-
-    - Informative parser errors
-    - Supports strftime, as well as an easier to read formatter, i.e. `{ISO:Basic}`, `{YYYY}`
-    - Supports many formats out of the box: ISO8601 basic and extended, RFC822, RFC1123, RFC3339, ANSIC, UNIX
-    - Relative time formatter (i.e. "2 years from now")
-
-    Extendable
-
-    - Protocols for core modules like the parser tokenizer
-    - Easy to wrap to add extra functionality
-
-    Can be used with Phoenix and Ecto when used with timex_ecto package
+    Timex is a rich, comprehensive Date/Time library for Elixir projects, with full timezone support via the :tzdata package. 
+    If you need to manipulate dates, times, datetimes, timestamps, etc., then Timex is for you! 
     """
   end
 
