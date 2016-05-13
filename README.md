@@ -67,7 +67,7 @@ Here's a few simple examples:
 > Timex.parse(strftime_str, "%FT%T%:z", :strftime)
 {:ok, %DateTime{...}}
 
-> Time.diff(Time.now, Time.zero, :days)
+> Timex.diff(Time.now, Time.zero, :days)
 16850
 
 > Timex.shift(date, days: 3)
