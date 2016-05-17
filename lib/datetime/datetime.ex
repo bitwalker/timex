@@ -793,9 +793,10 @@ defmodule Timex.DateTime do
       :else  -> %{datetime | :month => m}
     end
 
-    # setting months to remainders may result in month = 0
-    if shifted.month == 0 do
-      shifted = %{ shifted | :year => shifted.year - 1, :month => 12 }
+    # setting months to remainders may result in invalid :month => 0
+    shifted = case shifted.month do
+      0 -> %{ shifted | :year => shifted.year - 1, :month => 12 }
+      _ -> shifted
     end
 
     # If the shift fails, it's because it's a high day number, and the month
