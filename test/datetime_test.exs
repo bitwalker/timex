@@ -425,4 +425,10 @@ defmodule DateTimeTests do
     date |> Timex.datetime |> Timex.shift(spec)
   end
 
+  test "shifting to end of year" do
+    assert Timex.date({2016,4,25}) |> Timex.shift( months: 19 ) == Timex.date({2017, 11, 25})
+    assert Timex.date({2016,4,25}) |> Timex.shift( months: 20 ) == Timex.date({2017, 12, 25})
+    assert Timex.date({2016,4,25}) |> Timex.shift( months: 21 ) == Timex.date({2018,  1, 25})
+  end
+
 end

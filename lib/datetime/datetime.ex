@@ -792,6 +792,13 @@ defmodule Timex.DateTime do
       m < 0  -> %{datetime | :year => year + min(div(m, 12), -1), :month => 12 + rem(m, 12)}
       :else  -> %{datetime | :month => m}
     end
+
+    # setting months to remainders may result in invalid :month => 0
+    shifted = case shifted.month do
+      0 -> %{ shifted | :year => shifted.year - 1, :month => 12 }
+      _ -> shifted
+    end
+
     # If the shift fails, it's because it's a high day number, and the month
     # shifted to does not have that many days. This will be handled by always
     # shifting to the last day of the month shifted to.
