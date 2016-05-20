@@ -809,11 +809,11 @@ defmodule Timex.DateTime do
         resolve_timezone_info(shifted)
     end
   end
-  defp shift_by(%DateTime{} = datetime, value, :milliseconds) do
+  defp shift_by(%DateTime{millisecond: current_msecs} = datetime, value, :milliseconds) do
     millisecs_from_zero = :calendar.datetime_to_gregorian_seconds({
       {datetime.year,datetime.month,datetime.day},
       {datetime.hour,datetime.minute,datetime.second}
-    }) * 1_000 + value
+    }) * 1_000 + current_msecs + value
 
     secs_from_zero = div(millisecs_from_zero, 1_000)
     ms = rem(millisecs_from_zero, 1_000)

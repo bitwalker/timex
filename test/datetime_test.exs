@@ -217,6 +217,24 @@ defmodule DateTimeTests do
     assert %DateTime{minute: 22, second: 58, millisecond: 0} = shift(datetime, seconds: -24, milliseconds: -1000)
     assert %DateTime{minute: 23, second: 00, millisecond: 0} = shift(datetime, seconds: -24, milliseconds: 1000)
     assert %DateTime{year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23, millisecond: 0} = shift(datetime, milliseconds: -24*3600*(365*2+1)*1000)   # +1 day for leap year 2012
+
+    datetime = datetime |> Timex.datetime 
+    datetime = %{datetime | millisecond: 1}
+
+    assert %DateTime{minute: 23, second: 23, millisecond: 2} = shift(datetime, milliseconds: 1)
+    assert %DateTime{minute: 23, second: 23, millisecond: 37} = shift(datetime, milliseconds: 36)
+    assert %DateTime{minute: 23, second: 24, millisecond: 1} = shift(datetime, milliseconds: 1000)
+    assert %DateTime{minute: 24, second: 24, millisecond: 39} = shift(datetime, milliseconds: 61038)
+    assert %DateTime{minute: 25, second: 1, millisecond: 46} = shift(datetime, milliseconds: (38+60)*1000+45)
+    assert %DateTime{minute: 59, second: 1, millisecond: 59} = shift(datetime, milliseconds: (38+60*35)*1000+58)
+    assert %DateTime{month: 3, day: 6, hour: 23, minute: 23, second: 23, millisecond: 21} = shift(datetime, milliseconds: 24*3600000 + 20)
+    assert %DateTime{month: 3, day: 5, hour: 23, minute: 23, second: 23, millisecond: 35} = shift(datetime, milliseconds: 24*3600000*365 + 34)
+
+    assert %DateTime{minute: 23, second: 22, millisecond: 999} = shift(datetime, milliseconds: -2)
+    assert %DateTime{minute: 23, second: 22, millisecond: 977} = shift(datetime, milliseconds: -24)
+    assert %DateTime{minute: 22, second: 58, millisecond: 0} = shift(datetime, seconds: -24, milliseconds: -1001)
+    assert %DateTime{minute: 23, second: 00, millisecond: 1} = shift(datetime, seconds: -24, milliseconds: 1000)
+    assert %DateTime{year: 2011, month: 3, day: 5, hour: 23, minute: 23, second: 23, millisecond: 1} = shift(datetime, milliseconds: -24*3600*(365*2+1)*1000)   # +1 day for leap year 2012
   end
 
   test "shift by seconds" do
