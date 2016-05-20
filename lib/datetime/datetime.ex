@@ -789,7 +789,7 @@ defmodule Timex.DateTime do
       value == -12 -> %{datetime | :year => year - 1}
       m == 0 -> %{datetime | :year => year - 1, :month => 12}
       m > 12 -> %{datetime | :year => year + div(m, 12), :month => rem(m, 12)}
-      m < 0  -> %{datetime | :year => year + div(m, 12), :month => 12 + rem(m, 12)}
+      m < 0  -> %{datetime | :year => year + min(div(m, 12), -1), :month => 12 + rem(m, 12)}
       :else  -> %{datetime | :month => m}
     end
     # If the shift fails, it's because it's a high day number, and the month

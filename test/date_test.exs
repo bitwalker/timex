@@ -343,6 +343,7 @@ defmodule DateTests do
     assert %Date{year: 2014, month: 1, day: 5} = shift(datetime, months: 10)
     assert %Date{year: 2013, month: 1, day: 5} = shift(datetime, months: -2)
     assert %Date{year: 2012, month: 3, day: 5} = shift(datetime, months: -12)
+    assert %Date{year: 2012, month: 9, day: 5} = shift(datetime, months: -6)
 
     datetime = { {2013,3,31}, time }
     assert %Date{year: 2013, month: 4, day: 30} = shift(datetime, months: 1)
