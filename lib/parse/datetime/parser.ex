@@ -6,7 +6,6 @@ defmodule Timex.Parse.DateTime.Parser do
 
   alias Timex.Date
   alias Timex.DateTime
-  alias Timex.Time
   alias Timex.Timezone
   alias Timex.TimezoneInfo
   alias Timex.Parse.ParseError
