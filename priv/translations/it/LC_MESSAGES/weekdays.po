@@ -1,0 +1,76 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: it\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+
+#: lib/i10n/translator.ex:239
+msgid "Fri"
+msgstr "Ven"
+
+#: lib/i10n/translator.ex:247
+msgid "Friday"
+msgstr "Venerdì"
+
+#: lib/i10n/translator.ex:235
+msgid "Mon"
+msgstr "Lun"
+
+#: lib/i10n/translator.ex:243
+msgid "Monday"
+msgstr "Lunedì"
+
+#: lib/i10n/translator.ex:240
+msgid "Sat"
+msgstr "Sab"
+
+#: lib/i10n/translator.ex:248
+msgid "Saturday"
+msgstr "Sabato"
+
+#: lib/i10n/translator.ex:241
+msgid "Sun"
+msgstr "Dom"
+
+#: lib/i10n/translator.ex:249
+msgid "Sunday"
+msgstr "Domenica"
+
+#: lib/i10n/translator.ex:238
+msgid "Thu"
+msgstr "Giu"
+
+#: lib/i10n/translator.ex:246
+msgid "Thursday"
+msgstr "Giovedì"
+
+#: lib/i10n/translator.ex:236
+msgid "Tue"
+msgstr "Mar"
+
+#: lib/i10n/translator.ex:244
+msgid "Tuesday"
+msgstr "Martedì"
+
+#: lib/i10n/translator.ex:237
+msgid "Wed"
+msgstr "Mer"
+
+#: lib/i10n/translator.ex:245
+msgid "Wednesday"
+msgstr "Mercoledì"

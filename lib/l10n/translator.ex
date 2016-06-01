@@ -22,6 +22,9 @@ defmodule Timex.Translator do
       iex> Timex.Translator.translate("ru", "weekdays", "Saturday")
       "суббота"
 
+      iex> Timex.Translator.translate("it", "weekdays", "Saturday")
+      "Sabato"
+
       iex> Timex.Translator.translate("invalid_locale", "weekdays", "Saturday")
       "Saturday"
 
@@ -39,6 +42,9 @@ defmodule Timex.Translator do
 
       iex> Timex.Translator.translate_plural("ru", "relative_time", "in %{count} second", "in %{count} seconds", 5)
       "через 5 секунды"
+
+      iex> Timex.Translator.translate_plural("it", "relative_time", "in %{count} second", "in %{count} seconds", 5)
+      "in 5 secondi"
 
       iex> Timex.Translator.translate_plural("invalid_locale", "relative_time", "in %{count} second", "in %{count} seconds", 5)
       "in 5 seconds"
