@@ -30,6 +30,11 @@ defimpl Timex.Convertable, for: Map do
             second = Map.get(datetime_map, :second, 0)
             ms     = Map.get(datetime_map, :millisecond, 0)
             tz     = Map.get(datetime_map, :timezone, "UTC")
+            tz = case tz do
+              %{"full_name" => tzname} when is_binary(tzname) -> tzname
+              tzname when is_binary(tzname) -> tzname
+              _ -> "UTC"
+            end
             case Timex.datetime({{year, month, day}, {hour, minute, second, ms}}, tz) do
               {:error, _} = err -> err
               datetime -> fun.(datetime)
@@ -42,8 +47,7 @@ defimpl Timex.Convertable, for: Map do
   @allowed_keys_atom [
     :year, :month, :day,
     :hour, :minute, :min, :mins, :second, :sec, :secs,
-    :milliseconds, :millisecond, :ms,
-    :timezone, :tz
+    :milliseconds, :millisecond, :ms
   ]
   @allowed_keys Enum.concat(@allowed_keys_atom, Enum.map(@allowed_keys_atom, &Atom.to_string/1))
   @valid_keys_map %{
@@ -53,7 +57,8 @@ defimpl Timex.Convertable, for: Map do
     :sec          => :second,
     :milliseconds => :millisecond,
     :ms           => :millisecond,
-    :tz           => :timezone
+    :tz           => :timezone,
+    :timezone     => :timezone
   }
 
   def convert_keys(map) when is_map(map) do
@@ -70,11 +75,9 @@ defimpl Timex.Convertable, for: Map do
           nil -> Map.put(acc, ak, v)
           vk  -> Map.put(acc, vk, v)
         end
-      {:tz, v}, acc ->
+      {k, v}, acc when k in [:tz, :timezone, "tz", "timezone"] ->
         Map.put(acc, :timezone, v)
-      {:timezone, v}, acc ->
-        Map.put(acc, :timezone, v)
-      {k, v}, acc when k in @allowed_keys and is_atom(k) ->
+      {k, v}, acc when k in @allowed_keys and is_atom(k) and is_binary(v) ->
         case Integer.parse(v) do
           {n, _} ->
             case Map.get(@valid_keys_map, k) do
@@ -84,7 +87,7 @@ defimpl Timex.Convertable, for: Map do
           :error ->
             {:error, {:expected_integer, for: k, got: v}}
         end
-      {k, v}, acc when k in @allowed_keys ->
+      {k, v}, acc when k in @allowed_keys and is_binary(v) ->
         case Integer.parse(v) do
           {n, _} ->
             ak = String.to_atom(k)
