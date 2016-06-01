@@ -1,0 +1,237 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: pt\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Roberto Trevisan <beto@trevisan.me>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.8\n"
+
+#: lib/l10n/translator.ex:231
+msgid "last month"
+msgstr "mês passado"
+
+#: lib/l10n/translator.ex:237
+msgid "last week"
+msgstr "semana passada"
+
+#: lib/l10n/translator.ex:225
+msgid "last year"
+msgstr "ano passado"
+
+#: lib/l10n/translator.ex:233
+msgid "next month"
+msgstr "ano que vem"
+
+#: lib/l10n/translator.ex:239
+msgid "next week"
+msgstr "semana que vem"
+
+#: lib/l10n/translator.ex:227
+msgid "next year"
+msgstr "ano que vem"
+
+#: lib/l10n/translator.ex:232
+msgid "this month"
+msgstr "este mês"
+
+#: lib/l10n/translator.ex:238
+msgid "this week"
+msgstr "esta semana"
+
+#: lib/l10n/translator.ex:226
+msgid "this year"
+msgstr "este ano"
+
+#: lib/l10n/translator.ex:244
+msgid "today"
+msgstr "hoje"
+
+#: lib/l10n/translator.ex:245
+msgid "tomorrow"
+msgstr "amanhã"
+
+#: lib/l10n/translator.ex:243
+msgid "yesterday"
+msgstr "ontem"
+
+#: lib/l10n/translator.ex:247
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "%{count} dia atrás"
+msgstr[1] "%{count} dias atrás"
+
+#: lib/l10n/translator.ex:272
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "%{count} hora atrás"
+msgstr[1] "%{count} horas atrás"
+
+#: lib/l10n/translator.ex:275
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "%{count} minuto atrás"
+msgstr[1] "%{count} minutos atrás"
+
+#: lib/l10n/translator.ex:235
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "%{count} mês atrás"
+msgstr[1] "%{count} meses atrás"
+
+#: lib/l10n/translator.ex:278
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "%{count} segundo atrás"
+msgstr[1] "%{count} segundos atrás"
+
+#: lib/l10n/translator.ex:241
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "%{count} semana atrás"
+msgstr[1] "%{count} semanas atrás"
+
+#: lib/l10n/translator.ex:229
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "%{count} ano atrás"
+msgstr[1] "%{count} anos atrás"
+
+#: lib/l10n/translator.ex:246
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "em %{count} dia"
+msgstr[1] "em %{count} dias"
+
+#: lib/l10n/translator.ex:271
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "em %{count} hora"
+msgstr[1] "em %{count} horas"
+
+#: lib/l10n/translator.ex:274
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "em %{count} minuto"
+msgstr[1] "em %{count} minutos"
+
+#: lib/l10n/translator.ex:234
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "em %{count} mês"
+msgstr[1] "em %{count} meses"
+
+#: lib/l10n/translator.ex:277
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "em %{count} segundo"
+msgstr[1] "em %{count} segundos"
+
+#: lib/l10n/translator.ex:240
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "em %{count} semana"
+msgstr[1] "em %{count} semanas"
+
+#: lib/l10n/translator.ex:228
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "em %{count} ano"
+msgstr[1] "em %{count} anos"
+
+#: lib/l10n/translator.ex:261
+msgid "last friday"
+msgstr "última sexta-feira"
+
+#: lib/l10n/translator.ex:249
+msgid "last monday"
+msgstr "última segunda-feira"
+
+#: lib/l10n/translator.ex:264
+msgid "last saturday"
+msgstr "último sábado"
+
+#: lib/l10n/translator.ex:267
+msgid "last sunday"
+msgstr "último domingo"
+
+#: lib/l10n/translator.ex:258
+msgid "last thursday"
+msgstr "última quinta-feira"
+
+#: lib/l10n/translator.ex:252
+msgid "last tuesday"
+msgstr "última terça-feira"
+
+#: lib/l10n/translator.ex:255
+msgid "last wednesday"
+msgstr "última quarta-feira"
+
+#: lib/l10n/translator.ex:263
+msgid "next friday"
+msgstr "próxima sexta-feira"
+
+#: lib/l10n/translator.ex:251
+msgid "next monday"
+msgstr "próxima segunda-feira"
+
+#: lib/l10n/translator.ex:266
+msgid "next saturday"
+msgstr "próximo sábado"
+
+#: lib/l10n/translator.ex:269
+msgid "next sunday"
+msgstr "próximo domingo"
+
+#: lib/l10n/translator.ex:260
+msgid "next thursday"
+msgstr "próxima quinta-feira"
+
+#: lib/l10n/translator.ex:254
+msgid "next tuesday"
+msgstr "próxima terça-feira"
+
+#: lib/l10n/translator.ex:257
+msgid "next wednesday"
+msgstr "próxima quarta-feira"
+
+#: lib/l10n/translator.ex:262
+msgid "this friday"
+msgstr "esta sexta-feira"
+
+#: lib/l10n/translator.ex:250
+msgid "this monday"
+msgstr "esta segunda-feira"
+
+#: lib/l10n/translator.ex:265
+msgid "this saturday"
+msgstr "este sábado"
+
+#: lib/l10n/translator.ex:268
+msgid "this sunday"
+msgstr "este domingo"
+
+#: lib/l10n/translator.ex:259
+msgid "this thursday"
+msgstr "esta quinta-feira"
+
+#: lib/l10n/translator.ex:253
+msgid "this tuesday"
+msgstr "esta terça-feira"
+
+#: lib/l10n/translator.ex:256
+msgid "this wednesday"
+msgstr "esta quarta-feira"
