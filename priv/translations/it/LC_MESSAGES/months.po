@@ -65,7 +65,7 @@ msgstr "Lug"
 
 #: lib/i10n/translator.ex:270
 msgid "July"
-msgstr "luglio"
+msgstr "Luglio"
 
 #: lib/i10n/translator.ex:256
 msgid "Jun"
