@@ -1,0 +1,76 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: pt\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Roberto Trevisan <beto@trevisan.me>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.8\n"
+
+#: lib/l10n/translator.ex:186
+msgid "Fri"
+msgstr "Sex"
+
+#: lib/l10n/translator.ex:194
+msgid "Friday"
+msgstr "Sexta-feira"
+
+#: lib/l10n/translator.ex:182
+msgid "Mon"
+msgstr "Seg"
+
+#: lib/l10n/translator.ex:190
+msgid "Monday"
+msgstr "Segunda-feira"
+
+#: lib/l10n/translator.ex:187
+msgid "Sat"
+msgstr "Sab"
+
+#: lib/l10n/translator.ex:195
+msgid "Saturday"
+msgstr "Sábado"
+
+#: lib/l10n/translator.ex:188
+msgid "Sun"
+msgstr "Dom"
+
+#: lib/l10n/translator.ex:196
+msgid "Sunday"
+msgstr "Domingo"
+
+#: lib/l10n/translator.ex:185
+msgid "Thu"
+msgstr "Qui"
+
+#: lib/l10n/translator.ex:193
+msgid "Thursday"
+msgstr "Quinta-feira"
+
+#: lib/l10n/translator.ex:183
+msgid "Tue"
+msgstr "Ter"
+
+#: lib/l10n/translator.ex:191
+msgid "Tuesday"
+msgstr "Terça-feira"
+
+#: lib/l10n/translator.ex:184
+msgid "Wed"
+msgstr "Qua"
+
+#: lib/l10n/translator.ex:192
+msgid "Wednesday"
+msgstr "Quarta-feira"
