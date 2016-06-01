@@ -825,7 +825,7 @@ defmodule Timex.DateTime do
     secs_from_zero = div(millisecs_from_zero, 1_000)
     ms = rem(millisecs_from_zero, 1_000)
 
-    {{y,m,d}=date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs_from_zero)
+    {{_y,_m,_d}=date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs_from_zero)
     Timezone.resolve(datetime.timezone.full_name, {date, {h,mm,s,ms}})
     |> Map.merge(%{millisecond: ms})
   end
