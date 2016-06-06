@@ -4,4 +4,6 @@ defmodule Timex.Calendar do
 
   Currently it is empty, but that will change as multi-calendar support is added.
   """
+
+  def is_leap_year?(year), do: :calendar.is_leap_year(year)
 end
