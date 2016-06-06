@@ -2,9 +2,8 @@ defmodule Timex.Parse.DateTime.Parser do
   @moduledoc """
   This is the base plugin behavior for all Timex date/time string parsers.
   """
-  import Combine.Parsers.Base, only: [eof: 0, sequence: 1, map: 2, pipe: 2]
+  import Combine.Parsers.Base, only: [eof: 0, map: 2, pipe: 2]
 
-  alias Timex.Date
   alias Timex.DateTime
   alias Timex.Timezone
   alias Timex.TimezoneInfo
@@ -189,14 +188,14 @@ defmodule Timex.Parse.DateTime.Parser do
       :oday when is_integer(value) and value >= 0 ->
         Timex.from_iso_day(value, date)
       :wday_mon ->
-        current_day = Date.weekday(date)
+        current_day = Timex.weekday(date)
         cond do
           current_day == value -> date
           current_day > value  -> Timex.shift(date, days: current_day - value)
           current_day < value  -> Timex.shift(date, days: value - current_day)
         end
       :wday_sun ->
-        current_day = Date.weekday(date) - 1
+        current_day = Timex.weekday(date) - 1
         cond do
           current_day == value -> date
           current_day > value -> Timex.shift(date, days: current_day - value)
