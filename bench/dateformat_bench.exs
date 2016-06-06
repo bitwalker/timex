@@ -7,9 +7,14 @@ defmodule Timex.Timex.Bench do
     @datetime "2014-07-22T12:30:05Z"
     @datetime_zoned "2014-07-22T12:30:05+02:00"
 
+    setup_all do
+      Application.ensure_all_started(:tzdata)
+      {:ok, nil}
+    end
+
     bench "(default) parse ISO 8601 datetime" do
-      datetime = Timex.parse(@datetime, "{ISOz}")
-      datetime_zoned = Timex.parse(@datetime_zoned, "{ISO}")
+      datetime = Timex.parse(@datetime, "{ISO:Extended}")
+      datetime_zoned = Timex.parse(@datetime_zoned, "{ISO:Extended}")
       {:ok, _} = datetime
       {:ok, _} = datetime_zoned
     end
