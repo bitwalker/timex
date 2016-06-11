@@ -86,6 +86,36 @@ defmodule Timex.Parse.DateTime.Parser do
       end
   end
 
+  # Special case iso8601/rfc3339 for performance
+  defp do_parse(str, [%Directive{:type => type}], _tokenizer)
+    when type in [:iso_8601, :iso_8601z, :iso_8601_extended, :iso_8601_extended_z, :rfc_3339, :rfc_3339z] do
+    case Combine.parse(str, Timex.Parse.DateTime.Parsers.ISO8601Extended.parse) do
+      {:error, _} = err -> err
+      [[{:year4, y}, {:month, m}, {:day, d}, {:hour24, h}, {:zname, tzname}]] ->
+        dt = %DateTime{:year => y, :month => m, :day => d, :hour => h}
+        tz = Timezone.get(tzname, dt)
+        {:ok, %{dt | :timezone => tz}}
+      [[{:year4, y}, {:month, m}, {:day, d}, {:hour24, h}, {:min, mm}, {:zname, tzname}]] ->
+        dt = %DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => mm}
+        tz = Timezone.get(tzname, dt)
+        {:ok, %{dt | :timezone => tz}}
+      [[{:year4, y}, {:month, m}, {:day, d}, {:hour24, h}, {:min, mm}, {:sec, s}, {:zname, tzname}]] ->
+        dt = %DateTime{
+          :year => y, :month => m, :day => d,
+          :hour => h, :minute => mm, :second => s
+        }
+        tz = Timezone.get(tzname, dt)
+        {:ok, %{dt | :timezone => tz}}
+      [[{:year4, y}, {:month, m}, {:day, d}, {:hour24, h}, {:min, mm}, {:sec, s}, {:sec_fractional, ms}, {:zname, tzname}]] ->
+        dt = %DateTime{
+          :year => y, :month => m, :day => d,
+          :hour => h, :minute => mm, :second => s,
+          :millisecond => ms
+        }
+        tz = Timezone.get(tzname, dt)
+        {:ok, %{dt | :timezone => tz}}
+    end
+  end
   defp do_parse(str, directives, tokenizer) do
     parsers = directives
               |> Stream.map(fn %Directive{weight: weight, parser: parser} -> map(parser, &({&1, weight})) end)

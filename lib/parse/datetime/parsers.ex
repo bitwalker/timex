@@ -378,20 +378,7 @@ defmodule Timex.Parse.DateTime.Parsers do
   RFC 3339 date/time format with timezone information.
   Example: `2013-03-05T23:25:19+02:00`
   """
-  def rfc3339(opts \\ []) do
-    is_zulu? = get_in(opts, [:zulu])
-    parts = [
-      iso_date(opts),
-      either(literal(char("T")), literal(space)),
-      iso_time(opts)
-    ]
-    case is_zulu? do
-      true ->
-        sequence(parts ++ [literal(char("Z"))])
-      _ ->
-        sequence(parts ++ [zoffs_colon(opts)])
-    end
-  end
+  def rfc3339(_opts \\ []), do: Timex.Parse.DateTime.Parsers.ISO8601Extended.parse
   @doc """
   UNIX standard date/time format.
   Example: `Tue Mar  5 23:25:19 PST 2013`

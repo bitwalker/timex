@@ -99,11 +99,10 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
       case parse_fractional_seconds(rest, count, <<>>) do
         {:ok, fraction, count, rest} ->
           seconds = String.to_integer(<<s1::utf8,s2::utf8>>)
+          fractional = String.to_integer(fraction)
           cond do
             seconds >= 0 and seconds <= 60 ->
-              {n, _} = Float.parse("0.#{fraction}")
-              fraction = trunc(Float.round(1_000*n))
-              parse_offset(rest, [{:sec_fractional, fraction}, {:sec, seconds}|acc], count+2)
+              parse_offset(rest, [{:sec_fractional, fractional}, {:sec, seconds}|acc], count+2)
             :else ->
               {:error, "Expected second between 0-60, but got `#{seconds}` instead.", count}
           end
@@ -145,7 +144,7 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
     m2 >= ?0 and m2 <= ?9 and
     s1 >= ?0 and s1 < ?6 and
     s2 >= ?0 and s2 <= ?9 do
-      {:ok, [{:zoffs, <<dir::utf8,h1::utf8,h2::utf8,":",m1::utf8,m2::utf8>>}|acc], count+7, rest}
+      {:ok, [{:zname, <<dir::utf8,h1::utf8,h2::utf8,":",m1::utf8,m2::utf8>>}|acc], count+7, rest}
   end
   # +/-HH:MM
   def parse_offset(dir, <<h1::utf8,h2::utf8,":",m1::utf8,m2::utf8,rest::binary>>, acc, count) when
@@ -153,7 +152,7 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
     h2 >= ?0 and h2 <= ?9 and
     m1 >= ?0 and m1 < ?6 and
     m2 >= ?0 and m2 <= ?9 do
-      {:ok, [{:zoffs, <<dir::utf8,h1::utf8,h2::utf8,":",m1::utf8,m2::utf8>>}|acc], count+5, rest}
+      {:ok, [{:zname, <<dir::utf8,h1::utf8,h2::utf8,":",m1::utf8,m2::utf8>>}|acc], count+5, rest}
   end
   # +/-HHMM
   def parse_offset(dir, <<h1::utf8,h2::utf8,m1::utf8,m2::utf8,rest::binary>>, acc, count) when
@@ -161,13 +160,13 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
     h2 >= ?0 and h2 <= ?9 and
     m1 >= ?0 and m1 < ?6 and
     m2 >= ?0 and m2 <= ?9 do
-      {:ok, [{:zoffs, <<dir::utf8,h1::utf8,h2::utf8,":",m1::utf8,m2::utf8>>}|acc], count+5, rest}
+      {:ok, [{:zname, <<dir::utf8,h1::utf8,h2::utf8,":",m1::utf8,m2::utf8>>}|acc], count+5, rest}
   end
   # +/-HH
   def parse_offset(dir, <<h1::utf8,h2::utf8,rest::binary>>, acc, count) when
     h1 >= ?0 and h1 < ?2 and
     h2 >= ?0 and h2 <= ?9 do
-      {:ok, [{:zoffs, <<dir::utf8,h1::utf8,h2::utf8,":00">>}|acc], count+2, rest}
+      {:ok, [{:zname, <<dir::utf8,h1::utf8,h2::utf8,":00">>}|acc], count+2, rest}
   end
   def parse_offset(_, <<h::utf8,_rest::binary>>, _acc, count), do: {:error, "Expected valid offset, but got `#{<<h::utf8>>}` instead.", count}
 
