@@ -3,7 +3,7 @@ defmodule Timex.Mixfile do
 
   def project do
     [ app: :timex,
-      version: "2.1.6",
+      version: "2.2.0",
       elixir: "~> 1.1",
       description: description(),
       package: package(),
