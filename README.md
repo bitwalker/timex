@@ -43,7 +43,7 @@ added, check the top of the `Timex` module, in the `__using__/1` macro definitio
 
 Here's a few simple examples:
 
-```
+```elixir
 > use Timex
 > date = Date.today
 %Date{year: 2016, month: 2, day: 29}
@@ -55,10 +55,10 @@ Here's a few simple examples:
 > timestamp = Time.now
 {1457, 137754, 906908}
 
-> default_str = Timex.format(datetime, "{ISO:Extended}")
+> {:ok, default_str} = Timex.format(datetime, "{ISO:Extended}")
 {:ok, "2016-02-29T12:30:30.120+00:00"}
 
-> strftime_str = Timex.format(datetime, "%FT%T%:z", :strftime)
+> {:ok, strftime_str} = Timex.format(datetime, "%FT%T%:z", :strftime)
 {:ok, "2016-02-29T12:30:30+00:00"}
 
 > Timex.parse(default_str, "{ISO:Extended}")
