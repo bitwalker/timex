@@ -34,7 +34,7 @@ defmodule Timex do
 
   If a date/time value is provided, it will convert it to a Date struct.
   """
-  @spec date(Timex.Convertable) :: Date.t | {:error, term}
+  @spec date(Timex.Convertable.t) :: Date.t | {:error, term}
   defdelegate date(from), to: Timex.Convertable, as: :to_date
 
   @doc """
@@ -42,13 +42,13 @@ defmodule Timex do
 
   The provided date/time value will be converted via the `Timex.Convertable` protocol.
   """
-  @spec datetime(Convertable) :: DateTime.t | {:error, term}
+  @spec datetime(Convertable.t) :: DateTime.t | {:error, term}
   defdelegate datetime(from), to: Timex.Convertable, as: :to_datetime
 
   @doc """
   Same as `datetime/1`, except this version returns a DateTime or AmbiguousDateTime in the provided timezone.
   """
-  @spec datetime(Convertable, Types.valid_timezone) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
+  @spec datetime(Convertable.t, Types.valid_timezone) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
   def datetime(from, timezone) do
     case Convertable.to_datetime(from) do
       {:error, _} = err ->
@@ -96,50 +96,50 @@ defmodule Timex do
   Convert a date/time value to a Gregorian calendar datetme+timezone tuple.
   i.e. { {year, month, day}, {hour, minute, second}, {offset_hours, timezone_abbreviation}}
   """
-  @spec to_gregorian(Convertable) :: Types.gregorian | {:error, term}
+  @spec to_gregorian(Convertable.t) :: Types.gregorian | {:error, term}
   defdelegate to_gregorian(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to a Julian calendar date number
   """
-  @spec to_julian(Convertable) :: float
+  @spec to_julian(Convertable.t) :: float
   defdelegate to_julian(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to gregorian seconds (seconds since start of year zero)
   """
-  @spec to_gregorian_seconds(Convertable) :: non_neg_integer | {:error, term}
+  @spec to_gregorian_seconds(Convertable.t) :: non_neg_integer | {:error, term}
   defdelegate to_gregorian_seconds(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to a standard Erlang datetme tuple.
   i.e. { {year, month, day}, {hour, minute, second} }
   """
-  @spec to_erlang_datetime(Convertable) :: Types.datetime | {:error, term}
+  @spec to_erlang_datetime(Convertable.t) :: Types.datetime | {:error, term}
   defdelegate to_erlang_datetime(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to a Date struct
   """
-  @spec to_date(Convertable) :: Date.t | {:error, term}
+  @spec to_date(Convertable.t) :: Date.t | {:error, term}
   defdelegate to_date(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to a DateTime struct
   """
-  @spec to_datetime(Convertable) :: DateTime.t | {:error, term}
+  @spec to_datetime(Convertable.t) :: DateTime.t | {:error, term}
   defdelegate to_datetime(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to seconds since the UNIX epoch
   """
-  @spec to_unix(Convertable) :: non_neg_integer | {:error, term}
+  @spec to_unix(Convertable.t) :: non_neg_integer | {:error, term}
   defdelegate to_unix(datetime), to: Convertable
 
   @doc """
   Convert a date/time value to an Erlang timestamp
   """
-  @spec to_timestamp(Convertable) :: Types.timestamp | {:error, term}
+  @spec to_timestamp(Convertable.t) :: Types.timestamp | {:error, term}
   defdelegate to_timestamp(datetime), to: Convertable
 
   @doc """
@@ -163,7 +163,7 @@ defmodule Timex do
       iex> Timex.format!({{2016,2,29},{22,25,0}}, "{ISO:Extended}")
       "2016-02-29T22:25:00+00:00"
   """
-  @spec format(Convertable, format :: String.t) :: {:ok, String.t} | {:error, term}
+  @spec format(Convertable.t, format :: String.t) :: {:ok, String.t} | {:error, term}
   defdelegate format(datetime, format_string), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -176,7 +176,7 @@ defmodule Timex do
       iex> Timex.format!(datetime, "%FT%T%:z", :strftime)
       "2016-02-29T22:25:00-06:00"
   """
-  @spec format(Convertable, format :: String.t, formatter :: atom) :: {:ok, String.t} | {:error, term}
+  @spec format(Convertable.t, format :: String.t, formatter :: atom) :: {:ok, String.t} | {:error, term}
   defdelegate format(datetime, format_string, formatter), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -185,7 +185,7 @@ defmodule Timex do
   Translations only apply to units, relative time phrases, and only for the locales in the
   list of supported locales in the Timex documentation.
   """
-  @spec lformat(Convertable, format :: String.t, locale :: String.t) :: {:ok, String.t} | {:error, term}
+  @spec lformat(Convertable.t, format :: String.t, locale :: String.t) :: {:ok, String.t} | {:error, term}
   defdelegate lformat(datetime, format_string, locale), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -194,7 +194,7 @@ defmodule Timex do
   Translations only apply to units, relative time phrases, and only for the locales in the
   list of supported locales in the Timex documentation.
   """
-  @spec lformat(Convertable, format :: String.t, locale :: String.t, formatter :: atom) :: {:ok, String.t} | {:error, term}
+  @spec lformat(Convertable.t, format :: String.t, locale :: String.t, formatter :: atom) :: {:ok, String.t} | {:error, term}
   defdelegate lformat(datetime, format_string, locale, formatter), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -202,7 +202,7 @@ defmodule Timex do
 
   See format/2 docs for usage examples.
   """
-  @spec format!(Convertable, format :: String.t) :: String.t | no_return
+  @spec format!(Convertable.t, format :: String.t) :: String.t | no_return
   defdelegate format!(datetime, format_string), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -210,7 +210,7 @@ defmodule Timex do
 
   See format/3 docs for usage examples
   """
-  @spec format!(Convertable, format :: String.t, formatter :: atom) :: String.t | no_return
+  @spec format!(Convertable.t, format :: String.t, formatter :: atom) :: String.t | no_return
   defdelegate format!(datetime, format_string, formatter), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -218,7 +218,7 @@ defmodule Timex do
 
   See lformat/3 docs for usage examples.
   """
-  @spec lformat!(Convertable, format :: String.t, locale :: String.t) :: String.t | no_return
+  @spec lformat!(Convertable.t, format :: String.t, locale :: String.t) :: String.t | no_return
   defdelegate lformat!(datetime, format_string, locale), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -226,7 +226,7 @@ defmodule Timex do
 
   See lformat/4 docs for usage examples
   """
-  @spec lformat!(Convertable, format :: String.t, locale :: String.t, formatter :: atom) :: String.t | no_return
+  @spec lformat!(Convertable.t, format :: String.t, locale :: String.t, formatter :: atom) :: String.t | no_return
   defdelegate lformat!(datetime, format_string, locale, formatter), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -243,7 +243,7 @@ defmodule Timex do
       ...> Timex.from_now(Timex.shift(DateTime.now, days: -2))
       "2 days ago"
   """
-  @spec from_now(Convertable) :: String.t | {:error, term}
+  @spec from_now(Convertable.t) :: String.t | {:error, term}
   def from_now(datetime), do: from_now(datetime, Timex.Translator.default_locale)
 
   @doc """
@@ -260,7 +260,7 @@ defmodule Timex do
       "2 дня назад"
 
   """
-  @spec from_now(Convertable, String.t) :: String.t | {:error, term}
+  @spec from_now(Convertable.t, String.t) :: String.t | {:error, term}
   def from_now(datetime, locale) when is_binary(locale) do
     case Convertable.to_datetime(datetime) do
       {:error, _} = err -> err
@@ -275,14 +275,14 @@ defmodule Timex do
   @doc """
   Formats a DateTime using a fuzzy relative duration, with a reference datetime other than now
   """
-  @spec from_now(Convertable, Convertable) :: String.t | {:error, term}
+  @spec from_now(Convertable.t, Convertable.t) :: String.t | {:error, term}
   def from_now(datetime, reference_date), do: from_now(datetime, reference_date, Timex.Translator.default_locale)
 
   @doc """
   Formats a DateTime using a fuzzy relative duration, with a reference datetime other than now,
   translated using the given locale
   """
-  @spec from_now(Convertable, Convertable, String.t) :: String.t | {:error, term}
+  @spec from_now(Convertable.t, Convertable.t, String.t) :: String.t | {:error, term}
   def from_now(datetime, reference_date, locale) when is_binary(locale) do
     case Convertable.to_datetime(datetime) do
       {:error, _} = err -> err
@@ -446,7 +446,7 @@ defmodule Timex do
   21
 
   """
-  @spec century(Convertable | Types.year) :: non_neg_integer | {:error, term}
+  @spec century(Convertable.t | Types.year) :: non_neg_integer | {:error, term}
   def century(date) when not is_integer(date) do
     case Convertable.to_date(date) do
       {:error, _} = err    -> err
@@ -514,7 +514,7 @@ defmodule Timex do
       ...> (Timex.from_iso_day(180, date) === expected)
       true
   """
-  @spec from_iso_day(non_neg_integer, Types.year | Date.t | DateTime.t | Convertable) :: Date.t | DateTime.t | {:error, term}
+  @spec from_iso_day(non_neg_integer, Types.year | Date.t | DateTime.t | Convertable.t) :: Date.t | DateTime.t | {:error, term}
   def from_iso_day(day, year) when is_day_of_year(day) and is_year(year) do
     datetime = Helpers.iso_day_to_date_tuple(year, day)
     Timex.date(datetime)
@@ -546,7 +546,7 @@ defmodule Timex do
       iex> #{__MODULE__}.iso_week({1970, 1, 1})
       {1970,1}
   """
-  @spec iso_week(Convertable) :: {Types.year, Types.weeknum} | {:error, term}
+  @spec iso_week(Convertable.t) :: {Types.year, Types.weeknum} | {:error, term}
 
   def iso_week(%Date{:year => y, :month => m, :day => d}) when is_date(y,m,d),
     do: iso_week(y, m, d)
@@ -584,7 +584,7 @@ defmodule Timex do
       {1970, 1, 4}
 
   """
-  @spec iso_triplet(Convertable) :: {Types.year, Types.weeknum, Types.weekday} | {:error, term}
+  @spec iso_triplet(Convertable.t) :: {Types.year, Types.weeknum, Types.weekday} | {:error, term}
   def iso_triplet(datetime) do
     case Convertable.to_date(datetime) do
       {:error, _} = err ->
@@ -649,7 +649,7 @@ defmodule Timex do
       {"Etc/GMT-2", "GMT-2"}
 
   """
-  @spec timezone(Types.valid_timezone, Convertable) :: TimezoneInfo.t | AmbiguousTimezoneInfo.t
+  @spec timezone(Types.valid_timezone, Convertable.t) :: TimezoneInfo.t | AmbiguousTimezoneInfo.t
 
   def timezone(:utc, _),                 do: %TimezoneInfo{}
   def timezone(%TimezoneInfo{full_name: name}, datetime) do
@@ -696,7 +696,7 @@ defmodule Timex do
       false
 
   """
-  @spec is_valid?(Convertable) :: boolean
+  @spec is_valid?(Convertable.t) :: boolean
   def is_valid?(%Date{:year => y, :month => m, :day => d}) do
     :calendar.valid_date({y,m,d})
   end
@@ -872,7 +872,7 @@ defmodule Timex do
   Add time to a date using a timestamp, i.e. {megasecs, secs, microsecs}
   Same as shift(date, Time.to_timestamp(5, :minutes), :timestamp).
   """
-  @spec add(Convertable, Types.timestamp) :: DateTime.t | {:error, term}
+  @spec add(Convertable.t, Types.timestamp) :: DateTime.t | {:error, term}
   def add(%Date{} = date, {mega,sec,_}),     do: shift(date, [seconds: (mega * @million) + sec])
   def add(%DateTime{} = date, {mega,sec,_}), do: shift(date, [seconds: (mega * @million) + sec])
   def add(datetime, {_,_,_} = timestamp) do
@@ -886,7 +886,7 @@ defmodule Timex do
   Subtract time from a date using a timestamp, i.e. {megasecs, secs, microsecs}
   Same as shift(date, Time.to_timestamp(5, :minutes) |> Time.invert, :timestamp).
   """
-  @spec subtract(Convertable, Types.timestamp) :: DateTime.t | {:error, term}
+  @spec subtract(Convertable.t, Types.timestamp) :: DateTime.t | {:error, term}
   def subtract(%Date{} = date, {mega,sec,_}),     do: shift(date, [seconds: (-mega * @million) - sec])
   def subtract(%DateTime{} = date, {mega,sec,_}), do: shift(date, [seconds: (-mega * @million) - sec])
   def subtract(datetime, {_,_,_} = timestamp) do
@@ -1098,7 +1098,7 @@ defmodule Timex do
   4 # (i.e. Thursday)
 
   """
-  @spec weekday(Convertable) :: Types.weekday | {:error, term}
+  @spec weekday(Convertable.t) :: Types.weekday | {:error, term}
 
   def weekday(%Date{:year => y, :month => m, :day => d}),     do: :calendar.day_of_the_week({y, m, d})
   def weekday(%DateTime{:year => y, :month => m, :day => d}), do: :calendar.day_of_the_week({y, m, d})
@@ -1117,7 +1117,7 @@ defmodule Timex do
   iex> Timex.datetime({{2015,6,26},{0,0,0}}) |> Timex.day
   177
   """
-  @spec day(Convertable) :: Types.daynum | {:error, term}
+  @spec day(Convertable.t) :: Types.daynum | {:error, term}
 
   def day(%Date{} = date), do: day(to_datetime(date))
   def day(%DateTime{} = date) do
@@ -1140,7 +1140,7 @@ defmodule Timex do
       31
 
   """
-  @spec days_in_month(Convertable) :: Types.num_of_days | {:error, term}
+  @spec days_in_month(Convertable.t) :: Types.num_of_days | {:error, term}
   def days_in_month(%DateTime{:year => y, :month => m}), do: days_in_month(y, m)
   def days_in_month(%Date{:year => y, :month => m}),     do: days_in_month(y, m)
   def days_in_month(date) do
@@ -1167,7 +1167,7 @@ defmodule Timex do
       iex> Timex.week_of_month(Timex.datetime({2016, 3, 14}))
       3
   """
-  @spec week_of_month(Convertable) :: Types.week_of_month
+  @spec week_of_month(Convertable.t) :: Types.week_of_month
   def week_of_month(%DateTime{:year => y, :month => m, :day => d}), do: week_of_month(y,m,d)
   def week_of_month(%Date{:year => y, :month => m, :day => d}),     do: week_of_month(y,m,d)
   def week_of_month(datetime) do
@@ -1261,7 +1261,7 @@ defmodule Timex do
   def end_of_month(_, _),
     do: {:error, :invalid_year_or_month}
 
-  @spec quarter(Convertable | Types.month) :: integer | {:error, term}
+  @spec quarter(Convertable.t | Types.month) :: integer | {:error, term}
   defp quarter(month) when is_month(month) do
     case month do
       m when m in 1..3   -> 1
@@ -1288,7 +1288,7 @@ defmodule Timex do
     Timex.datetime({{2015, 4, 1}, {0, 0, 0}}, "CST")
 
   """
-  @spec beginning_of_quarter(Date.t | Convertable) :: Date.t | DateTime.t | {:error, term}
+  @spec beginning_of_quarter(Date.t | Convertable.t) :: Date.t | DateTime.t | {:error, term}
   def beginning_of_quarter(%Date{year: year, month: month}) when is_year(year) and is_month(month) do
     month = 1 + (3 * (quarter(month) - 1))
     Timex.date({year, month, 1})
@@ -1321,7 +1321,7 @@ defmodule Timex do
     Timex.date({{2015, 6, 30}, {23, 59, 59}})
 
   """
-  @spec end_of_quarter(Convertable) :: Date.t | DateTime.t | {:error, term}
+  @spec end_of_quarter(Convertable.t) :: Date.t | DateTime.t | {:error, term}
   def end_of_quarter(%Date{year: year, month: month}) when is_year(year) and is_month(month) do
     month = 3 * quarter(month)
     end_of_month(Timex.date({year, month, 1}))
@@ -1505,7 +1505,7 @@ defmodule Timex do
       5
 
   """
-  @spec days_to_end_of_week(Convertable, Types.weekday) :: integer | {:error, term}
+  @spec days_to_end_of_week(Convertable.t, Types.weekday) :: integer | {:error, term}
   def days_to_end_of_week(date, weekstart \\ :mon) do
     case days_to_beginning_of_week(date, weekstart) do
       {:error, _} = err -> err
@@ -1578,7 +1578,7 @@ defmodule Timex do
       Timex.date({2015, 12, 5})
 
   """
-  @spec end_of_week(Convertable, Types.weekday) :: Date.t | DateTime.t | {:error, term}
+  @spec end_of_week(Convertable.t, Types.weekday) :: Date.t | DateTime.t | {:error, term}
   def end_of_week(datetime, weekstart \\ 1)
 
   def end_of_week(%Date{} = date, weekstart) do
@@ -1622,7 +1622,7 @@ defmodule Timex do
       Timex.date({{2015,1,1}, {0,0,0}})
 
   """
-  @spec beginning_of_day(Convertable) :: DateTime.t | {:error, term}
+  @spec beginning_of_day(Convertable.t) :: DateTime.t | {:error, term}
   def beginning_of_day(%Date{} = date), do: date
   def beginning_of_day(%DateTime{} = datetime) do
     DateTime.set(datetime, [hour: 0, minute: 0, second: 0])
@@ -1648,7 +1648,7 @@ defmodule Timex do
       Timex.date({{2015,1,1}, {23,59,59}})
 
   """
-  @spec end_of_day(Convertable) :: DateTime.t | {:error, term}
+  @spec end_of_day(Convertable.t) :: DateTime.t | {:error, term}
   def end_of_day(%Date{} = date), do: date
   def end_of_day(%DateTime{} = datetime) do
     DateTime.set(datetime, [hour: 23, minute: 59, second: 59])
