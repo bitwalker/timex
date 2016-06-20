@@ -5,10 +5,10 @@ defmodule Timex.Mixfile do
     [ app: :timex,
       version: "2.1.6",
       elixir: "~> 1.1",
-      description: description,
-      package: package,
-      deps: deps,
-      docs: docs,
+      description: description(),
+      package: package(),
+      deps: deps(),
+      docs: docs(),
       compilers: [:gettext] ++ Mix.compilers,
       test_coverage: [tool: ExCoveralls] ]
 

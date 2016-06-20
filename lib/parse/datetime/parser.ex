@@ -121,7 +121,7 @@ defmodule Timex.Parse.DateTime.Parser do
               |> Stream.map(fn %Directive{weight: weight, parser: parser} -> map(parser, &({&1, weight})) end)
               |> Stream.filter(fn nil -> false; _ -> true end)
               |> Enum.reverse
-    case Combine.parse(str, pipe([eof|parsers] |> Enum.reverse, &(&1))) do
+    case Combine.parse(str, pipe([eof()|parsers] |> Enum.reverse, &(&1))) do
       [results] when is_list(results) ->
         results
         |> extract_parse_results

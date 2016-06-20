@@ -39,7 +39,7 @@ defmodule Timex.DateTime do
   """
   @spec today() :: DateTime.t | {:error, term}
   @spec today(Timezone.t | String.t | :utc | :local) :: DateTime.t | {:error, term}
-  def today,                               do: Timex.beginning_of_day(now)
+  def today,                               do: Timex.beginning_of_day(now())
   def today(%TimezoneInfo{} = tz),         do: Timex.beginning_of_day(now(tz))
   def today(tz) when is_binary(tz),        do: Timex.beginning_of_day(now(tz))
   def today(tz) when tz in [:utc, :local], do: Timex.beginning_of_day(now(tz))

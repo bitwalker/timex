@@ -28,7 +28,7 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
 
   @spec tokenize(String.t) :: {:ok, [Directive.t]} | {:error, term}
   def tokenize(format_string) do
-    case Combine.parse(format_string, relative_parser) do
+    case Combine.parse(format_string, relative_parser()) do
       results when is_list(results) ->
         directives = results |> List.flatten |> Enum.filter(fn x -> x !== nil end)
       case Enum.any?(directives, fn %Directive{type: type} -> type != :literal end) do
@@ -155,8 +155,8 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
   # Token parser
   defp relative_parser do
     many1(choice([
-      between(char(?{), map(one_of(word, ["relative"]), &map_directive/1), char(?})),
-      map(none_of(char, ["{", "}"]), &map_literal/1)
+      between(char(?{), map(one_of(word(), ["relative"]), &map_directive/1), char(?})),
+      map(none_of(char(), ["{", "}"]), &map_literal/1)
     ]))
   end
 

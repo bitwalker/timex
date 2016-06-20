@@ -45,13 +45,13 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label(expected_digits)
   end
   def month_full(_) do
-    one_of(word, Helpers.months)
+    one_of(word(), Helpers.months)
     |> map(&Helpers.to_month_num/1)
     |> label("full month name")
   end
   def month_short(_) do
     abbrs = Helpers.months |> Enum.map(fn m -> String.slice(m, 0, 3) end)
-    one_of(word, abbrs)
+    one_of(word(), abbrs)
     |> map(&Helpers.to_month_num/1)
     |> label("month abbreviation")
   end
@@ -81,13 +81,13 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("ordinal weekday")
   end
   def weekday_short(_) do
-    word
+    word()
     |> satisfy(&Helpers.is_weekday/1)
     |> map(fn name -> Helpers.to_weekday(name) end)
     |> label("weekday abbreviation")
   end
   def weekday_full(_) do
-    word
+    word()
     |> satisfy(&Helpers.is_weekday/1)
     |> map(fn name -> Helpers.to_weekday(name) end)
     |> label("weekday name")
@@ -106,17 +106,17 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("hour between 1 and 12")
   end
   def ampm_lower(_) do
-    one_of(word, ["am", "pm"])
+    one_of(word(), ["am", "pm"])
     |> map(&Helpers.to_ampm/1)
     |> label("am/pm")
   end
   def ampm_upper(_) do
-    one_of(word, ["AM", "PM"])
+    one_of(word(), ["AM", "PM"])
     |> map(&Helpers.to_ampm/1)
     |> label("AM/PM")
   end
   def ampm(_) do
-    one_of(word, ["am", "AM", "pm", "PM"])
+    one_of(word(), ["am", "AM", "pm", "PM"])
     |> map(&Helpers.to_ampm/1)
     |> label("am/pm or AM/PM")
   end
@@ -139,18 +139,18 @@ defmodule Timex.Parse.DateTime.Parsers do
   end
   def seconds_epoch(opts \\ []) do
     parser = case get_in(opts, [:padding]) do
-      :spaces -> skip(spaces) |> integer
-      _       -> integer
+      :spaces -> skip(spaces()) |> integer
+      _       -> integer()
     end
     parser
     |> map(fn secs -> [sec_epoch: secs] end)
     |> label("seconds since epoch")
   end
   def microseconds(_) do
-    label(map(integer, fn us -> [us: us] end), "microseconds")
+    label(map(integer(), fn us -> [us: us] end), "microseconds")
   end
   def milliseconds(_) do
-    label(map(integer, fn ms -> [ms: ms] end), "milliseconds")
+    label(map(integer(), fn ms -> [ms: ms] end), "milliseconds")
   end
 
   def zname(_) do
@@ -160,27 +160,27 @@ defmodule Timex.Parse.DateTime.Parsers do
   end
   def zoffs(_) do
     pipe([
-        one_of(char, ["-", "+"]),
-        digit, digit,
-        option(digit), option(digit)
+        one_of(char(), ["-", "+"]),
+        digit(), digit(),
+        option(digit()), option(digit())
       ], fn xs -> [zoffs: xs |> Stream.filter(&(&1 != nil)) |> Enum.join] end
     ) |> label("timezone offset (+/-hhmm)")
   end
   def zoffs_colon(_) do
     pipe([
-        one_of(char, ["-", "+"]),
-        digit, digit,
+        one_of(char(), ["-", "+"]),
+        digit(), digit(),
         ignore(char(":")),
-        digit, digit
+        digit(), digit()
       ], fn xs -> [zoffs_colon: xs |> Enum.join] end
     ) |> label("timezone offset (+/-hh:mm)")
   end
   def zoffs_sec(_) do
     pipe([
-        one_of(char, ["-", "+"]),
-        digit, digit,
+        one_of(char(), ["-", "+"]),
+        digit(), digit(),
         ignore(char(":")),
-        digit, digit,
+        digit(), digit(),
         ignore(char(":")),
         ignore(fixed_integer(2))
       ], fn xs -> [zoffs_sec: xs |> Enum.join] end
@@ -259,7 +259,7 @@ defmodule Timex.Parse.DateTime.Parsers do
         month2([padding: :zeroes, min: 2, max: 2]),
         day_of_month([padding: :zeroes, min: 2, max: 2])
       ]),
-      either(literal(char("T")), literal(space)),
+      either(literal(char("T")), literal(space())),
       choice([
         sequence([
           hour24([padding: :zeroes, min: 2, max: 2]),
@@ -306,28 +306,28 @@ defmodule Timex.Parse.DateTime.Parsers do
       weekday_short(opts),
       literal(string(", ")),
       day_of_month([padding: :zeroes, min: 1, max: 2]),
-      literal(space),
+      literal(space()),
       month_short(opts),
-      literal(space),
+      literal(space()),
       year2(padding: :zeroes),
-      literal(space),
+      literal(space()),
       iso_time(opts)
     ]
     case is_zulu? do
       true ->
         zone_parts = [
-          literal(space),
-          map(one_of(word, ["UT", "GMT", "Z"]), fn _ -> [zname: "UTC"] end)
+          literal(space()),
+          map(one_of(word(), ["UT", "GMT", "Z"]), fn _ -> [zname: "UTC"] end)
         ]
         sequence(parts ++ zone_parts)
       _ ->
         zone_parts = [
-          literal(space),
+          literal(space()),
           choice([
             zname(opts),
             zoffs(opts),
-            map(one_of(word, ["UT", "GMT", "Z"]), fn _ -> [zname: "UTC"] end),
-            map(one_of(char, ["A", "M", "N", "Y", "J"]), fn
+            map(one_of(word(), ["UT", "GMT", "Z"]), fn _ -> [zname: "UTC"] end),
+            map(one_of(char(), ["A", "M", "N", "Y", "J"]), fn
               "A" -> [zoffs: "-0100"]
               "M" -> [zoffs: "-1200"]
               "N" -> [zoffs: "+0100"]
@@ -352,23 +352,23 @@ defmodule Timex.Parse.DateTime.Parsers do
       weekday_short(opts),
       literal(string(", ")),
       day_of_month([padding: :zeroes, min: 1, max: 2]),
-      literal(space),
+      literal(space()),
       month_short(opts),
-      literal(space),
+      literal(space()),
       year4(padding: :zeroes),
-      literal(space),
+      literal(space()),
       iso_time(opts)
     ]
     case is_zulu? do
       true ->
         zone_parts = [
-          literal(space),
+          literal(space()),
           map(char("Z"), fn _ -> [zname: "UTC"] end)
         ]
         sequence(parts ++ zone_parts)
       _ ->
         zone_parts = [
-          literal(space),
+          literal(space()),
           either(zname(opts), zoffs(opts))
         ]
         sequence(parts ++ zone_parts)
@@ -386,15 +386,15 @@ defmodule Timex.Parse.DateTime.Parsers do
   def unix(opts \\ []) do
     sequence([
       weekday_short(opts),
-      literal(space),
+      literal(space()),
       month_short(opts),
-      literal(space),
+      literal(space()),
       day_of_month([padding: :spaces, min: 1, max: 2]),
-      literal(space),
+      literal(space()),
       iso_time(opts),
-      literal(space),
+      literal(space()),
       zname(opts),
-      literal(space),
+      literal(space()),
       year4(padding: :spaces, min: 4, max: 4)
     ])
   end
@@ -405,13 +405,13 @@ defmodule Timex.Parse.DateTime.Parsers do
   def ansic(opts \\ []) do
     sequence([
       weekday_short(opts),
-      literal(space),
+      literal(space()),
       month_short(opts),
-      literal(space),
+      literal(space()),
       day_of_month([padding: :spaces, min: 1, max: 2]),
-      literal(space),
+      literal(space()),
       iso_time(opts),
-      literal(space),
+      literal(space()),
       year4(padding: :spaces, min: 4, max: 4)
     ])
   end
@@ -545,7 +545,7 @@ defmodule Timex.Parse.DateTime.Parsers do
       minute(opts),
       literal(char(":")),
       second(opts),
-      literal(space),
+      literal(space()),
       ampm_upper(opts)
     ])
     |> map(fn parts -> [strftime_iso_kitchen: List.flatten(parts)] end)

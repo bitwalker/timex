@@ -30,12 +30,12 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
   @spec apply(DateTime.t, atom, term) :: {:ok, DateTime.t} | {:error, term} | :unrecognized
   def apply(_, _, _), do: :unrecognized
 
-  defp flags(),     do: map(one_of(char, ["-", "0", "_"]), &map_flag/1)
-  defp min_width(), do: integer
-  defp modifiers(), do: map(one_of(char, ["E", "O"]), &map_modifier/1)
+  defp flags(),     do: map(one_of(char(), ["-", "0", "_"]), &map_flag/1)
+  defp min_width(), do: integer()
+  defp modifiers(), do: map(one_of(char(), ["E", "O"]), &map_modifier/1)
   defp directives() do
     choice([
-      one_of(char, [
+      one_of(char(), [
         # Years/Centuries
         "Y", "y", "C", "G", "g",
         # Months
@@ -59,7 +59,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
     many1(choice([
       # %<flag><width><modifier><directive>
       pair_right(char("%"), pipe([option(flags()), option(min_width()), option(modifiers()), directives()], &coalesce_token/1)),
-      map(none_of(char, ["%"]), &map_literal/1),
+      map(none_of(char(), ["%"]), &map_literal/1),
       map(pair_left(char("%"), char("%")), &map_literal/1)
     ])) |> eof
   end
