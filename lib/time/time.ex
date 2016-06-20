@@ -324,7 +324,7 @@ defmodule Timex.Time do
     { mega, sec } = mdivmod(seconds)
     { mega, sec, 0 }
   end
-  def epoch(type), do: convert(epoch, type)
+  def epoch(type), do: convert(epoch(), type)
 
   @doc """
   Time interval since Epoch.
@@ -381,7 +381,7 @@ defmodule Timex.Time do
   def elapsed(timestamp, type \\ :timestamp)
 
   def elapsed(timestamp = {_,_,_}, type) do
-    elapsed(timestamp, now, type)
+    elapsed(timestamp, now(), type)
   end
 
   def elapsed(timestamp = {_,_,_}, reference_time = {_,_,_}, type) do

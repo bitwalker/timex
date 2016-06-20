@@ -61,9 +61,9 @@ defmodule Timex.Parse.DateTime.Helpers do
     case {padding, min_width, max_width} do
       {:zeroes, _, nil}   -> Text.integer
       {:zeroes, min, max} -> choice(Enum.map(max..min, &(fixed_integer(&1))))
-      {:spaces, -1, nil}  -> skip(spaces) |> Text.integer
-      {:spaces, min, nil} -> skip(spaces) |> fixed_integer(min)
-      {:spaces, _, max}   -> skip(spaces) |> choice(Enum.map(max..1, &(fixed_integer(&1))))
+      {:spaces, -1, nil}  -> skip(spaces()) |> Text.integer
+      {:spaces, min, nil} -> skip(spaces()) |> fixed_integer(min)
+      {:spaces, _, max}   -> skip(spaces()) |> choice(Enum.map(max..1, &(fixed_integer(&1))))
       {_, -1, nil}        -> Text.integer
       {_, min, nil}       -> fixed_integer(min)
       {_, min, max}       -> choice(Enum.map(max..min, &(fixed_integer(&1))))

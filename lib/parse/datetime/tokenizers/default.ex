@@ -34,7 +34,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
   @spec directives() :: (Combine.ParserState.t -> Combine.ParserState.t)
   defp directives() do
     pipe([
-      option(one_of(char, ["0", "_"])),
+      option(one_of(char(), ["0", "_"])),
       one_of(word_of(~r/[\-\w\:]/), [
         # Years/Centuries
         "YYYY", "YY", "C", "WYYYY", "WYY",
@@ -65,7 +65,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
       # {<padding><directive>}
       label(between(char(?{), directives(), char(?})),
         "a valid directive."),
-      label(map(none_of(char, ["{", "}"]), &map_literal/1),
+      label(map(none_of(char(), ["{", "}"]), &map_literal/1),
         "any character but { or }."),
       label(map(pair_left(char(?{), char(?{)), &map_literal/1),
         "an escaped { character"),

@@ -18,7 +18,7 @@ defmodule Timex.Date do
   """
   @spec today() :: Date.t | {:error, term}
   @spec today(Types.valid_timezone) :: Date.t | {:error, term}
-  def today,     do: now
+  def today,     do: now()
   def today(%TimezoneInfo{} = tz),         do: now(tz)
   def today(tz) when is_binary(tz),        do: now(tz)
   def today(tz) when tz in [:utc, :local], do: now(tz)
