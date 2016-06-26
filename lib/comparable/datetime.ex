@@ -122,7 +122,7 @@ defimpl Timex.Comparable, for: Timex.DateTime do
     extra_days = rem(days, 7)
     actual_weeks = (if extra_days == 0, do: weeks, else: weeks + 1)
     cond do
-      actual_weeks == 1 && extra_days < 7 -> 0
+      actual_weeks == 1 && days < 7 -> 0
       :else -> actual_weeks
     end
   end
