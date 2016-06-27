@@ -425,10 +425,9 @@ defmodule Timex do
   Gets the current century
 
   ## Examples
-
-  iex> #{__MODULE__}.century
-  21
-
+  
+      iex> #{__MODULE__}.century
+      21
   """
   @spec century() :: non_neg_integer
   def century(), do: century(Date.today)
@@ -438,13 +437,12 @@ defmodule Timex do
 
   ## Examples
 
-  iex> Timex.Date.today |> #{__MODULE__}.century
-  21
-  iex> Timex.DateTime.now |> #{__MODULE__}.century
-  21
-  iex> #{__MODULE__}.century(2016)
-  21
-
+      iex> Timex.Date.today |> #{__MODULE__}.century
+      21
+      iex> Timex.DateTime.now |> #{__MODULE__}.century
+      21
+      iex> #{__MODULE__}.century(2016)
+      21
   """
   @spec century(Convertable.t | Types.year) :: non_neg_integer | {:error, term}
   def century(date) when not is_integer(date) do
@@ -465,7 +463,7 @@ defmodule Timex do
   @doc """
   Convert an iso ordinal day number to the day it represents in the current year.
 
-   ## Examples
+  ## Examples
 
       iex> use Timex
       iex> %Date{:year => year} = Timex.from_iso_day(180)
@@ -1114,8 +1112,8 @@ defmodule Timex do
 
   ## Examples
 
-  iex> Timex.datetime({{2015,6,26},{0,0,0}}) |> Timex.day
-  177
+      iex> Timex.datetime({{2015,6,26},{0,0,0}}) |> Timex.day
+      177
   """
   @spec day(Convertable.t) :: Types.daynum | {:error, term}
 
