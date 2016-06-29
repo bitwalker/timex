@@ -92,6 +92,9 @@ true
 
 > Timex.before?(Date.today, Timex.shift(Date.today, days: 1))
 true
+
+> Timex.after?(Date.today, Timex.shift(Date.today, days: -1))
+true
 ```
 
 There are a ton of other functions for Dates, Times, and DateTimes, way more than can be covered here. Hopefully the above
