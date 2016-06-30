@@ -274,12 +274,12 @@ defmodule Timex.Parse.DateTime.Parser do
         %{date | :timezone => Timezone.get(value, zone_date)}
       tz when tz in [:zoffs_colon, :zoffs_sec] ->
         case value do
-          <<?-, h1::utf8, h2::utf8, _::binary>> ->
+          <<?-, h1::utf8, h2::utf8, m1::utf8, m2::utf8, _::binary>> ->
             zone_date = Timex.to_erlang_datetime(date)
-            %{date | :timezone => Timezone.get(<<?-, h1::utf8, h2::utf8>>, zone_date)}
-          <<?+, h1::utf8, h2::utf8, _::binary>> ->
+            %{date | :timezone => Timezone.get(<<?-, h1::utf8, h2::utf8, m1::utf8, m2::utf8>>, zone_date)}
+          <<?+, h1::utf8, h2::utf8, m1::utf8, m2::utf8, _::binary>> ->
             zone_date = Timex.to_erlang_datetime(date)
-            %{date | :timezone => Timezone.get(<<?+, h1::utf8, h2::utf8>>, zone_date)}
+            %{date | :timezone => Timezone.get(<<?+, h1::utf8, h2::utf8, m1::utf8, m2::utf8>>, zone_date)}
           _ ->
             {:error, "#{token} not implemented"}
         end

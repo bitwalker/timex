@@ -127,4 +127,25 @@ defmodule TimezoneTests do
 
     assert 63645015540 = DateTime.to_seconds(Timex.datetime(datetime, "Europe/Vienna"), :zero, [utc: true])
   end
+
+  test "name_of" do
+    assert {:error, {:invalid_timezone, :wat}} = Timezone.name_of(:wat)
+    assert {:error, {:invalid_timezone, "America/Not_A_Real_Timezone"}} = Timezone.name_of("America/Not_A_Real_Timezone")
+    assert "America/Los_Angeles" = Timezone.name_of("America/Los_Angeles")
+    assert "Etc/GMT+0500" = Timezone.name_of("GMT+0500")
+    assert "Etc/GMT-0500" = Timezone.name_of("GMT-0500")
+  end
+
+  test "partial-hour offset timezones" do
+    zones = [
+      "Asia/Kathmandu", "Asia/Colombo", "Asia/Kabul", "Asia/Rangoon", "Asia/Pyongyang",
+      "Australia/Eucla", "Australia/Darwin",
+      "Pacific/Chatham",
+      "America/Caracas", "America/St_Johns",
+    ]
+    for tz <- zones do
+      date = Timex.DateTime.now(tz)
+      assert(date == date |> Timex.format!("{RFC3339}") |> Timex.parse!("{RFC3339}"), tz)
+    end
+  end
 end
