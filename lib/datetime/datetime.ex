@@ -399,8 +399,8 @@ defmodule Timex.DateTime do
   Converts an integer value representing seconds since the reference date (:epoch or :zero)
   to a DateTime struct representing that moment in time
   """
-  @spec from_seconds(non_neg_integer) :: DateTime.t :: {:error, atom}
-  @spec from_seconds(non_neg_integer, :epoch | :zero) :: DateTime.t :: {:error, atom}
+  @spec from_seconds(non_neg_integer) :: DateTime.t | {:error, atom}
+  @spec from_seconds(non_neg_integer, :epoch | :zero) :: DateTime.t | {:error, atom}
   def from_seconds(s, ref \\ :epoch)
   def from_seconds(s, :epoch) when is_positive_number(s) do
     construct(:calendar.gregorian_seconds_to_datetime(trunc(s) + epoch(:seconds)), %TimezoneInfo{})
