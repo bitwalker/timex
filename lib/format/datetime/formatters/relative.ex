@@ -39,6 +39,14 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
     end
   end
 
+  @doc """
+  Formats a date/time as a relative time formatted string
+
+  ## Examples
+
+      iex> #{__MODULE__}.format(Timex.shift(Timex.now, minutes: -1))
+      "1 minute ago"
+  """
   @spec format(Types.calendar_types, String.t) :: {:ok, String.t} | {:error, term}
   def format(date, format_string),  do: lformat(date, format_string, Translator.default_locale)
 
@@ -120,7 +128,7 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
       diff < 0 && diff >= -45 ->
         Translator.translate_plural(locale, "relative_time", "%{count} second ago", "%{count} seconds ago", diff * -1)
       diff < -45 && diff > @minute * 2 * -1 ->
-        Translator.translate_plural(locale, "relative_time", "%{count} minute ago", "%{count} minutes ago", -1)
+        Translator.translate_plural(locale, "relative_time", "%{count} minute ago", "%{count} minutes ago", 1)
       diff <= (@minute * 2) && diff > @hour * -1 ->
         Translator.translate_plural(locale, "relative_time", "%{count} minute ago", "%{count} minutes ago", div(diff * -1, @minute))
       diff <= @hour && diff > (@hour * 2 * -1) ->
