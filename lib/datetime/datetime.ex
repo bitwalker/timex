@@ -129,8 +129,7 @@ defimpl Timex.Protocol, for: DateTime do
 
   @spec end_of_month(DateTime.t) :: DateTime.t
   def end_of_month(%DateTime{year: year, month: month, time_zone: tz} = date),
-    do: %{Timex.DateTime.Helpers.construct({{year, month, days_in_month(date)},{23,59,59}}, tz) |
-          :microsecond => {999_999, 6}}
+    do: Timex.DateTime.Helpers.construct({{year, month, days_in_month(date)},{23,59,59,999_999}}, tz)
 
   @spec quarter(DateTime.t) :: integer
   def quarter(%DateTime{month: month}), do: Timex.quarter(month)
