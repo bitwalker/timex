@@ -28,8 +28,8 @@ defmodule Timex.DateTime.Helpers do
   def construct({{_,_,_} = date, {h,mm,s}}, timezone) do
     construct({date,{h,mm,s,0}}, timezone)
   end
-  def construct({{y,m,d}, {h,mm,s,us}} = datetime, timezone) do
-    seconds_from_zeroyear = :calendar.datetime_to_gregorian_seconds(datetime)
+  def construct({{y,m,d} = date, {h,mm,s,us}}, timezone) do
+    seconds_from_zeroyear = :calendar.datetime_to_gregorian_seconds({date,{h,mm,s}})
     case Timezone.name_of(timezone) do
       {:error, _} = err -> err
       tzname ->

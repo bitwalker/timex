@@ -35,33 +35,28 @@ defmodule Timex do
   Returns a DateTime representing the current moment in time in UTC
   """
   @spec now() :: DateTime.t
-  def now() do
-    {{year, month, day}, {hour, minute, second}} = :calendar.universal_time()
-    %DateTime{year: year, month: month, day: day,
-              hour: hour, minute: minute, second: second,
-              time_zone: "Etc/UTC", zone_abbr: "UTC",
-              utc_offset: 0, std_offset: 0}
-  end
+  def now(), do: from_unix(:os.system_time, :native)
 
   @doc """
   Returns a DateTime representing the current moment in time in the provided
   timezone.
   """
   @spec now(Types.valid_timezone) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
-  def now(tz), do: Timex.DateTime.Helpers.construct(:calendar.universal_time(), tz)
+  def now(tz), do: Timezone.convert(now(), tz)
 
   @doc """
   Returns a DateTime representing the current moment in time in the local timezone.
   """
   @spec local() :: DateTime.t | AmbiguousDateTime.t | {:error, term}
   def local() do
-    local_time = :calendar.local_time
-    case Timezone.local(local_time) do
+    case Timezone.local(:calendar.local_time) do
       %AmbiguousTimezoneInfo{after: a, before: b} ->
-        ad = Timex.DateTime.Helpers.construct(local_time, a.time_zone)
-        bd = Timex.DateTime.Helpers.construct(local_time, b.time_zone)
+        d = now()
+        ad = Timezone.convert(d, a.full_name)
+        bd = Timezone.convert(d, b.full_name)
+        %AmbiguousDateTime{after: ad, before: bd}
       %TimezoneInfo{full_name: tz} ->
-        Timex.DateTime.Helpers.construct(local_time, tz)
+        now(tz)
       {:error, _} = err -> err
     end
   end
