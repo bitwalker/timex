@@ -6,6 +6,11 @@ These are questions asked at one point or another.
 
 Timex is made available under the MIT license. See the GitHub repo for details.
 
+**Why can't I compare dates and times with <, >, etc.?**
+
+It is not possible to override the comparison operators to properly
+compare arbitrary structs. Use `Timex.compare/2 or /3` to compare them instead.
+
 **Which functions provide microsecond precision?**
 
 All of them. Unless you convert to something with lower precision.
