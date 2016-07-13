@@ -113,8 +113,8 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
       "s"       -> force_width(2, :sec, directive, opts)
       "s-epoch" -> Directive.get(:sec_epoch, directive, opts)
       "ss"      -> Directive.get(:sec_fractional, directive, opts)
-      "am"      -> Directive.get(:am, directive, opts)
-      "AM"      -> Directive.get(:AM, directive, opts)
+      "am"      -> %{Directive.get(:am, directive, opts) | :weight => 99}
+      "AM"      -> %{Directive.get(:AM, directive, opts) | :weight => 99}
       # Timezones
       "Zname" -> Directive.get(:zname, directive, opts)
       "Zabbr" -> Directive.get(:zabbr, directive, opts)

@@ -168,8 +168,10 @@ defmodule Timex.Parse.DateTime.Parser do
   end
   defp extract_parse_results(parse_results), do: extract_parse_results(parse_results, [])
   defp extract_parse_results([], acc), do: Enum.reverse(acc)
-  defp extract_parse_results([{tokens, _}|rest], acc) when is_list(tokens) do
-    extracted = Enum.reverse(extract_parse_results(tokens))
+  defp extract_parse_results([{tokens, weight}|rest], acc) when is_list(tokens) do
+    extracted = extract_parse_results(tokens)
+      |> Enum.map(fn {{token, value}, _weight} -> {{token, value}, weight} end)
+      |> Enum.reverse
     extract_parse_results(rest, extracted ++ acc)
   end
   defp extract_parse_results([{{token, value}, weight}|rest], acc) when is_atom(token) do
