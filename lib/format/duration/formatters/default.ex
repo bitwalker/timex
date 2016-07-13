@@ -1,6 +1,6 @@
-defmodule Timex.Format.Time.Formatters.Default do
+defmodule Timex.Format.Duration.Formatters.Default do
   @moduledoc """
-  Handles formatting timestamp values as ISO 8601 durations as described below.
+  Handles formatting Duration values as ISO 8601 durations as described below.
 
   Durations are represented by the format P[n]Y[n]M[n]DT[n]H[n]M[n]S.
   In this representation, the [n] is replaced by the value for each of the
@@ -18,7 +18,7 @@ defmodule Timex.Format.Time.Formatters.Default do
   - M is the minute designator that follows the value for the number of minutes.
   - S is the second designator that follows the value for the number of seconds.
   """
-  use Timex.Format.Time.Formatter
+  use Timex.Format.Duration.Formatter
   alias Timex.Translator
 
   @minute 60
@@ -29,26 +29,29 @@ defmodule Timex.Format.Time.Formatters.Default do
   @year   @day * 365
 
   @doc """
-  Return a human readable string representing the time interval.
+  Return a human readable string representing the duration.
 
   ## Examples
 
-      iex> {1435, 180354, 590264} |> #{__MODULE__}.format
+      iex> use Timex
+      ...> Duration.from_erl({1435, 180354, 590264}) |> #{__MODULE__}.format
       "P45Y6M5DT21H12M34.590264S"
-      iex> {0, 65, 0} |> #{__MODULE__}.format
+
+      iex> use Timex
+      ...> Duration.from_erl({0, 65, 0}) |> #{__MODULE__}.format
       "PT1M5S"
 
   """
-  @spec format(Types.timestamp) :: String.t | {:error, term}
-  def format({_,_,_} = timestamp), do: lformat(timestamp, Translator.default_locale)
+  @spec format(Duration.t) :: String.t | {:error, term}
+  def format(%Duration{} = duration), do: lformat(duration, Translator.default_locale)
   def format(_), do: {:error, :invalid_timestamp}
 
-  def lformat({_,_,_} = timestamp, _locale) do
-    timestamp
+  def lformat(%Duration{} = duration, _locale) do
+    duration
     |> deconstruct
     |> do_format
   end
-  def lformat(_, _locale), do: {:error, :invalid_timestamp}
+  def lformat(_, _locale), do: {:error, :invalid_duration}
 
   defp do_format(components), do: do_format(components, <<?P>>)
   defp do_format([], str),    do: str
@@ -70,8 +73,10 @@ defmodule Timex.Format.Time.Formatters.Default do
   defp format_component({:minutes, m}, str), do: str <> "#{m}M"
   defp format_component({:seconds, s}, str), do: str <> "#{s}S"
 
-  defp deconstruct({_, _, micro} = ts), do: deconstruct({ts |> Time.to_seconds |> trunc, micro}, [])
-  defp deconstruct({0, 0}, components), do: components |> Enum.reverse
+  defp deconstruct(%Duration{microseconds: micro} = duration),
+    do: deconstruct({Duration.to_seconds(duration, truncate: true), micro}, [])
+  defp deconstruct({0, 0}, components),
+    do: Enum.reverse(components)
   defp deconstruct({seconds, us}, components) when seconds > 0 do
     cond do
       seconds >= @year   -> deconstruct({rem(seconds, @year), us}, [{:years, div(seconds, @year)} | components])
@@ -82,15 +87,19 @@ defmodule Timex.Format.Time.Formatters.Default do
       true -> get_fractional_seconds(seconds, us, components)
     end
   end
-  defp deconstruct({seconds, us}, components) do
-    get_fractional_seconds(seconds, us, components)
-  end
-  defp get_fractional_seconds(seconds, 0, components), do: deconstruct({0, 0}, [{:seconds, seconds} | components])
+  defp deconstruct({seconds, us}, components),
+    do: get_fractional_seconds(seconds, us, components)
+
+  defp get_fractional_seconds(seconds, 0, components),
+    do: deconstruct({0, 0}, [{:seconds, seconds} | components])
   defp get_fractional_seconds(seconds, micro, components) when micro > 0 do
-    msecs = {0, 0, micro} |> Time.abs |> Time.to_milliseconds
+    millis = micro
+    |> Duration.from_microseconds
+    |> Duration.abs
+    |> Duration.to_milliseconds
     cond do
-      msecs >= 1.0 -> deconstruct({0, 0}, [{:seconds, seconds + (msecs * :math.pow(10, -3))} | components])
-      true         -> deconstruct({0, 0}, [{:seconds, seconds + (micro * :math.pow(10, -6))} | components])
+      millis >= 1.0 -> deconstruct({0, 0}, [{:seconds, seconds + (millis * :math.pow(10, -3))} | components])
+      true          -> deconstruct({0, 0}, [{:seconds, seconds + (micro * :math.pow(10, -6))} | components])
     end
   end
 end

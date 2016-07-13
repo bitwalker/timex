@@ -98,11 +98,10 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
   """
   use Timex.Format.DateTime.Formatter
 
-  alias Timex.DateTime
   alias Timex.Format.FormatError
   alias Timex.Format.DateTime.Formatters.Default
   alias Timex.Parse.DateTime.Tokenizers.Strftime
-  alias Timex.Translator
+  alias Timex.{Types, Translator}
 
   @spec tokenize(String.t) :: {:ok, [Directive.t]} | {:error, term}
   defdelegate tokenize(format_string), to: Strftime
@@ -110,16 +109,16 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
   def format!(date, format_string), do: lformat!(date, format_string, Translator.default_locale)
   def format(date, format_string),  do: lformat(date, format_string, Translator.default_locale)
 
-  @spec lformat!(DateTime.t, String.t, String.t) :: String.t | no_return
-  def lformat!(%DateTime{} = date, format_string, locale) do
+  @spec lformat!(Types.calendar_types, String.t, String.t) :: String.t | no_return
+  def lformat!(date, format_string, locale) do
     case lformat(date, format_string, locale) do
       {:ok, result}    -> result
       {:error, reason} -> raise FormatError, message: reason
     end
   end
 
-  @spec lformat(DateTime.t, String.t, String.t) :: {:ok, String.t} | {:error, term}
-  def lformat(%DateTime{} = date, format_string, locale) do
+  @spec lformat(Types.calendar_types, String.t, String.t) :: {:ok, String.t} | {:error, term}
+  def lformat(date, format_string, locale) do
     Default.lformat(date, format_string, Strftime, locale)
   end
 end

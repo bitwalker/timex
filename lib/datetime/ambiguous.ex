@@ -37,8 +37,12 @@ defmodule Timex.AmbiguousDateTime do
   specific reason to use :before.
   """
 
+  @enforce_fields [:before, :after]
   defstruct before: nil,
             after: nil
 
-  @type t :: %__MODULE__{}
+  @type t :: %__MODULE__{
+    :before => DateTime.t,
+    :after => DateTime.t
+  }
 end

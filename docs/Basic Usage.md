@@ -2,107 +2,57 @@
 
 **Some common scenarios with examples**
 
-## Getting Dates/DateTimes
+## Getting the date/time
 
 ### Getting the current datetime in UTC
 
 ```elixir
-iex> DateTime.now
-%DateTime{calendar: :gregorian, day: 24, hour: 4, minute: 45, month: 6,
- millisecond: 730, second: 8,
- timezone: %TimezoneInfo{abbreviation: "UTC", from: :min,
-  full_name: "UTC", offset_std: 0, offset_utc: 0, until: :max}, year: 2015}
+iex> Timex.now
+#<DateTime(2016-07-12T22:26:43Z Etc/UTC)>
 
-iex> Date.today
-%Date{calendar: :gregorian, day: 24, month: 6, year: 2015}
+iex> Timex.today
+~D[2016-07-12]
 ```
 
 ### Getting the current datetime in the local timezone
 
 ```elixir
-iex> DateTime.local
-%DateTime{calendar: :gregorian, day: 23, hour: 23, minute: 45, month: 6,
- millisecond: 713, second: 58,
- timezone: %TimezoneInfo{abbreviation: "CDT",
-  from: {:sunday, {{2015, 3, 8}, {2, 0, 0}}}, full_name: "America/Chicago",
-  offset_std: 60, offset_utc: -360,
-  until: {:sunday, {{2015, 11, 1}, {1, 0, 0}}}}, year: 2015}
+iex> Timex.local
+#<DateTime(2016-07-12T17:27:09-05:00 America/Chicago)>
 ```
 
 ### Getting the current datetime in an arbitrary timezone
 
 ```elixir
-iex> DateTime.now("Europe/Copenhagen")
-%DateTime{calendar: :gregorian, day: 24, hour: 4, minute: 50, month: 6,
- millisecond: 308, second: 34,
- timezone: %TimezoneInfo{abbreviation: "CEST",
-  from: {:sunday, {{2015, 3, 29}, {2, 0, 0}}}, full_name: "Europe/Copenhagen",
-  offset_std: 60, offset_utc: 60,
-  until: {:sunday, {{2015, 10, 25}, {2, 0, 0}}}}, year: 2015}
+iex> Timex.now("Europe/Copenhagen")
+#<DateTime(2016-07-12T22:27:37+02:00 Europe/Copenhagen)>
 ```
 
-## Constructing Dates/DateTimes
-
-### Constructing a date in UTC
+## Construction
 
 ```elixir
-iex> Timex.date({2015, 6, 24})
-%Date{calendar: :gregorian, day: 24, month: 6, year: 2015}
+iex> Timex.to_date({2015, 6, 24})
+~D[2015-06-24]
 
-iex> Timex.datetime({{2015, 6, 24}, {4, 50, 34}})
-%DateTime{calendar: :gregorian, day: 24, hour: 4, minute: 50, month: 6,
- millisecond: 0, second: 34,
- timezone: %TimezoneInfo{abbreviation: "UTC", from: :min,
-  full_name: "UTC", offset_std: 0, offset_utc: 0, until: :max}, year: 2015}
+iex> Timex.to_datetime({{2015, 6, 24}, {4, 50, 34}}, "America/Chicago")
+#<DateTime(2015-06-24T04:50:34-05:00 America/Chicago)>
+
+iex> Timex.to_datetime({{2015, 6, 24}, {4, 50, 34}}, :local)
+#<DateTime(2015-06-24T04:50:34-05:00 America/Chicago)>
 ```
 
-### Constructing a date in the local timezone
-
-```elixir
-iex> Timex.datetime({{2015, 6, 24}, {4, 50, 34}}, :local)
-%DateTime{calendar: :gregorian, day: 24, hour: 4, minute: 50, month: 6,
- millisecond: 0, second: 34,
- timezone: %TimezoneInfo{abbreviation: "CDT",
-  from: {:sunday, {{2015, 3, 8}, {2, 0, 0}}}, full_name: "America/Chicago",
-  offset_std: 60, offset_utc: -360,
-  until: {:sunday, {{2015, 11, 1}, {1, 0, 0}}}}, year: 2015}
-```
-
-### Constructing a date in an arbitrary timezone
-
-```elixir
-iex> Timex.datetime({{2015, 6, 24}, {4, 50, 34}}, "Europe/Copenhagen")
-%DateTime{calendar: :gregorian, day: 24, hour: 4, minute: 50, month: 6,
- millisecond: 0, second: 34,
- timezone: %TimezoneInfo{abbreviation: "CEST",
-  from: {:sunday, {{2015, 3, 29}, {2, 0, 0}}}, full_name: "Europe/Copenhagen",
-  offset_std: 60, offset_utc: 60,
-  until: {:sunday, {{2015, 10, 25}, {2, 0, 0}}}}, year: 2015}
-```
-
-## Parsing DateTime strings
+## Parsing date/time strings
 
 ### Parsing an ISO 8601-formatted DateTime string
 
 ```elixir
 # With timezone offset
-iex> date = "2015-06-24T04:50:34-05:00"
-iex> Timex.parse(date, "{ISO}")
-{:ok,
- %DateTime{calendar: :gregorian, day: 24, hour: 4, minute: 50, month: 6,
-  millisecond: 0, second: 34,
-  timezone: %TimezoneInfo{abbreviation: "GMT+5", from: :min,
-   full_name: "Etc/GMT+5", offset_std: 0, offset_utc: -300, until: :max},
-  year: 2015}}
+iex> Timex.parse!("2015-06-24T04:50:34-05:00", "{ISO:Extended}")
+#<DateTime(2015-06-24T04:50:34-05:00 Etc/GMT+05)>
 
 # Without timezone offset
-> date = "2015-06-24T04:50:34Z"
-> Timex.parse(date, "{ISOz}")
-{:ok,
- %DateTime{calendar: :gregorian, day: 24, hour: 4, minute: 50, month: 6,
-  millisecond: 0, second: 34,
-  timezone: %TimezoneInfo{abbreviation: "UTC", from: :min,
-   full_name: "UTC", offset_std: 0, offset_utc: 0, until: :max}, year: 2015}}
+iex> Timex.parse!("2015-06-24T04:50:34Z", "{ISO:Extended:Z}")
+#<DateTime(2015-06-24T04:50:34Z Etc/UTC)>
 ```
 
 ## Formatting DateTimes
@@ -110,8 +60,8 @@ iex> Timex.parse(date, "{ISO}")
 ### Formatting a DateTime as an ISO 8601 string
 
 ```elixir
-> DateTime.local |> Timex.format("{ISO}")
-{:ok, "2015-06-24T00:04:09.293-05:00"}
-> DateTime.local |> Timex.format("{ISOz}")
-{:ok, "2015-06-24T05:04:13.910Z"}
+iex> Timex.format!(Timex.to_datetime(~N[2015-06-24T00:04:09.293], "America/Chicago"), "{ISO:Extended}")
+"2015-06-24T00:04:09.293-05:00"
+iex> Timex.format!(Timex.to_datetime(~N[2015-06-24T00:04:09.293], "America/Chicago"), "{ISO:Extended:Z}")
+"2015-06-24T05:04:13.293Z"
 ```

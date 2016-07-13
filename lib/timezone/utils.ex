@@ -1,9 +1,5 @@
-defmodule Timex.Timezone.Database do
-  @moduledoc """
-  This module is not really intended for use outside of Timex, but it
-  provides a way to map Olson timezone names to Windows timezone names,
-  and vice versa.
-  """
+defmodule Timex.Timezone.Utils do
+  @moduledoc false
 
   {olson_mappings, _}   = Path.join("priv", "standard_to_olson.exs") |> Code.eval_file
   {windows_mappings, _} = Path.join("priv", "olson_to_win.exs") |> Code.eval_file
@@ -14,7 +10,7 @@ defmodule Timex.Timezone.Database do
 
   ## Example
 
-      iex> Timex.Timezone.Database.to_olson("Azores Standard Time")
+      iex> Timex.Timezone.Utils.to_olson("Azores Standard Time")
       "Atlantic/Azores"
 
   """
@@ -31,7 +27,7 @@ defmodule Timex.Timezone.Database do
 
   ## Example
 
-      iex> Timex.Timezone.Database.olson_to_win("Pacific/Noumea")
+      iex> Timex.Timezone.Utils.olson_to_win("Pacific/Noumea")
       "Central Pacific Standard Time"
 
   """

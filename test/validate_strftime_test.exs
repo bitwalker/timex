@@ -1,6 +1,5 @@
 defmodule DateFormatTest.ValidateStrftime do
   use ExUnit.Case, async: true
-  use Timex
 
   test "validate" do
     assert {:error, "Format string cannot be empty."} = validate ""

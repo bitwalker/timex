@@ -282,6 +282,8 @@ defmodule Timex.Translator do
   # relative seconds
   dngettext "relative_time", "in %{count} second", "in %{count} seconds", 0
   dngettext "relative_time", "%{count} second ago", "%{count} seconds ago", 0
+  # relative now
+  dgettext "relative_time", "now"
 
   # symbols
   dgettext "symbols", "." # decimal

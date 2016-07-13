@@ -170,10 +170,6 @@ After all this, we're now ready to use our custom parser!
 > alias MyApp.DateTimeTokenizers.Humanized
 > phrase = "3 days before the second of July, 2015"
 > format = "{shift} the {day} of {month}, {year}"
-> Timex.parse(phrase, format, Humanized)
-{:ok,
- %Timex.DateTime{calendar: :gregorian, day: 1, hour: 0, minute: 0, month: 7,
-  millisecond: 0, second: 0,
-  timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min,
-   full_name: "UTC", offset_std: 0, offset_utc: 0, until: :max}, year: 2015}}
+> Timex.parse!(phrase, format, Humanized)
+#<DateTime(2015-07-01T00:00:00Z Etc/UTC)>
 ```

@@ -8,7 +8,8 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
 
   | Range	                     | Sample Output
   ---------------------------------------------------------------------
-  | 0 to 45 seconds	           | a few seconds ago
+  | 0 seconds                  | now
+  | 1 to 45 seconds	           | a few seconds ago
   | 45 to 90 seconds	         | a minute ago
   | 90 seconds to 45 minutes	 | 2 minutes ago ... 45 minutes ago
   | 45 to 90 minutes	         | an hour ago
@@ -22,9 +23,8 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
   """
   use Timex.Format.DateTime.Formatter
   use Combine
-  alias Timex.DateTime
   alias Timex.Format.FormatError
-  alias Timex.Translator
+  alias Timex.{Types, Translator}
 
   @spec tokenize(String.t) :: {:ok, [Directive.t]} | {:error, term}
   def tokenize(format_string) do
@@ -39,24 +39,24 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
     end
   end
 
-  @spec format(DateTime.t, String.t) :: {:ok, String.t} | {:error, term}
+  @spec format(Types.calendar_types, String.t) :: {:ok, String.t} | {:error, term}
   def format(date, format_string),  do: lformat(date, format_string, Translator.default_locale)
 
-  @spec format!(DateTime.t, String.t) :: String.t | no_return
+  @spec format!(Types.calendar_types, String.t) :: String.t | no_return
   def format!(date, format_string), do: lformat!(date, format_string, Translator.default_locale)
 
-  @spec lformat(DateTime.t, String.t, String.t) :: {:ok, String.t} | {:error, term}
-  def lformat(%DateTime{:timezone => tz} = date, format_string, locale) do
+  @spec lformat(Types.calendar_types, String.t, String.t) :: {:ok, String.t} | {:error, term}
+  def lformat(date, format_string, locale) do
     case tokenize(format_string) do
       {:ok, []} ->
         {:error, "There were no formatting directives in the provided string."}
       {:ok, dirs} when is_list(dirs) ->
-        do_format(locale, date, DateTime.now(tz), dirs, <<>>)
+        do_format(locale, Timex.to_naive_datetime(date), Timex.Protocol.NaiveDateTime.now(), dirs, <<>>)
       {:error, reason} -> {:error, {:format, reason}}
     end
   end
 
-  @spec lformat(DateTime.t, String.t, String.t) :: String.t | no_return
+  @spec lformat(Types.calendar_types, String.t, String.t) :: String.t | no_return
   def lformat!(date, format_string, locale) do
     case lformat(date, format_string, locale) do
       {:ok, result}    -> result
@@ -72,7 +72,7 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
       {:ok, []} ->
         {:error, "There were no formatting directives in the provided string."}
       {:ok, dirs} when is_list(dirs) ->
-        do_format(locale, date, relative_to, dirs, <<>>)
+        do_format(locale, Timex.to_naive_datetime(date), Timex.to_naive_datetime(relative_to), dirs, <<>>)
       {:error, reason} -> {:error, {:format, reason}}
     end
   end
@@ -90,14 +90,11 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
   end
   defp do_format(locale, date, relative, [%Directive{type: :relative} | dirs], result) do
     diff = Timex.diff(date, relative, :seconds)
-    diff = case Timex.compare(date, relative, :seconds) do
-             0  -> diff
-             1  -> diff
-             -1 -> diff * -1
-           end
     phrase = cond do
       # future
-      diff >= 0 && diff <= 45 ->
+      diff == 0 ->
+        Translator.translate(locale, "relative_time", "now")
+      diff > 0 && diff <= 45 ->
         Translator.translate_plural(locale, "relative_time", "in %{count} second", "in %{count} seconds", diff)
       diff > 45 && diff < @minute * 2 ->
         Translator.translate_plural(locale, "relative_time", "in %{count} minute", "in %{count} minutes", 1)
@@ -120,7 +117,7 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
       diff >= (@year * 2) ->
         Translator.translate_plural(locale, "relative_time", "in %{count} year", "in %{count} years", div(diff, @year))
       # past
-      diff <= 0 && diff >= -45 ->
+      diff < 0 && diff >= -45 ->
         Translator.translate_plural(locale, "relative_time", "%{count} second ago", "%{count} seconds ago", diff * -1)
       diff < -45 && diff > @minute * 2 * -1 ->
         Translator.translate_plural(locale, "relative_time", "%{count} minute ago", "%{count} minutes ago", -1)
@@ -169,7 +166,5 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
   defp map_literal(literals)
     when is_list(literals),  do: Enum.map(literals, &map_literal/1)
   defp map_literal(literal), do: %Directive{type: :literal, value: literal, parser: char(literal)}
-
-
 
 end

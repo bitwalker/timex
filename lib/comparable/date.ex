@@ -1,21 +1,27 @@
-defimpl Timex.Comparable, for: Timex.Date do
-  alias Timex.Date
-  alias Timex.DateTime
-  alias Timex.Convertable
+defimpl Timex.Comparable, for: Date do
+  alias Timex.AmbiguousDateTime
+  alias Timex.Comparable.Utils
+  alias Timex.Comparable.Diff
 
-  @doc """
-  See docs for `Timex.compare/3`
-  """
+  def compare(a, :epoch, granularity),           do: compare(a, Timex.epoch(), granularity)
+  def compare(a, :zero, granularity),            do: compare(a, Timex.zero(), granularity)
+  def compare(_, :distant_past, _granularity),   do: +1
   def compare(_, :distant_future, _granularity), do: -1
-  def compare(_, :distant_past, _granularity), do: 1
-  def compare(a, b, granularity) do
-    DateTime.compare(Date.to_datetime(a), Convertable.to_datetime(b), granularity)
-  end
+  def compare(a, a, _granularity),               do: 0
+  def compare(_, %AmbiguousDateTime{} = b, _granularity),
+    do: {:error, {:ambiguous_comparison, b}}
+  def compare(a, b, granularity),
+    do: Utils.to_compare_result(diff(a, b, granularity))
 
-  @doc """
-  See docs for `Timex.diff/3`
-  """
+  def diff(_, %AmbiguousDateTime{} = b, _granularity),
+    do: {:error, {:ambiguous_comparison, b}}
   def diff(a, b, granularity) do
-    DateTime.diff(Date.to_datetime(a), Convertable.to_datetime(b), granularity)
+    case Timex.to_date(b) do
+      {:error, _} = err -> err
+      %Date{} = b ->
+        au = Timex.to_gregorian_microseconds(a)
+        bu = Timex.to_gregorian_microseconds(b)
+        Diff.diff(au, bu, granularity)
+    end
   end
 end

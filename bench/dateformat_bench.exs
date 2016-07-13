@@ -21,19 +21,19 @@ defmodule Timex.Timex.Bench do
 
     bench "(strftime) parse ISO 8601 datetime" do
       datetime = Timex.parse(@datetime, "%FT%TZ", :strftime)
-      datetime_zoned = Timex.parse(@datetime_zoned, "%FT%T%z", :strftime)
+      datetime_zoned = Timex.parse(@datetime_zoned, "%FT%T%:z", :strftime)
       {:ok, _} = datetime
       {:ok, _} = datetime_zoned
     end
 
     bench "(default) format ISO 8601 datetime" do
-      date = DateTime.epoch
-      {:ok, _} = Timex.format(date, "{ISOz}")
-      {:ok, _} = Timex.format(date, "{ISO}")
+      date = Timex.epoch
+      {:ok, _} = Timex.format(date, "{ISO:Extended:Z}")
+      {:ok, _} = Timex.format(date, "{ISO:Extended}")
     end
 
     bench "(strftime) format ISO 8601 datetime" do
-      date = DateTime.epoch
+      date = Timex.epoch
       {:ok, _} = Timex.format(date, "%FT%TZ", :strftime)
       {:ok, _} = Timex.format(date, "%FT%Tz", :strftime)
     end
@@ -48,8 +48,8 @@ defmodule Timex.Timex.Bench do
       {:ok, _} = Default.tokenize("{YYYY}-{M}-{D}T{h24}:{m}:{s}{Z}")
     end
 
-    bench "DateTime.local" do
-      _ = DateTime.local
+    bench "Timex.local" do
+      _ = Timex.local
       :ok
     end
 end

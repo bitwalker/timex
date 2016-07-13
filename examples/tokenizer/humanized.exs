@@ -1,6 +1,6 @@
 defmodule MyApp.DateTimeTokenizers.Humanized do
   @moduledoc """
-  See https://timex.readme.io/docs/custom-parsers for more context.
+  See https://hexdocs.pm/timex/custom-parsers.html for more context.
 
   This custom tokenizer accepts format strings containing the following tokens:
 
@@ -51,7 +51,7 @@ defmodule MyApp.DateTimeTokenizers.Humanized do
   You can return {:ok, date}, {:error, reason}, or :unrecognized (if you don't
   know what to do with the provided token).
   """
-  def apply(%DateTime{} = date, token, value) do
+  def apply(date, token, value) do
     case token do
       :oday_phonetic ->
         {:ok, %{date | :day => value}}

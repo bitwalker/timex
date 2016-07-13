@@ -45,8 +45,13 @@ defmodule Timex.Parse.DateTime.Helpers do
   end
 
   def to_sec_ms(sec, fraction) do
-    {n, _} = Float.parse("0.#{fraction}")
-    [sec: sec, sec_fractional: (1_000*n) |> Float.round |> trunc]
+    precision = byte_size(fraction)
+    n = String.to_integer(fraction)
+    n = n * div(1_000_000, trunc(:math.pow(10, precision)))
+    case n do
+      0 -> [sec: sec, sec_fractional: {0,0}]
+      _ -> [sec: sec, sec_fractional: {n, precision}]
+    end
   end
 
   def to_ampm("am"), do: [am: "am"]

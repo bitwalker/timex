@@ -3,8 +3,8 @@ defmodule Timex.Mixfile do
 
   def project do
     [ app: :timex,
-      version: "2.2.1",
-      elixir: "~> 1.1",
+      version: "3.0.0",
+      elixir: "~> 1.3",
       description: description(),
       package: package(),
       deps: deps(),
@@ -21,8 +21,8 @@ defmodule Timex.Mixfile do
 
   defp description do
     """
-    Timex is a rich, comprehensive Date/Time library for Elixir projects, with full timezone support via the :tzdata package. 
-    If you need to manipulate dates, times, datetimes, timestamps, etc., then Timex is for you! 
+    Timex is a rich, comprehensive Date/Time library for Elixir projects, with full timezone support via the :tzdata package.
+    If you need to manipulate dates, times, datetimes, timestamps, etc., then Timex is for you!
     """
   end
 
@@ -37,7 +37,7 @@ defmodule Timex.Mixfile do
     [{:tzdata, "~> 0.1.8 or ~> 0.5"},
      {:combine, "~> 0.7"},
      {:gettext, "~> 0.10"},
-     {:ex_doc, "~> 0.11", only: :dev},
+     {:ex_doc, "~> 0.12", only: :dev},
      {:earmark, "~> 0.2", only: :dev},
      {:benchfella, "~> 0.3", only: :dev},
      {:dialyze, "~> 0.2", only: :dev},
@@ -53,8 +53,6 @@ defmodule Timex.Mixfile do
        "CHANGELOG.md",
        "docs/Basic Usage.md",
        "docs/Erlang Interop.md",
-       "docs/Working with DateTime.md",
-       "docs/Working with Time.md",
        "docs/Formatting.md",
        "docs/Parsing.md",
        "docs/FAQ.md",

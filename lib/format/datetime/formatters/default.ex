@@ -1,6 +1,6 @@
 defmodule Timex.Format.DateTime.Formatters.Default do
   @moduledoc """
-  Date formatting language used by default by the `DateFormat` module.
+  Date formatting language used by default by the formatting functions in Timex.
 
   This is a novel formatting language introduced with `DateFormat`. Its main
   advantage is simplicity and usage of mnemonics that are easy to memorize.
@@ -81,11 +81,9 @@ defmodule Timex.Format.DateTime.Formatters.Default do
                          separators (e.g. `20070813T134801Z`)
 
   * `{ISO:Extended}`   - `<date>T<time><offset>`. Full date and time
-                         specification with separators. This is equivalent
-                         to `{ISO}`. (e.g. `2007-08-13T16:48:01 +03:00`)
+                         specification with separators. (e.g. `2007-08-13T16:48:01 +03:00`)
 
-  * `{ISO:Extended:Z}` - `<date>T<time>Z`. Full date and time in UTC. This is
-                         equivalent to `{ISOz}` (e.g. `2007-08-13T13:48:01Z`)
+  * `{ISO:Extended:Z}` - `<date>T<time>Z`. Full date and time in UTC. (e.g. `2007-08-13T13:48:01Z`)
 
   * `{ISOdate}`        - `YYYY-MM-DD`. That is, 4-digit year number, followed by
                          2-digit month and day numbers (e.g. `2007-08-13`)
@@ -131,10 +129,9 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   """
   use Timex.Format.DateTime.Formatter
 
-  alias Timex.DateTime
   alias Timex.Format.FormatError
   alias Timex.Parse.DateTime.Tokenizers.Default, as: Tokenizer
-  alias Timex.Translator
+  alias Timex.{Types, Translator}
 
   @spec tokenize(String.t) :: {:ok, [Directive.t]} | {:error, term}
   defdelegate tokenize(format_string), to: Tokenizer
@@ -143,16 +140,16 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   def format(date, format_string),            do: lformat(date, format_string, Translator.default_locale)
   def format(date, format_string, tokenizer), do: lformat(date, format_string, tokenizer, Translator.default_locale)
 
-  @spec lformat!(DateTime.t, String.t, String.t) :: String.t | no_return
-  def lformat!(%DateTime{} = date, format_string, locale) do
+  @spec lformat!(Types.calendar_types, String.t, String.t) :: String.t | no_return
+  def lformat!(date, format_string, locale) do
     case lformat(date, format_string, locale) do
       {:ok, result}    -> result
       {:error, reason} -> raise FormatError, message: reason
     end
   end
 
-  @spec lformat(DateTime.t, String.t, String.t) :: {:ok, String.t} | {:error, term}
-  def lformat(%DateTime{} = date, format_string, locale) do
+  @spec lformat(Types.calendar_types, String.t, String.t) :: {:ok, String.t} | {:error, term}
+  def lformat(date, format_string, locale) do
     case tokenize(format_string) do
       {:ok, []} ->
         {:error, "There were no formatting directives in the provided string."}
@@ -166,8 +163,8 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   If one wants to use the default formatting semantics with a different
   tokenizer, this is the way.
   """
-  @spec lformat(DateTime.t, String.t, atom, String.t) :: {:ok, String.t} | {:error, term}
-  def lformat(%DateTime{} = date, format_string, tokenizer, locale) do
+  @spec lformat(Types.calendar_types, String.t, atom, String.t) :: {:ok, String.t} | {:error, term}
+  def lformat(date, format_string, tokenizer, locale) do
     case tokenizer.tokenize(format_string) do
       {:ok, []} ->
         {:error, "There were no formatting directives in the provided string."}

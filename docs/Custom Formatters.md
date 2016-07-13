@@ -25,7 +25,6 @@ The implementation of the formatter for our "humanized" date format would like s
 defmodule MyApp.DateTimeFormatters.Humanized do
   use Timex.Format.DateTime.Formatter
 
-  alias Timex.DateTime
   alias Timex.Format.FormatError
   alias MyApp.DateTimeTokenizers.Humanized, as: Tokenizer
 
@@ -41,19 +40,19 @@ defmodule MyApp.DateTimeFormatters.Humanized do
 
   defdelegate tokenize(format_string), to: Tokenizer
 
-  def format!(%DateTime{} = date, format_string) do
+  def format!(date, format_string) do
     case format(date, format_string) do
       {:ok, result}    -> result
       {:error, reason} -> raise FormatError, message: reason
     end
   end
 
-  def format(%DateTime{} = date, format_string) do
+  def format(date, format_string) do
     case tokenize(format_string) do
       {:ok, []} ->
         {:error, "There were no formatting directives in the provided string."}
       {:ok, dirs} when is_list(dirs) ->
-        do_format(date, dirs, <<>>)
+        do_format(Timex.to_naive_datetime(date), dirs, <<>>)
       {:error, reason} -> {:error, {:format, reason}}
     end
   end
@@ -63,7 +62,7 @@ defmodule MyApp.DateTimeFormatters.Humanized do
   defp do_format(date, [%Directive{type: :literal, value: char} | dirs], result) when is_binary(char) do
     do_format(date, dirs, <<result::binary, char::binary>>)
   end
-  defp do_format(%DateTime{day: day} = date, [%Directive{type: :oday_phonetic} | dirs], result) do
+  defp do_format(%NaiveDateTime{day: day} = date, [%Directive{type: :oday_phonetic} | dirs], result) do
     phonetic = Enum.at(@days, day - 1)
     do_format(date, dirs, <<result::binary, phonetic::binary>>)
   end
@@ -89,6 +88,6 @@ iex> use Timex
 iex> alias MyApp.DateTimeFormatters.Humanized, as: HumanFormat
 iex> alias MyApp.DateTimeTokenizers.Humanized
 iex> format = "{shift} the {day} of {month}, {year}"
-iex> Timex.format(DateTime.now, format, HumanFormat)
+iex> Timex.format(Timex.now, format, HumanFormat)
 {:ok, "currently the eleventh of August, 2015"}
 ```

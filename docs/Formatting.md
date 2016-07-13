@@ -8,40 +8,40 @@ Formatting DateTimes in Timex is done via the `Timex` module. There are two buil
 
 ```elixir
 # By default the :default formatter is used
-iex> Timex.date({2013, 8, 18}) |> Timex.format("{YYYY}-{M}-{D}")
+iex> Timex.format({2013,8,18}, "{YYYY}-{M}-{D}")
 {:ok, "2013-8-18"}
 
 # But you can use the :strftime formatter very easily
-iex> Timex.date({2013, 8, 18}) |> Timex.format("%Y-%m-%d", :strftime)
+iex> Timex.format({2013,8,18}, "%Y-%m-%d", :strftime)
 {:ok, "2013-08-18"}
 
 # If you create your own formatter, you can use it easily as well
-iex> Timex.date({2013, 8, 18}) |> Timex.format(format_str, MyApp.MyDateFormatter)
+iex> Timex.format({2013,8,18}, format_str, MyApp.MyDateFormatter)
 
 # If formatting fails for some reason you will get an `{:error, reason}` tuple, so it's
 # recommended to use `format/1` or `format/2`; however you can use the "bang"
 # versions of these two, `format!/1` or `format!/2` which will return the result directly,
 # or raise on failure
-iex> Timex.date({2013, 8, 18}) |> Timex.format!("%Y-%m-%d", :strftime)
+iex> Timex.format!({2013,8,18}, "%Y-%m-%d", :strftime)
 "2013-08-18"
 ```
 
-### Formatting intervals/durations (represented as timestamps)
+### Formatting durations
 
-Formatting intervals (or timestamps really) is done via the `Timex.Format.Time.Formatter` module, or more commonly via `Timex.format_time`. It is extensible like DateTime formatting as well.
+Formatting durations (or timestamps really) is done via the `Timex.Format.Duration.Formatter` module, or more commonly via `Timex.format_duration`. It is extensible like date/time formatting as well.
 
 ```elixir
 # Time since the epoch
-iex> Time.now |> Timex.format_time
+iex> Duration.now |> Timex.format_duration
 "P45Y7M25DT18H13M10.966072S"
-iex> Time.now |> Timex.format_time(:humanized)
+iex> Duration.now |> Timex.format_duration(:humanized)
 "45 years, 7 months, 3 weeks, 4 days, 18 hours, 13 minutes, 16 seconds, 141.422 milliseconds"
 
 # Time it took to execute some code
-iex> {interval, _} = Time.measure(fn -> 1..10000 |> Enum.reverse end)
-{{0, 0, 2614}, ...}
-iex> interval |> Timex.format_time
+iex> {interval, _} = Duration.measure(fn -> 1..10000 |> Enum.reverse end)
+#<Duration(PT0.002614S)>
+iex> interval |> Timex.format_duration
 "PT0.002614S"
-iex> interval |> Timex.format_time(:humanized)
+iex> interval |> Timex.format_duration(:humanized)
 "2.614 milliseconds"
 ```

@@ -1,27 +1,7 @@
 defmodule Timex.Helpers do
   @moduledoc false
-  alias Timex.Time
   use Timex.Constants
   import Timex.Macros
-
-  def calendar_universal_time() do
-    {_, _, us} = ts = Time.now
-    {d,{h,min,sec}} = :calendar.now_to_universal_time(ts)
-    {d,{h,min,sec,round(us/1000)}}
-  end
-
-  def calendar_local_time() do
-    {_, _, us} = ts = Time.now
-    {d,{h,min,sec}} = :calendar.now_to_local_time(ts)
-    {d,{h,min,sec,round(us/1000)}}
-  end
-
-  def calendar_gregorian_microseconds_to_datetime(us, addseconds) do
-    sec = div(us, @million)
-    u   = rem(us, @million)
-    {d,{h,m,s}} = :calendar.gregorian_seconds_to_datetime(sec + addseconds)
-    {d,{h,m,s,round(u/1000)}}
-  end
 
   def iso_day_to_date_tuple(year, day) when is_year(year) and is_day_of_year(day) do
     {year, day} = cond do

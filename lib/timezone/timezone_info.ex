@@ -10,16 +10,26 @@ defmodule Timex.TimezoneInfo do
   Spec:
     - `day_of_week`: :sunday, :monday, :tuesday, etc
     - `datetime`:    {{year, month, day}, {hour, minute, second}}
-    - `from`:      :min | :max | {day_of_week, datetime}, when this zone starts
-    - `until`:     :min | :max | {day_of_week, datetime}, when this zone ends
+    - `from`:      :min | {day_of_week, datetime}, when this zone starts
+    - `until`:     :max | {day_of_week, datetime}, when this zone ends
   """
 
-  defstruct full_name:        "UTC",
+  defstruct full_name:        "Etc/UTC",
             abbreviation:     "UTC",
             offset_std:       0,
             offset_utc:       0,
             from:             :min,
             until:            :max
 
-  @type t :: %__MODULE__{}
+  @type day_of_week :: :sunday | :monday | :tuesday |
+                       :wednesday | :thursday | :friday | :saturday
+  @type datetime :: {{non_neg_integer, 1..12, 1..366}, {0..24,0..59,0..60}}
+  @type t :: %__MODULE__{
+    full_name: String.t,
+    abbreviation: String.t,
+    offset_std: integer,
+    offset_utc: integer,
+    from: :min | {day_of_week, datetime},
+    until: :max | {day_of_week, datetime}
+  }
 end

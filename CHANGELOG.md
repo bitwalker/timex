@@ -3,6 +3,52 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.0.0
+
+**IMPORTANT**: This release is a significant rewrite of Timex's internals as well as API. Many things have remained unchanged,
+but there are many things that have as well. Mostly the removal of prior deprecations, and the removal (without deprecation) of
+things incompatible with, or now redundant due to, the introduction of calendar types in Elixir 1.3 and their impact on Timex.
+The list of these changes will be comprehensively spelled out below, along with recommendations for alternatives in the cases
+of removals.
+
+### Fixed
+- [#185](https://github.com/bitwalker/timex/issues/185)
+- [#137](https://github.com/bitwalker/timex/issues/137)
+
+### Added
+- `Timex.Protocol` (defines the API all calendar types must implement to be used with Timex)
+- `compare/3`, `diff/3` `shift/2`, now allow the use of `:milliseconds` and `:microseconds`
+- `set/2` now allow the use of `:microsecond`
+- `Timex.Duration`
+- `to_gregorian_microseconds/1`, converts a date/time value to microseconds since year zero
+
+### Changed
+- Timex's old Date/DateTime types are replaced by Elixir 1.3's new calendar types,
+  NaiveDateTime is now used where appropriate, and AmbiguousDateTime remains in order to
+  handle timezone ambiguities.
+- `Timex.diff/3` now returns to it's old behaviour of returning a signed integer for values, so
+  that diffing/comparing can be done on a single value.
+- Renamed `Timex.Time` to `Timex.Duration` to better reflect it's purpose and prevent conflicts with
+  Elixir's built-in `Time` type.
+- Renamed `Timex.Format.Time.*` to `Timex.Formt.Duration.*`
+- Renamed `:timestamp` options to `:duration`
+- Renamed `*_timestamp` functions to `*_duration`
+- Changed `Timex.Duration` to operate on and return `Duration` structs rather than Erlang timestamp tuples
+- Changed `Duration.from/2`, to `Duration.from_*/1`, moving the unit into the name.
+- Renamed `to_erlang_datetime` to `to_erl`
+
+### Removed
+- Timex.Date (use `Timex` now)
+- Timex.DateTime (use `Timex` now)
+- Timex.Convertable (no longer makes sense in the face of differentiating NaiveDateTime/DateTime)
+- `set/2` no longer allow the use of `:millisecond`
+- Removed `Timex.date`
+- Deprecated `Timex.datetime`
+- Removed `from_timestamp` functions
+- Removed `to_gregorian`
+- Removed `to_seconds/2` in favor of `to_gregorian_seconds/1` and `to_unix/1`
+- Removed `normalize/1`, it no longer is necessary. `normalize/2` still exists however
+
 ## 2.1.3
 
 ### Fixed

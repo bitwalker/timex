@@ -6,17 +6,19 @@ defimpl Inspect, for: Timex.TimezoneInfo do
   def inspect(tzinfo, _) do
     total_offset = Timex.Timezone.total_offset(tzinfo)
     offset = format_offset(total_offset)
-    "#<Timezone(#{tzinfo.full_name} - #{tzinfo.abbreviation} (#{offset}))>"
+    "#<TimezoneInfo(#{tzinfo.full_name} - #{tzinfo.abbreviation} (#{offset}))>"
   end
 
   defp format_offset(total_offset) do
-    offset_hours = div(total_offset, 60)
-    offset_mins  = rem(total_offset, 60)
+    offset_hours = div(total_offset, 60*60)
+    offset_mins  = rem(total_offset, 60*60)
+    offset_secs  = rem(total_offset, 60)
     hour  = "#{pad_numeric(offset_hours)}"
     min   = "#{pad_numeric(offset_mins)}"
+    secs  = "#{pad_numeric(offset_secs)}"
     cond do
-      (offset_hours + offset_mins) >= 0 -> "+#{hour}:#{min}"
-      true -> "#{hour}:#{min}"
+      (offset_hours + offset_mins) >= 0 -> "+#{hour}:#{min}:#{secs}"
+      true -> "#{hour}:#{min}:#{secs}"
     end
   end
 

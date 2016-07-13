@@ -8,15 +8,11 @@ Timex is made available under the MIT license. See the GitHub repo for details.
 
 **Which functions provide microsecond precision?**
 
-If you need to work with time intervals down to microsecond precision, you should take a look at the functions in the `Time` module. The `Date` module is designed for things like handling different time zones and working with dates separated by large intervals, so the minimum time unit it uses is milliseconds.
-
-**So how do I work with time intervals defined with microsecond precision?**
-
-Use functions from the `Time` module for time interval arithmetic.
+All of them. Unless you convert to something with lower precision.
 
 **How do I find the time interval between two dates?**
 
-Use `Timex.diff` to obtain the number of milliseconds, seconds, minutes, hours, days, months, weeks, or years between two dates.
+Use `Timex.diff` to obtain the number of microseconds, milliseconds, seconds, minutes, hours, days, months, weeks, or years between two dates.
 
 **What is the support for timezones?**
 

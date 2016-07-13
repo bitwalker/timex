@@ -3,9 +3,8 @@
 **Learn how to add timex to your Elixir project and start using it.**
 
 If you are looking for a general reference of what functions are available to you, take a
-look at the `Timex`, `Timex.Date`, `Timex.DateTime`, and `Timex.Time` modules, as they cover
-the vast majority of functionality you will care about. The other modules, and even some functions
-in Date and DateTime are there to support the main API as accessed via the `Timex` module.
+look at the `Timex`, `Timex.Interval`, `Timex.Duration` modules, as they cover
+the vast majority of functionality you will care about.
 
 ## Project Setup
 
@@ -17,11 +16,11 @@ def application do
 end
 
 defp deps do
-  [{:timex, "~> x.x.x"}]
+  [{:timex, "~> 3.0"}]
 end
 ```
 
-To use Timex modules without the Timex namespace, add `use Timex` to the top of each module you plan on referencing Timex from. You can then reference the modules directly, for example: `DateTime.now`, versus `Timex.DateTime.now`. This is for compatibility with other libraries which might define their own Date/DateTime/Time implementations. You can also alias individual modules if that suits your needs better, but for purposes of this documentation, we'll assume that you're going the `use Timex` route.
+To use Timex modules without the Timex namespace, add `use Timex` to the top of each module you plan on referencing Timex from. You can then reference the modules directly, for example: `Duration.now`, versus `Timex.Duration.now`. You can also alias individual modules if that suits your needs better, but for purposes of this documentation, we'll assume that you're going the `use Timex` route.
 
 ### What Is Timex
 

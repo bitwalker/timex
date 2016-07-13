@@ -133,7 +133,7 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("second")
   end
   def second_fractional(opts \\ []) do
-    both(Helpers.integer(opts), pair_right(char("."), word_of(~r/\d/)), &Helpers.to_sec_ms/2)
+    both(Helpers.integer(opts), pair_right(char("."), word_of(~r/\d{1,6}/)), &Helpers.to_sec_ms/2)
     |> satisfy(fn [{:sec, sec}|_] -> sec >= 0 && sec <= 59 end)
     |> label("fractional second")
   end
@@ -163,27 +163,30 @@ defmodule Timex.Parse.DateTime.Parsers do
         one_of(char(), ["-", "+"]),
         digit(), digit(),
         option(digit()), option(digit())
-      ], fn xs -> [zoffs: xs |> Stream.filter(&(&1 != nil)) |> Enum.join] end
+    ], fn
+        [sign,h1,h2,nil,nil] -> [zoffs: "#{sign}#{h1}#{h2}"]
+        [sign,h1,h2,m1,m2]   -> [zoffs: "#{sign}#{h1}#{h2}#{m1}#{m2}"]
+       end
     ) |> label("timezone offset (+/-hhmm)")
   end
   def zoffs_colon(_) do
     pipe([
         one_of(char(), ["-", "+"]),
         digit(), digit(),
-        ignore(char(":")),
+        char(":"),
         digit(), digit()
-      ], fn xs -> [zoffs_colon: xs |> Enum.join] end
+      ], fn xs -> [zoffs_colon: Enum.join(xs)] end
     ) |> label("timezone offset (+/-hh:mm)")
   end
   def zoffs_sec(_) do
     pipe([
         one_of(char(), ["-", "+"]),
         digit(), digit(),
-        ignore(char(":")),
+        char(":"),
         digit(), digit(),
-        ignore(char(":")),
-        ignore(fixed_integer(2))
-      ], fn xs -> [zoffs_sec: xs |> Enum.join] end
+        char(":"),
+        digit(), digit()
+      ], fn xs -> [zoffs_sec: Enum.join(xs)] end
     ) |> label("timezone offset (+/-hh:mm:ss)")
   end
 
@@ -277,9 +280,9 @@ defmodule Timex.Parse.DateTime.Parsers do
     ]
     case is_zulu? do
       true ->
-        sequence(parts ++ [literal(char("Z"))])
+        sequence(parts ++ [map(char("Z"), fn _ -> [zname: "Etc/UTC"] end)])
       _ ->
-        sequence(parts ++ [choice([map(char("Z"), fn _ -> [zname: "UTC"] end), zoffs_sec(opts), zoffs(opts)])])
+        sequence(parts ++ [choice([map(char("Z"), fn _ -> [zname: "Etc/UTC"] end), zoffs_sec(opts), zoffs(opts)])])
     end
   end
 
@@ -317,7 +320,7 @@ defmodule Timex.Parse.DateTime.Parsers do
       true ->
         zone_parts = [
           literal(space()),
-          map(one_of(word(), ["UT", "GMT", "Z"]), fn _ -> [zname: "UTC"] end)
+          map(one_of(word(), ["UT", "GMT", "Z"]), fn _ -> [zname: "Etc/UTC"] end)
         ]
         sequence(parts ++ zone_parts)
       _ ->
@@ -326,7 +329,7 @@ defmodule Timex.Parse.DateTime.Parsers do
           choice([
             zname(opts),
             zoffs(opts),
-            map(one_of(word(), ["UT", "GMT", "Z"]), fn _ -> [zname: "UTC"] end),
+            map(one_of(word(), ["UT", "GMT", "Z"]), fn _ -> [zname: "Etc/UTC"] end),
             map(one_of(char(), ["A", "M", "N", "Y", "J"]), fn
               "A" -> [zoffs: "-0100"]
               "M" -> [zoffs: "-1200"]
@@ -363,7 +366,7 @@ defmodule Timex.Parse.DateTime.Parsers do
       true ->
         zone_parts = [
           literal(space()),
-          map(char("Z"), fn _ -> [zname: "UTC"] end)
+          map(char("Z"), fn _ -> [zname: "Etc/UTC"] end)
         ]
         sequence(parts ++ zone_parts)
       _ ->
@@ -438,7 +441,7 @@ defmodule Timex.Parse.DateTime.Parsers do
         ])
       ])
     ]
-    sequence(parts ++ [literal(char("Z"))])
+    sequence(parts ++ [map(char("Z"), fn _ -> [zname: "Etc/UTC"] end)])
   end
   @doc """
   ASN.1 GeneralizedTime standard date/time format.
@@ -478,9 +481,9 @@ defmodule Timex.Parse.DateTime.Parsers do
       ])
     ]
     cond do
-      is_zulu?  == true -> sequence(parts ++ [literal(char("Z"))])
-      is_zoffs? == true -> sequence(parts ++ [zoffs(opts)])
-      true              -> sequence(parts)
+      is_zulu?  -> sequence(parts ++ [map(char("Z"), fn _ -> [zname: "Etc/UTC"] end)])
+      is_zoffs? -> sequence(parts ++ [zoffs(opts)])
+      true      -> sequence(parts)
     end
   end
   @doc """

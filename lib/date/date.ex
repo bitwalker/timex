@@ -1,281 +1,131 @@
-defmodule Timex.Date do
+defimpl Timex.Protocol, for: Date do
   @moduledoc """
   This module represents all functions specific to creating/manipulating/comparing Dates (year/month/day)
   """
-  defstruct calendar: :gregorian, day: 1, month: 1, year: 0
-
-  alias __MODULE__
-  alias Timex.DateTime
-  alias Timex.TimezoneInfo
-  alias Timex.Helpers
   use Timex.Constants
   import Timex.Macros
 
-  @type t :: %__MODULE__{}
+  alias Timex.Types
 
-  @doc """
-  Returns today's date as a Date struct. If given a timezone, returns whatever "today" is in that timezone
-  """
-  @spec today() :: Date.t | {:error, term}
-  @spec today(Types.valid_timezone) :: Date.t | {:error, term}
-  def today,     do: now()
-  def today(%TimezoneInfo{} = tz),         do: now(tz)
-  def today(tz) when is_binary(tz),        do: now(tz)
-  def today(tz) when tz in [:utc, :local], do: now(tz)
-  def today(_), do: {:error, :invalid_timezone}
+  @epoch_seconds :calendar.datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}})
 
-  @doc """
-  Returns today's date as a Date struct. If given a timezone, returns whatever "today" is in that timezone
-  """
-  @spec now() :: Date.t | {:error, term}
-  @spec now(Types.valid_timezone) :: DateTime.t | {:error, term}
-  def now,                               do: from_erl(Helpers.calendar_universal_time())
-  def now(tz) when is_binary(tz),        do: from(DateTime.now(tz))
-  def now(%TimezoneInfo{} = tz),         do: from(DateTime.now(tz))
-  def now(tz) when tz in [:utc, :local], do: from(DateTime.now(tz))
-  def now(:days),                        do: to_days(now())
-  def now(_), do: {:error, :invalid_timezone}
-
-  @doc """
-  Returns a Date representing the first day of year zero
-  """
-  @spec zero() :: Date.t
-  def zero, do: from_erl({0, 1, 1})
-
-  @doc """
-  Returns a Date representing the date of the UNIX epoch
-  """
-  @spec epoch() :: DateTime.t
-  @spec epoch(:seconds) :: DateTime.t
-  def epoch, do: from_erl({1970, 1, 1})
-  def epoch(:seconds), do: to_seconds(from_erl({1970, 1, 1}), :zero)
-  def epoch(:secs) do
-    IO.write :stderr, "warning: :secs is a deprecated unit name, use :seconds instead\n"
-    epoch(:seconds)
+  @spec to_julian(Date.t) :: integer
+  def to_julian(%Date{:year => y, :month => m, :day => d}) do
+    Timex.Calendar.Julian.julian_date(y, m, d)
   end
 
-  @doc """
-  Converts from a date/time value to a Date struct representing that date
-  """
-  @spec from(Types.valid_datetime | Types.dtz | Types.phoenix_datetime_select_params) :: Date.t | {:error, term}
-  # From Timex types
-  def from(%Date{} = date), do: date
-  def from(%DateTime{year: y, month: m, day: d}), do: %Date{year: y, month: m, day: d}
-  # From Erlang/Ecto datetime tuples
-  def from({y,m,d} = date) when is_date(y,m,d),
-    do: from_erl(date)
-  def from({{y,m,d} = date, {h,mm,s}}) when is_datetime(y,m,d,h,mm,s),
-    do: from_erl(date)
-  def from({{y,m,d} = date, {h,mm,s,ms}}) when is_datetime(y,m,d,h,mm,s,ms),
-    do: from_erl(date)
-  # Phoenix datetime select value
-  def from(%{"year" => _, "month" => _, "day" => _} = dt) do
-    validated = Enum.reduce(dt, %{}, fn
-      _, :error -> :error
-    {key, value}, acc ->
-        case Integer.parse(value) do
-          {v, _} -> Map.put(acc, key, v)
-          :error -> :error
-        end
-    end)
-    case validated do
-      %{"year" => y, "month" => m, "day" => d} ->
-        from({{y,m,d},{0,0,0}})
-      {:error, _} ->
-        {:error, :invalid}
-    end
+  @spec to_gregorian_seconds(Date.t) :: integer
+  def to_gregorian_seconds(date), do: to_seconds(date, :zero)
+
+  @spec to_gregorian_microseconds(Date.t) :: integer
+  def to_gregorian_microseconds(date), do: (to_seconds(date, :zero) * (1_000*1_000))
+
+  @spec to_unix(Date.t) :: integer
+  def to_unix(date), do: trunc(to_seconds(date, :epoch))
+
+  @spec to_date(Date.t) :: Date.t
+  def to_date(date), do: date
+
+  @spec to_datetime(Date.t, timezone :: Types.valid_timezone) :: DateTime.t | {:error, term}
+  def to_datetime(%Date{:year => y, :month => m, :day => d}, timezone) do
+    Timex.DateTime.Helpers.construct({y,m,d}, timezone)
   end
-  def from(_), do: {:error, :invalid_date}
 
-  @doc """
-  WARNING: This is here to ease the migration to 2.x, but is deprecated.
-
-  Converts a value of the provided type to a Date struct, relative to the reference date (:epoch or :zero)
-  """
-  def from(value, type, ref \\ :epoch)
-  defdeprecated from(ts, :timestamp, ref), "use Date.from_timestamp/1 instead",
-    do: from_timestamp(ts, ref)
-  defdeprecated from(n, :us, ref), "use Date.from_microseconds/1 instead",
-    do: from_microseconds(n, ref)
-  defdeprecated from(n, :msecs, ref), "use Date.from_milliseconds/1 instead",
-    do: from_milliseconds(n, ref)
-  defdeprecated from(n, :secs, ref), "use Date.from_seconds/1 instead",
-    do: from_seconds(n, ref)
-  defdeprecated from(n, :days, ref), "use Date.from_days/1 instead",
-    do: from_days(n, ref)
-
-  @doc """
-  Like from/1, but more explicit about it's inputs (Erlang date/datetime tuples only).
-  """
-  def from_erl({y,m,d}) when is_date(y,m,d) do
-    case :calendar.valid_date({y,m,d}) do
-      true  -> %Date{year: y, month: m, day: d}
-      false -> {:error, :invalid_date}
-    end
+  @spec to_naive_datetime(Date.t) :: NaiveDateTime.t
+  def to_naive_datetime(%Date{:year => y, :month => m, :day => d}) do
+    %NaiveDateTime{year: y, month: m, day: d, hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
   end
-  def from_erl({{y,m,d}, {_,_,_}}) when is_date(y,m,d),   do: from_erl({y,m,d})
-  def from_erl({{y,m,d}, {_,_,_,_}}) when is_date(y,m,d), do: from_erl({y,m,d})
-  def from_erl(_), do: {:error, :invalid_date}
 
-  @doc """
-  Given an Erlang timestamp, converts it to a Date struct representing the date of that timestamp
-  """
-  @spec from_timestamp(Types.timestamp, :epoch | :zero) :: Date.t | {:error, term}
-  def from_timestamp(timestamp, ref \\ :epoch)
-  def from_timestamp({mega,sec,micro} = timestamp, ref)
-    when is_date_timestamp(mega,sec,micro) and ref in [:epoch, :zero]
-    do
-      case ok!(DateTime.from_timestamp(timestamp, ref)) do
-        {:error, _} = err -> err
-        {:ok, datetime} -> from(datetime)
-      end
-  end
-  def from_timestamp(_, _), do: {:error, :badarg}
+  @spec to_erl(Date.t) :: Types.date
+  def to_erl(%Date{year: y, month: m, day: d}), do: {y,m,d}
 
-  @doc """
-  Given an integer value representing days since the reference date (:epoch or :zero), returns
-  a Date struct representing that date
-  """
-  @spec from_days(non_neg_integer, :epoch | :zero) :: Date.t | {:error, term}
-  def from_days(n, ref \\ :epoch)
-  def from_days(n, ref) when is_positive_number(n) and ref in [:epoch, :zero] do
-    case ok!(DateTime.from_days(trunc(n), ref)) do
+  @spec century(Date.t) :: non_neg_integer
+  def century(%Date{:year => year}), do: Timex.century(year)
+
+  @spec is_leap?(Date.t) :: boolean
+  def is_leap?(%Date{year: year}), do: :calendar.is_leap_year(year)
+
+  @spec beginning_of_day(Date.t) :: Date.t
+  def beginning_of_day(%Date{} = date), do: date
+
+  @spec end_of_day(Date.t) :: Date.t
+  def end_of_day(%Date{} = date), do: date
+
+  @spec beginning_of_week(Date.t, Types.weekday) :: Date.t
+  def beginning_of_week(%Date{} = date, weekstart) do
+    case Timex.days_to_beginning_of_week(date, weekstart) do
       {:error, _} = err -> err
-      {:ok, datetime} -> from(datetime)
+      days -> shift(date, [days: -days])
     end
   end
-  def from_days(_, _), do: {:error, :badarg}
 
-  @doc """
-  Given an integer value representing seconds since the reference date (:epoch or :zero), returns
-  a Date struct representing that date
-  """
-  @spec from_seconds(non_neg_integer, :epoch | :zero) :: Date.t | {:error, term}
-  def from_seconds(n, ref \\ :epoch)
-  def from_seconds(n, ref) when is_positive_number(n) and ref in [:epoch, :zero] do
-    case ok!(DateTime.from_seconds(trunc(n), ref)) do
+  @spec end_of_week(Date.t, Types.weekday) :: Date.t
+  def end_of_week(%Date{} = date, weekstart) do
+    case Timex.days_to_end_of_week(date, weekstart) do
       {:error, _} = err -> err
-      {:ok, datetime} -> from(datetime)
+      days_to_end ->
+        shift(date, [days: days_to_end])
     end
   end
-  def from_seconds(_, _), do: {:error, :badarg}
 
-  @doc """
-  Given an integer value representing milliseconds since the reference date (:epoch or :zero), returns
-  a Date struct representing that date
-  """
-  @spec from_milliseconds(non_neg_integer, :epoch | :zero) :: Date.t | {:error, term}
-  def from_milliseconds(n, ref \\ :epoch)
-  def from_milliseconds(n, ref) when is_positive_number(n) and ref in [:epoch, :zero] do
-    case ok!(DateTime.from_milliseconds(trunc(n), ref)) do
-      {:error, _} = err -> err
-      {:ok, datetime} -> from(datetime)
-    end
+  @spec beginning_of_year(Date.t) :: Date.t
+  def beginning_of_year(%Date{} = date),
+    do: %{date | :month => 1, :day => 1}
+
+  @spec end_of_year(Date.t) :: Date.t
+  def end_of_year(%Date{} = date),
+    do: %{date | :month => 12, :day => 31}
+
+  @spec beginning_of_quarter(Date.t) :: Date.t
+  def beginning_of_quarter(%Date{month: month} = date) do
+    month = 1 + (3 * (quarter(month) - 1))
+    %{date | :month => month, :day => 1}
   end
-  def from_millisecond(_, _), do: {:error, :badarg}
 
-  @doc """
-  Given an integer value representing microseconds since the reference date (:epoch or :zero), returns
-  a Date struct representing that date
-  """
-  @spec from_microseconds(non_neg_integer, :epoch | :zero) :: Date.t | {:error, term}
-  def from_microseconds(n, ref \\ :epoch)
-  def from_microseconds(n, ref) when is_positive_number(n) and ref in [:epoch, :zero] do
-    case ok!(DateTime.from_microseconds(trunc(n), ref)) do
-      {:error, _} = err -> err
-      {:ok, datetime} -> from(datetime)
-    end
+  @spec end_of_quarter(Date.t) :: Date.t
+  def end_of_quarter(%Date{month: month} = date) do
+    month = 3 * quarter(month)
+    end_of_month(%{date | :month => month, :day => 1})
   end
-  def from_microseconds(_, _), do: {:error, :badarg}
 
-  @doc """
-  Convert a date to a timestamp value consumable by the Time module.
+  @spec beginning_of_month(Date.t) :: Date.t
+  def beginning_of_month(%Date{} = date),
+    do: %{date | :day => 1}
 
-  See also `diff/2` if you want to specify an arbitrary reference date.
+  @spec end_of_month(Date.t) :: Date.t
+  def end_of_month(%Date{} = date),
+    do: %{date | :day => days_in_month(date)}
 
-  ## Examples
+  @spec quarter(Date.t) :: integer
+  def quarter(%Date{month: month}), do: Timex.quarter(month)
 
-    iex> #{__MODULE__}.epoch |> #{__MODULE__}.to_timestamp
-    {0,0,0}
+  def days_in_month(%Date{:year => y, :month => m}), do: Timex.days_in_month(y, m)
 
-  """
-  @spec to_timestamp(Date.t) :: Types.timestamp | {:error, term}
-  @spec to_timestamp(Date.t, :epoch | :zero) :: Types.timestamp | {:error, term}
-  def to_timestamp(date, ref \\ :epoch)
-  def to_timestamp(%Date{} = date, ref) when ref in [:epoch, :zero] do
-    case ok!(to_datetime(date)) do
-      {:error, _} = err -> err
-      {:ok, datetime} -> DateTime.to_timestamp(datetime, ref)
-    end
+  def week_of_month(%Date{:year => y, :month => m, :day => d}), do: Timex.week_of_month(y,m,d)
+
+  def weekday(%Date{:year => y, :month => m, :day => d}), do: :calendar.day_of_the_week({y, m, d})
+
+  def day(%Date{} = date),
+    do: 1 + Timex.diff(date, %Date{:year => date.year, :month => 1, :day => 1}, :days)
+
+  def is_valid?(%Date{:year => y, :month => m, :day => d}) do
+    :calendar.valid_date({y,m,d})
   end
-  def to_timestamp(_, _), do: {:error, :badarg}
 
-  defdelegate to_secs(date),      to: __MODULE__, as: :to_seconds
-  defdelegate to_secs(date, ref), to: __MODULE__, as: :to_seconds
+  def iso_week(%Date{:year => y, :month => m, :day => d}),
+    do: Timex.iso_week(y, m, d)
 
-  @doc """
-  Convert a date to an integer number of seconds since Epoch or year 0.
-
-  See also `Timex.diff/3` if you want to specify an arbitrary reference date.
-
-  ## Examples
-
-      iex> Timex.date({1999, 1, 2}) |> #{__MODULE__}.to_seconds
-      915235200
-
-  """
-  @spec to_seconds(Date.t) :: integer | {:error, term}
-  @spec to_seconds(Date.t, :epoch | :zero) :: integer | {:error, term}
-  def to_seconds(date, ref \\ :epoch)
-  def to_seconds(%Date{} = date, ref) when ref in [:epoch, :zero] do
-    case ok!(to_datetime(date)) do
-      {:error, _} = err -> err
-      {:ok, datetime} -> DateTime.to_seconds(datetime, ref)
-    end
+  def from_iso_day(%Date{year: year} = date, day) when is_day_of_year(day) do
+    {year, month, day_of_month} = Timex.Helpers.iso_day_to_date_tuple(year, day)
+    %{date | :year => year, :month => month, :day => day_of_month}
   end
-  def to_seconds(_, _), do: {:error, :badarg}
-
-  @doc """
-  Convert the date to an integer number of days since Epoch or year 0.
-
-  See also `Timex.diff/3` if you want to specify an arbitray reference date.
-
-  ## Examples
-
-      iex> Timex.date({1970, 1, 15}) |> #{__MODULE__}.to_days
-      14
-
-  """
-  @spec to_days(Date.t) :: integer | {:error, term}
-  @spec to_days(Date.t, :epoch | :zero) :: integer | {:error, term}
-  def to_days(date, ref \\ :epoch)
-  def to_days(date, ref) when ref in [:epoch, :zero] do
-    case ok!(to_datetime(date)) do
-      {:error, _} = err -> err
-      {:ok, datetime} -> DateTime.to_days(datetime, ref)
-    end
-  end
-  def to_days(_, _), do: {:error, :badarg}
-
-  @doc """
-  Converts a Date to a DateTime in UTC
-  """
-  @spec to_datetime(Date.t) :: DateTime.t | {:error, term}
-  def to_datetime(%DateTime{} = dt), do: dt
-  def to_datetime(%Date{:year => y, :month => m, :day => d}) do
-    %DateTime{:year => y, :month => m, :day => d, :timezone => %TimezoneInfo{}}
-  end
-  def to_datetime(_), do: {:error, :badarg}
 
   @doc """
   See docs for Timex.set/2 for details.
   """
   @spec set(Date.t, list({atom(), term})) :: Date.t | {:error, term}
   def set(%Date{} = date, options) do
-    validate? = case options |> List.keyfind(:validate, 0, true) do
-      {:validate, bool} -> bool
-      _                 -> true
-    end
+    validate? = Keyword.get(options, :validate, true)
     Enum.reduce(options, date, fn
       _option, {:error, _} = err ->
         err
@@ -311,10 +161,7 @@ defmodule Timex.Date do
             else
               Map.put(result, name, val)
             end
-          {:ms, _} ->
-            IO.write :stderr, "warning: using :ms with shift is deprecated, use :millisecond instead"
-            result
-          {name, _} when name in [:time, :timezone, :hour, :minute, :second] ->
+          {name, _} when name in [:time, :timezone, :hour, :minute, :second, :microsecond] ->
             result
           {option_name, _}   ->
             {:error, {:invalid_option, option_name}}
@@ -322,60 +169,34 @@ defmodule Timex.Date do
     end)
   end
 
-  @doc """
-  See docs for `Timex.compare/3`
-  """
-  defdelegate compare(a, b), to: Timex.Comparable
-  defdelegate compare(a, b, granularity), to: Timex.Comparable
-
-  @doc """
-  See docs for `Timex.diff/3`
-  """
-  defdelegate diff(a, b), to: Timex.Comparable
-  defdelegate diff(a, b, granularity), to: Timex.Comparable
-
-  @doc """
-  Shifts the given Date based on the provided options.
-  See Timex.shift/2 for more information.
-  """
   @spec shift(Date.t, list({atom(), term})) :: Date.t | {:error, term}
   def shift(%Date{} = date, [{_, 0}]),               do: date
-  def shift(%Date{} = date, [timestamp: {0,0,0}]),   do: date
   def shift(%Date{} = date, options) do
     allowed_options = Enum.filter(options, fn
       {:hours, value} when value >= 24 or value <= -24 -> true
       {:hours, _} -> false
-      {:mins, value} when value >= 24*60 or value <= -24*60 ->
-        IO.write :stderr, "warning: :mins is a deprecated unit name, use :minutes instead"
-        true
-      {:mins, _} ->
-        IO.write :stderr, "warning: :mins is a deprecated unit name, use :minutes instead"
-        false
       {:minutes, value} when value >= 24*60 or value <= -24*60 -> true
       {:minutes, _} -> false
-      {:secs, value} when value >= 24*60*60 or value <= -24*60*60 ->
-        IO.write :stderr, "warning: :secs is a deprecated unit name, use :seconds instead"
-        true
-      {:secs, _} ->
-        IO.write :stderr, "warning: :secs is a deprecated unit name, use :seconds instead"
-        false
       {:seconds, value} when value >= 24*60*60 or value <= -24*60*60 -> true
       {:seconds, _} -> false
-      {:msecs, value} when value >= 24*60*60*1000 or value <= -24*60*60*1000 ->
-        IO.write :stderr, "warning: :msecs is a deprecated unit name, use :milliseconds instead"
-        true
-      {:msecs, _} ->
-        IO.write :stderr, "warning: :msecs is a deprecated unit name, use :milliseconds instead"
-        false
       {:milliseconds, value} when value >= 24*60*60*1000 or value <= -24*60*60*1000 -> true
       {:milliseconds, _} -> false
+      {:microseconds, {value, _}} when value >= 24*60*60*1000*1000 or value <= -24*60*60*1000*1000 -> true
+      {:microseconds, value} when value >= 24*60*60*1000*1000 or value <= -24*60*60*1000*1000 -> true
+      {:microseconds, _} -> false
       {_type, _value} -> true
     end)
-    case DateTime.shift(to_datetime(date), allowed_options) do
+    case Timex.shift(to_naive_datetime(date), allowed_options) do
       {:error, _} = err -> err
-      datetime -> from(datetime)
+      %NaiveDateTime{:year => y, :month => m, :day => d} ->
+        %Date{year: y, month: m, day: d}
     end
   end
   def shift(_, _), do: {:error, :badarg}
+
+  defp to_seconds(%Date{year: y, month: m, day: d}, :zero),
+    do: :calendar.datetime_to_gregorian_seconds({{y,m,d},{0,0,0}})
+  defp to_seconds(%Date{year: y, month: m, day: d}, :epoch),
+    do: (:calendar.datetime_to_gregorian_seconds({{y,m,d},{0,0,0}}) - @epoch_seconds)
 
 end

@@ -2,8 +2,7 @@ defmodule Timex.Interval do
   @moduledoc """
   This module is used for creating and manipulating DateTime intervals.
   """
-  alias __MODULE__
-  alias Timex.DateTime
+  alias Timex.Duration
 
   defmodule FormatError do
     @moduledoc """
@@ -16,6 +15,7 @@ defmodule Timex.Interval do
     end
   end
 
+  @enforce_keys [:from, :until]
   defstruct from:       nil,
             until:      nil,
             left_open:  false,
@@ -49,41 +49,49 @@ defmodule Timex.Interval do
   ## Examples
 
     iex> use Timex
-    ...> Interval.new(from: Timex.date({2014, 9, 22}), until: Timex.date({2014, 9, 29}))
+    ...> Interval.new(from: ~D[2014-09-22], until: ~D[2014-09-29])
     ...> |> Interval.format!("%Y-%m-%d", :strftime)
     "[2014-09-22, 2014-09-29)"
 
     iex> use Timex
-    ...> Interval.new(from: Timex.date({2014, 9, 22}), until: [days: 7])
+    ...> Interval.new(from: ~D[2014-09-22], until: [days: 7])
     ...> |> Interval.format!("%Y-%m-%d", :strftime)
     "[2014-09-22, 2014-09-29)"
 
     iex> use Timex
-    ...> Interval.new(from: Timex.date({2014, 9, 22}), until: [days: 7], left_open: true, right_open: false)
+    ...> Interval.new(from: ~D[2014-09-22], until: [days: 7], left_open: true, right_open: false)
     ...> |> Interval.format!("%Y-%m-%d", :strftime)
     "(2014-09-22, 2014-09-29]"
 
     iex> use Timex
-    ...> Interval.new(from: DateTime.from({{2014, 9, 22}, {15, 30, 0}}), until: [minutes: 20], right_open: false)
+    ...> Interval.new(from: ~N[2014-09-22T15:30:00], until: [minutes: 20], right_open: false)
     ...> |> Interval.format!("%H:%M", :strftime)
     "[15:30, 15:50]"
 
   """
   def new(options \\ []) do
-    from       = Keyword.get(options, :from,       DateTime.now())
+    from = case Keyword.get(options, :from) do
+      nil -> Timex.Protocol.NaiveDateTime.now()
+      %NaiveDateTime{} = d -> d
+      d -> Timex.to_naive_datetime(d)
+    end
     left_open  = Keyword.get(options, :left_open,  false)
     right_open = Keyword.get(options, :right_open, true)
     step       = Keyword.get(options, :step,       [days: 1])
     until = case Keyword.get(options, :until, [days: 1]) do
-      x when is_list(x) -> Timex.shift(from, x)
-      x -> x
-    end
+              {:error, _} = err    -> err
+              x when is_list(x)    -> Timex.shift(from, x)
+              %NaiveDateTime{} = d -> d
+              %DateTime{} = d      -> Timex.to_naive_datetime(d)
+              %Date{} = d          -> Timex.to_naive_datetime(d)
+              _ -> {:error, :invalid_until}
+            end
     case until do
       {:error, _} = err -> err
       _ ->
-        %Interval{from: from, until: until,
-                  left_open: left_open, right_open: right_open,
-                  step: step}
+        %__MODULE__{from: from, until: until,
+                    left_open: left_open, right_open: right_open,
+                    step: step}
     end
   end
 
@@ -92,31 +100,26 @@ defmodule Timex.Interval do
 
   When the unit is one of `:seconds`, `:minutes`, `:hours`, `:days`, `:weeks`, `:months`, `:years`, the result is an `integer`.
 
-  When the unit is `:timestamp`, the result is a tuple representing a valid `Timex.Time`.
+  When the unit is `:duration`, the result is a `Duration` struct.
 
   ## Example
 
     iex> use Timex
-    ...> Interval.new(from: DateTime.from({2014, 9, 22}), until: [months: 5])
+    ...> Interval.new(from: ~D[2014-09-22], until: [months: 5])
     ...> |> Interval.duration(:months)
     5
 
     iex> use Timex
-    ...> Interval.new(from: DateTime.from({{2014, 9, 22}, {15, 30, 0}}), until: [minutes: 20])
-    ...> |> Interval.duration(:timestamp)
-    {0, 1200, 0}
+    ...> Interval.new(from: ~N[2014-09-22T15:30:00], until: [minutes: 20])
+    ...> |> Interval.duration(:duration)
+    Duration.from_minutes(20)
 
   """
-  def duration(%Interval{} = interval, :secs) do
-    IO.write :stderr, "warning: :secs is a deprecated unit name, use :seconds instead\n"
-    duration(interval, :seconds)
+  def duration(%__MODULE__{from: from, until: until}, :duration) do
+    Timex.diff(until, from, :microseconds) |> Duration.from_microseconds
   end
-  def duration(%Interval{} = interval, :mins) do
-    IO.write :stderr, "warning: :mins is a deprecated unit name, use :minutes instead\n"
-    duration(interval, :minutes)
-  end
-  def duration(%Interval{from: from, until: until}, unit) do
-    Timex.diff(from, until, unit)
+  def duration(%__MODULE__{from: from, until: until}, unit) do
+    Timex.diff(until, from, unit)
   end
 
   @doc """
@@ -127,23 +130,23 @@ defmodule Timex.Interval do
   ## Examples
 
     iex> use Timex
-    ...> Interval.new(from: Timex.date({2014, 9, 22}), until: [days: 3], right_open: false)
+    ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
     ...> |> Interval.with_step([days: 1]) |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
     ["2014-09-22", "2014-09-23", "2014-09-24", "2014-09-25"]
 
     iex> use Timex
-    ...> Interval.new(from: Timex.date({2014, 9, 22}), until: [days: 3], right_open: false)
+    ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
     ...> |> Interval.with_step([days: 2]) |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
     ["2014-09-22", "2014-09-24"]
 
     iex> use Timex
-    ...> Interval.new(from: Timex.date({2014, 9, 22}), until: [days: 3], right_open: false)
+    ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
     ...> |> Interval.with_step([days: 3]) |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
     ["2014-09-22", "2014-09-25"]
 
   """
-  def with_step(%Interval{} = interval, step) do
-    %Interval{interval | :step => step}
+  def with_step(%__MODULE__{} = interval, step) do
+    %__MODULE__{interval | :step => step}
   end
 
   @doc """
@@ -152,16 +155,16 @@ defmodule Timex.Interval do
   ## Examples
 
       iex> use Timex
-      ...> Interval.new(from: Timex.date({2014, 9, 22}), until: [days: 3])
+      ...> Interval.new(from: ~D[2014-09-22], until: [days: 3])
       ...> |> Interval.format!("%Y-%m-%d %H:%M", :strftime)
       "[2014-09-22 00:00, 2014-09-25 00:00)"
 
       iex> use Timex
-      ...> Interval.new(from: Timex.date({2014, 9, 22}), until: [days: 3])
+      ...> Interval.new(from: ~D[2014-09-22], until: [days: 3])
       ...> |> Interval.format!("%Y-%m-%d", :strftime)
       "[2014-09-22, 2014-09-25)"
   """
-  def format(%Interval{} = interval, format, formatter \\ nil) do
+  def format(%__MODULE__{} = interval, format, formatter \\ nil) do
     case Timex.format(interval.from, format, formatter) do
       {:error, _} = err -> err
       {:ok, from} ->
@@ -178,20 +181,20 @@ defmodule Timex.Interval do
   @doc """
   Same as `format/3`, but raises a `Timex.Interval.FormatError` on failure.
   """
-  def format!(%Interval{} = interval, format, formatter \\ nil) do
+  def format!(%__MODULE__{} = interval, format, formatter \\ nil) do
     case format(interval, format, formatter) do
       {:ok, str} -> str
       {:error, e} -> raise FormatError, message: "#{inspect e}"
     end
   end
 
-  defimpl Enumerable, for: Interval do
+  defimpl Enumerable do
 
     def reduce(interval, acc, fun) do
       do_reduce({get_starting_date(interval), interval.until, interval.right_open, interval.step}, acc, fun)
     end
 
-    def member?(%Interval{from: from, until: until}, %DateTime{} = value) do
+    def member?(%Timex.Interval{from: from, until: until}, value) do
       # Just tests for set membership (date is within the provided (inclusive) range)
       result = cond do
         Timex.compare(value, from) < 1  -> false
@@ -217,8 +220,8 @@ defmodule Timex.Interval do
       end
     end
 
-    defp get_starting_date(%Interval{from: from, step: step, left_open: true}), do: Timex.shift(from, step)
-    defp get_starting_date(%Interval{from: from}),                              do: from
+    defp get_starting_date(%Timex.Interval{from: from, step: step, left_open: true}), do: Timex.shift(from, step)
+    defp get_starting_date(%Timex.Interval{from: from}),                              do: from
 
     defp has_recursion_ended?(current_date, end_date,  true), do: Timex.compare(end_date, current_date) < 1
     defp has_recursion_ended?(current_date, end_date, false), do: Timex.compare(end_date, current_date) < 0

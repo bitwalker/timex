@@ -14,24 +14,16 @@ iex> Timex.parse("2013-03-05", "{YYYY}-{0M}-{0D}")
 iex> Timex.parse("2013-03-05", "%Y-%m-%d", :strftime)
 
 # Parse a date using the default parser and the shortcut directive for RFC 1123
-iex> Timex.parse("Tue, 05 Mar 2013 23:25:19 Z", "{RFC1123z}")
-{:ok,
- %DateTime{calendar: :gregorian, day: 5, hour: 23, minute: 25, month: 3,
-  millisecond: 0, second: 19,
-  timezone: %TimezoneInfo{abbreviation: "UTC", from: :min,
-   full_name: "UTC", offset_std: 0, offset_utc: 0, until: :max}, year: 2013}}
+iex> Timex.parse!("Tue, 05 Mar 2013 23:25:19 Z", "{RFC1123z}")
+#<DateTime(2013-03-05T23:25:19Z Etc/UTC)>
 
-# Or you can use the :strftime parser
-iex> Timex.parse("2013-03-05", "%Y-%m-%d", :strftime)
-{:ok, %DateTime{..., day: 5, hour: 0, minute: 0, month: 3, year: 2013}}
+# Or you can use the :strftime parser (note how without timezone information, a NaiveDateTime is returned)
+iex> Timex.parse!("2013-03-05", "%Y-%m-%d", :strftime)
+~N[2013-03-05T00:00:00]
 
 # Any preformatted directive ending in `z` will shift the date to UTC/Zulu
 iex> Timex.parse("Tue, 06 Mar 2013 01:25:19 +0200", "{RFC1123}")
-{:ok,
- %DateTime{calendar: :gregorian, day: 5, hour: 23, minute: 25, month: 3,
-  millisecond: 0, second: 19,
-  timezone: %TimezoneInfo{abbreviation: "UTC", from: :min,
-   full_name: "UTC", offset_std: 0, offset_utc: 0, until: :max}, year: 2013}}
+{:ok, #<DateTime(2013-03-05T23:25:19Z Etc/UTC)>}
 ```
 
 ,You can also use "bang" versions (i.e. `parse!`), which will raise on failure rather than returning an `{:error, reason}` tuple (`parse!/1` and `parse!/2` respectively).

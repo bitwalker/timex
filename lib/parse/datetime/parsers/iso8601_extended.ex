@@ -99,10 +99,12 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
       case parse_fractional_seconds(rest, count, <<>>) do
         {:ok, fraction, count, rest} ->
           seconds = String.to_integer(<<s1::utf8,s2::utf8>>)
+          precision  = byte_size(fraction)
           fractional = String.to_integer(fraction)
+          fractional = fractional * div(1_000_000, trunc(:math.pow(10, precision)))
           cond do
             seconds >= 0 and seconds <= 60 ->
-              parse_offset(rest, [{:sec_fractional, fractional}, {:sec, seconds}|acc], count+2)
+              parse_offset(rest, [{:sec_fractional, {fractional, precision}}, {:sec, seconds}|acc], count+2)
             :else ->
               {:error, "Expected second between 0-60, but got `#{seconds}` instead.", count}
           end
@@ -132,7 +134,7 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
   end
 
 
-  def parse_offset(<<"Z",rest::binary>>, acc, count), do: {:ok, [{:zname, "UTC"}|acc], count+1, rest}
+  def parse_offset(<<"Z",rest::binary>>, acc, count), do: {:ok, [{:zname, "Etc/UTC"}|acc], count+1, rest}
   def parse_offset(<<dir::utf8,rest::binary>>, acc, count) when dir in [?+,?-] do
     parse_offset(dir, rest, acc, count+1)
   end

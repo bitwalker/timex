@@ -4,10 +4,13 @@ defprotocol Timex.Comparable do
   """
   alias Timex.Types
 
-  @type granularity :: :years | :months | :weeks | :calendar_weeks | :days | :hours | :minutes | :seconds | :timestamp
+  @type granularity :: :years | :months | :weeks | :calendar_weeks | :days |
+                       :hours | :minutes | :seconds | :milliseconds | :microseconds |
+                       :duration
   @type constants :: :epoch | :zero | :distant_past | :distant_future
-  @type comparable :: DateTime.t | Date.t | Types.date | Types.datetime | Types.gregorian | constants
+  @type comparable :: Date.t | DateTime.t | NaiveDateTime.t | Types.date | Types.datetime
   @type compare_result :: -1 | 0 | 1 | {:error, term}
+  @type diff_result :: Timex.Duration | integer | {:error, term}
 
   @doc """
   Compare two date or datetime types.
@@ -22,7 +25,9 @@ defprotocol Timex.Comparable do
   - :hours
   - :minutes
   - :seconds
-  - :timestamp
+  - :milliseconds
+  - :microseconds (default)
+  - :duration
 
   and the dates will be compared with the cooresponding accuracy.
   The default granularity is :seconds.
@@ -35,7 +40,7 @@ defprotocol Timex.Comparable do
 
   """
   @spec compare(comparable, comparable, granularity) :: compare_result
-  def compare(a, b, granularity \\ :seconds)
+  def compare(a, b, granularity \\ :microseconds)
 
   @doc """
   Get the difference between two date or datetime types.
@@ -50,12 +55,14 @@ defprotocol Timex.Comparable do
   - :hours
   - :minutes
   - :seconds
-  - :timestamp
+  - :milliseconds
+  - :microseconds (default)
+  - :duration
 
-  and the result will be a non-negative integer value of those units or a timestamp.
-
-
+  and the result will be an integer value of those units or a Duration struct.
+  The diff value will be negative if `a` comes before `b`, and positive if `a` comes
+  after `b`. This behaviour mirrors `compare/3`.
   """
-  @spec diff(comparable, comparable, granularity) :: Types.timestamp | non_neg_integer | {:error, term}
-  def diff(a, b, granularity \\ :seconds)
+  @spec diff(comparable, comparable, granularity) :: diff_result
+  def diff(a, b, granularity \\ :microseconds)
 end

@@ -18,20 +18,20 @@ defmodule ComparableTests do
 
   test "diff tuple" do
     assert 0 = Comparable.diff({2016,1,1}, {2016,1,1})
-    assert 1 = Comparable.diff({2016,1,1}, {2016,1,2}, :days)
+    assert -1 = Comparable.diff({2016,1,1}, {2016,1,2}, :days)
     assert {:error, :invalid_date} = Comparable.diff({0,0,0}, {2015,1,1})
   end
 
   test "compare ambiguous_datetime" do
-    lmt_jwst = {{1895,12,31},{23,55,0}, "Asia/Taipei"}
+    lmt_jwst = Timex.to_datetime({{1895,12,31},{23,55,0}}, "Asia/Taipei")
     assert 0 = Comparable.compare(lmt_jwst, lmt_jwst)
     assert 1 = Comparable.compare(lmt_jwst, :distant_past)
     assert -1 = Comparable.compare(lmt_jwst, :distant_future)
   end
 
   test "diff ambiguous_datetime" do
-    lmt_jwst = {{1895, 12, 31}, {23, 55, 0}, "Asia/Taipei"}
+    lmt_jwst = Timex.to_datetime({{1895,12,31},{23,55,0}}, "Asia/Taipei")
     assert 0 = Comparable.compare(lmt_jwst, lmt_jwst)
-    assert {:error, {:ambiguous_comparison, _}} = Comparable.compare(lmt_jwst, Timex.datetime({2015, 1, 1}))
+    assert {:error, {:ambiguous_comparison, _}} = Comparable.compare(lmt_jwst, Timex.to_naive_datetime({2015, 1, 1}))
   end
 end

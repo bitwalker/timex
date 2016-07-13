@@ -2,15 +2,15 @@ defmodule DateFormatTest.FormatStrftime do
   use ExUnit.Case, async: true
   use Timex
 
-  @aug182013 Timex.datetime({{2013,8,18}, {12,30,5}})
-  @aug180003 Timex.datetime({{3,8,18}, {12,30,5}})
-  @jan12015 Timex.datetime({{2015,1,1}, {0,0,0}})
-  @jan152015 Timex.datetime({{2015,1,15}, {0,0,0}})
-  @dec312015 Timex.datetime({{2015,12,31}, {0,0,0}})
-  @dec312012 Timex.datetime({{2012,12,31}, {0,0,0}})
+  @aug182013 Timex.to_datetime({{2013,8,18}, {12,30,5}})
+  @aug180003 Timex.to_datetime({{3,8,18}, {12,30,5}})
+  @jan12015 Timex.to_datetime({{2015,1,1}, {0,0,0}})
+  @jan152015 Timex.to_datetime({{2015,1,15}, {0,0,0}})
+  @dec312015 Timex.to_datetime({{2015,12,31}, {0,0,0}})
+  @dec312012 Timex.to_datetime({{2012,12,31}, {0,0,0}})
 
   test "exceptions" do
-    date = Timex.datetime({2013,03,02})
+    date = Timex.to_datetime({2013,03,02})
 
     formatter = Timex.Format.DateTime.Formatters.Strftime
     assert "2013-03-02" = formatter.format!(date, "%Y-%m-%d")
@@ -125,36 +125,36 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "format %a" do
-    assert { :ok, "Mon" } = format(Timex.datetime({2012,12,31}), "%a")
-    assert { :ok, "Tue" } = format(Timex.datetime({2013,1,1}), "%a")
-    assert { :ok, "Wed" } = format(Timex.datetime({2013,1,2}), "%a")
-    assert { :ok, "Thu" } = format(Timex.datetime({2013,1,3}), "%a")
-    assert { :ok, "Fri" } = format(Timex.datetime({2013,1,4}), "%a")
-    assert { :ok, "Sat" } = format(Timex.datetime({2013,1,5}), "%a")
-    assert { :ok, "Sun" } = format(Timex.datetime({2013,1,6}), "%a")
-    assert { :ok, "Sun" } = format(Timex.datetime({2013,1,6}), "%0a")
-    assert { :ok, "Sun" } = format(Timex.datetime({2013,1,6}), "%-a")
+    assert { :ok, "Mon" } = format(Timex.to_datetime({2012,12,31}), "%a")
+    assert { :ok, "Tue" } = format(Timex.to_datetime({2013,1,1}), "%a")
+    assert { :ok, "Wed" } = format(Timex.to_datetime({2013,1,2}), "%a")
+    assert { :ok, "Thu" } = format(Timex.to_datetime({2013,1,3}), "%a")
+    assert { :ok, "Fri" } = format(Timex.to_datetime({2013,1,4}), "%a")
+    assert { :ok, "Sat" } = format(Timex.to_datetime({2013,1,5}), "%a")
+    assert { :ok, "Sun" } = format(Timex.to_datetime({2013,1,6}), "%a")
+    assert { :ok, "Sun" } = format(Timex.to_datetime({2013,1,6}), "%0a")
+    assert { :ok, "Sun" } = format(Timex.to_datetime({2013,1,6}), "%-a")
   end
 
   test "format %A" do
-    assert { :ok, "Monday" }    = format(Timex.datetime({2012,12,31}), "%A")
-    assert { :ok, "Tuesday" }   = format(Timex.datetime({2013,1,1}), "%A")
-    assert { :ok, "Wednesday" } = format(Timex.datetime({2013,1,2}), "%A")
-    assert { :ok, "Thursday" }  = format(Timex.datetime({2013,1,3}), "%A")
-    assert { :ok, "Friday" }    = format(Timex.datetime({2013,1,4}), "%A")
-    assert { :ok, "Saturday" }  = format(Timex.datetime({2013,1,5}), "%A")
-    assert { :ok, "Sunday" }    = format(Timex.datetime({2013,1,6}), "%A")
-    assert { :ok, "Sunday" } = format(Timex.datetime({2013,1,6}), "%_A")
-    assert { :ok, "Sunday" } = format(Timex.datetime({2013,1,6}), "%0A")
+    assert { :ok, "Monday" }    = format(Timex.to_datetime({2012,12,31}), "%A")
+    assert { :ok, "Tuesday" }   = format(Timex.to_datetime({2013,1,1}), "%A")
+    assert { :ok, "Wednesday" } = format(Timex.to_datetime({2013,1,2}), "%A")
+    assert { :ok, "Thursday" }  = format(Timex.to_datetime({2013,1,3}), "%A")
+    assert { :ok, "Friday" }    = format(Timex.to_datetime({2013,1,4}), "%A")
+    assert { :ok, "Saturday" }  = format(Timex.to_datetime({2013,1,5}), "%A")
+    assert { :ok, "Sunday" }    = format(Timex.to_datetime({2013,1,6}), "%A")
+    assert { :ok, "Sunday" } = format(Timex.to_datetime({2013,1,6}), "%_A")
+    assert { :ok, "Sunday" } = format(Timex.to_datetime({2013,1,6}), "%0A")
   end
 
   test "format %V" do
-    date = Timex.datetime({2007,11,19})
+    date = Timex.to_datetime({2007,11,19})
     assert { :ok, "47" } = format(date, "%V")
     assert { :ok, "47" } = format(date, "%0V")
     assert { :ok, "47" } = format(date, "%-V")
 
-    date = Timex.datetime({2007,1,1})
+    date = Timex.to_datetime({2007,1,1})
     assert { :ok, "1" }  = format(date, "%-V")
     assert { :ok, "01" } = format(date, "%V")
     assert { :ok, "01" } = format(date, "%0V")
@@ -162,34 +162,34 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "format %W" do
-    date = Timex.datetime({2015,12,28})
+    date = Timex.to_datetime({2015,12,28})
     assert { :ok, "53" } = format(date, "%W")
     assert { :ok, "53" } = format(date, "%-W")
-    date = Timex.datetime({2013,1,6})
+    date = Timex.to_datetime({2013,1,6})
     assert { :ok, "01" } = format(date, "%W")
     assert { :ok, "1" } = format(date, "%-W")
     assert { :ok, " 1" } = format(date, "%_W")
-    date = Timex.datetime({2013,1,7})
+    date = Timex.to_datetime({2013,1,7})
     assert { :ok, "02" } = format(date, "%W")
     assert { :ok, "2" } = format(date, "%-W")
   end
 
   test "format %U" do
-    date = Timex.datetime({2015,12,28})
+    date = Timex.to_datetime({2015,12,28})
     assert { :ok, "53" } = format(date, "%U")
     assert { :ok, "53" } = format(date, "%-U")
-    date = Timex.datetime({2013,1,6})
+    date = Timex.to_datetime({2013,1,6})
     assert { :ok, "02" } = format(date, "%U")
     assert { :ok, "2" } = format(date, "%-U")
     assert { :ok, " 2" } = format(date, "%_U")
-    date = Timex.datetime({2013,1,7})
+    date = Timex.to_datetime({2013,1,7})
     assert { :ok, "02" } = format(date, "%U")
     assert { :ok, "2" } = format(date, "%-U")
   end
 
   test "various simple date combinations" do
-    date = Timex.datetime({2013,8,18})
-    old_date = Timex.datetime({3,8,8})
+    date = Timex.to_datetime({2013,8,18})
+    old_date = Timex.to_datetime({3,8,8})
 
     assert { :ok, "2013-8-18" } = format(date, "%Y-%-m-%d")
     assert { :ok, "3/08/08" } = format(old_date, "%-Y/%m/%d")
@@ -203,8 +203,8 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "format %H" do
-    date = Timex.datetime({{2013,8,18}, {16,28,27}})
-    date_midnight = Timex.datetime({{2013,8,18}, {0,3,4}})
+    date = Timex.to_datetime({{2013,8,18}, {16,28,27}})
+    date_midnight = Timex.to_datetime({{2013,8,18}, {0,3,4}})
 
     assert { :ok, "0" }  = format(date_midnight, "%-H")
     assert { :ok, "00" } = format(date_midnight, "%H")
@@ -214,15 +214,15 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "format %k" do
-    date = Timex.datetime({{2013,8,18}, {16,28,27}})
-    date_midnight = Timex.datetime({{2013,8,18}, {0,3,4}})
+    date = Timex.to_datetime({{2013,8,18}, {16,28,27}})
+    date_midnight = Timex.to_datetime({{2013,8,18}, {0,3,4}})
 
     assert { :ok, " 0" } = format(date_midnight, "%k")
     assert { :ok, "16" } = format(date, "%k")
   end
 
   test "format %I" do
-    date = Timex.datetime({{2013,8,18}, {16,28,27}})
+    date = Timex.to_datetime({{2013,8,18}, {16,28,27}})
 
     assert { :ok, "4" }  = format(date, "%-I")
     assert { :ok, "04" } = format(date, "%I")
@@ -233,7 +233,7 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "format %l" do
-    date = Timex.datetime({{2013,8,18}, {16,28,27}})
+    date = Timex.to_datetime({{2013,8,18}, {16,28,27}})
 
     assert { :ok, " 4" } = format(date, "%l")
     assert { :ok, "4" }  = format(date, "%-l")
@@ -241,8 +241,8 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "various time combinations" do
-    date = Timex.datetime({{2013,8,18}, {12,3,4}})
-    date_midnight = Timex.datetime({{2013,8,18}, {0,3,4}})
+    date = Timex.to_datetime({{2013,8,18}, {12,3,4}})
+    date_midnight = Timex.to_datetime({{2013,8,18}, {0,3,4}})
 
     assert { :ok, "12: 3: 4" } = format(date, "%H:%_M:%_S")
     assert { :ok, "12:03:04" } = format(date, "%k:%M:%S")
@@ -257,14 +257,14 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "format %p" do
-    date_midnight = Timex.datetime({{2013,8,18}, {0,3,4}})
+    date_midnight = Timex.to_datetime({{2013,8,18}, {0,3,4}})
 
     assert { :ok, "AM" } = format(date_midnight, "%0p")
     assert { :ok, "am" } = format(date_midnight, "%_P")
   end
 
   test "format %s" do
-    date = Timex.datetime({{2013,8,18}, {12,3,4}})
+    date = Timex.to_datetime({{2013,8,18}, {12,3,4}})
 
     assert { :ok, "1376827384" }  = format(date, "%s")
     assert { :ok, "1376827384" }  = format(date, "%-s")
@@ -272,10 +272,10 @@ defmodule DateFormatTest.FormatStrftime do
             {:formatter,
              "Invalid directive flag: Cannot pad seconds from epoch, as it is not a fixed width integer."}}  = format(date, "%_s")
 
-    date = Timex.datetime({{2001,9,9},{1,46,40}})
+    date = Timex.to_datetime({{2001,9,9},{1,46,40}})
     assert { :ok, "1000000000" } = format(date, "%s")
 
-    date = DateTime.epoch()
+    date = Timex.epoch()
     cannot_pad_err = {:error, {:formatter, "Invalid directive flag: Cannot pad seconds from epoch, as it is not a fixed width integer."}}
     assert { :ok, "0" }  = format(date, "%-s")
     assert { :ok, "0" }  = format(date, "%s")
@@ -284,13 +284,13 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "format timezones" do
-    date = Timex.datetime({2007,11,19}, "Europe/Athens")
+    date = Timex.to_datetime({2007,11,19}, "Europe/Athens")
     assert { :ok, "Europe/Athens" } = format(date, "%Z")
     assert { :ok, "+0200" } = format(date, "%z")
     assert { :ok, "+02:00" } = format(date, "%:z")
     assert { :ok, "+02:00:00" } = format(date, "%::z")
 
-    date = Timex.datetime({2007,11,19}, "America/Los_Angeles")
+    date = Timex.to_datetime({2007,11,19}, "America/Los_Angeles")
     assert { :ok, "America/Los_Angeles" } = format(date, "%Z")
     assert { :ok, "-0800" } = format(date, "%z")
     assert { :ok, "-08:00" } = format(date, "%:z")
@@ -303,24 +303,24 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "format pre-defined directives" do
-    date = Timex.datetime({{2013,8,18}, {16,28,27}})
+    date = Timex.to_datetime({{2013,8,18}, {16,28,27}})
     assert { :ok, "08/18/13" }    = format(date, "%D")
     assert { :ok, "2013-08-18" }  = format(date, "%F")
     assert { :ok, "16:28" }       = format(date, "%R")
     assert { :ok, "04:28:27 PM" } = format(date, "%r")
     assert { :ok, "16:28:27" }    = format(date, "%T")
 
-    date = Timex.datetime({{2013,8,1}, {16,28,27}})
+    date = Timex.to_datetime({{2013,8,1}, {16,28,27}})
     assert { :ok, " 1-Aug-2013" } = format(date, "%v")
   end
 
   test "supports unicode format strings" do
-    date = Timex.datetime({{2007,11,9}, {8,37,48}})
-    assert { :ok, "Fri å∫ç∂ {%08…37…48%} ¿UTC?" } = format(date, "%a å∫ç∂ {%%%H…%M…%S%%} ¿%Z?")
+    date = Timex.to_datetime({{2007,11,9}, {8,37,48}})
+    assert { :ok, "Fri å∫ç∂ {%08…37…48%} ¿Etc/UTC?" } = format(date, "%a å∫ç∂ {%%%H…%M…%S%%} ¿%Z?")
   end
 
   test "tokenization errors" do
-    date = DateTime.now()
+    date = Timex.now()
     assert {:error, {:format, "Format string cannot be empty."}} = format(date, "")
     assert {:error, {:format, "Invalid format string, must contain at least one directive."}} = format(date, "abc")
     assert {:error, {:format, "Invalid format string, must contain at least one directive."}} = format(date, "Use %% as oft{{en as you like%%")
@@ -328,8 +328,9 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "lau/calendar tests" do
-    dt = Timex.datetime({{2014, 11, 3}, {1, 41, 2, 123}})
-    dt_sunday = Timex.datetime({{2014, 11, 2}, {1, 41, 2}})
+    dt = Timex.to_datetime({{2014, 11, 3}, {1, 41, 2}})
+    dt = %{dt | :microsecond => {123_000,3}}
+    dt_sunday = Timex.to_datetime({{2014, 11, 2}, {1, 41, 2}})
     assert format(dt, "%a") == {:ok, "Mon"}
     assert format(dt, "%A") == {:ok, "Monday"}
     assert format(dt, "%b") == {:ok, "Nov"}
@@ -355,27 +356,27 @@ defmodule DateFormatTest.FormatStrftime do
     assert format(dt, "%R") == {:ok, "01:41"}
     assert format(dt, "%T") == {:ok, "01:41:02"}
     assert format(dt, "%F") == {:ok, "2014-11-03"}
-    assert format(dt, "%Z") == {:ok, "UTC"}
+    assert format(dt, "%Z") == {:ok, "Etc/UTC"}
 
-    dt = Timex.datetime({{2014, 12, 31}, {21, 41, 2}})
+    dt = Timex.to_datetime({{2014, 12, 31}, {21, 41, 2}})
     assert format(dt, "%l %P") == {:ok, " 9 pm"}
     assert format(dt, "%I %p") == {:ok, "09 PM"}
-    dt = Timex.datetime({{2014, 12, 31}, {12, 41, 2}})
+    dt = Timex.to_datetime({{2014, 12, 31}, {12, 41, 2}})
     assert format(dt, "%l %P") == {:ok, "12 pm"}
     assert format(dt, "%I %p") == {:ok, "12 PM"}
-    dt = Timex.datetime({{2014, 12, 31}, {0, 41, 2}})
+    dt = Timex.to_datetime({{2014, 12, 31}, {0, 41, 2}})
     assert format(dt, "%l %P") == {:ok, "12 am"}
     assert format(dt, "%I %p") == {:ok, "12 AM"}
-    dt = Timex.datetime({{2014, 12, 31}, {9, 41, 2}})
+    dt = Timex.to_datetime({{2014, 12, 31}, {9, 41, 2}})
     assert format(dt, "%l %P") == {:ok, " 9 am"}
     assert format(dt, "%I %p") == {:ok, "09 AM"}
 
-    dt = Timex.datetime({{2014, 12, 31}, {21, 41, 2}})
+    dt = Timex.to_datetime({{2014, 12, 31}, {21, 41, 2}})
     assert format(dt, "%j") == {:ok, "365"}
-    dt = Timex.datetime({{2014, 1, 1}, {21, 41, 2}})
+    dt = Timex.to_datetime({{2014, 1, 1}, {21, 41, 2}})
     assert format(dt, "%j") == {:ok, "001"}
     # Leap year
-    dt = Timex.datetime({{2012, 12, 31}, {21, 41, 2}})
+    dt = Timex.to_datetime({{2012, 12, 31}, {21, 41, 2}})
     assert format(dt, "%j") == {:ok, "366"}
   end
 

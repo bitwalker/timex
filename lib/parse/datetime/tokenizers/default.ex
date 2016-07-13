@@ -122,8 +122,6 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
       "Z:"    -> Directive.get(:zoffs_colon, directive, opts)
       "Z::"   -> Directive.get(:zoffs_sec, directive, opts)
       # Preformatted Directives
-      "ISO"            -> Directive.get(:iso_8601, directive, opts)
-      "ISOz"           -> Directive.get(:iso_8601z, directive, opts)
       "ISO:Extended"   -> Directive.get(:iso_8601_extended, directive, opts)
       "ISO:Extended:Z" -> Directive.get(:iso_8601_extended_z, directive, opts)
       "ISO:Basic"      -> Directive.get(:iso_8601_basic, directive, opts)
@@ -146,6 +144,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
       "ASN1:GeneralizedTime:Z" -> Directive.get(:asn1_generalized_time_z, directive, opts)
       "ASN1:GeneralizedTime:TZ" -> Directive.get(:asn1_generalized_time_tz, directive, opts)
       "kitchen"        -> Directive.get(:kitchen, directive, opts)
+      t -> raise "invalid formatting directive #{t}"
     end
   end
 

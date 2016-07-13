@@ -46,28 +46,53 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
     wday_mon: :weekday, wday_sun: :weekday, wdshort: :weekday_short, wdfull: :weekday_full,
     min: :minute, sec: :second, sec_fractional: :second_fractional, sec_epoch: :seconds_epoch,
     us: :microseconds, ms: :milliseconds, am: :ampm, AM: :ampm, zabbr: :zname,
-    iso_8601: :iso8601, iso_8601_extended: :iso8601_extended, iso_8601_basic: :iso8601_basic,
+    iso_8601_extended: :iso8601_extended, iso_8601_basic: :iso8601_basic,
     rfc_822: :rfc822, rfc_1123: :rfc1123, rfc_3339: :rfc3339,
     strftime_iso_date: :iso_date,
   ]
   @mapped_zulu_types [
-    iso_8601z: :iso8601, iso_8601_extended_z: :iso8601_extended, iso_8601_basic_z: :iso8601_basic,
+    iso_8601_extended_z: :iso8601_extended, iso_8601_basic_z: :iso8601_basic,
     rfc_822z: :rfc822, rfc_1123z: :rfc1123, rfc_3339z: :rfc3339, asn1_generalized_time_z: :asn1_generalized_time
   ]
   for type <- @simple_types do
-    def get(unquote(type), directive, flags, mods, width),
-      do: %Directive{type: unquote(type), value: directive, flags: flags, modifiers: mods, width: width, parser: apply(Parsers, unquote(type), [flags])}
+    def get(unquote(type), directive, flags, mods, width) do
+      %Directive{type: unquote(type),
+                 value: directive,
+                 flags: flags,
+                 modifiers: mods,
+                 width: width,
+                 parser: apply(Parsers, unquote(type), [flags])}
+    end
   end
   for {type, parser_fun} <- @mapped_types do
-    def get(unquote(type), directive, flags, mods, width),
-      do: %Directive{type: unquote(type), value: directive, flags: flags, modifiers: mods, width: width, parser: apply(Parsers, unquote(parser_fun), [flags])}
+    def get(unquote(type), directive, flags, mods, width) do
+      %Directive{type: unquote(type),
+                 value: directive,
+                 flags: flags,
+                 modifiers: mods,
+                 width: width,
+                 parser: apply(Parsers, unquote(parser_fun), [flags])}
+    end
   end
   for {type, parser_fun} <- @mapped_zulu_types do
-    def get(unquote(type), directive, flags, mods, width),
-      do: %Directive{type: unquote(type), value: directive, flags: flags, modifiers: mods, width: width, parser: apply(Parsers, unquote(parser_fun), [[{:zulu, true}|flags]])}
+    def get(unquote(type), directive, flags, mods, width) do
+      %Directive{type: unquote(type),
+                 value: directive,
+                 flags: flags,
+                 modifiers: mods,
+                 width: width,
+                 parser: apply(Parsers, unquote(parser_fun), [[{:zulu, true}|flags]])}
+    end
   end
-  def get(:asn1_generalized_time_tz, directive, flags, mods, width),
-    do: %Directive{type: :asn1_generalized_time_tz, value: directive, flags: flags, modifiers: mods, width: width, parser: Parsers.asn1_generalized_time([{:zoffs, true}|flags])}
+  def get(:asn1_generalized_time_tz, directive, flags, mods, width) do
+    %Directive{type: :asn1_generalized_time_tz,
+               value: directive,
+               flags: flags,
+               modifiers: mods,
+               width: width,
+               parser: Parsers.asn1_generalized_time([{:zoffs, true}|flags])}
+  end
   # Catch-all
-  def get(type, _directive, _flags, _mods, _width), do: {:error, "Unrecognized directive type: #{type}."}
+  def get(type, _directive, _flags, _mods, _width),
+    do: {:error, "Unrecognized directive type: #{type}."}
 end
