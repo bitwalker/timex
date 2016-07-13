@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.0.2
+
+### Fixed
+
+- Converting a NaiveDateTime with to_datetime did not include microseconds
+- now/0, now/1, local/0 were not microsecond precise
+
 ## 3.0.1
 
 ### Added
