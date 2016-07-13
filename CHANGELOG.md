@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.0.1
+
+### Added
+
+- `Duration.to_clock/1` - convert a Duration to a `{hour,min,sec,usec}` tuple
+- `Duration.from_clock/1` - convert a `{hour,min,sec,usec}` tuple to a Duration
+
 ## 3.0.0
 
 **IMPORTANT**: This release is a significant rewrite of Timex's internals as well as API. Many things have remained unchanged,
