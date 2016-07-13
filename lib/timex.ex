@@ -5,6 +5,7 @@ defmodule Timex do
     quote do
       alias Timex.AmbiguousDateTime
       alias Timex.TimezoneInfo
+      alias Timex.AmbiguousTimezoneInfo
       alias Timex.Interval
       alias Timex.Duration
       alias Timex.Timezone
