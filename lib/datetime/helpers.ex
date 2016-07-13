@@ -58,10 +58,9 @@ defmodule Timex.DateTime.Helpers do
   end
 
   def construct_microseconds(0), do: {0,0}
-  def construct_microseconds(n) when n < 10, do: {n,1}
-  def construct_microseconds(n) when n < 100, do: {n,2}
-  def construct_microseconds(n) when n < 1_000, do: {n,3}
-  def construct_microseconds(n) when n < 10_000, do: {n,4}
-  def construct_microseconds(n) when n < 100_000, do: {n,5}
-  def construct_microseconds(n) when n < 1_000_000, do: {n,6}
+  def construct_microseconds(n), do: {n, precision(n)}
+
+  defp precision(0), do: 0
+  defp precision(n) when is_integer(n),
+    do: byte_size(String.trim_trailing(Integer.to_string(n), "0"))
 end
