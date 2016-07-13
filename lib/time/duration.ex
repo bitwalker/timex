@@ -47,6 +47,33 @@ defmodule Timex.Duration do
   end
 
   @doc """
+  Converts a Duration to a clock tuple, i.e. `{hour,minute,second,microsecond}`
+  Helpful for if you want to convert a duration to a clock and vice versa
+  """
+  def to_clock(%__MODULE__{megaseconds: mega, seconds: sec, microseconds: micro} = duration) do
+    ss = (mega * 1_000_000)+sec
+    ss = cond do
+      micro > 1_000_000 -> ss+div(micro,1_000_000)
+      :else -> ss
+    end
+    hour = div(ss, 60*60)
+    min  = div(rem(ss, 60*60),60)
+    secs = rem(rem(ss, 60*60),60)
+    {hour,min,secs,rem(micro,1_000_000)}
+  end
+
+  @doc """
+  Convers a clock tuple, i.e. `{hour,minute,second,microsecond}` to a Duration
+  Helpful for if you want to convert a duration to a clock and vice vera
+  """
+  def from_clock({hour,minute,second,usec}) do
+    total_seconds = (hour*60*60)+(minute*60)+second
+    mega = div(total_seconds,1_000_000)
+    ss = rem(total_seconds,1_000_000)
+    from_erl({mega,ss,usec})
+  end
+
+  @doc """
   Converts a Duration to its value in microseconds
 
   ## Example
