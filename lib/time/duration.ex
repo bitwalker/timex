@@ -50,7 +50,7 @@ defmodule Timex.Duration do
   Converts a Duration to a clock tuple, i.e. `{hour,minute,second,microsecond}`
   Helpful for if you want to convert a duration to a clock and vice versa
   """
-  def to_clock(%__MODULE__{megaseconds: mega, seconds: sec, microseconds: micro} = duration) do
+  def to_clock(%__MODULE__{megaseconds: mega, seconds: sec, microseconds: micro}) do
     ss = (mega * 1_000_000)+sec
     ss = cond do
       micro > 1_000_000 -> ss+div(micro,1_000_000)
