@@ -7,7 +7,7 @@
   "excoveralls": {:hex, :excoveralls, "0.5.5", "d97b6fc7aa59c5f04f2fa7ec40fc0b7555ceea2a5f7e7c442aad98ddd7f79002", [:mix], [{:hackney, ">= 0.12.0", [hex: :hackney, optional: false]}, {:exjsx, "~> 3.0", [hex: :exjsx, optional: false]}]},
   "exjsx": {:hex, :exjsx, "3.2.0", "7136cc739ace295fc74c378f33699e5145bead4fdc1b4799822d0287489136fb", [:mix], [{:jsx, "~> 2.6.2", [hex: :jsx, optional: false]}]},
   "gettext": {:hex, :gettext, "0.11.0", "80c1dd42d270482418fa158ec5ba073d2980e3718bacad86f3d4ad71d5667679", [:mix], []},
-  "hackney": {:hex, :hackney, "1.6.0", "8d1e9440c9edf23bf5e5e2fe0c71de03eb265103b72901337394c840eec679ac", [:rebar3], [{:ssl_verify_fun, "1.1.0", [hex: :ssl_verify_fun, optional: false]}, {:mimerl, "1.0.2", [hex: :mimerl, optional: false]}, {:metrics, "1.0.1", [hex: :metrics, optional: false]}, {:idna, "1.2.0", [hex: :idna, optional: false]}, {:certifi, "0.4.0", [hex: :certifi, optional: false]}]},
+  "hackney": {:hex, :hackney, "1.6.1", "ddd22d42db2b50e6a155439c8811b8f6df61a4395de10509714ad2751c6da817", [:rebar3], [{:ssl_verify_fun, "1.1.0", [hex: :ssl_verify_fun, optional: false]}, {:mimerl, "1.0.2", [hex: :mimerl, optional: false]}, {:metrics, "1.0.1", [hex: :metrics, optional: false]}, {:idna, "1.2.0", [hex: :idna, optional: false]}, {:certifi, "0.4.0", [hex: :certifi, optional: false]}]},
   "idna": {:hex, :idna, "1.2.0", "ac62ee99da068f43c50dc69acf700e03a62a348360126260e87f2b54eced86b2", [:rebar3], []},
   "inch_ex": {:hex, :inch_ex, "0.5.3", "39f11e96181ab7edc9c508a836b33b5d9a8ec0859f56886852db3d5708889ae7", [:mix], [{:poison, "~> 1.5 or ~> 2.0", [hex: :poison, optional: false]}]},
   "jsx": {:hex, :jsx, "2.6.2", "213721e058da0587a4bce3cc8a00ff6684ced229c8f9223245c6ff2c88fbaa5a", [:mix, :rebar], []},
