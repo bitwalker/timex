@@ -33,8 +33,9 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   def to_date(date), do: NaiveDateTime.to_date(date)
 
   @spec to_datetime(NaiveDateTime.t, timezone :: Types.valid_timezone) :: DateTime.t | {:error, term}
-  def to_datetime(%NaiveDateTime{} = d, timezone) do
-    Timex.DateTime.Helpers.construct(NaiveDateTime.to_erl(d), timezone)
+  def to_datetime(%NaiveDateTime{:microsecond => {us,_}} = d, timezone) do
+    {date,{h,mm,s}} = NaiveDateTime.to_erl(d)
+    Timex.DateTime.Helpers.construct({date,{h,mm,s,us}}, timezone)
   end
 
   @spec to_naive_datetime(NaiveDateTime.t) :: NaiveDateTime.t
