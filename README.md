@@ -91,6 +91,9 @@ Here's a few simple examples:
 
 > Timex.before?(Timex.today, Timex.shift(Timex.today, days: 1))
 true
+
+> Timex.before?(Timex.shift(Timex.today, days: 1), Timex.today)
+true
 ```
 
 There are a ton of other functions, all of which work with Erlang datetime tuples, Date, NaiveDateTime, and DateTime. The Duration module contains functions for working with Durations, including Erlang timestamps (such as those returned from `:timer.tc`)
