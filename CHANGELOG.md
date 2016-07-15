@@ -44,7 +44,7 @@ of removals.
   that diffing/comparing can be done on a single value.
 - Renamed `Timex.Time` to `Timex.Duration` to better reflect it's purpose and prevent conflicts with
   Elixir's built-in `Time` type.
-- Renamed `Timex.Format.Time.*` to `Timex.Formt.Duration.*`
+- Renamed `Timex.Format.Time.*` to `Timex.Format.Duration.*`
 - Renamed `:timestamp` options to `:duration`
 - Renamed `*_timestamp` functions to `*_duration`
 - Changed `Timex.Duration` to operate on and return `Duration` structs rather than Erlang timestamp tuples
