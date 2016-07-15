@@ -39,6 +39,34 @@ defmodule Timex.Duration do
     do: %__MODULE__{megaseconds: mega, seconds: sec, microseconds: micro}
 
   @doc """
+  Converts a Duration to a Time, if the duration fits within a 24-hour clock,
+  if it does not, an error will be returned.
+  """
+  @spec to_time(__MODULE__.t) :: {:ok, Time.t} | {:error, atom}
+  def to_time(%__MODULE__{} = d) do
+    {h,m,s,us} = to_clock(d)
+    Time.from_erl({h,m,s}, Timex.DateTime.Helpers.construct_microseconds(us))
+  end
+
+  @doc """
+  Same as to_time/1, but returns the Time directly, and raises on error
+  """
+  @spec to_time!(__MODULE__.t) :: Time.t | no_return
+  def to_time!(%__MODULE__{} = d) do
+    {h,m,s,us} = to_clock(d)
+    Time.from_erl!({h,m,s}, Timex.DateTime.Helpers.construct_microseconds(us))
+  end
+
+  @doc """
+  Converts a Time to a Duration
+  """
+  @spec from_time(Time.t) :: __MODULE__.t
+  def from_time(%Time{} = t) do
+    {us, _} = t.microsecond
+    from_clock({t.hour, t.minute, t.second, us})
+  end
+
+  @doc """
   Converts a Duration to a string, using the ISO standard for formatting durations.
   """
   @spec to_string(__MODULE__.t) :: String.t
