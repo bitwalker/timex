@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.0.3
+
+### Added
+
+- Add Duration.to_time/1, to_time!/1, from_time/1 for conversions to/from Time
+
 ## 3.0.2
 
 ### Fixed
