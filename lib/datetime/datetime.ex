@@ -335,7 +335,7 @@ defimpl Timex.Protocol, for: DateTime do
     rem_microseconds = rem(usecs_from_zero, 1_000*1_000)
 
     {{_y,_m,_d}=date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs_from_zero)
-    Timezone.resolve(datetime.timezone.full_name, {date, {h,mm,s}})
+    Timezone.resolve(datetime.time_zone, {date, {h,mm,s}})
     |> Map.merge(%{microsecond: Helpers.construct_microseconds(rem_microseconds)})
   end
   defp shift_by(%DateTime{microsecond: {current_usecs, _}} = datetime, value, :milliseconds) do
