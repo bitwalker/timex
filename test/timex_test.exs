@@ -18,6 +18,13 @@ defmodule TimexTests do
     assert expected === result
   end
 
+  test "add microseconds" do
+    time = Timex.to_datetime({{2015, 6, 24}, {14, 27, 52}})
+    time = %{time | microsecond: {900_000, 6}}
+    added = Timex.add(time, Duration.from_microseconds(42))
+    assert added.microsecond === {900_042, 6}
+  end
+
   test "subtract" do
     date     = Timex.to_datetime({{2015, 6, 24}, {14, 27, 52}})
     expected = Timex.to_datetime({{2015, 6, 16}, {14, 27, 52}})
