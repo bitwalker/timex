@@ -69,7 +69,7 @@ defmodule Timex do
     reference_date = to_erl(date)
     case Timezone.local(reference_date) do
       {:error, _} = err -> err
-      tz -> to_datetime(date, tz.full_name)
+      tz -> Timezone.convert(date, tz.full_name)
     end
   end
 
