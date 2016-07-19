@@ -38,7 +38,6 @@ defmodule Timex.Mixfile do
      {:combine, "~> 0.7"},
      {:gettext, "~> 0.10"},
      {:ex_doc, "~> 0.13", only: :dev},
-     {:earmark, "~> 1.0", only: :dev},
      {:benchfella, "~> 0.3", only: :dev},
      {:dialyze, "~> 0.2", only: :dev},
      {:excoveralls, "~> 0.4", only: [:dev, :test]},
