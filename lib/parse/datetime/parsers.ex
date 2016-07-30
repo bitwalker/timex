@@ -154,7 +154,7 @@ defmodule Timex.Parse.DateTime.Parsers do
   end
 
   def zname(_) do
-    word_of(~r/[\/\w_]/)
+    word_of(~r/[\/\w_-]/)
     |> map(fn name -> [zname: name] end)
     |> label("timezone name")
   end
