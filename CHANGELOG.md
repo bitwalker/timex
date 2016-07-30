@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.0.5
+
+### Fixed
+
+- #199 - Handling of timezone names with `-` was broken.
+
 ## 3.0.3
 
 ### Added
