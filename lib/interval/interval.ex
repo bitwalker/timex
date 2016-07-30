@@ -48,25 +48,25 @@ defmodule Timex.Interval do
 
   ## Examples
 
-    iex> use Timex
-    ...> Interval.new(from: ~D[2014-09-22], until: ~D[2014-09-29])
-    ...> |> Interval.format!("%Y-%m-%d", :strftime)
-    "[2014-09-22, 2014-09-29)"
+      iex> use Timex
+      ...> Interval.new(from: ~D[2014-09-22], until: ~D[2014-09-29])
+      ...> |> Interval.format!("%Y-%m-%d", :strftime)
+      "[2014-09-22, 2014-09-29)"
 
-    iex> use Timex
-    ...> Interval.new(from: ~D[2014-09-22], until: [days: 7])
-    ...> |> Interval.format!("%Y-%m-%d", :strftime)
-    "[2014-09-22, 2014-09-29)"
+      iex> use Timex
+      ...> Interval.new(from: ~D[2014-09-22], until: [days: 7])
+      ...> |> Interval.format!("%Y-%m-%d", :strftime)
+      "[2014-09-22, 2014-09-29)"
 
-    iex> use Timex
-    ...> Interval.new(from: ~D[2014-09-22], until: [days: 7], left_open: true, right_open: false)
-    ...> |> Interval.format!("%Y-%m-%d", :strftime)
-    "(2014-09-22, 2014-09-29]"
+      iex> use Timex
+      ...> Interval.new(from: ~D[2014-09-22], until: [days: 7], left_open: true, right_open: false)
+      ...> |> Interval.format!("%Y-%m-%d", :strftime)
+      "(2014-09-22, 2014-09-29]"
 
-    iex> use Timex
-    ...> Interval.new(from: ~N[2014-09-22T15:30:00], until: [minutes: 20], right_open: false)
-    ...> |> Interval.format!("%H:%M", :strftime)
-    "[15:30, 15:50]"
+      iex> use Timex
+      ...> Interval.new(from: ~N[2014-09-22T15:30:00], until: [minutes: 20], right_open: false)
+      ...> |> Interval.format!("%H:%M", :strftime)
+      "[15:30, 15:50]"
 
   """
   def new(options \\ []) do
@@ -104,15 +104,15 @@ defmodule Timex.Interval do
 
   ## Example
 
-    iex> use Timex
-    ...> Interval.new(from: ~D[2014-09-22], until: [months: 5])
-    ...> |> Interval.duration(:months)
-    5
+      iex> use Timex
+      ...> Interval.new(from: ~D[2014-09-22], until: [months: 5])
+      ...> |> Interval.duration(:months)
+      5
 
-    iex> use Timex
-    ...> Interval.new(from: ~N[2014-09-22T15:30:00], until: [minutes: 20])
-    ...> |> Interval.duration(:duration)
-    Duration.from_minutes(20)
+      iex> use Timex
+      ...> Interval.new(from: ~N[2014-09-22T15:30:00], until: [minutes: 20])
+      ...> |> Interval.duration(:duration)
+      Duration.from_minutes(20)
 
   """
   def duration(%__MODULE__{from: from, until: until}, :duration) do
@@ -129,20 +129,20 @@ defmodule Timex.Interval do
 
   ## Examples
 
-    iex> use Timex
-    ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
-    ...> |> Interval.with_step([days: 1]) |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
-    ["2014-09-22", "2014-09-23", "2014-09-24", "2014-09-25"]
+      iex> use Timex
+      ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
+      ...> |> Interval.with_step([days: 1]) |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
+      ["2014-09-22", "2014-09-23", "2014-09-24", "2014-09-25"]
 
-    iex> use Timex
-    ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
-    ...> |> Interval.with_step([days: 2]) |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
-    ["2014-09-22", "2014-09-24"]
+      iex> use Timex
+      ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
+      ...> |> Interval.with_step([days: 2]) |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
+      ["2014-09-22", "2014-09-24"]
 
-    iex> use Timex
-    ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
-    ...> |> Interval.with_step([days: 3]) |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
-    ["2014-09-22", "2014-09-25"]
+      iex> use Timex
+      ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
+      ...> |> Interval.with_step([days: 3]) |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
+      ["2014-09-22", "2014-09-25"]
 
   """
   def with_step(%__MODULE__{} = interval, step) do
