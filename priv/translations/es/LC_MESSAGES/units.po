@@ -1,0 +1,72 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: es\n"
+
+#: lib/l10n/translator.ex:178
+msgid "%{count} day"
+msgid_plural "%{count} days"
+msgstr[0] "%{count} día"
+msgstr[1] "%{count} días"
+
+#: lib/l10n/translator.ex:177
+msgid "%{count} hour"
+msgid_plural "%{count} hours"
+msgstr[0] "%{count} hora"
+msgstr[1] "%{count} horas"
+
+#: lib/l10n/translator.ex:173
+msgid "%{count} microsecond"
+msgid_plural "%{count} microseconds"
+msgstr[0] "%{count} microsegundo"
+msgstr[1] "%{count} microsegundos"
+
+#: lib/l10n/translator.ex:174
+msgid "%{count} millisecond"
+msgid_plural "%{count} milliseconds"
+msgstr[0] "%{count} milisegundo"
+msgstr[1] "%{count} milisegundos"
+
+#: lib/l10n/translator.ex:176
+msgid "%{count} minute"
+msgid_plural "%{count} minutes"
+msgstr[0] "%{count} minuto"
+msgstr[1] "%{count} minutos"
+
+#: lib/l10n/translator.ex:180
+msgid "%{count} month"
+msgid_plural "%{count} months"
+msgstr[0] "%{count} mes"
+msgstr[1] "%{count} meses"
+
+#: lib/l10n/translator.ex:172
+msgid "%{count} nanosecond"
+msgid_plural "%{count} nanoseconds"
+msgstr[0] "%{count} nanosegundo"
+msgstr[1] "%{count} nanosegundos"
+
+#: lib/l10n/translator.ex:175
+msgid "%{count} second"
+msgid_plural "%{count} seconds"
+msgstr[0] "%{count} segundo"
+msgstr[1] "%{count} segundos"
+
+#: lib/l10n/translator.ex:179
+msgid "%{count} week"
+msgid_plural "%{count} weeks"
+msgstr[0] "%{count} semana"
+msgstr[1] "%{count} semanas"
+
+#: lib/l10n/translator.ex:181
+msgid "%{count} year"
+msgid_plural "%{count} years"
+msgstr[0] "%{count} año"
+msgstr[1] "%{count} años"
