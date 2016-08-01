@@ -30,10 +30,9 @@ defmodule Timex.Types do
   @type weekday_name :: :monday | :tuesday | :wednesday | :thursday | :friday | :saturday | :sunday
   @type shift_units :: :milliseconds | :seconds | :minutes | :hours | :days | :weeks | :years
   @type time_units :: :microseconds | :milliseconds | :seconds | :minutes | :hours | :days | :weeks | :years
-  @type time :: { hour, minute, second } | { hour, minute, second, milliseconds }
+  @type time :: { hour, minute, second }
   @type date :: { year, month, day }
   @type datetime :: { date, time }
   @type iso_triplet :: { year, weeknum, weekday }
-  @type phoenix_datetime_select_params :: %{String.t => String.t}
   @type valid_datetime :: Date.t | DateTime.t | NaiveDateTime.t | datetime | date
 end
