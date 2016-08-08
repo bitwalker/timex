@@ -3,6 +3,7 @@ defmodule DurationTests do
   use Timex
   doctest Timex.Duration
   doctest Timex.Format.Duration.Formatter
+  doctest Timex.Parse.Duration.Parsers.ISO8601Parser
 
   test "to_12hour_clock" do
     assert Timex.Time.to_12hour_clock(0) == {12, :am}

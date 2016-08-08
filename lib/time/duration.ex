@@ -75,6 +75,30 @@ defmodule Timex.Duration do
   end
 
   @doc """
+  Parses a duration string (in ISO-8601 format) into a Duration struct.
+  """
+  @spec parse(String.t) :: {:ok, __MODULE__.t} | {:error, term}
+  defdelegate parse(str), to: Timex.Parse.Duration.Parser
+
+  @doc """
+  Parses a duration string into a Duration struct, using the provided parser module.
+  """
+  @spec parse(String.t, module()) :: {:ok, __MODULE__.t} | {:error, term}
+  defdelegate parse(str, module), to: Timex.Parse.Duration.Parser
+
+  @doc """
+  Same as parse/1, but returns the Duration unwrapped, and raises on error
+  """
+  @spec parse!(String.t) :: __MODULE__.t | no_return
+  defdelegate parse!(str), to: Timex.Parse.Duration.Parser
+
+  @doc """
+  Same as parse/2, but returns the Duration unwrapped, and raises on error
+  """
+  @spec parse!(String.t, module()) :: __MODULE__.t | no_return
+  defdelegate parse!(str, module), to: Timex.Parse.Duration.Parser
+
+  @doc """
   Converts a Duration to a clock tuple, i.e. `{hour,minute,second,microsecond}`
   Helpful for if you want to convert a duration to a clock and vice versa
   """
