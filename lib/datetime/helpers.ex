@@ -61,6 +61,10 @@ defmodule Timex.DateTime.Helpers do
   def construct_microseconds(n), do: {n, precision(n)}
 
   defp precision(0), do: 0
-  defp precision(n) when is_integer(n),
-    do: byte_size(String.trim_trailing(Integer.to_string(n), "0"))
+  defp precision(n) when is_integer(n) do
+    ns = Integer.to_string(n)
+    n_width = byte_size(ns)
+    trimmed = byte_size(String.trim_trailing(ns, "0"))
+    6 - (n_width - trimmed)
+  end
 end
