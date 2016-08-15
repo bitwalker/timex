@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.0.7
+
+### Added
+
+- Implementation of Timex.Protocol for Map. This is primarily useful (and intended) 
+  for dealing with deserialized date/time structs.
+
+### Fixed
+
+- Precision calculation for microseconds was sometimes incorrect.
+
 ## 3.0.6
 
 ### Added
