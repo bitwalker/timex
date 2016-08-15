@@ -7,9 +7,6 @@ otp_release:
   - 19.0
 script:
   - "MIX_ENV=test mix do deps.get, compile, coveralls.travis"
-after_script:
-  - mix deps.get
-  - MIX_ENV=test mix inch.report
 notifications:
   recipients:
     - paulschoenfelder@gmail.com

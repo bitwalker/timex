@@ -40,8 +40,7 @@ defmodule Timex.Mixfile do
      {:ex_doc, "~> 0.13", only: :dev},
      {:benchfella, "~> 0.3", only: :dev},
      {:dialyze, "~> 0.2", only: :dev},
-     {:excoveralls, "~> 0.4", only: [:dev, :test]},
-     {:inch_ex, "~> 0.4", only: [:dev, :test]}]
+     {:excoveralls, "~> 0.4", only: [:dev, :test]}]
   end
 
   defp docs do
