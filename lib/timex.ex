@@ -829,7 +829,9 @@ defmodule Timex do
   defdelegate diff(a, b), to: Timex.Comparable
 
   @doc """
-  Calculate time interval between two dates. The result will always be a non-negative integer
+  Calculate time interval between two dates. The result will be a signed integer, negative
+  if the first date/time comes before the second, and positive if the first date/time comes
+  after the second.
 
   You must specify one of the following units:
 
@@ -843,7 +845,7 @@ defmodule Timex do
   - :seconds
   - :duration
 
-  and the result will be an integer value of those units or a timestamp.
+  and the result will be an integer value of those units or a Duration.
   """
   @spec diff(Comparable.comparable, Comparable.comparable, Comparable.granularity) ::
     Duration.t | non_neg_integer | {:error, term}
