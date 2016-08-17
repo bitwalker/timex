@@ -345,11 +345,21 @@ defmodule Timex.Duration do
   @doc """
   Scale a Duration by some coefficient value, i.e. a scale of 2 is twice is long.
   """
-  @spec scale(__MODULE__.t, coefficient :: integer) :: __MODULE__.t
+  @spec scale(__MODULE__.t, coefficient :: integer | float) :: __MODULE__.t
   def scale(%Duration{megaseconds: mega, seconds: secs, microseconds: micro}, coef) do
-    normalize(%Duration{megaseconds: mega*coef,
-                        seconds: secs*coef,
-                        microseconds: micro*coef })
+    mega_s     = mega*coef
+    s_diff     = (mega_s*1_000_000)-(trunc(mega_s)*1_000_000)
+    secs_s     = s_diff+(secs*coef)
+    us_diff    = (secs_s*1_000_000)-(trunc(secs_s)*1_000_000)
+    us_s       = us_diff+(micro*coef)
+    extra_mega = div(trunc(secs_s), 1_000_000)
+    mega_final = trunc(mega_s)+extra_mega
+    extra_secs = div(trunc(us_s), 1_000_000)
+    secs_final = trunc(secs_s)-(extra_mega*1_000_000)+extra_secs
+    us_final   = trunc(us_s)-(extra_secs*1_000_000)
+    normalize(%Duration{megaseconds: mega_final,
+                        seconds: secs_final,
+                        microseconds: us_final })
   end
 
   @doc """
