@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.0.8
+
+### Changed
+
+- Duration.scale/2 now works with float coefficients
+
 ## 3.0.7
 
 ### Added
