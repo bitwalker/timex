@@ -7,6 +7,10 @@ defmodule DateFormatTest.ParseStrftime do
     assert {:ok, ^date} = parse("Sat, 19 Jul 2014 14:20:34 +0700", "%a, %d %b %Y %T %z")
   end
 
+  test "issue #215" do
+    assert {:ok, _date} = parse("14-Dec-00", "%e-%b-%y")
+  end
+
   test "issue #66" do
     date = Timex.to_datetime({{2015,7,6}, {0,0,0}}, "CST")
     assert {:ok, ^date} = parse("Mon Jul 06 2015 00:00:00 GMT+0200 (CST)", "%a %b %d %Y %H:%M:%S %Z%z (%Z)")

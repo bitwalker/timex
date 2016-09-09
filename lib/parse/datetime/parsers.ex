@@ -23,7 +23,7 @@ defmodule Timex.Parse.DateTime.Parsers do
       {min, max} -> "#{min}-#{max} digit year"
     end
     Helpers.integer(opts)
-    |> satisfy(fn year -> year > 0 end)
+    |> satisfy(fn year -> year >= 0 end)
     |> map(fn year -> [year2: year] end)
     |> label(expected_digits)
   end
