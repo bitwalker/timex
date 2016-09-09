@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+
+### Fixed
+
+- Fix #215 - Properly validate 2-digit years
+
 ## 3.0.8
 
 ### Changed
