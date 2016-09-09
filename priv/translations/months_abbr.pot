@@ -11,50 +11,50 @@ msgid ""
 msgstr ""
 "Language: INSERT LANGUAGE HERE\n"
 
-#: lib/l10n/translator.ex:220
-msgid "April"
+#: lib/l10n/translator.ex:207
+msgid "Apr"
 msgstr ""
 
-#: lib/l10n/translator.ex:224
-msgid "August"
+#: lib/l10n/translator.ex:211
+msgid "Aug"
 msgstr ""
 
-#: lib/l10n/translator.ex:228
-msgid "December"
+#: lib/l10n/translator.ex:215
+msgid "Dec"
 msgstr ""
 
-#: lib/l10n/translator.ex:218
-msgid "February"
+#: lib/l10n/translator.ex:205
+msgid "Feb"
 msgstr ""
 
-#: lib/l10n/translator.ex:217
-msgid "January"
+#: lib/l10n/translator.ex:204
+msgid "Jan"
 msgstr ""
 
-#: lib/l10n/translator.ex:223
-msgid "July"
+#: lib/l10n/translator.ex:210
+msgid "Jul"
 msgstr ""
 
-#: lib/l10n/translator.ex:222
-msgid "June"
+#: lib/l10n/translator.ex:209
+msgid "Jun"
 msgstr ""
 
-#: lib/l10n/translator.ex:219
-msgid "March"
+#: lib/l10n/translator.ex:206
+msgid "Mar"
 msgstr ""
 
-#: lib/l10n/translator.ex:221
+#: lib/l10n/translator.ex:208
 msgid "May"
 msgstr ""
 
-#: lib/l10n/translator.ex:227
-msgid "November"
+#: lib/l10n/translator.ex:214
+msgid "Nov"
 msgstr ""
 
-#: lib/l10n/translator.ex:226
-msgid "October"
+#: lib/l10n/translator.ex:213
+msgid "Oct"
 msgstr ""
 
-#: lib/l10n/translator.ex:225
-msgid "September"
+#: lib/l10n/translator.ex:212
+msgid "Sep"
 msgstr ""

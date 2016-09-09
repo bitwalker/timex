@@ -19,6 +19,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.7\n"
 
-#: lib/i10n/translator.ex:343
+#: lib/l10n/translator.ex:298
 msgid "#,##0.###"
 msgstr "#,##0.###"

@@ -19,18 +19,18 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.8\n"
 
-#: lib/l10n/translator.ex:177
+#: lib/l10n/translator.ex:183
 msgid "AM"
 msgstr "AM"
 
-#: lib/l10n/translator.ex:179
+#: lib/l10n/translator.ex:185
 msgid "PM"
 msgstr "PM"
 
-#: lib/l10n/translator.ex:178
+#: lib/l10n/translator.ex:184
 msgid "am"
 msgstr "am"
 
-#: lib/l10n/translator.ex:180
+#: lib/l10n/translator.ex:186
 msgid "pm"
 msgstr "pm"

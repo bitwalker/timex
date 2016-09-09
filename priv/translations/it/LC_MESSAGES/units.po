@@ -20,61 +20,61 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.7\n"
 
-#: lib/i10n/translator.ex:225
+#: lib/l10n/translator.ex:178
 msgid "%{count} day"
 msgid_plural "%{count} days"
 msgstr[0] "%{count} giorno"
 msgstr[1] "%{count} giorni"
 
-#: lib/i10n/translator.ex:224
+#: lib/l10n/translator.ex:177
 msgid "%{count} hour"
 msgid_plural "%{count} hours"
 msgstr[0] "%{count} ora"
 msgstr[1] "%{count} ore"
 
-#: lib/i10n/translator.ex:220
+#: lib/l10n/translator.ex:173
 msgid "%{count} microsecond"
 msgid_plural "%{count} microseconds"
 msgstr[0] "%{count} microsecondo"
 msgstr[1] "%{count} microsecondi"
 
-#: lib/i10n/translator.ex:221
+#: lib/l10n/translator.ex:174
 msgid "%{count} millisecond"
 msgid_plural "%{count} milliseconds"
 msgstr[0] "%{count} millisecondo"
 msgstr[1] "%{count} millisecondi"
 
-#: lib/i10n/translator.ex:223
+#: lib/l10n/translator.ex:176
 msgid "%{count} minute"
 msgid_plural "%{count} minutes"
 msgstr[0] "%{count} minuto"
 msgstr[1] "%{count} minuti"
 
-#: lib/i10n/translator.ex:227
+#: lib/l10n/translator.ex:180
 msgid "%{count} month"
 msgid_plural "%{count} months"
 msgstr[0] "%{count} mese"
 msgstr[1] "%{count} mesi"
 
-#: lib/i10n/translator.ex:219
+#: lib/l10n/translator.ex:172
 msgid "%{count} nanosecond"
 msgid_plural "%{count} nanoseconds"
 msgstr[0] "%{count} nanosecondo"
 msgstr[1] "%{count} nanosecondi"
 
-#: lib/i10n/translator.ex:222
+#: lib/l10n/translator.ex:175
 msgid "%{count} second"
 msgid_plural "%{count} seconds"
 msgstr[0] "%{count} secondo"
 msgstr[1] "%{count} secondi"
 
-#: lib/i10n/translator.ex:226
+#: lib/l10n/translator.ex:179
 msgid "%{count} week"
 msgid_plural "%{count} weeks"
 msgstr[0] "%{count} settimana"
 msgstr[1] "%{count} settimane"
 
-#: lib/i10n/translator.ex:228
+#: lib/l10n/translator.ex:181
 msgid "%{count} year"
 msgid_plural "%{count} years"
 msgstr[0] "%{count} anno"

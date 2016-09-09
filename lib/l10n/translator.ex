@@ -120,18 +120,18 @@ defmodule Timex.Translator do
   """
   @spec get_months_abbreviated(locale :: String.t) :: %{integer() => String.t}
   def get_months_abbreviated(locale) do
-    %{1 => get_domain_text(locale, "months", "Jan"),
-      2 => get_domain_text(locale, "months", "Feb"),
-      3 => get_domain_text(locale, "months", "Mar"),
-      4 => get_domain_text(locale, "months", "Apr"),
-      5 => get_domain_text(locale, "months", "May"),
-      6 => get_domain_text(locale, "months", "Jun"),
-      7 => get_domain_text(locale, "months", "Jul"),
-      8 => get_domain_text(locale, "months", "Aug"),
-      9 => get_domain_text(locale, "months", "Sep"),
-      10 => get_domain_text(locale, "months", "Oct"),
-      11 => get_domain_text(locale, "months", "Nov"),
-      12 => get_domain_text(locale, "months", "Dec")}
+    %{1 => get_domain_text(locale, "months_abbr", "Jan"),
+      2 => get_domain_text(locale, "months_abbr", "Feb"),
+      3 => get_domain_text(locale, "months_abbr", "Mar"),
+      4 => get_domain_text(locale, "months_abbr", "Apr"),
+      5 => get_domain_text(locale, "months_abbr", "May"),
+      6 => get_domain_text(locale, "months_abbr", "Jun"),
+      7 => get_domain_text(locale, "months_abbr", "Jul"),
+      8 => get_domain_text(locale, "months_abbr", "Aug"),
+      9 => get_domain_text(locale, "months_abbr", "Sep"),
+      10 => get_domain_text(locale, "months_abbr", "Oct"),
+      11 => get_domain_text(locale, "months_abbr", "Nov"),
+      12 => get_domain_text(locale, "months_abbr", "Dec")}
   end
 
   @doc """
@@ -201,18 +201,18 @@ defmodule Timex.Translator do
   dgettext "weekdays", "Saturday"
   dgettext "weekdays", "Sunday"
 
-  dgettext "months", "Jan"
-  dgettext "months", "Feb"
-  dgettext "months", "Mar"
-  dgettext "months", "Apr"
-  dgettext "months", "May"
-  dgettext "months", "Jun"
-  dgettext "months", "Jul"
-  dgettext "months", "Aug"
-  dgettext "months", "Sep"
-  dgettext "months", "Oct"
-  dgettext "months", "Nov"
-  dgettext "months", "Dec"
+  dgettext "months_abbr", "Jan"
+  dgettext "months_abbr", "Feb"
+  dgettext "months_abbr", "Mar"
+  dgettext "months_abbr", "Apr"
+  dgettext "months_abbr", "May"
+  dgettext "months_abbr", "Jun"
+  dgettext "months_abbr", "Jul"
+  dgettext "months_abbr", "Aug"
+  dgettext "months_abbr", "Sep"
+  dgettext "months_abbr", "Oct"
+  dgettext "months_abbr", "Nov"
+  dgettext "months_abbr", "Dec"
 
   dgettext "months", "January"
   dgettext "months", "February"

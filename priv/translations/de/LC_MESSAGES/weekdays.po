@@ -19,58 +19,58 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.7\n"
 
-#: lib/i10n/translator.ex:239
+#: lib/l10n/translator.ex:192
 msgid "Fri"
 msgstr "Fr"
 
-#: lib/i10n/translator.ex:247
+#: lib/l10n/translator.ex:200
 msgid "Friday"
 msgstr "Freitag"
 
-#: lib/i10n/translator.ex:235
+#: lib/l10n/translator.ex:188
 msgid "Mon"
 msgstr "Mo"
 
-#: lib/i10n/translator.ex:243
+#: lib/l10n/translator.ex:196
 msgid "Monday"
 msgstr "Montag"
 
-#: lib/i10n/translator.ex:240
+#: lib/l10n/translator.ex:193
 msgid "Sat"
 msgstr "Sa"
 
-#: lib/i10n/translator.ex:248
+#: lib/l10n/translator.ex:201
 msgid "Saturday"
 msgstr "Samstag"
 
-#: lib/i10n/translator.ex:241
+#: lib/l10n/translator.ex:194
 msgid "Sun"
 msgstr "So"
 
-#: lib/i10n/translator.ex:249
+#: lib/l10n/translator.ex:202
 msgid "Sunday"
 msgstr "Sonntag"
 
-#: lib/i10n/translator.ex:238
+#: lib/l10n/translator.ex:191
 msgid "Thu"
 msgstr "Do"
 
-#: lib/i10n/translator.ex:246
+#: lib/l10n/translator.ex:199
 msgid "Thursday"
 msgstr "Donnerstag"
 
-#: lib/i10n/translator.ex:236
+#: lib/l10n/translator.ex:189
 msgid "Tue"
 msgstr "Di"
 
-#: lib/i10n/translator.ex:244
+#: lib/l10n/translator.ex:197
 msgid "Tuesday"
 msgstr "Dienstag"
 
-#: lib/i10n/translator.ex:237
+#: lib/l10n/translator.ex:190
 msgid "Wed"
 msgstr "Mi"
 
-#: lib/i10n/translator.ex:245
+#: lib/l10n/translator.ex:198
 msgid "Wednesday"
 msgstr "Mittwoch"

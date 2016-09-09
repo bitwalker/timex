@@ -21,6 +21,6 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "Language: ja\n"
 
-#: lib/i10n/translator.ex:343
+#: lib/l10n/translator.ex:298
 msgid "#,##0.###"
 msgstr "#,##0.###"

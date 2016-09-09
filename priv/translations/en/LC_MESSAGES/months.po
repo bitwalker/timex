@@ -19,94 +19,50 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.7\n"
 
-#: lib/i10n/translator.ex:254
-msgid "Apr"
-msgstr "Apr"
-
-#: lib/i10n/translator.ex:267
+#: lib/l10n/translator.ex:220
 msgid "April"
 msgstr "April"
 
-#: lib/i10n/translator.ex:258
-msgid "Aug"
-msgstr "Aug"
-
-#: lib/i10n/translator.ex:271
+#: lib/l10n/translator.ex:224
 msgid "August"
 msgstr "August"
 
-#: lib/i10n/translator.ex:262
-msgid "Dec"
-msgstr "Dec"
-
-#: lib/i10n/translator.ex:275
+#: lib/l10n/translator.ex:228
 msgid "December"
 msgstr "December"
 
-#: lib/i10n/translator.ex:252
-msgid "Feb"
-msgstr "Feb"
-
-#: lib/i10n/translator.ex:265
+#: lib/l10n/translator.ex:218
 msgid "February"
 msgstr "February"
 
-#: lib/i10n/translator.ex:251
-msgid "Jan"
-msgstr "Jan"
-
-#: lib/i10n/translator.ex:264
+#: lib/l10n/translator.ex:217
 msgid "January"
 msgstr "January"
 
-#: lib/i10n/translator.ex:257
-msgid "Jul"
-msgstr "Jul"
-
-#: lib/i10n/translator.ex:270
+#: lib/l10n/translator.ex:223
 msgid "July"
 msgstr "July"
 
-#: lib/i10n/translator.ex:256
-msgid "Jun"
-msgstr "Jun"
-
-#: lib/i10n/translator.ex:269
+#: lib/l10n/translator.ex:222
 msgid "June"
 msgstr "June"
 
-#: lib/i10n/translator.ex:253
-msgid "Mar"
-msgstr "Mar"
-
-#: lib/i10n/translator.ex:266
+#: lib/l10n/translator.ex:219
 msgid "March"
 msgstr "March"
 
-#: lib/i10n/translator.ex:255 lib/i10n/translator.ex:268
+#: lib/l10n/translator.ex:221
 msgid "May"
 msgstr "May"
 
-#: lib/i10n/translator.ex:261
-msgid "Nov"
-msgstr "Nov"
-
-#: lib/i10n/translator.ex:274
+#: lib/l10n/translator.ex:227
 msgid "November"
 msgstr "November"
 
-#: lib/i10n/translator.ex:260
-msgid "Oct"
-msgstr "Oct"
-
-#: lib/i10n/translator.ex:273
+#: lib/l10n/translator.ex:226
 msgid "October"
 msgstr "October"
 
-#: lib/i10n/translator.ex:259
-msgid "Sep"
-msgstr "Sep"
-
-#: lib/i10n/translator.ex:272
+#: lib/l10n/translator.ex:225
 msgid "September"
 msgstr "September"

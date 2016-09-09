@@ -10,6 +10,6 @@ msgid ""
 msgstr ""
 "Language: ru\n"
 
-#: lib/i10n/translator.ex:343
+#: lib/l10n/translator.ex:298
 msgid "#,##0.###"
 msgstr ""
