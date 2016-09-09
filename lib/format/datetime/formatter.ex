@@ -45,6 +45,9 @@ defmodule Timex.Format.DateTime.Formatter do
     do: lformat!(datetime, format_string, locale, Strftime)
   def lformat!(datetime, format_string, locale, :relative),
     do: lformat!(datetime, format_string, locale, Relative)
+  def lformat!(datetime, format_string, locale, formatter)
+    when is_tuple(datetime),
+    do: lformat!(Timex.to_naive_datetime(datetime), format_string, locale, formatter)
   def lformat!(date, format_string, locale, formatter)
     when is_binary(format_string) and is_binary(locale) and is_atom(formatter)
     do

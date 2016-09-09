@@ -9,6 +9,10 @@ defmodule DateFormatTest.FormatDefault do
     end)
   end
 
+  test "format Erlang date" do
+    assert {:ok, _} = Timex.format({2015,6,24}, "{YYYY}-{M}-{D}")
+  end
+
   test "format year" do
     date = Timex.to_datetime({2013,8,18})
     old_date = Timex.to_datetime({3,8,18})

@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fix #214 - Permit any valid datetime type in formatting API
 - Fix #215 - Properly validate 2-digit years
 
 ## 3.0.8
