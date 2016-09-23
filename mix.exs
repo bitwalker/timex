@@ -1,9 +1,11 @@
 defmodule Timex.Mixfile do
   use Mix.Project
 
+  @version "3.0.8"
+
   def project do
     [ app: :timex,
-      version: "3.0.8",
+      version: @version,
       elixir: "~> 1.3",
       description: description(),
       package: package(),
@@ -46,6 +48,8 @@ defmodule Timex.Mixfile do
   defp docs do
     [main: "getting-started",
      formatter_opts: [gfm: true],
+     source_ref: @version,
+     source_url: "https://github.com/bitwalker/timex",
      extras: [
        "docs/Getting Started.md",
        "CHANGELOG.md",
