@@ -44,8 +44,8 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
 
   ## Examples
 
-      iex> #{__MODULE__}.format(Timex.shift(Timex.now, minutes: -1))
-      "1 minute ago"
+      iex> #{__MODULE__}.format(Timex.shift(Timex.now, minutes: -1), "{relative}")
+      {:ok, "1 minute ago"}
   """
   @spec format(Types.calendar_types, String.t) :: {:ok, String.t} | {:error, term}
   def format(date, format_string),  do: lformat(date, format_string, Translator.default_locale)
