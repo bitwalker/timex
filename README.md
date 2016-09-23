@@ -65,6 +65,9 @@ Here's a few simple examples:
 > {:ok, default_str} = Timex.format(datetime, "{ISO:Extended}")
 {:ok, "2016-02-29T12:30:30.120+00:00"}
 
+> {:ok, relative_str} = Timex.shift(datetime, minutes: -3) |> Timex.format("{relative}", :relative)
+{:ok, "3 minutes ago"}
+
 > strftime_str = Timex.format!(datetime, "%FT%T%:z", :strftime)
 "2016-02-29T12:30:30+00:00"
 
