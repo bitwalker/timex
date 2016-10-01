@@ -126,6 +126,19 @@ defmodule TimezoneTests do
     assert %AmbiguousDateTime{} = Timex.to_datetime(datetime4, "UTC") |> Timezone.convert("Europe/Zurich")
   end
 
+  test "Issue #220 - Timex.Timezone.convert gives wrong result date/tz sets resulting ambiguous timezones" do
+    datetime = {{2016, 10, 30}, {0, 0, 0}}
+
+    converted =
+      datetime
+      |> Timex.to_datetime("Etc/UTC")
+      |> Timezone.convert("Europe/Amsterdam")
+      |> Map.get(:after)
+      |> Timex.to_erl
+
+    assert {{2016, 10, 30}, {1, 0, 0}} = converted
+  end
+
   test "another issue related to #142" do
     datetime = {{2016,10,30}, {3,59,0}}
 

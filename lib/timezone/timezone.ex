@@ -311,9 +311,9 @@ defmodule Timex.Timezone do
                   :std_offset => new_zone.offset_std}
       %AmbiguousTimezoneInfo{:before => before_tz, :after => after_tz} ->
         before_diff = diff(tz, before_tz)
-        {before_shifted, before_us} = do_shift(seconds_from_zeroyear, microsecs, :minutes, before_diff)
+        {before_shifted, before_us} = do_shift(seconds_from_zeroyear, microsecs, :seconds, before_diff)
         after_diff = diff(tz, after_tz)
-        {after_shifted, after_us} = do_shift(seconds_from_zeroyear, microsecs, :minutes, after_diff)
+        {after_shifted, after_us} = do_shift(seconds_from_zeroyear, microsecs, :seconds, after_diff)
         {{y,m,d},{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(before_shifted)
         before_dt = %DateTime{:year => y, :month => m, :day => d,
                               :hour => h, :minute => mm, :second => s,
