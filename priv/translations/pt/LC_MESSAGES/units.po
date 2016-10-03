@@ -53,7 +53,7 @@ msgstr[1] "%{count} minutos"
 #: lib/l10n/translator.ex:180
 msgid "%{count} month"
 msgid_plural "%{count} months"
-msgstr[0] "%{count} mês"
+msgstr[0] "%{count} mÃªs"
 msgstr[1] "%{count} meses"
 
 #: lib/l10n/translator.ex:172
