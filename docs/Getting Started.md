@@ -8,7 +8,7 @@ the vast majority of functionality you will care about.
 
 ## Project Setup
 
-To use Timex with your projects, edit your `mix.exs` file and add it as a dependency, as well as add `:tzdata` to your applications list.
+To use Timex with your projects, edit your `mix.exs` file and add it as a dependency, as well as add `:timex` to your applications list.
 
 ```elixir
 def application do
