@@ -41,7 +41,7 @@ msgstr "Sab"
 
 #: lib/l10n/translator.ex:201
 msgid "Saturday"
-msgstr "Sábado"
+msgstr "SÃ¡bado"
 
 #: lib/l10n/translator.ex:194
 msgid "Sun"
@@ -65,7 +65,7 @@ msgstr "Ter"
 
 #: lib/l10n/translator.ex:197
 msgid "Tuesday"
-msgstr "Terça-feira"
+msgstr "TerÃ§a-feira"
 
 #: lib/l10n/translator.ex:190
 msgid "Wed"
