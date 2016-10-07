@@ -32,6 +32,13 @@ defmodule TimexTests do
     assert expected === result
   end
 
+  test "subtract milliseconds" do
+    time = Timex.to_datetime({{2015, 6, 24}, {14, 27, 52}})
+    time = %{time | microsecond: {910_000, 6}}
+    subtracted = Timex.subtract(time, Duration.from_milliseconds(10))
+    assert subtracted.microsecond === {900_000, 1}
+  end
+
   test "weekday" do
     localdate = {{2013,3,17},{11,59,10}}
     assert Timex.weekday(Timex.to_datetime(localdate)) === 7

@@ -1364,7 +1364,7 @@ defmodule Timex do
   """
   @spec subtract(Convertable.t, Types.timestamp) :: DateTime.t | {:error, term}
   def subtract(date, %Duration{megaseconds: mega, seconds: sec, microseconds: micro}),
-    do: shift(date, [seconds: (-mega * @million) - sec, microseconds: micro])
+    do: shift(date, [seconds: (-mega * @million) - sec, microseconds: -micro])
 
   @doc """
   A single function for adjusting the date using various units: duration,
