@@ -40,6 +40,11 @@ defmodule ConversionTests do
 
     datetime = Timex.to_datetime({{2015,2,28}, {12, 35, 1}}, "Etc/UTC")
     assert ^datetime = Timex.to_datetime(datetime, "Etc/UTC")
+
+    datetime_utc = Timex.to_datetime({{2015,2,28}, {12, 35, 1}}, "Etc/UTC")
+    datetime_berlin = Timex.to_datetime({{2015,2,28}, {13, 35, 1}}, "Europe/Berlin")
+
+    assert ^datetime_berlin = Timex.to_datetime(datetime_utc, "Europe/Berlin")
   end
 
   test "to_unix" do

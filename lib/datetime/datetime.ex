@@ -38,8 +38,9 @@ defimpl Timex.Protocol, for: DateTime do
   @spec to_date(DateTime.t) :: Date.t
   def to_date(date), do: DateTime.to_date(date)
 
-  @spec to_datetime(DateTime.t, timezone :: Types.valid_timezone) :: DateTime.t | {:error, term}
-  def to_datetime(%DateTime{} = d, _timezone), do: d
+  @spec to_datetime(DateTime.t, timezone :: Types.valid_timezone) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
+  def to_datetime(%DateTime{time_zone: timezone} = d, timezone), do: d
+  def to_datetime(%DateTime{} = d, timezone), do: Timezone.convert(d, timezone)
 
   @spec to_naive_datetime(DateTime.t) :: NaiveDateTime.t
   def to_naive_datetime(%DateTime{time_zone: nil} = d) do
