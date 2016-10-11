@@ -40,7 +40,7 @@ defimpl Timex.Protocol, for: DateTime do
 
   @spec to_datetime(DateTime.t, timezone :: Types.valid_timezone) :: DateTime.t | {:error, term}
   def to_datetime(%DateTime{time_zone: time_zone} = d, timezone) when time_zone == timezone, do: d
-  def to_datetime(%DateTime{} = d, timezone), do: Timex.Timezone.convert(d, timezone)
+  def to_datetime(%DateTime{} = d, timezone), do: Timezone.convert(d, timezone)
 
   @spec to_naive_datetime(DateTime.t) :: NaiveDateTime.t
   def to_naive_datetime(%DateTime{time_zone: nil} = d) do
