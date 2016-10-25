@@ -456,6 +456,13 @@ defmodule DateFormatTest.FormatDefault do
     assert expected == formatted
   end
 
+  test "issue #228 - update of gettext causes exception" do
+    date = Timex.to_datetime({{2015,1,14},{12,0,0}}, "Etc/UTC")
+    formatted = Timex.format!(date, "{Mfull} {D} {YYYY}, {h12}:{m}{am}")
+    expected = "January 14 2015, 12:00pm"
+    assert expected == formatted
+  end
+
   defp format(date, fmt) do
     Timex.format(date, fmt)
   end
