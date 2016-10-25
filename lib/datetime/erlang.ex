@@ -265,7 +265,6 @@ defimpl Timex.Protocol, for: Tuple do
               end
             end
           {:day, d} ->
-            {y,m,_} = date
             if validate? do
               case result do
                 {y,m,_} -> {y,m, Timex.normalize(:day, {y,m,d})}

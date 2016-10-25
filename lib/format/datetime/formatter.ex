@@ -557,18 +557,18 @@ defmodule Timex.Format.DateTime.Formatter do
     day_periods = Translator.get_day_periods(locale)
     case Timex.Time.to_12hour_clock(hour) do
       {_, :am} ->
-        day_period = Map.get(day_periods, :AM)
+        Map.get(day_periods, :AM)
       {_, :pm} ->
-        day_period = Map.get(day_periods, :PM)
+        Map.get(day_periods, :PM)
     end
   end
   def format_token(locale, :AM, _date, _modifiers, _flags, _width) do
     day_periods = Translator.get_day_periods(locale)
     case Timex.Time.to_12hour_clock(0) do
       {_, :am} ->
-        day_period = Map.get(day_periods, :AM)
+        Map.get(day_periods, :AM)
       {_, :pm} ->
-        day_period = Map.get(day_periods, :PM)
+        Map.get(day_periods, :PM)
     end
   end
   # Timezones

@@ -384,7 +384,7 @@ defimpl Timex.Protocol, for: DateTime do
           new_secs_from_zero <= 0 ->
             {:error, :shift_to_invalid_date}
           :else ->
-            {{y,m,d}=date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(new_secs_from_zero)
+            {{_y,_m,_d}=date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(new_secs_from_zero)
             resolved = Timezone.resolve(datetime.time_zone, {date, {h,mm,s}})
             case {resolved, units} do
               {%DateTime{} = dt, :microseconds} ->
