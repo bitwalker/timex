@@ -1413,7 +1413,7 @@ defmodule Timex do
     weeks: integer,
     years: integer
   ]
-  @spec shift(Types.valid_datetimes, shift_options) :: Types.valid_datetimes | {:error, term}
+  @spec shift(Types.valid_datetime, shift_options) :: Types.valid_datetime | {:error, term}
   defdelegate shift(date, options), to: Timex.Protocol
 
   @doc """
