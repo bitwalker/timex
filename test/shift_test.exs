@@ -15,9 +15,15 @@ defmodule ShiftTests do
     assert expected === date
   end
 
-  test "issue 230 - shifting epoch by -13 months takes you to 1969" do
+  test "shift by negative month" do
     date = Timex.shift(Timex.epoch, months: -24)
     expected = ~D[1968-01-01]
+    assert expected === date
+  end
+
+  test "issue 230 - shifting epoch by -13 months takes you to 1969" do
+    date = Timex.shift(Timex.epoch, months: -13)
+    expected = ~D[1968-12-01]
     assert expected === date
   end
 
