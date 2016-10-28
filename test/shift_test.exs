@@ -75,4 +75,9 @@ defmodule ShiftTests do
     assert expected === date
   end
 
+  test "shift by a month from November" do
+    date = Timex.shift(~D[2000-11-01], months: 1)
+    expected = ~D[2000-12-01]
+    assert expected === date
+  end
 end

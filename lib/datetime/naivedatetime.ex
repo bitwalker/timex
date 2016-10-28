@@ -236,7 +236,7 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   defp shift_by(%NaiveDateTime{:year => year, :month => month} = datetime, value, :months) do
     m = month + value
     shifted = cond do
-      m > 0  -> %{datetime | :year => year + div(m, 12), :month => rem(m, 12)}
+      m > 0  -> %{datetime | :year => year + div(m - 1, 12), :month => rem(m - 1, 12) + 1}
       m <= 0 -> %{datetime | :year => year + div(m, 12) - 1, :month => 12 + rem(m, 12)}
     end
 
