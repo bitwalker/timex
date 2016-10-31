@@ -1411,6 +1411,7 @@ defmodule Timex do
     hours: integer,
     days: integer,
     weeks: integer,
+    months: integer,
     years: integer
   ]
   @spec shift(Types.valid_datetime, shift_options) :: Types.valid_datetime | {:error, term}
