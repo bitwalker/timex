@@ -153,7 +153,7 @@ defmodule Timex.Translator do
 
   @spec get_domain_text(locale :: String.t, domain :: String.t, msgid :: String.t) :: String.t
   defp get_domain_text(locale, domain, msgid) do
-    case Timex.Gettext.lgettext(locale, domain, msgid) do
+    case Timex.Gettext.lgettext(locale, domain, msgid, %{}) do
       {:ok, translated}   -> translated
       {:default, default} -> default
     end
