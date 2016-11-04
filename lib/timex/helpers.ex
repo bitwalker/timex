@@ -11,7 +11,11 @@ defmodule Timex.Helpers do
       day > 365                                   -> {year, day - 365}
       true                                        -> {year, day}
     end
-    {_, month, first_of_month} = Enum.take_while(@ordinal_day_map, fn {_, _, oday} -> oday <= day end) |> List.last
+    {_, month, first_of_month} =
+      @ordinal_day_map
+      |> Enum.filter(fn {leap, _, _} -> leap == :calendar.is_leap_year(year) end)
+      |> Enum.take_while(fn {_, _, oday} -> oday <= day end)
+      |> List.last
     {year, month, day - first_of_month}
   end
 
