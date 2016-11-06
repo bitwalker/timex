@@ -3,7 +3,14 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 3.1.5
+
+### Fixed
+
+- Fix #218 - Bug with `Timex.from_iso_triplet`
+- Zone abbreviations produced by parsing did not always match those in tzdata
+
+## 3.1
 
 ### Fixed
 
