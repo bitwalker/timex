@@ -1,7 +1,6 @@
 defmodule ShiftTests do
   use ExUnit.Case, async: true
   use Timex
-  doctest Timex
 
   test "shift by year" do
     date = Timex.shift(Timex.epoch, years: 3)
