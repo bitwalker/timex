@@ -337,16 +337,22 @@ defmodule Timex.Parse.DateTime.Parser do
               ?+ -> {?-, ((hours*60*60) + (minutes*60))}
             end
             case hours do
+              0 ->
+                %{date |
+                  :time_zone => "Etc/GMT+0",
+                  :zone_abbr => "GMT",
+                  :utc_offset => total_offset,
+                  :std_offset => 0}
               h when h < 10 ->
                 %{date |
                   :time_zone => <<"Etc/GMT", gmt_sign::utf8, h2::utf8>>,
-                  :zone_abbr => <<"GMT", gmt_sign::utf8, h2::utf8>>,
+                  :zone_abbr => <<sign::utf8, ?0, h2::utf8>>,
                   :utc_offset => total_offset,
                   :std_offset => 0}
               _ ->
                 %{date |
                   :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary>>,
-                  :zone_abbr => <<"GMT", gmt_sign::utf8, hour::binary>>,
+                  :zone_abbr => <<sign::utf8, hour::binary>>,
                   :utc_offset => total_offset,
                   :std_offset => 0}
             end
@@ -360,22 +366,28 @@ defmodule Timex.Parse.DateTime.Parser do
               ?+ -> {?-, ((hours*60*60) + (minutes*60))}
             end
             case {hours, minutes} do
+              {0, 0} ->
+                %{date |
+                  :time_zone => "Etc/GMT+0",
+                  :zone_abbr => "GMT",
+                  :utc_offset => total_offset,
+                  :std_offset => 0}
               {h, 0} when h < 10 ->
                 %{date |
                   :time_zone => <<"Etc/GMT", gmt_sign::utf8, h2::utf8>>,
-                  :zone_abbr => <<"GMT", gmt_sign::utf8, h2::utf8>>,
+                  :zone_abbr => <<sign::utf8, ?0, h2::utf8>>,
                   :utc_offset => total_offset,
                   :std_offset => 0}
               {_, 0} ->
                 %{date |
                   :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary>>,
-                  :zone_abbr => <<"GMT", gmt_sign::utf8, hour::binary>>,
+                  :zone_abbr => <<sign::utf8, hour::binary>>,
                   :utc_offset => total_offset,
                   :std_offset => 0}
               _ ->
                 %{date |
                   :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary, ?:, minute::binary>>,
-                  :zone_abbr => <<"GMT", gmt_sign::utf8, hour::binary, ?:, minute::binary>>,
+                  :zone_abbr => <<sign::utf8, hour::binary, ?:, minute::binary>>,
                   :utc_offset => total_offset,
                   :std_offset => 0}
             end
@@ -420,22 +432,28 @@ defmodule Timex.Parse.DateTime.Parser do
               ?+ -> {?-, ((hours*60*60) + (minutes*60))}
             end
             case {hours, minutes} do
+              {0, 0} ->
+                %{date |
+                  :time_zone => "Etc/GMT+0",
+                  :zone_abbr => "GMT",
+                  :utc_offset => total_offset,
+                  :std_offset => 0}
               {h, 0} when h < 10 ->
                 %{date |
                   :time_zone => <<"Etc/GMT", gmt_sign::utf8, h2::utf8>>,
-                  :zone_abbr => <<"GMT", gmt_sign::utf8, h2::utf8>>,
+                  :zone_abbr => <<sign::utf8, ?0, h2::utf8>>,
                   :utc_offset => total_offset,
                   :std_offset => 0}
               {_, 0} ->
                 %{date |
                   :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary>>,
-                  :zone_abbr => <<"GMT", gmt_sign::utf8, hour::binary>>,
+                  :zone_abbr => <<sign::utf8, hour::binary>>,
                   :utc_offset => total_offset,
                   :std_offset => 0}
               _ ->
                 %{date |
                   :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary, ?:, minute::binary>>,
-                  :zone_abbr => <<"GMT", gmt_sign::utf8, hour::binary, ?:, minute::binary>>,
+                  :zone_abbr => <<sign::utf8, hour::binary, ?:, minute::binary>>,
                   :utc_offset => total_offset,
                   :std_offset => 0}
             end
@@ -456,22 +474,28 @@ defmodule Timex.Parse.DateTime.Parser do
               ?+ -> {?-, ((hours*60*60) + (minutes*60))}
             end
             case {hours, minutes, seconds} do
+              {0, 0, 0} ->
+                %{date |
+                  :time_zone => "Etc/GMT+0",
+                  :zone_abbr => "GMT",
+                  :utc_offset => total_offset,
+                  :std_offset => 0}
               {h, 0, 0} when h < 10 ->
                 %{date |
                   :time_zone => <<"Etc/GMT", gmt_sign::utf8, h2::utf8>>,
-                  :zone_abbr => <<"GMT", gmt_sign::utf8, h2::utf8>>,
+                  :zone_abbr => <<sign::utf8, ?0, h2::utf8>>,
                   :utc_offset => total_offset,
                   :std_offset => 0}
               {_, 0, 0} ->
                 %{date |
                   :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary>>,
-                  :zone_abbr => <<"GMT", gmt_sign::utf8, hour::binary>>,
+                  :zone_abbr => <<sign::utf8, hour::binary>>,
                   :utc_offset => total_offset,
                   :std_offset => 0}
               _ ->
                 %{date |
                   :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary, ?:, minute::binary, ?:, second::binary>>,
-                  :zone_abbr => <<"GMT", gmt_sign::utf8, hour::binary, ?:, minute::binary, ?:, second::binary>>,
+                  :zone_abbr => <<sign::utf8, hour::binary, ?:, minute::binary, ?:, second::binary>>,
                   :utc_offset => total_offset,
                   :std_offset => 0}
             end

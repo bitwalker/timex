@@ -643,7 +643,7 @@ defmodule Timex do
 
       iex> tz = #{__MODULE__}.timezone(+2, {2015, 4, 12})
       ...> {tz.full_name, tz.abbreviation}
-      {"Etc/GMT-2", "GMT-2"}
+      {"Etc/GMT-2", "+02"}
 
   """
   @spec timezone(Types.valid_timezone, Convertable.t) ::

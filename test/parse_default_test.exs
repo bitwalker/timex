@@ -348,9 +348,9 @@ defmodule DateFormatTest.ParseDefault do
 
   test "parse ISO8601 (Basic)" do
     date1z = Timex.to_datetime({{2014, 8, 14}, {12, 34, 33}})
-    date1  = %{date1z | :time_zone => "Etc/GMT+0", :zone_abbr => "GMT+0"}
+    date1  = %{date1z | :time_zone => "Etc/GMT+0", :zone_abbr => "GMT"}
     date2z = %{date1z | :microsecond => {199_000,3}}
-    date2  = %{date2z | :time_zone => "Etc/GMT+0", :zone_abbr => "GMT+0"}
+    date2  = %{date2z | :time_zone => "Etc/GMT+0", :zone_abbr => "GMT"}
 
     assert {:ok, ^date1} = parse("20140814T123433-0000", "{ISO:Basic}")
     assert {:ok, ^date1} = parse("20140814T123433-00", "{ISO:Basic}")
