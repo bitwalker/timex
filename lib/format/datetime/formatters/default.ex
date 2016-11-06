@@ -114,8 +114,8 @@ defmodule Timex.Format.DateTime.Formatters.Default do
 
   * `{RFC822}`                  - e.g. `Mon, 05 Jun 14 23:20:59 UT`
   * `{RFC822z}`                 - e.g. `Mon, 05 Jun 14 23:20:59 Z`
-  * `{RFC1123}`                 - e.g. `Tue, 05 Mar 2013 23:25:19 GMT`
-  * `{RFC1123z}`                - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
+  * `{RFC1123}`                 - e.g. `Tue, 05 Mar 2013 23:25:19 +0200`
+  * `{RFC1123z}`                - e.g. `Tue, 05 Mar 2013 23:25:19 Z`
   * `{RFC3339}`                 - e.g. `2013-03-05T23:25:19+02:00`
   * `{RFC3339z}`                - e.g. `2013-03-05T23:25:19Z`
   * `{ANSIC}`                   - e.g. `Tue Mar  5 23:25:19 2013`
