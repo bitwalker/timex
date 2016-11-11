@@ -1,0 +1,48 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: pl\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Remigiusz Jackowski\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#: lib/l10n/translator.ex:292
+msgid "+"
+msgstr ""
+
+#: lib/l10n/translator.ex:290
+msgid ","
+msgstr ""
+
+#: lib/l10n/translator.ex:293
+msgid "-"
+msgstr ""
+
+#: lib/l10n/translator.ex:289
+msgid "."
+msgstr ""
+
+#: lib/l10n/translator.ex:295
+msgid ":"
+msgstr ""
+
+#: lib/l10n/translator.ex:291
+msgid ";"
+msgstr ""
+
+#: lib/l10n/translator.ex:294
+msgid "E"
+msgstr ""
