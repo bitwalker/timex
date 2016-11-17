@@ -39,9 +39,9 @@ defmodule Timex.Format.Duration.Formatter do
 
   ## Examples
 
-    iex> d = Timex.Duration.from_erl({1435, 180354, 590264})
-    ...> #{__MODULE__}.format(d, :humanized)
-    "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds, 590.264 milliseconds"
+      iex> d = Timex.Duration.from_erl({1435, 180354, 590264})
+      ...> #{__MODULE__}.format(d, :humanized)
+      "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds, 590.264 milliseconds"
   """
   @spec format(Duration.t, atom) :: String.t | {:error, term}
   def format(duration, formatter), do: lformat(duration, Translator.default_locale, formatter)
