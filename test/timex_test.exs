@@ -43,6 +43,8 @@ defmodule TimexTests do
     localdate = {{2013,3,17},{11,59,10}}
     assert Timex.weekday(Timex.to_datetime(localdate)) === 7
     assert Timex.weekday(Timex.epoch()) === 4
+    assert {:error, :invalid_date} = Timex.weekday("Made up date")
+    assert {:error, :invalid_date} = Timex.weekday(nil)
   end
 
   test "day" do
@@ -50,6 +52,8 @@ defmodule TimexTests do
     assert Timex.day(Timex.to_datetime({3,2,1})) === 32
     assert Timex.day(Timex.to_datetime({3,12,31})) === 365
     assert Timex.day(Timex.to_datetime({2012,12,31})) === 366
+    assert  {:error, :invalid_date} = Timex.day("Made up day")
+    assert  {:error, :invalid_date} = Timex.day(nil)
   end
 
   test "week" do
@@ -57,6 +61,8 @@ defmodule TimexTests do
     assert Timex.iso_week(localdate) === {2013,11}
     assert Timex.iso_week(Timex.to_datetime(localdate)) === {2013,11}
     assert Timex.iso_week(Timex.epoch()) === {1970,1}
+    assert {:error, :invalid_date} = Timex.iso_week("Made up date")
+    assert {:error, :invalid_date} = Timex.iso_week(nil)
   end
 
   test "iso_triplet" do
@@ -75,6 +81,9 @@ defmodule TimexTests do
     assert Timex.days_in_month(Timex.epoch()) === 31
     assert Timex.days_in_month(2012, 2) === 29
     assert Timex.days_in_month(2013, 2) === 28
+
+    assert {:error, :invalid_date} = Timex.days_in_month("Made up date")
+    assert {:error, :invalid_date} = Timex.days_in_month(nil)
   end
 
   test "month_to_num" do
@@ -97,6 +106,9 @@ defmodule TimexTests do
     assert not Timex.is_leap?(Timex.epoch())
     assert Timex.is_leap?(2012)
     assert not Timex.is_leap?(2100)
+
+    assert {:error, :invalid_date} = Timex.is_leap?("Made up year")
+    assert {:error, :invalid_date} = Timex.is_leap?(nil)
   end
 
   test "is_valid?" do
@@ -119,6 +131,9 @@ defmodule TimexTests do
     assert not Timex.is_valid?(Timex.set(new_date, [datetime: {{12,12,12}, {23,60,0}}, validate: false]))
     assert not Timex.is_valid?(Timex.set(new_date, [datetime: {{12,12,12}, {23,59,60}}, validate: false]))
     assert not Timex.is_valid?(Timex.set(new_date, [datetime: {{12,12,12}, {-1,59,59}}, validate: false]))
+
+    assert {:error, :invalid_date} = Timex.is_valid?("Made up date")
+    assert {:error, :invalid_date} = Timex.is_valid?(nil)
   end
 
   test "set" do
@@ -248,17 +263,26 @@ defmodule TimexTests do
     year_start = Timex.to_datetime({{2015,1,1},{0,0,0}})
     assert Timex.beginning_of_year(2015) == Timex.to_date(year_start)
     assert Timex.beginning_of_year({2015,6,15}) == {2015,1,1}
+
+    assert {:error, :invalid_date} = Timex.beginning_of_year("Made up date")
+    assert {:error, :invalid_date} = Timex.beginning_of_year(nil)
   end
 
   test "end_of_year" do
     year_end = Timex.to_datetime({{2015, 12, 31},  {23, 59, 59}})
     assert Timex.end_of_year(2015) == Timex.to_date(year_end)
     assert {2015,12,31} = Timex.end_of_year({2015,6,15})
+
+    assert {:error, :invalid_date} = Timex.end_of_year("Made up date")
+    assert {:error, :invalid_date} = Timex.end_of_year(nil)
   end
 
   test "beginning_of_month" do
     assert Timex.beginning_of_month({2016,2,15}) == {2016, 2, 1}
     assert Timex.beginning_of_month(Timex.to_datetime({{2014,2,15},{14,14,14}})) == Timex.to_datetime({{2014,2,1},{0,0,0}})
+
+    assert {:error, :invalid_date} = Timex.beginning_of_month("Made up date")
+    assert {:error, :invalid_date} = Timex.beginning_of_month(nil)
   end
 
   test "end_of_month" do
@@ -269,6 +293,9 @@ defmodule TimexTests do
 
     assert {:error, _} = Timex.end_of_month(2015, 13)
     assert {:error, _} = Timex.end_of_month(-2015, 12)
+
+    assert {:error, :invalid_date} = Timex.end_of_month("Made up date")
+    assert {:error, :invalid_date} = Timex.end_of_month(nil)
   end
 
   test "beginning_of_quarter" do
@@ -277,6 +304,9 @@ defmodule TimexTests do
     assert Timex.beginning_of_quarter({2016,5,15}) == {2016,4,1}
     assert Timex.beginning_of_quarter({2016,8,15}) == {2016,7,1}
     assert Timex.beginning_of_quarter({2016,11,15}) == {2016,10,1}
+
+    assert {:error, :invalid_date} = Timex.beginning_of_quarter("Made up date")
+    assert {:error, :invalid_date} = Timex.beginning_of_quarter(nil)
   end
 
   test "end_of_quarter" do
@@ -286,6 +316,9 @@ defmodule TimexTests do
     assert Timex.end_of_quarter(2015, 1) == Timex.to_date({2015, 3, 31})
 
     assert {:error, _} = Timex.end_of_quarter(2015, 13)
+
+    assert {:error, :invalid_date} = Timex.end_of_quarter("Made up date")
+    assert {:error, :invalid_date} = Timex.end_of_quarter(nil)
   end
 
   test "beginning_of_week" do
@@ -368,6 +401,10 @@ defmodule TimexTests do
     # Invalid start of week string
     assert {:error, _} = Timex.days_to_beginning_of_week(date, "Made up day")
     assert {:error, _} = Timex.beginning_of_week(date, "Made up day")
+
+    # Invalid start of week - invalid date
+    assert {:error, :invalid_date} = Timex.beginning_of_week("Made up date", "Made up day")
+    assert {:error, :invalid_date} = Timex.beginning_of_week(nil, nil)
   end
 
   test "end_of_week" do
@@ -457,16 +494,25 @@ defmodule TimexTests do
     # Invalid start of week string
     assert {:error, _} = Timex.days_to_end_of_week(date, "Made up day")
     assert {:error, _} = Timex.end_of_week(date, "Made up day")
+
+    # Invalid end of week - invalid date
+    assert {:error, :invalid_date} = Timex.beginning_of_week("Made up date", "Made up day")
+    assert {:error, :invalid_date} = Timex.beginning_of_week(nil, nil)
   end
 
   test "beginning_of_day" do
     date = Timex.to_datetime({{2015,1,1},{13,14,15}})
     assert Timex.beginning_of_day(date) == Timex.to_datetime({{2015,1,1},{0,0,0}})
+    assert {:error, :invalid_date} == Timex.beginning_of_day({"Made up date"})
+    assert {:error, :invalid_date} == Timex.beginning_of_day(nil)
   end
 
   test "end_of_day" do
     date = Timex.to_datetime({{2015,1,1},{13,14,15}})
     expected = %{Timex.to_datetime({{2015,1,1},{23,59,59}}) | :microsecond => {999_999,6}}
     assert Timex.end_of_day(date) == expected
+
+    assert {:error, :invalid_date} == Timex.end_of_day({"Made up date"})
+    assert {:error, :invalid_date} == Timex.end_of_day(nil)
   end
 end
