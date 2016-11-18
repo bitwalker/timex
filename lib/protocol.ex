@@ -4,6 +4,8 @@ defprotocol Timex.Protocol do
   `NaiveDateTime`, or `DateTime` as input.
   """
 
+  @fallback_to_any true
+
   @doc """
   Convert a date/time value to a Julian calendar date number
   """
