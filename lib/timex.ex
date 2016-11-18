@@ -452,8 +452,8 @@ defmodule Timex do
 
   ## Examples
 
-  iex> #{__MODULE__}.century
-  21
+      iex> #{__MODULE__}.century
+      21
 
   """
   @spec century() :: non_neg_integer
@@ -464,12 +464,12 @@ defmodule Timex do
 
   ## Examples
 
-  iex> Timex.today |> #{__MODULE__}.century
-  21
-  iex> Timex.now |> #{__MODULE__}.century
-  21
-  iex> #{__MODULE__}.century(2016)
-  21
+      iex> Timex.today |> #{__MODULE__}.century
+      21
+      iex> Timex.now |> #{__MODULE__}.century
+      21
+      iex> #{__MODULE__}.century(2016)
+      21
 
   """
   @spec century(Types.year | Types.valid_datetime) :: non_neg_integer
@@ -999,8 +999,8 @@ defmodule Timex do
 
   ## Examples
 
-  iex> Timex.epoch |> #{__MODULE__}.weekday
-  4 # (i.e. Thursday)
+      iex> Timex.epoch |> #{__MODULE__}.weekday
+      4 # (i.e. Thursday)
 
   """
   @spec weekday(Types.valid_datetime) :: Types.weekday | {:error, term}
@@ -1011,8 +1011,8 @@ defmodule Timex do
 
   ## Examples
 
-  iex> Timex.day(~D[2015-06-26])
-  177
+      iex> Timex.day(~D[2015-06-26])
+      177
   """
   @spec day(Types.valid_datetime) :: Types.daynum | {:error, term}
   defdelegate day(datetime), to: Timex.Protocol
@@ -1068,9 +1068,9 @@ defmodule Timex do
   @doc """
   Given a date returns a date at the beginning of the month.
 
-    iex> date = Timex.to_datetime({{2015, 6, 15}, {12,30,0}}, "Europe/Paris")
-    iex> Timex.beginning_of_month(date)
-    Timex.to_datetime({{2015, 6, 1}, {0, 0, 0}}, "Europe/Paris")
+      iex> date = Timex.to_datetime({{2015, 6, 15}, {12,30,0}}, "Europe/Paris")
+      iex> Timex.beginning_of_month(date)
+      Timex.to_datetime({{2015, 6, 1}, {0, 0, 0}}, "Europe/Paris")
 
   """
   @spec beginning_of_month(Types.valid_datetime) :: Types.valid_datetime | {:error, term}
@@ -1088,9 +1088,9 @@ defmodule Timex do
   @doc """
   Given a date returns a date at the end of the month.
 
-    iex> date = ~N[2015-06-15T12:30:00Z]
-    iex> Timex.end_of_month(date)
-    ~N[2015-06-30T23:59:59.999999Z]
+      iex> date = ~N[2015-06-15T12:30:00Z]
+      iex> Timex.end_of_month(date)
+      ~N[2015-06-30T23:59:59.999999Z]
 
   """
   @spec end_of_month(Types.valid_datetime) :: Types.valid_datetime | {:error, term}
@@ -1133,9 +1133,9 @@ defmodule Timex do
   @doc """
   Given a date returns a date at the beginning of the quarter.
 
-    iex> date = Timex.to_datetime({{2015, 6, 15}, {12,30,0}}, "America/Chicago")
-    iex> Timex.beginning_of_quarter(date)
-    Timex.to_datetime({{2015, 4, 1}, {0, 0, 0}}, "America/Chicago")
+      iex> date = Timex.to_datetime({{2015, 6, 15}, {12,30,0}}, "America/Chicago")
+      iex> Timex.beginning_of_quarter(date)
+      Timex.to_datetime({{2015, 4, 1}, {0, 0, 0}}, "America/Chicago")
 
   """
   @spec beginning_of_quarter(Types.valid_datetime) :: Types.valid_datetime | {:error, term}
@@ -1144,12 +1144,12 @@ defmodule Timex do
   @doc """
   Given a date or a year and month returns a date at the end of the quarter.
 
-    iex> date = ~N[2015-06-15T12:30:00]
-    ...> Timex.end_of_quarter(date)
-    ~N[2015-06-30T23:59:59.999999]
+      iex> date = ~N[2015-06-15T12:30:00]
+      ...> Timex.end_of_quarter(date)
+      ~N[2015-06-30T23:59:59.999999]
 
-    iex> Timex.end_of_quarter(2015, 4)
-    ~D[2015-06-30]
+      iex> Timex.end_of_quarter(2015, 4)
+      ~D[2015-06-30]
 
   """
   @spec end_of_quarter(Types.valid_datetime) :: Types.valid_datetime | {:error, term}

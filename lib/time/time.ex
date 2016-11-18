@@ -8,8 +8,8 @@ defmodule Timex.Time do
 
   ## Examples
 
-  iex> Timex.Time.to_12hour_clock(23)
-  {11, :pm}
+      iex> Timex.Time.to_12hour_clock(23)
+      {11, :pm}
 
   """
   @spec to_12hour_clock(0..24) :: {1..12, :am | :pm}
@@ -27,8 +27,8 @@ defmodule Timex.Time do
 
   ## Examples
 
-  iex> Timex.Time.to_24hour_clock(7, :pm)
-  19
+      iex> Timex.Time.to_24hour_clock(7, :pm)
+      19
 
   """
   @spec to_24hour_clock(1..12, :am | :pm) :: 0..23
