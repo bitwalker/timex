@@ -803,7 +803,7 @@ defmodule Timex do
   - :timestamp
 
   and the dates will be compared with the cooresponding accuracy.
-  The default granularity is :seconds.
+  The default granularity is :microseconds.
 
   ## Examples
 

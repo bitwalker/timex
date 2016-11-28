@@ -30,7 +30,7 @@ defprotocol Timex.Comparable do
   - :duration
 
   and the dates will be compared with the cooresponding accuracy.
-  The default granularity is :seconds.
+  The default granularity is :microseconds.
 
     - 0:  when equal
     - -1: when the first date/time comes before the second
