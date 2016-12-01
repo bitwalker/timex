@@ -344,6 +344,10 @@ defmodule DateFormatTest.ParseDefault do
 
     date5 = Timex.to_datetime({{2007, 4, 5}, {14, 0, 0}})
     assert {:ok, ^date5} = parse("2007-04-05T14Z", "{ISO:Extended}")
+
+    date6 = Timex.to_datetime({{2016, 11, 30}, {9, 5, 32}})
+    date6 = %{date6 | :time_zone => "Etc/GMT-5:30", :zone_abbr => "+05:30", :utc_offset => 330*60, :std_offset => 0}
+    assert {:ok, ^date6} = parse("2016-11-30T09:05:32+05:30", "{ISO:Extended}")
   end
 
   test "parse ISO8601 (Basic)" do

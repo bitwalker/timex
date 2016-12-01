@@ -86,6 +86,15 @@ defmodule Timex.Timezone do
       "Etc/GMT+#{offset * -1}"
     end
   end
+  def name_of(<<?+, ?0, ?0, ?:, ?0, ?0>>) do
+    "Etc/UTC"
+  end
+  def name_of(<<?+, h1::utf8, h2::utf8, ?:, ?0, ?0>>) do
+    "Etc/GMT-" <> <<h1::utf8,h2::utf8>>
+  end
+  def name_of(<<?+, h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8>>) do
+    "Etc/GMT-" <> <<h1::utf8,h2::utf8,?:,m1::utf8,m2::utf8>>
+  end
   def name_of(<<?+, offset :: binary>> = tz) do
     case Integer.parse(offset) do
       {num, _} ->
@@ -96,6 +105,15 @@ defmodule Timex.Timezone do
       :error ->
         {:error, {:no_such_zone, tz}}
     end
+  end
+  def name_of(<<?-, ?0, ?0, ?:, ?0, ?0>>) do
+    "Etc/UTC"
+  end
+  def name_of(<<?-, h1::utf8, h2::utf8, ?:, ?0, ?0>>) do
+    "Etc/GMT+" <> <<h1::utf8,h2::utf8>>
+  end
+  def name_of(<<?-, h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8>>) do
+    "Etc/GMT+" <> <<h1::utf8,h2::utf8,?:,m1::utf8,m2::utf8>>
   end
   def name_of(<<?-, offset :: binary>> = tz) do
     case Integer.parse(offset) do
@@ -149,7 +167,31 @@ defmodule Timex.Timezone do
     end
   end
 
-  defp do_get(timezone, datetime, utc_or_wall \\ :wall) do
+  defp do_get(timezone, datetime, utc_or_wall \\ :wall)
+
+  defp do_get("Etc/GMT+" <> offset, _datetime, _utc_or_wall) do
+    {suffix, offset_secs} = parse_offset(offset)
+    %TimezoneInfo{
+      full_name: "Etc/GMT+" <> suffix,
+      abbreviation: "-" <> offset,
+      offset_std: 0,
+      offset_utc: offset_secs * -1,
+      from: :min,
+      until: :max
+    }
+  end
+  defp do_get("Etc/GMT-" <> offset, _datetime, _utc_or_wall) do
+    {suffix, offset_secs} = parse_offset(offset)
+    %TimezoneInfo{
+      full_name: "Etc/GMT-" <> suffix,
+      abbreviation: "+" <> offset,
+      offset_std: 0,
+      offset_utc: offset_secs,
+      from: :min,
+      until: :max
+    }
+  end
+  defp do_get(timezone, datetime, utc_or_wall) do
     name = name_of(timezone)
     seconds_from_zeroyear = Timex.to_gregorian_seconds(datetime)
     case Tzdata.zone_exists?(name) do
@@ -159,6 +201,39 @@ defmodule Timex.Timezone do
         resolve(name, seconds_from_zeroyear, utc_or_wall)
     end
   end
+
+  defp parse_offset(<<?0, h2::utf8, ?:, m1::utf8, m2::utf8, ?:, s1::utf8, s2::utf8>>) do
+    secs = String.to_integer(<<h2::utf8>>) * 60 * 60
+    secs = secs + String.to_integer(<<m1::utf8,m2::utf8>>) * 60
+    secs = secs + String.to_integer(<<s1::utf8,s2::utf8>>)
+    {<<h2::utf8,?:,m1::utf8,m2::utf8,?:,s1::utf8,s2::utf8>>, secs}
+  end
+  defp parse_offset(<<h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8, ?:, s1::utf8, s2::utf8>> = suffix) do
+    secs = String.to_integer(<<h1::utf8,h2::utf8>>) * 60 * 60
+    secs = secs + String.to_integer(<<m1::utf8,m2::utf8>>) * 60
+    secs = secs + String.to_integer(<<s1::utf8,s2::utf8>>)
+    {suffix, secs}
+  end
+  defp parse_offset(<<?0, h2::utf8, ?:, m1::utf8, m2::utf8>>) do
+    secs = String.to_integer(<<h2::utf8>>) * 60 * 60
+    secs = secs + String.to_integer(<<m1::utf8,m2::utf8>>) * 60
+    {<<h2::utf8,?:,m1::utf8,m2::utf8>>, secs}
+  end
+  defp parse_offset(<<h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8>> = suffix) do
+    secs = String.to_integer(<<h1::utf8,h2::utf8>>) * 60 * 60
+    secs = secs + String.to_integer(<<m1::utf8,m2::utf8>>) * 60
+    {suffix, secs}
+  end
+  defp parse_offset(<<?0, h2::utf8>>) do
+    secs = String.to_integer(<<h2::utf8>>) * 60 * 60
+    {<<h2::utf8>>, secs}
+  end
+  defp parse_offset(<<h1::utf8, h2::utf8>> = suffix) do
+    secs = String.to_integer(<<h1::utf8,h2::utf8>>) * 60 * 60
+    {suffix, secs}
+  end
+  defp parse_offset("0"), do: {"0", 0}
+  defp parse_offset(<<h1::utf8>> = suffix), do: {suffix, String.to_integer(<<h1::utf8>>) * 60 * 60}
 
   def total_offset(%TimezoneInfo{offset_std: std, offset_utc: utc}) do
     utc + std
