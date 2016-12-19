@@ -64,6 +64,7 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   ### Time zones
 
   * `{Zname}`   - time zone name, e.g. `UTC` (no padding)
+  * `{Zabbr}`   - time zone abbreviation, e.g. `CST` (no padding)
   * `{Z}`       - time zone offset in the form `+0230` (no padding)
   * `{Z:}`      - time zone offset in the form `-07:30` (no padding)
   * `{Z::}`     - time zone offset in the form `-07:30:00` (no padding)
