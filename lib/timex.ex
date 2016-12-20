@@ -1,6 +1,18 @@
 defmodule Timex do
   @moduledoc File.read!("README.md")
 
+  use Application
+
+  def start(_type, _args) do
+    apps = Enum.map(Application.started_applications(), &elem(&1, 0))
+    cond do
+      :tzdata in apps ->
+        Supervisor.start_link([], strategy: :one_for_one, name: Timex.Supervisor)
+      :else ->
+        {:error, ":tzdata application not started! Ensure :timex is in your applications list!"}
+    end
+  end
+
   defmacro __using__(_) do
     quote do
       alias Timex.AmbiguousDateTime
