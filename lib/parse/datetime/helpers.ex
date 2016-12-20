@@ -44,13 +44,13 @@ defmodule Timex.Parse.DateTime.Helpers do
     end
   end
 
-  def to_sec_ms(sec, fraction) do
+  def to_sec_ms(fraction) do
     precision = byte_size(fraction)
     n = String.to_integer(fraction)
     n = n * div(1_000_000, trunc(:math.pow(10, precision)))
     case n do
-      0 -> [sec: sec, sec_fractional: {0,0}]
-      _ -> [sec: sec, sec_fractional: {n, precision}]
+      0 -> [sec_fractional: {0,0}]
+      _ -> [sec_fractional: {n, precision}]
     end
   end
 

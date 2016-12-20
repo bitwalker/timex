@@ -132,9 +132,8 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> map(fn sec -> [sec: sec] end)
     |> label("second")
   end
-  def second_fractional(opts \\ []) do
-    both(Helpers.integer(opts), pair_right(char("."), word_of(~r/\d{1,6}/)), &Helpers.to_sec_ms/2)
-    |> satisfy(fn [{:sec, sec}|_] -> sec >= 0 && sec <= 59 end)
+  def second_fractional(_) do
+    map(pair_right(char("."), word_of(~r/\d{1,6}/)), &Helpers.to_sec_ms/1)
     |> label("fractional second")
   end
   def seconds_epoch(opts \\ []) do
@@ -205,7 +204,10 @@ defmodule Timex.Parse.DateTime.Parsers do
       ignore(char(":")),
       minute([padding: :zeroes, min: 2, max: 2]),
       ignore(char(":")),
-      either(second_fractional([padding: :zeroes]), second([padding: :zeroes, min: 2, max: 2]))
+      both(second([padding: :zeroes, min: 2, max: 2]), option(second_fractional([padding: :zeroes])), fn
+        [{:sec, _sec}] = res, nil -> res
+        [{:sec, _} = sec], [{:sec_fractional, _} = frac] -> [sec, frac]
+      end)
     ])
   end
   def iso_week(_) do
@@ -267,7 +269,10 @@ defmodule Timex.Parse.DateTime.Parsers do
         sequence([
           hour24([padding: :zeroes, min: 2, max: 2]),
           minute([padding: :zeroes, min: 2, max: 2]),
-          either(second_fractional([padding: :zeroes]), second([padding: :zeroes, min: 2, max: 2]))
+          both(second([padding: :zeroes, min: 2, max: 2]), option(second_fractional([padding: :zeroes])), fn
+            [{:sec, _sec}] = res, nil -> res
+            [{:sec, _} = sec], [{:sec_fractional, _} = frac] -> [sec, frac]
+          end)
         ]),
         sequence([
           hour24([padding: :zeroes, min: 2, max: 2]),
@@ -464,7 +469,10 @@ defmodule Timex.Parse.DateTime.Parsers do
         sequence([
           hour24([padding: :zeroes, min: 2, max: 2]),
           minute([padding: :zeroes, min: 2, max: 2]),
-          second_fractional([padding: :zeroes]),
+          both(second([padding: :zeroes, min: 2, max: 2]), option(second_fractional([padding: :zeroes])), fn
+            [{:sec, _sec}] = res, nil -> res
+            [{:sec, _} = sec], [{:sec_fractional, _} = frac] -> [sec, frac]
+          end)
         ]),
         sequence([
           hour24([padding: :zeroes, min: 2, max: 2]),

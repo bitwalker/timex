@@ -160,7 +160,7 @@ defmodule DateFormatTest.ParseDefault do
     str = "2015-11-07T13:45:02.060Z"
     assert {:ok, %DateTime{second: 2, microsecond: {60_000, 3}}} = parse(str, "{ISO:Extended:Z}")
     str = "2015-11-07T13:45:02.687"
-    assert {:ok, %NaiveDateTime{second: 2, microsecond: {687_000,3}}} = parse(str, "{YYYY}-{M}-{0D}T{h24}:{m}:{ss}")
+    assert {:ok, %NaiveDateTime{second: 2, microsecond: {687_000,3}}} = parse(str, "{YYYY}-{M}-{0D}T{h24}:{m}:{s}{ss}")
   end
 
   test "parse s-epoch" do
@@ -375,6 +375,13 @@ defmodule DateFormatTest.ParseDefault do
 
     date5 = Timex.to_datetime({{2007, 4, 5}, {14, 0, 0}})
     assert {:ok, ^date5} = parse("20070405T14Z", "{ISO:Basic}")
+  end
+
+  test "roundtrip bug #252" do
+    format = "{YYYY}-{0M}-{0D}T{0h24}:{0m}:{0s}{0ss}{Zname}"
+    now = Timex.now()
+    formatted = Timex.format!(now, format)
+    assert ^now = Timex.parse!(formatted, format)
   end
 
   defp parse(date, fmt) do
