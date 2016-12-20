@@ -3,7 +3,7 @@ defmodule DateFormatTest.ParseStrftime do
   use Timex
 
   test "parse datetime" do
-    date = Timex.to_datetime({{2014,7,19},{14,20,34}}, 7)
+    date = Timex.to_datetime({{2014,7,19},{14,20,34}}, "Etc/GMT-7")
     assert {:ok, ^date} = parse("Sat, 19 Jul 2014 14:20:34 +0700", "%a, %d %b %Y %T %z")
   end
 
