@@ -515,13 +515,9 @@ defmodule Timex.Format.DateTime.Formatter do
     do: pad_numeric(sec, flags, width)
   def format_token(_locale, :sec, _date, _modifiers, flags, width),
     do: pad_numeric(0, flags, width)
-  def format_token(_locale, :sec_fractional, %{microsecond: {us, precision}}, _modifiers, flags, _width) do
-    case us do
-      0 -> ""
-      _ ->
-        padded = pad_numeric(us, flags, width_spec(6..6))
-        ".#{:erlang.binary_part(padded, {0, precision})}"
-    end
+  def format_token(_locale, :sec_fractional, %{microsecond: {us, precision}}, _modifiers, flags, _width) when precision > 0 do
+    padded = pad_numeric(us, flags, width_spec(6..6))
+    ".#{:erlang.binary_part(padded, {0, precision})}"
   end
   def format_token(_locale, :sec_fractional, _date, _modifiers, _flags, _width),
     do: ""
