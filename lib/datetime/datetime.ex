@@ -236,10 +236,10 @@ defimpl Timex.Protocol, for: DateTime do
     rem_microseconds = rem(total_microseconds, 1_000*1_000)
     shifted = case shift_by(datetime, seconds, :seconds) do
       %AmbiguousDateTime{before: b, after: a} = adt ->
-        %{adt | :before => %{b | :microsecond => Helpers.construct_microseconds(rem_microseconds)},
-                :after => %{a | :microsecond => Helpers.construct_microseconds(rem_microseconds)}}
+        %{adt | :before => apply_microseconds(b, rem_microseconds),
+                :after => apply_microseconds(a, rem_microseconds)}
       %DateTime{} = dt ->
-        %{dt | :microsecond => Helpers.construct_microseconds(rem_microseconds)}
+        apply_microseconds(dt, rem_microseconds)
     end
     apply_shifts(shifted, rest)
   end
@@ -251,6 +251,15 @@ defimpl Timex.Protocol, for: DateTime do
   end
   defp apply_shifts({:error, _} = err, _),
     do: err
+
+  defp apply_microseconds(%DateTime{microsecond: {_, precision}} = datetime, ms) do
+    case precision do
+      0 -> %{datetime | :microsecond => Helpers.construct_microseconds(ms)}
+      _ ->
+        {new_ms, _} = Helpers.construct_microseconds(ms)
+        %{datetime | :microsecond => {new_ms, precision}}
+    end
+  end
 
   defp shift_by(%AmbiguousDateTime{:before => before_dt, :after => after_dt}, value, unit) do
     # Since we're presumably in the middle of a shifting operation, rather than failing because
@@ -337,7 +346,7 @@ defimpl Timex.Protocol, for: DateTime do
 
     {{_y,_m,_d}=date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs_from_zero)
     Timezone.resolve(datetime.time_zone, {date, {h,mm,s}})
-    |> Map.merge(%{microsecond: Helpers.construct_microseconds(rem_microseconds)})
+    |> apply_microseconds(rem_microseconds)
   end
   defp shift_by(%DateTime{microsecond: {current_usecs, _}} = datetime, value, :milliseconds) do
     usecs_from_zero = :calendar.datetime_to_gregorian_seconds({
@@ -350,7 +359,7 @@ defimpl Timex.Protocol, for: DateTime do
 
     {{_y,_m,_d}=date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs_from_zero)
     Timezone.resolve(datetime.time_zone, {date, {h,mm,s}})
-    |> Map.merge(%{microsecond: Helpers.construct_microseconds(rem_microseconds)})
+    |> apply_microseconds(rem_microseconds)
   end
   defp shift_by(%DateTime{microsecond: {us, p}} = datetime, value, units) do
     secs_from_zero = :calendar.datetime_to_gregorian_seconds({
@@ -372,10 +381,10 @@ defimpl Timex.Protocol, for: DateTime do
       {:error, _} = err -> err
       0 when units in [:microseconds] ->
         total_us = rem(value + us, 1_000)
-        %{datetime | :microsecond => Helpers.construct_microseconds(total_us)}
+        apply_microseconds(datetime, total_us)
       0 when units in [:milliseconds] ->
         total_ms = rem(value + (us*1_000), 1_000)
-        %{datetime | :microsecond => Helpers.construct_microseconds(total_ms*1_000)}
+        apply_microseconds(datetime, total_ms*1_000)
       0 ->
         datetime
       _ ->
@@ -388,16 +397,16 @@ defimpl Timex.Protocol, for: DateTime do
             resolved = Timezone.resolve(datetime.time_zone, {date, {h,mm,s}})
             case {resolved, units} do
               {%DateTime{} = dt, :microseconds} ->
-                %{dt | :microsecond => Helpers.construct_microseconds(rem(value+us, 1_000))}
+                apply_microseconds(dt, rem(value+us, 1_000))
               {%DateTime{} = dt, :milliseconds} ->
-                %{dt | :microsecond => Helpers.construct_microseconds(rem(value+(us*1_000), 1_000))}
+                apply_microseconds(dt, rem(value+(us*1_000), 1_000))
               {%AmbiguousDateTime{before: b, after: a}, :microseconds} ->
-                bd = %{b | :microsecond => Helpers.construct_microseconds(rem(value+us, 1_000))}
-                ad = %{a | :microsecond => Helpers.construct_microseconds(rem(value+us, 1_000))}
+                bd = apply_microseconds(b, rem(value+us, 1_000))
+                ad = apply_microseconds(a, rem(value+us, 1_000))
                 %AmbiguousDateTime{before: bd, after: ad}
               {%AmbiguousDateTime{before: b, after: a}, :milliseconds} ->
-                bd = %{b | :microsecond => Helpers.construct_microseconds(rem(value+(us*1_000), 1_000))}
-                ad = %{a | :microsecond => Helpers.construct_microseconds(rem(value+(us*1_000), 1_000))}
+                bd = apply_microseconds(b, rem(value+(us*1_000), 1_000))
+                ad = apply_microseconds(a, rem(value+(us*1_000), 1_000))
                 %AmbiguousDateTime{before: bd, after: ad}
               {%DateTime{} = dt, _} ->
                 %{dt | :microsecond => {us,p}}

@@ -199,12 +199,18 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   end
   defp apply_shifts(datetime, []),
     do: datetime
-  defp apply_shifts(datetime, [{:duration, %Duration{} = duration} | rest]) do
+  defp apply_shifts(%NaiveDateTime{microsecond: {ms, precision}} = datetime, [{:duration, %Duration{} = duration} | rest]) do
     total_microseconds = Duration.to_microseconds(duration)
-    seconds = div(total_microseconds, 1_000*1_000)
+    seconds = div(total_microseconds + ms, 1_000*1_000)
     rem_microseconds = rem(total_microseconds, 1_000*1_000)
     shifted = shift_by(datetime, seconds, :seconds)
-    shifted = %{shifted | :microsecond => Timex.DateTime.Helpers.construct_microseconds(rem_microseconds)}
+    shifted = case precision do
+      0 ->
+        %{shifted | :microsecond => Timex.DateTime.Helpers.construct_microseconds(rem_microseconds)}
+      _ ->
+        {new_ms, _} = Timex.DateTime.Helpers.construct_microseconds(ms + rem_microseconds)
+        %{shifted | :microsecond => {new_ms, precision}}
+    end
     apply_shifts(shifted, rest)
   end
   defp apply_shifts(datetime, [{unit, 0} | rest]) when is_atom(unit),
