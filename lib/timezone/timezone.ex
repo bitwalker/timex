@@ -86,6 +86,16 @@ defmodule Timex.Timezone do
       "Etc/GMT+#{offset * -1}"
     end
   end
+  def name_of(offset) when is_float(offset) do
+    IO.warn "use of floating point offsets is dangerous as they are not guaranteed to be precise " <>
+      "it is recommended that you use either a proper Olson timezone name, or build a timezone info manually " <>
+      "with Timex.Timezone.create/6"
+    if offset > 0 do
+      "Etc/GMT-#{offset}"
+    else
+      "Etc/GMT+#{offset * -1}"
+    end
+  end
   def name_of(<<?+, ?0, ?0, ?:, ?0, ?0>>) do
     "Etc/UTC"
   end
@@ -194,11 +204,18 @@ defmodule Timex.Timezone do
   defp do_get(timezone, datetime, utc_or_wall) do
     name = name_of(timezone)
     seconds_from_zeroyear = Timex.to_gregorian_seconds(datetime)
-    case Tzdata.zone_exists?(name) do
-      false ->
-        lookup_timezone_by_abbreviation(name, seconds_from_zeroyear, utc_or_wall)
-      true ->
-        resolve(name, seconds_from_zeroyear, utc_or_wall)
+    case name do
+      "Etc/GMT-" <> _offset ->
+        do_get(name, datetime, utc_or_wall)
+      "Etc/GMT+" <> _offset ->
+        do_get(name, datetime, utc_or_wall)
+      _ ->
+        case Tzdata.zone_exists?(name) do
+          false ->
+            lookup_timezone_by_abbreviation(name, seconds_from_zeroyear, utc_or_wall)
+          true ->
+            resolve(name, seconds_from_zeroyear, utc_or_wall)
+        end
     end
   end
 
@@ -232,6 +249,24 @@ defmodule Timex.Timezone do
     secs = String.to_integer(<<h1::utf8,h2::utf8>>) * 60 * 60
     {suffix, secs}
   end
+  defp parse_offset(<<h1::utf8, h2::utf8, ?., rest::binary>>) do
+    hours = String.to_integer(<<h1::utf8,h2::utf8>>)
+    hours = hours + String.to_float(<<?0, ?., rest::binary>>)
+    secs  = trunc(Float.round(hours*60*60))
+    mm = div(rem(secs, 60*60), 60)
+    {m1, m2} = cond do
+      mm > 9 ->
+        <<m1::utf8,m2::utf8>> = Integer.to_string(mm)
+        {m1, m2}
+      :else ->
+        <<m2::utf8>> = Integer.to_string(mm)
+        {?0, m2}
+    end
+    {<<h1::utf8,h2::utf8,?:,m1::utf8,m2::utf8>>, secs}
+  end
+  defp parse_offset(<<h2::utf8, ?., rest::binary>>) do
+    parse_offset(<<?0, h2::utf8, ?., rest::binary>>)
+  end
   defp parse_offset("0"), do: {"0", 0}
   defp parse_offset(<<h1::utf8>> = suffix), do: {suffix, String.to_integer(<<h1::utf8>>) * 60 * 60}
 
@@ -256,13 +291,32 @@ defmodule Timex.Timezone do
 
   def resolve(name, seconds_from_zeroyear, utc_or_wall)
     when is_binary(name) and is_integer(seconds_from_zeroyear) and utc_or_wall in [:utc, :wall] do
-    case Tzdata.periods_for_time(name, seconds_from_zeroyear, utc_or_wall) do
-      [] ->
-        # Shift forward an hour, try again
-        case Tzdata.periods_for_time(name, seconds_from_zeroyear + (60 * 60), utc_or_wall) do
-          # Do not try again, something is wrong
+    case Tzdata.zone_exists?(name) do
+      false ->
+        # Timezone doesn't exist, so it must be either a custom timezone, or an odd offset
+        case name do
+          "Etc/GMT" <> _offset ->
+            do_get(name, :calendar.gregorian_seconds_to_datetime(seconds_from_zeroyear), utc_or_wall)
+          _ ->
+            {:error, {:unknown_timezone, name}}
+        end
+      true ->
+        case Tzdata.periods_for_time(name, seconds_from_zeroyear, utc_or_wall) do
           [] ->
-            {:error, {:could_not_resolve_timezone, name, seconds_from_zeroyear, utc_or_wall}}
+            # Shift forward an hour, try again
+            case Tzdata.periods_for_time(name, seconds_from_zeroyear + (60 * 60), utc_or_wall) do
+              # Do not try again, something is wrong
+              [] ->
+                {:error, {:could_not_resolve_timezone, name, seconds_from_zeroyear, utc_or_wall}}
+              # Resolved
+              [period] ->
+                tzdata_to_timezone(period, name)
+              # Ambiguous
+              [before_period, after_period] ->
+                before_tz = tzdata_to_timezone(before_period, name)
+                after_tz  = tzdata_to_timezone(after_period, name)
+                AmbiguousTimezoneInfo.new(before_tz, after_tz)
+            end
           # Resolved
           [period] ->
             tzdata_to_timezone(period, name)
@@ -272,14 +326,6 @@ defmodule Timex.Timezone do
             after_tz  = tzdata_to_timezone(after_period, name)
             AmbiguousTimezoneInfo.new(before_tz, after_tz)
         end
-      # Resolved
-      [period] ->
-        tzdata_to_timezone(period, name)
-      # Ambiguous
-      [before_period, after_period] ->
-        before_tz = tzdata_to_timezone(before_period, name)
-        after_tz  = tzdata_to_timezone(after_period, name)
-        AmbiguousTimezoneInfo.new(before_tz, after_tz)
     end
   end
 

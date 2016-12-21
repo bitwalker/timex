@@ -11,8 +11,8 @@ defimpl Inspect, for: Timex.TimezoneInfo do
 
   defp format_offset(total_offset) do
     offset_hours = div(total_offset, 60*60)
-    offset_mins  = rem(total_offset, 60*60)
-    offset_secs  = rem(total_offset, 60)
+    offset_mins  = div(rem(total_offset, 60*60), 60)
+    offset_secs  = rem(rem(total_offset, 60*60), 60)
     hour  = "#{pad_numeric(offset_hours)}"
     min   = "#{pad_numeric(offset_mins)}"
     secs  = "#{pad_numeric(offset_secs)}"
