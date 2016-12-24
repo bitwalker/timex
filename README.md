@@ -16,7 +16,7 @@ The complete documentation for Timex is located [here](https://hexdocs.pm/timex)
 See the Migrating section further down for details. If you are migrating from earlier than 2.x,
 please review [this migration doc for 1.x to 2.x](https://github.com/bitwalker/timex/tree/2.2.1#migrating).
 
-Timex 3.0 is a significant rewrite, in order to accomodate Elixir 1.3's new Calendar types in a semantically
+Timex 3.0 is a significant rewrite, in order to accommodate Elixir 1.3's new Calendar types in a semantically
 correct way. The external API is mostly the same, but there are changes, many without deprecations, so please
 read the changelog carefully.
 
@@ -103,7 +103,7 @@ There are a ton of other functions, all of which work with Erlang datetime tuple
 
 ## Extensibility
 
-Timex exposes a number of extension points for you, in order to accomodate different use cases:
+Timex exposes a number of extension points for you, in order to accommodate different use cases:
 
 Timex itself defines it's core operations on the Date, DateTime, and NaiveDateTime types using the `Timex.Protocol` protocol. From there, all other Timex functionality is derived. If you have custom date/datetime types you want to use with Timex, this is the protocol you would need to implement.
 
@@ -113,7 +113,7 @@ You can provide your own formatter/parser for datetime strings by implementing t
 
 ## Common Issues
 
-**Warning**: Timex functions of the form `iso_*` behave based on how the ISO calendar represents dates/times and not the ISO8601 date format. This confusion has occured before, and it's important to note this!
+**Warning**: Timex functions of the form `iso_*` behave based on how the ISO calendar represents dates/times and not the ISO8601 date format. This confusion has occurred before, and it's important to note this!
 
 - If you need to use Timex from within an escript, add `{:tzdata, "~> 0.1.8", override: true}` to your deps,
   more recent versions of :tzdata are unable to work in an escript because of the need to load ETS table files
@@ -121,7 +121,7 @@ You can provide your own formatter/parser for datetime strings by implementing t
 
 ## Migrating
 
-If you have been using Timex pre-3.x, and you are looking to migrate, it will be fairly painless as long as you review the `CHANGELOG.md` file and make note of anything that has changed which you are using. In almost every single case, the functionality has simply moved, or is accessed slightly differently. In some cases behaviour has changed, but the old behaviour can be acheived manually. For those things which were removed or are no longer available, it is almost certainly because those things are no longer recommended, or no longer make sense for this library. If I have missed something, or there is a good justification for re-adding something which was removed, I'm always open to discussing it on the issue tracker.
+If you have been using Timex pre-3.x, and you are looking to migrate, it will be fairly painless as long as you review the `CHANGELOG.md` file and make note of anything that has changed which you are using. In almost every single case, the functionality has simply moved, or is accessed slightly differently. In some cases behaviour has changed, but the old behaviour can be achieved manually. For those things which were removed or are no longer available, it is almost certainly because those things are no longer recommended, or no longer make sense for this library. If I have missed something, or there is a good justification for re-adding something which was removed, I'm always open to discussing it on the issue tracker.
 
 ### Overview of 3.x changes
 
