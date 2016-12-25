@@ -1,0 +1,71 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: zh_CN\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+
+#: lib/l10n/translator.ex:178
+msgid "%{count} day"
+msgid_plural "%{count} days"
+msgstr[0] "%{count}天"
+
+#: lib/l10n/translator.ex:177
+msgid "%{count} hour"
+msgid_plural "%{count} hours"
+msgstr[0] "%{count}小时"
+
+#: lib/l10n/translator.ex:173
+msgid "%{count} microsecond"
+msgid_plural "%{count} microseconds"
+msgstr[0] "%{count}微秒"
+
+#: lib/l10n/translator.ex:174
+msgid "%{count} millisecond"
+msgid_plural "%{count} milliseconds"
+msgstr[0] "%{count}毫秒"
+
+#: lib/l10n/translator.ex:176
+msgid "%{count} minute"
+msgid_plural "%{count} minutes"
+msgstr[0] "%{count}分钟"
+
+#: lib/l10n/translator.ex:180
+msgid "%{count} month"
+msgid_plural "%{count} months"
+msgstr[0] "%{count}个月"
+
+#: lib/l10n/translator.ex:172
+msgid "%{count} nanosecond"
+msgid_plural "%{count} nanoseconds"
+msgstr[0] "%{count}纳秒"
+
+#: lib/l10n/translator.ex:175
+msgid "%{count} second"
+msgid_plural "%{count} seconds"
+msgstr[0] "%{count}秒"
+
+#: lib/l10n/translator.ex:179
+msgid "%{count} week"
+msgid_plural "%{count} weeks"
+msgstr[0] "%{count}周"
+
+#: lib/l10n/translator.ex:181
+msgid "%{count} year"
+msgid_plural "%{count} years"
+msgstr[0] "%{count}年"
