@@ -620,8 +620,19 @@ defmodule Timex do
       do
       {_, _, jan4weekday} = iso_triplet({year, 1, 4})
       offset = jan4weekday + 3
-      ordinal_date = ((week * 7) + weekday) - offset
-      {year, month, day} = Helpers.iso_day_to_date_tuple(year, ordinal_date)
+      ordinal_day = ((week * 7) + weekday) - offset
+      {year, iso_day} = case {year, ordinal_day} do
+        {year, ordinal_day} when ordinal_day < 1 and is_leap_year(year - 1) ->
+          {year - 1, ordinal_day + 366}
+        {year, ordinal_day} when ordinal_day < 1 ->
+          {year - 1, ordinal_day + 365}
+        {year, ordinal_day} when ordinal_day > 366 and is_leap_year(year) ->
+          {year + 1, ordinal_day - 366}
+        {year, ordinal_day} when ordinal_day > 365 and not is_leap_year(year) ->
+          {year + 1, ordinal_day - 365}
+        _ -> {year, ordinal_day}
+      end
+      {year, month, day} = Helpers.iso_day_to_date_tuple(year, iso_day)
       %Date{year: year, month: month, day: day}
   end
   def from_iso_triplet(_, _, _), do: {:error, {:from_iso_triplet, :invalid_triplet}}
