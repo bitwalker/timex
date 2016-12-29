@@ -71,6 +71,30 @@ defmodule TimexTests do
     assert Timex.iso_triplet(Timex.epoch()) === {1970,1,4}
   end
 
+  describe "from_iso_triplet" do
+    test "first day of first iso week is first day of the year" do
+      assert Timex.from_iso_triplet({2001, 1, 1}) === Timex.to_date({2001, 1, 1})
+    end
+    test "first iso week includes the maximum number of days from the previous year" do
+      assert Timex.from_iso_triplet({2004, 1, 1}) === Timex.to_date({2003, 12, 29})
+    end
+    test "last iso week includes the maximum number of days in the next year" do
+      assert Timex.from_iso_triplet({2026, 53, 7}) === Timex.to_date({2027, 1, 3})
+    end
+    test "last iso week of leap year includes the maximum number of days in the next year" do
+      assert Timex.from_iso_triplet({2020, 53, 7}) === Timex.to_date({2021, 1, 3})
+    end
+    test "iso week that includes a leap day" do
+      assert Timex.from_iso_triplet({2000, 9, 2}) === Timex.to_date({2000, 2, 29})
+    end
+    test "first iso week starts on the last day of the year" do
+      assert Timex.from_iso_triplet({2013, 1, 1}) === Timex.to_date({2012, 12, 31})
+    end
+    test "last day of last iso week ends on last day of the year" do
+      assert Timex.from_iso_triplet({2028, 52, 7}) == Timex.to_date({2028, 12, 31})
+    end
+  end
+
   test "days_in_month" do
     localdate = {{2013,2,17},{11,59,10}}
     assert Timex.days_in_month(Timex.to_datetime(localdate)) === 28

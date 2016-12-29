@@ -242,6 +242,67 @@ defmodule Timex.Macros do
   end
 
   @doc """
+  A guard macro which asserts that the given value is a valid iso day for the given year.
+  For a leap year this would be in the range of 1-366. For a regular year this would be
+  in the range of 1-365.
+
+  ## Examples
+
+      iex> import Timex.Macros
+      ...> is_iso_day_of_year(2001, 1)
+      true
+
+      iex> import Timex.Macros
+      ...> is_iso_day_of_year(2001, 0)
+      false
+
+      iex> import Timex.Macros
+      ...> is_iso_day_of_year(2012, 366)
+      true
+
+      iex> import Timex.Macros
+      ...> is_iso_day_of_year(2011, 366)
+      false
+
+      iex> import Timex.Macros
+      ...> is_iso_day_of_year(2012, 367)
+      false
+  """
+  defmacro is_iso_day_of_year(y, d) do
+    quote do
+      is_integer_in_range(unquote(d), 1, 365) or
+      (unquote(d) == 366 and is_leap_year(unquote(y)))
+    end
+  end
+
+  @doc """
+  A guard macro which returns true if the given value is a leap year
+
+  ## Examples
+
+      iex> import Timex.Macros
+      ...> is_leap_year(2001)
+      false
+
+      iex> import Timex.Macros
+      ...> is_leap_year(2000)
+      true
+
+      iex> import Timex.Macros
+      ...> is_leap_year(2004)
+      true
+
+      iex> import Timex.Macros
+      ...> is_leap_year(1900)
+      false
+  """
+  defmacro is_leap_year(y) do
+    quote do
+      (rem(unquote(y), 4) == 0 and rem(unquote(y), 100) != 0) or rem(unquote(y), 400) == 0
+    end
+  end
+
+  @doc """
   A guard macro which asserts that the given value is an integer in the range of 1-53
   """
   defmacro is_week_of_year(w) do
