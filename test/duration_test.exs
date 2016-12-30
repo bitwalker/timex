@@ -1,9 +1,20 @@
 defmodule DurationTests do
   use ExUnit.Case, async: true
   use Timex
-  doctest Timex.Duration
+  doctest Timex.Duration, except: [{:now, 0}, {:now, 1}]
   doctest Timex.Format.Duration.Formatter
   doctest Timex.Parse.Duration.Parsers.ISO8601Parser
+
+  describe "to_clock" do
+    test "when microseconds are greater than a second" do
+      d = %Timex.Duration{megaseconds: 0, seconds: 1, microseconds: 1_000_050}
+      assert Timex.Duration.to_clock(d) == {0, 0, 2, 50}
+    end
+    test "when seconds are greater than a megaseconds" do
+      d = %Timex.Duration{megaseconds: 0, seconds: 1_000_001, microseconds: 0}
+      assert Timex.Duration.to_clock(d) == {277, 46, 41, 0}
+    end
+  end
 
   test "to_12hour_clock" do
     assert Timex.Time.to_12hour_clock(0) == {12, :am}
@@ -109,6 +120,22 @@ defmodule DurationTests do
     reversed_list = Enum.to_list(100000..1)
     assert { %Duration{} = d, ^reversed_list } = Duration.measure(fn -> Enum.reverse(1..100000) end)
     assert d.megaseconds + d.seconds + d.microseconds > 0
+  end
+
+  describe "now" do
+    test "now/0 returns the duration since epoch" do
+      erlang_now_microseconds = div(:os.system_time, 1000)
+      timex_now_microseconds = Timex.Duration.now() |> Timex.Duration.to_microseconds
+      difference_microseconds = timex_now_microseconds - erlang_now_microseconds
+      assert_in_delta(difference_microseconds, 500_000, 500_001)
+    end
+    test "now(:seconds) is correct" do
+      erlang_now_seconds = :calendar.datetime_to_gregorian_seconds(:calendar.universal_time()) -
+        :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
+      timex_now_seconds = Timex.Duration.now(:seconds)
+      difference_seconds = timex_now_seconds - erlang_now_seconds
+      assert_in_delta(difference_seconds, 0.5, 1)
+    end
   end
 
   def something_to_measure(x), do: x
