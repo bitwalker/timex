@@ -34,12 +34,20 @@ defmodule Timex.Format.Duration.Formatters.Default do
   ## Examples
 
       iex> use Timex
-      ...> Duration.from_erl({1435, 180354, 590264}) |> #{__MODULE__}.format
-      "P45Y6M5DT21H12M34.590264S"
+      ...> Duration.from_erl({0, 1, 1_000_000}) |> #{__MODULE__}.format
+      "PT2S"
+
+      iex> use Timex
+      ...> Duration.from_erl({0, 1, 1_000_100}) |> #{__MODULE__}.format
+      "PT2.0001S"
 
       iex> use Timex
       ...> Duration.from_erl({0, 65, 0}) |> #{__MODULE__}.format
       "PT1M5S"
+
+      iex> use Timex
+      ...> Duration.from_erl({1435, 180354, 590264}) |> #{__MODULE__}.format
+      "P45Y6M5DT21H12M34.590264S"
 
   """
   @spec format(Duration.t) :: String.t | {:error, term}
@@ -74,7 +82,7 @@ defmodule Timex.Format.Duration.Formatters.Default do
   defp format_component({:seconds, s}, str), do: str <> "#{s}S"
 
   defp deconstruct(%Duration{microseconds: micro} = duration),
-    do: deconstruct({Duration.to_seconds(duration, truncate: true), micro}, [])
+    do: deconstruct({Duration.to_seconds(duration, truncate: true), rem(micro, 1_000_000)}, [])
   defp deconstruct({0, 0}, components),
     do: Enum.reverse(components)
   defp deconstruct({seconds, us}, components) when seconds > 0 do
