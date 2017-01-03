@@ -26,6 +26,12 @@ defmodule Timex.Duration do
 
   @doc """
   Converts a Duration to an Erlang timestamp
+
+  ## Example
+
+      iex> d = %Timex.Duration{megaseconds: 1, seconds: 2, microseconds: 3}
+      ...> Timex.Duration.to_erl(d)
+      {1, 2, 3}
   """
   @spec to_erl(__MODULE__.t) :: Types.timestamp
   def to_erl(%__MODULE__{} = d),
@@ -33,14 +39,29 @@ defmodule Timex.Duration do
 
   @doc """
   Converts an Erlang timestamp to a Duration
+
+  ## Example
+
+      iex> Timex.Duration.from_erl({1, 2, 3})
+      %Timex.Duration{megaseconds: 1, seconds: 2, microseconds: 3}
   """
   @spec from_erl(Types.timestamp) :: __MODULE__.t
   def from_erl({mega, sec, micro}),
     do: %__MODULE__{megaseconds: mega, seconds: sec, microseconds: micro}
 
   @doc """
-  Converts a Duration to a Time, if the duration fits within a 24-hour clock,
-  if it does not, an error will be returned.
+  Converts a Duration to a Time if the duration fits within a 24-hour clock.
+  If it does not, an error tuple is returned.
+
+  ## Examples
+
+      iex> d = %Timex.Duration{megaseconds: 0, seconds: 4000, microseconds: 0}
+      ...> Timex.Duration.to_time(d)
+      {:ok, ~T[01:06:40]}
+
+      iex> d = %Timex.Duration{megaseconds: 1, seconds: 0, microseconds: 0}
+      ...> Timex.Duration.to_time(d)
+      {:error, :invalid_time}
   """
   @spec to_time(__MODULE__.t) :: {:ok, Time.t} | {:error, atom}
   def to_time(%__MODULE__{} = d) do
@@ -49,7 +70,18 @@ defmodule Timex.Duration do
   end
 
   @doc """
-  Same as to_time/1, but returns the Time directly, and raises on error
+  Same as to_time/1, but returns the Time directly. Raises an error if the
+  duration does not fit within a 24-hour clock.
+
+  ## Examples
+
+      iex> d = %Timex.Duration{megaseconds: 0, seconds: 4000, microseconds: 0}
+      ...> Timex.Duration.to_time!(d)
+      ~T[01:06:40]
+
+      iex> d = %Timex.Duration{megaseconds: 1, seconds: 0, microseconds: 0}
+      ...> Timex.Duration.to_time!(d)
+      ** (ArgumentError) cannot convert {277, 46, 40} to time, reason: :invalid_time
   """
   @spec to_time!(__MODULE__.t) :: Time.t | no_return
   def to_time!(%__MODULE__{} = d) do
@@ -59,6 +91,11 @@ defmodule Timex.Duration do
 
   @doc """
   Converts a Time to a Duration
+
+  ## Example
+
+      iex> Timex.Duration.from_time(~T[01:01:30])
+      %Timex.Duration{megaseconds: 0, seconds: 3690, microseconds: 0}
   """
   @spec from_time(Time.t) :: __MODULE__.t
   def from_time(%Time{} = t) do
@@ -68,6 +105,16 @@ defmodule Timex.Duration do
 
   @doc """
   Converts a Duration to a string, using the ISO standard for formatting durations.
+
+  ## Examples
+
+      iex> d = %Timex.Duration{megaseconds: 0, seconds: 3661, microseconds: 0}
+      ...> Timex.Duration.to_string(d)
+      "PT1H1M1S"
+
+      iex> d = %Timex.Duration{megaseconds: 102, seconds: 656013, microseconds: 33}
+      ...> Timex.Duration.to_string(d)
+      "P3Y3M3DT3H33M33.000033S"
   """
   @spec to_string(__MODULE__.t) :: String.t
   def to_string(%__MODULE__{} = duration) do
@@ -99,8 +146,13 @@ defmodule Timex.Duration do
   defdelegate parse!(str, module), to: Timex.Parse.Duration.Parser
 
   @doc """
-  Converts a Duration to a clock tuple, i.e. `{hour,minute,second,microsecond}`
-  Helpful for if you want to convert a duration to a clock and vice versa
+  Converts a Duration to a clock tuple, i.e. `{hour,minute,second,microsecond}`.
+
+  ## Example
+
+      iex> d = %Timex.Duration{megaseconds: 1, seconds: 1, microseconds: 50}
+      ...> Timex.Duration.to_clock(d)
+      {277, 46, 41, 50}
   """
   def to_clock(%__MODULE__{megaseconds: mega, seconds: sec, microseconds: micro}) do
     ss = (mega * 1_000_000)+sec
@@ -115,8 +167,12 @@ defmodule Timex.Duration do
   end
 
   @doc """
-  Convers a clock tuple, i.e. `{hour,minute,second,microsecond}` to a Duration
-  Helpful for if you want to convert a duration to a clock and vice vera
+  Converts a clock tuple, i.e. `{hour, minute, second, microsecond}` to a Duration.
+
+  ## Example
+
+      iex> Timex.Duration.from_clock({1, 2, 3, 4})
+      %Timex.Duration{megaseconds: 0, seconds: 3723, microseconds: 4}
   """
   def from_clock({hour,minute,second,usec}) do
     total_seconds = (hour*60*60)+(minute*60)+second
@@ -322,6 +378,16 @@ defmodule Timex.Duration do
 
   @doc """
   Add one Duration to another.
+
+  ## Examples
+
+      iex> d = %Timex.Duration{megaseconds: 1, seconds: 1, microseconds: 1}
+      ...> Timex.Duration.add(d, d)
+      %Timex.Duration{megaseconds: 2, seconds: 2, microseconds: 2}
+
+      iex> d = %Timex.Duration{megaseconds: 1, seconds: 750000, microseconds: 750000}
+      ...> Timex.Duration.add(d, d)
+      %Timex.Duration{megaseconds: 3, seconds: 500001, microseconds: 500000}
   """
   @spec add(__MODULE__.t, __MODULE__.t) :: __MODULE__.t
   def add(%Duration{megaseconds: mega1, seconds: sec1, microseconds: micro1},
@@ -333,6 +399,13 @@ defmodule Timex.Duration do
 
   @doc """
   Subtract one Duration from another.
+
+  ## Example
+
+      iex> d1 = %Timex.Duration{megaseconds: 3, seconds: 3, microseconds: 3}
+      ...> d2 = %Timex.Duration{megaseconds: 2, seconds: 2, microseconds: 2}
+      ...> Timex.Duration.sub(d1, d2)
+      %Timex.Duration{megaseconds: 1, seconds: 1, microseconds: 1}
   """
   @spec sub(__MODULE__.t, __MODULE__.t) :: __MODULE__.t
   def sub(%Duration{megaseconds: mega1, seconds: sec1, microseconds: micro1},
@@ -344,6 +417,12 @@ defmodule Timex.Duration do
 
   @doc """
   Scale a Duration by some coefficient value, i.e. a scale of 2 is twice is long.
+
+  ## Example
+
+      iex> d = %Timex.Duration{megaseconds: 1, seconds: 1, microseconds: 1}
+      ...> Timex.Duration.scale(d, 2)
+      %Timex.Duration{megaseconds: 2, seconds: 2, microseconds: 2}
   """
   @spec scale(__MODULE__.t, coefficient :: integer | float) :: __MODULE__.t
   def scale(%Duration{megaseconds: mega, seconds: secs, microseconds: micro}, coef) do
@@ -364,6 +443,12 @@ defmodule Timex.Duration do
 
   @doc """
   Invert a Duration, i.e. a positive duration becomes a negative one, and vice versa
+
+  ## Example
+
+      iex> d = %Timex.Duration{megaseconds: -1, seconds: -2, microseconds: -3}
+      ...> Timex.Duration.invert(d)
+      %Timex.Duration{megaseconds: 1, seconds: 2, microseconds: 3}
   """
   @spec invert(__MODULE__.t) :: __MODULE__.t
   def invert(%Duration{megaseconds: mega, seconds: sec, microseconds: micro}) do
@@ -372,6 +457,12 @@ defmodule Timex.Duration do
 
   @doc """
   Returns the absolute value of the provided Duration.
+
+  ## Example
+
+      iex> d = %Timex.Duration{megaseconds: -1, seconds: -2, microseconds: -3}
+      ...> Timex.Duration.abs(d)
+      %Timex.Duration{megaseconds: 1, seconds: 2, microseconds: 3}
   """
   @spec abs(__MODULE__.t) :: __MODULE__.t
   def abs(%Duration{} = duration) do
@@ -395,19 +486,49 @@ defmodule Timex.Duration do
 
   Can also be used to represent the timestamp of the start of the UNIX epoch,
   as all Erlang timestamps are relative to this point.
-
   """
   @spec zero() :: __MODULE__.t
   def zero, do: %Duration{megaseconds: 0, seconds: 0, microseconds: 0}
 
   @doc """
-  Return time interval since the first day of year 0 to Epoch.
+  Returns the duration since the first day of year 0 to Epoch.
+
+  ## Example
+
+      iex> Timex.Duration.epoch()
+      %Timex.Duration{megaseconds: 62_167, seconds: 219_200, microseconds: 0}
   """
   @spec epoch() :: __MODULE__.t
-  @spec epoch(units) :: __MODULE__.t
   def epoch() do
     from_seconds(epoch(:seconds))
   end
+
+  @doc """
+  Returns the amount of time since the first day of year 0 to Epoch.
+
+  The argument is an atom indicating the type of time units to return.
+
+  The allowed unit type atoms are:
+  - :microseconds
+  - :milliseconds
+  - :seconds
+  - :minutes
+  - :hours
+  - :days
+  - :weeks
+
+  ## Examples
+
+      iex> Timex.Duration.epoch(:seconds)
+      62_167_219_200
+
+  If the specified type is nil, a duration since the first day of year 0 to Epoch
+  is returned.
+
+      iex> Timex.Duration.epoch(nil)
+      %Timex.Duration{megaseconds: 62_167, seconds: 219_200, microseconds: 0}
+  """
+  @spec epoch(units) :: __MODULE__.t
   def epoch(type) do
     seconds = :calendar.datetime_to_gregorian_seconds({{1970,1,1}, {0,0,0}})
     case type do
@@ -424,12 +545,28 @@ defmodule Timex.Duration do
   end
 
   @doc """
-  Time interval since Epoch.
+  Returns the amount of time since Epoch.
 
-  The argument is an atom indicating the type of time units to return (see
-  convert/2 for supported values).
+  The argument is an atom indicating the type of time units to return.
 
-  When the argument is omitted, the return value's format is { megasecs, seconds, microsecs }.
+  The allowed unit type atoms are:
+  - :microseconds
+  - :milliseconds
+  - :seconds
+  - :minutes
+  - :hours
+  - :days
+  - :weeks
+
+  ## Examples
+
+      iex> Timex.Duration.now(:seconds)
+      1483141644
+
+  When the argument is omitted or nil, a Duration is returned.
+
+      iex> Timex.Duration.now
+      %Timex.Duration{megaseconds: 1483, seconds: 141562, microseconds: 536938}
   """
   @spec now() :: __MODULE__.t
   @spec now(units) :: non_neg_integer
@@ -547,7 +684,7 @@ defmodule Timex.Duration do
     {Duration.from_microseconds(time), result}
   end
 
-  defp normalize(%Duration{megaseconds: mega, seconds: sec, microseconds: micro}) do
+  def normalize(%Duration{megaseconds: mega, seconds: sec, microseconds: micro}) do
     # TODO: check for negative values
     { sec, micro } = mdivmod(sec, micro)
     { mega, sec }  = mdivmod(mega, sec)
