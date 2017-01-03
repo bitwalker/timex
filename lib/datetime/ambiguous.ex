@@ -31,8 +31,8 @@ defmodule Timex.AmbiguousDateTime do
 
   For this use case, Timex will return an AmbiguousDateTime any time you try to create a DateTime,
   or shift a DateTime, to an ambiguous time period. It has two fields, :before, containing a DateTime
-  configured in the timezone occuring before the ambiguous period, and :after, containing a DateTime
-  configured in the timezone occuring after the ambiguous period. It is up to you as the programmer to
+  configured in the timezone occurring before the ambiguous period, and :after, containing a DateTime
+  configured in the timezone occurring after the ambiguous period. It is up to you as the programmer to
   decide which DateTime is the one to use, but my recommendation is to choose :after, unless you have a
   specific reason to use :before.
   """
