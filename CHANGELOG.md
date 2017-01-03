@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.1.6
+
+### Added
+
+- Translations for zh_CN (chinese)
+- Translations for pl (polish)
+- #244 - Support for fractional offsets
+
+### Fixed
+
+- Various documentation fixes
+- Fix #262 - Day of week calculation in Julian calendar - Mark Meeus
+- Fix #260 - Duration formatting edge case - Slava Kisel
+- Fix #257 - Fix from_iso_triplet logic - Mathew Bramson
+- Fix #252 - Formatting/parsing of fractional seconds was not roundtripable
+- Fix #248 - Make fractional second formatting consistent with standard library
+- Add application callback so we can provide better errors if :tzdata isn't started
+- Enable fallback_to_any in Timex.Protocol
+
 ## 3.1.5
 
 ### Fixed
