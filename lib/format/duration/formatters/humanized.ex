@@ -19,11 +19,21 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
 
   ## Examples
 
-      iex> alias Timex.Duration
-      iex> Duration.from_erl({1435, 180354, 590264}) |> #{__MODULE__}.format
-      "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds, 590.264 milliseconds"
-      iex> Duration.from_erl({0, 65, 0}) |> #{__MODULE__}.format
+      iex> use Timex
+      ...> Duration.from_erl({0, 1, 1_000_000}) |> #{__MODULE__}.format
+      "2 seconds"
+
+      iex> use Timex
+      ...> Duration.from_erl({0, 1, 1_000_100}) |> #{__MODULE__}.format
+      "2 seconds, 100 microseconds"
+
+      iex> use Timex
+      ...> Duration.from_erl({0, 65, 0}) |> #{__MODULE__}.format
       "1 minute, 5 seconds"
+
+      iex> use Timex
+      ...> Duration.from_erl({1435, 180354, 590264}) |> #{__MODULE__}.format
+      "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds, 590.264 milliseconds"
 
   """
   @spec format(Duration.t) :: String.t | {:error, term}
@@ -36,12 +46,12 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
   ## Examples
 
       iex> use Timex
-      ...> Duration.from_erl({1435, 180354, 590264}) |> #{__MODULE__}.lformat("ru")
-      "45 года  6 месяца  5 днем  21 час  12 минуты  34 секунды  590.264 миллисекунды"
-
-      iex> use Timex
       ...> Duration.from_erl({0, 65, 0}) |> #{__MODULE__}.lformat("ru")
       "1 минута  5 секунды"
+
+      iex> use Timex
+      ...> Duration.from_erl({1435, 180354, 590264}) |> #{__MODULE__}.lformat("ru")
+      "45 года  6 месяца  5 днем  21 час  12 минуты  34 секунды  590.264 миллисекунды"
 
   """
   @spec lformat(Duration.t, String.t) :: String.t | {:error, term}
@@ -67,7 +77,7 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
   end
 
   defp deconstruct(%Duration{microseconds: micro} = duration),
-    do: deconstruct({Duration.to_seconds(duration, truncate: true), micro}, [])
+    do: deconstruct({Duration.to_seconds(duration, truncate: true), rem(micro, 1_000_000)}, [])
   defp deconstruct({0, 0}, components),
     do: Enum.reverse(components)
   defp deconstruct({seconds, us}, components) when seconds > 0 do
