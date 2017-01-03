@@ -75,7 +75,7 @@ defmodule Timex.Calendar.Julian do
     cardinal = mod((trunc(julian_date(year, month, day)) + 1), 7)
     case weekstart do
       :sun -> cardinal
-      :mon -> cardinal + 1
+      :mon -> mod(cardinal + 6, 7) + 1
     end
   end
   def day_of_week(_, _, _, weekstart) when not weekstart in [:sun, :mon] do
