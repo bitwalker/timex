@@ -4,7 +4,6 @@ defmodule Timex.Parse.Duration.Parser do
   The actual parsing is delegated to specific parser modules, but this module
   provides a unified API for all of them.
   """
-  use Behaviour
   alias Timex.Duration
   alias Timex.Parse.ParseError
   alias Timex.Parse.Duration.Parsers.ISO8601Parser

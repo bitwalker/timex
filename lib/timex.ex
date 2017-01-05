@@ -32,8 +32,6 @@ defmodule Timex do
   use Timex.Constants
   import Timex.Macros
 
-  @epoch_seconds :calendar.datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}})
-
   @doc """
   Returns a Date representing the current day in UTC
   """

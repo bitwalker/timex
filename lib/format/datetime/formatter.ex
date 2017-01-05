@@ -2,7 +2,6 @@ defmodule Timex.Format.DateTime.Formatter do
   @moduledoc """
   This module defines the behaviour for custom DateTime formatters.
   """
-  use Behaviour
 
   alias Timex.{Timezone, Translator, Types}
   alias Timex.Translator
@@ -10,15 +9,15 @@ defmodule Timex.Format.DateTime.Formatter do
   alias Timex.Format.DateTime.Formatters.{Default, Strftime, Relative}
   alias Timex.Parse.DateTime.Tokenizers.Directive
 
-  defcallback tokenize(format_string :: String.t)
+  @callback tokenize(format_string :: String.t)
     :: {:ok, [Directive.t]} | {:error, term}
-  defcallback format(date :: Types.calendar_types, format_string :: String.t)
+  @callback format(date :: Types.calendar_types, format_string :: String.t)
     :: {:ok, String.t} | {:error, term}
-  defcallback format!(date :: Types.calendar_types, format_string :: String.t)
+  @callback format!(date :: Types.calendar_types, format_string :: String.t)
     :: String.t | no_return
-  defcallback lformat(date :: Types.calendar_types, format_string :: String.t, locale :: String.t)
+  @callback lformat(date :: Types.calendar_types, format_string :: String.t, locale :: String.t)
     :: {:ok, String.t} | {:error, term}
-  defcallback lformat!(date :: Types.calendar_types, format_string :: String.t, locale :: String.t)
+  @callback lformat!(date :: Types.calendar_types, format_string :: String.t, locale :: String.t)
     :: String.t | no_return
 
   @doc false

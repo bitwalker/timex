@@ -2,7 +2,6 @@ defmodule Timex.Format.Duration.Formatter do
   @moduledoc """
   This module defines the behaviour for custom Time formatters
   """
-  use Behaviour
   use Timex
   alias Timex.Translator
   alias Timex.Duration
@@ -16,8 +15,8 @@ defmodule Timex.Format.Duration.Formatter do
     end
   end
 
-  defcallback format(Duration.t) :: String.t | {:error, term}
-  defcallback lformat(Duration.t, locale :: String.t) :: String.t | {:error, term}
+  @callback format(Duration.t) :: String.t | {:error, term}
+  @callback lformat(Duration.t, locale :: String.t) :: String.t | {:error, term}
 
   @doc """
   Formats a Duration as a string, using the provided
