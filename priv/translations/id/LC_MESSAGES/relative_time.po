@@ -1,0 +1,241 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: id\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+
+#: lib/l10n/translator.ex:237
+msgid "last month"
+msgstr "bulan lalu"
+
+#: lib/l10n/translator.ex:243
+msgid "last week"
+msgstr "minggu lalu"
+
+#: lib/l10n/translator.ex:231
+msgid "last year"
+msgstr "tahun lalu"
+
+#: lib/l10n/translator.ex:239
+msgid "next month"
+msgstr "bulan depan"
+
+#: lib/l10n/translator.ex:245
+msgid "next week"
+msgstr "minggu depan"
+
+#: lib/l10n/translator.ex:233
+msgid "next year"
+msgstr "tahun depan"
+
+#: lib/l10n/translator.ex:238
+msgid "this month"
+msgstr "bulan ini"
+
+#: lib/l10n/translator.ex:244
+msgid "this week"
+msgstr "minggu ini"
+
+#: lib/l10n/translator.ex:232
+msgid "this year"
+msgstr "tahun ini"
+
+#: lib/l10n/translator.ex:250
+msgid "today"
+msgstr "hari ini"
+
+#: lib/l10n/translator.ex:251
+msgid "tomorrow"
+msgstr "besok"
+
+#: lib/l10n/translator.ex:249
+msgid "yesterday"
+msgstr "kemarin"
+
+#: lib/l10n/translator.ex:253
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "%{count} hari lalu"
+msgstr[1] "%{count} hari lalu"
+
+#: lib/l10n/translator.ex:278
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "%{count} jam lalu"
+msgstr[1] "%{count} jam lalu"
+
+#: lib/l10n/translator.ex:281
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "%{count} menit lalu"
+msgstr[1] "%{count} menit lalu"
+
+#: lib/l10n/translator.ex:241
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "%{count} bulan lalu"
+msgstr[1] "%{count} bulan lalu"
+
+#: lib/l10n/translator.ex:284
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "%{count} detik lalu"
+msgstr[1] "%{count} detik lalu"
+
+#: lib/l10n/translator.ex:247
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "%{count} minggu lalu"
+msgstr[1] "%{count} minggu lalu"
+
+#: lib/l10n/translator.ex:235
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "%{count} tahun lalu"
+msgstr[1] "%{count} tahun lalu"
+
+#: lib/l10n/translator.ex:252
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "dalam %{count} hari"
+msgstr[1] "dalam %{count} hari"
+
+#: lib/l10n/translator.ex:277
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "dalam %{count} jam"
+msgstr[1] "dalam %{count} jam"
+
+#: lib/l10n/translator.ex:280
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "dalam %{count} menit"
+msgstr[1] "dalam %{count} menit"
+
+#: lib/l10n/translator.ex:240
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "dalam %{count} bulan"
+msgstr[1] "dalam %{count} bulan"
+
+#: lib/l10n/translator.ex:283
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "dalam %{count} detik"
+msgstr[1] "dalam %{count} detik"
+
+#: lib/l10n/translator.ex:246
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "dalam %{count} minggu"
+msgstr[1] "dalam %{count} minggu"
+
+#: lib/l10n/translator.ex:234
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "dalam %{count} tahun"
+msgstr[1] "dalam %{count} tahun"
+
+#: lib/l10n/translator.ex:267
+msgid "last friday"
+msgstr "Jumat lalu"
+
+#: lib/l10n/translator.ex:255
+msgid "last monday"
+msgstr "Senin lalu"
+
+#: lib/l10n/translator.ex:270
+msgid "last saturday"
+msgstr "Sabtu lalu"
+
+#: lib/l10n/translator.ex:273
+msgid "last sunday"
+msgstr "Minggu lalu"
+
+#: lib/l10n/translator.ex:264
+msgid "last thursday"
+msgstr "Kamis lalu"
+
+#: lib/l10n/translator.ex:258
+msgid "last tuesday"
+msgstr "Selasa lalu"
+
+#: lib/l10n/translator.ex:261
+msgid "last wednesday"
+msgstr "Rabu lalu"
+
+#: lib/l10n/translator.ex:269
+msgid "next friday"
+msgstr "Jumat depan"
+
+#: lib/l10n/translator.ex:257
+msgid "next monday"
+msgstr "Senin depan"
+
+#: lib/l10n/translator.ex:272
+msgid "next saturday"
+msgstr "Sabtu depan"
+
+#: lib/l10n/translator.ex:275
+msgid "next sunday"
+msgstr "Minggu depan"
+
+#: lib/l10n/translator.ex:266
+msgid "next thursday"
+msgstr "Kamis depan"
+
+#: lib/l10n/translator.ex:260
+msgid "next tuesday"
+msgstr "Selasa depan"
+
+#: lib/l10n/translator.ex:263
+msgid "next wednesday"
+msgstr "Rabu depan"
+
+#: lib/l10n/translator.ex:268
+msgid "this friday"
+msgstr "Jumat ini"
+
+#: lib/l10n/translator.ex:256
+msgid "this monday"
+msgstr "Senin ini"
+
+#: lib/l10n/translator.ex:271
+msgid "this saturday"
+msgstr "Sabtu ini"
+
+#: lib/l10n/translator.ex:274
+msgid "this sunday"
+msgstr "Minggu ini"
+
+#: lib/l10n/translator.ex:265
+msgid "this thursday"
+msgstr "Kamis ini"
+
+#: lib/l10n/translator.ex:259
+msgid "this tuesday"
+msgstr "Selasa ini"
+
+#: lib/l10n/translator.ex:262
+msgid "this wednesday"
+msgstr "Rabu ini"
+
+#: lib/l10n/translator.ex:286
+msgid "now"
+msgstr ""
