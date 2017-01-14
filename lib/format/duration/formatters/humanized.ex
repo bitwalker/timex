@@ -14,8 +14,11 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
   @month  @day * 30
   @year   @day * 365
 
+  @microsecond 1_000_000
+
   @doc """
-  Return a human readable string representing the time interval.
+  Return a human readable string representing the absolute value of duration (i.e. would
+  return the same output for both negative and positive representations of a given duration)
 
   ## Examples
 
@@ -29,6 +32,10 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
 
       iex> use Timex
       ...> Duration.from_erl({0, 65, 0}) |> #{__MODULE__}.format
+      "1 minute, 5 seconds"
+
+      iex> use Timex
+      ...> Duration.from_erl({0, -65, 0}) |> #{__MODULE__}.format
       "1 minute, 5 seconds"
 
       iex> use Timex
@@ -76,8 +83,10 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
     end
   end
 
-  defp deconstruct(%Duration{microseconds: micro} = duration),
-    do: deconstruct({Duration.to_seconds(duration, truncate: true), rem(micro, 1_000_000)}, [])
+  defp deconstruct(duration) do
+    micros = Duration.to_microseconds(duration) |> abs
+    deconstruct({div(micros, @microsecond), rem(micros, @microsecond)}, [])
+  end
   defp deconstruct({0, 0}, components),
     do: Enum.reverse(components)
   defp deconstruct({seconds, us}, components) when seconds > 0 do
@@ -91,12 +100,9 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
       true -> deconstruct({0, us}, [{:second, seconds} | components])
     end
   end
-  defp deconstruct({seconds, micro}, components) when seconds < 0,
-    do: deconstruct({seconds * -1, micro}, components)
   defp deconstruct({0, micro}, components) do
     millis = micro
     |> Duration.from_microseconds
-    |> Duration.abs
     |> Duration.to_milliseconds()
     cond do
       millis >= 1 -> deconstruct({0, 0}, [{:millisecond, millis} | components])

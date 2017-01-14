@@ -27,8 +27,11 @@ defmodule Timex.Format.Duration.Formatters.Default do
   @month  @day * 30
   @year   @day * 365
 
+  @microsecond 1_000_000
+
   @doc """
-  Return a human readable string representing the duration.
+  Return a human readable string representing the absolute value of duration (i.e. would
+  return the same output for both negative and positive representations of a given duration)
 
   ## Examples
 
@@ -42,6 +45,10 @@ defmodule Timex.Format.Duration.Formatters.Default do
 
       iex> use Timex
       ...> Duration.from_erl({0, 65, 0}) |> #{__MODULE__}.format
+      "PT1M5S"
+
+      iex> use Timex
+      ...> Duration.from_erl({0, -65, 0}) |> #{__MODULE__}.format
       "PT1M5S"
 
       iex> use Timex
@@ -80,11 +87,13 @@ defmodule Timex.Format.Duration.Formatters.Default do
   defp format_component({:minutes, m}, str), do: str <> "#{m}M"
   defp format_component({:seconds, s}, str), do: str <> "#{s}S"
 
-  defp deconstruct(%Duration{microseconds: micro} = duration),
-    do: deconstruct({Duration.to_seconds(duration, truncate: true), rem(micro, 1_000_000)}, [])
+  defp deconstruct(duration) do
+    micros = Duration.to_microseconds(duration) |> abs
+    deconstruct({div(micros, @microsecond), rem(micros, @microsecond)}, [])
+  end
   defp deconstruct({0, 0}, components),
     do: Enum.reverse(components)
-  defp deconstruct({seconds, us}, components) when seconds > 0 do
+  defp deconstruct({seconds, us}, components) do
     cond do
       seconds >= @year   -> deconstruct({rem(seconds, @year), us}, [{:years, div(seconds, @year)} | components])
       seconds >= @month  -> deconstruct({rem(seconds, @month), us}, [{:months, div(seconds, @month)} | components])
@@ -94,15 +103,12 @@ defmodule Timex.Format.Duration.Formatters.Default do
       true -> get_fractional_seconds(seconds, us, components)
     end
   end
-  defp deconstruct({seconds, us}, components),
-    do: get_fractional_seconds(seconds, us, components)
 
   defp get_fractional_seconds(seconds, 0, components),
     do: deconstruct({0, 0}, [{:seconds, seconds} | components])
-  defp get_fractional_seconds(seconds, micro, components) when micro > 0 do
+  defp get_fractional_seconds(seconds, micro, components) do
     millis = micro
     |> Duration.from_microseconds
-    |> Duration.abs
     |> Duration.to_milliseconds
     cond do
       millis >= 1.0 -> deconstruct({0, 0}, [{:seconds, seconds + (millis * :math.pow(10, -3))} | components])
