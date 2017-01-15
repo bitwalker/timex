@@ -41,7 +41,7 @@ defmodule Timex.Translator do
   ## Examples
 
       iex> Timex.Translator.translate_plural("ru", "relative_time", "in %{count} second", "in %{count} seconds", 5)
-      "через 5 секунды"
+      "через 5 секунд"
 
       iex> Timex.Translator.translate_plural("it", "relative_time", "in %{count} second", "in %{count} seconds", 5)
       "in 5 secondi"
