@@ -21,7 +21,7 @@ msgstr ""
 
 #: lib/l10n/translator.ex:220
 msgid "April"
-msgstr "апрель"
+msgstr "апреля"
 
 #: lib/l10n/translator.ex:224
 msgid "August"

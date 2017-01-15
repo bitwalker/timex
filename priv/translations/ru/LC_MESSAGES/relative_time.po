@@ -73,55 +73,55 @@ msgid "%{count} day ago"
 msgid_plural "%{count} days ago"
 msgstr[0] "%{count} день назад"
 msgstr[1] "%{count} дня назад"
-msgstr[2] "%{count} дня назад"
+msgstr[2] "%{count} дней назад"
 
 #: lib/l10n/translator.ex:278
 msgid "%{count} hour ago"
 msgid_plural "%{count} hours ago"
 msgstr[0] "%{count} час назад"
 msgstr[1] "%{count} часа назад"
-msgstr[2] "%{count} часа назад"
+msgstr[2] "%{count} часов назад"
 
 #: lib/l10n/translator.ex:281
 msgid "%{count} minute ago"
 msgid_plural "%{count} minutes ago"
 msgstr[0] "%{count} минуту назад"
 msgstr[1] "%{count} минуты назад"
-msgstr[2] "%{count} минуты назад"
+msgstr[2] "%{count} минут назад"
 
 #: lib/l10n/translator.ex:241
 msgid "%{count} month ago"
 msgid_plural "%{count} months ago"
 msgstr[0] "%{count} месяц назад"
 msgstr[1] "%{count} месяца назад"
-msgstr[2] "%{count} месяца назад"
+msgstr[2] "%{count} месяцев назад"
 
 #: lib/l10n/translator.ex:284
 msgid "%{count} second ago"
 msgid_plural "%{count} seconds ago"
 msgstr[0] "%{count} секунду назад"
 msgstr[1] "%{count} секунды назад"
-msgstr[2] "%{count} секунды назад"
+msgstr[2] "%{count} секунд назад"
 
 #: lib/l10n/translator.ex:247
 msgid "%{count} week ago"
 msgid_plural "%{count} weeks ago"
 msgstr[0] "%{count} неделю назад"
 msgstr[1] "%{count} недели назад"
-msgstr[2] "%{count} недели назад"
+msgstr[2] "%{count} недель назад"
 
 #: lib/l10n/translator.ex:235
 msgid "%{count} year ago"
 msgid_plural "%{count} years ago"
 msgstr[0] "%{count} год назад"
 msgstr[1] "%{count} года назад"
-msgstr[2] "%{count} года назад"
+msgstr[2] "%{count} лет назад"
 
 #: lib/l10n/translator.ex:252
 msgid "in %{count} day"
 msgid_plural "in %{count} days"
 msgstr[0] "через %{count} день"
-msgstr[1] "через %{count} дней"
+msgstr[1] "через %{count} дня"
 msgstr[2] "через %{count} дней"
 
 #: lib/l10n/translator.ex:277
@@ -129,42 +129,42 @@ msgid "in %{count} hour"
 msgid_plural "in %{count} hours"
 msgstr[0] "через %{count} час"
 msgstr[1] "через %{count} часа"
-msgstr[2] "через %{count} часа"
+msgstr[2] "через %{count} часов"
 
 #: lib/l10n/translator.ex:280
 msgid "in %{count} minute"
 msgid_plural "in %{count} minutes"
 msgstr[0] "через %{count} минуту"
 msgstr[1] "через %{count} минуты"
-msgstr[2] "через %{count} минуты"
+msgstr[2] "через %{count} минут"
 
 #: lib/l10n/translator.ex:240
 msgid "in %{count} month"
 msgid_plural "in %{count} months"
 msgstr[0] "через %{count} месяц"
 msgstr[1] "через %{count} месяца"
-msgstr[2] "через %{count} месяца"
+msgstr[2] "через %{count} месяцев"
 
 #: lib/l10n/translator.ex:283
 msgid "in %{count} second"
 msgid_plural "in %{count} seconds"
 msgstr[0] "через %{count} секунду"
 msgstr[1] "через %{count} секунды"
-msgstr[2] "через %{count} секунды"
+msgstr[2] "через %{count} секунд"
 
 #: lib/l10n/translator.ex:246
 msgid "in %{count} week"
 msgid_plural "in %{count} weeks"
 msgstr[0] "через %{count} неделю"
 msgstr[1] "через %{count} недели"
-msgstr[2] "через %{count} недели"
+msgstr[2] "через %{count} недель"
 
 #: lib/l10n/translator.ex:234
 msgid "in %{count} year"
 msgid_plural "in %{count} years"
 msgstr[0] "через %{count} год"
 msgstr[1] "через %{count} года"
-msgstr[2] "через %{count} года"
+msgstr[2] "через %{count} лет"
 
 #: lib/l10n/translator.ex:267
 msgid "last friday"

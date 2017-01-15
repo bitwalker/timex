@@ -24,68 +24,68 @@ msgstr ""
 msgid "%{count} day"
 msgid_plural "%{count} days"
 msgstr[0] "%{count} день"
-msgstr[1] "%{count} днем"
-msgstr[2] "%{count} днем"
+msgstr[1] "%{count} дня"
+msgstr[2] "%{count} дней"
 
 #: lib/l10n/translator.ex:177
 msgid "%{count} hour"
 msgid_plural "%{count} hours"
 msgstr[0] "%{count} час"
 msgstr[1] "%{count} часа"
-msgstr[2] "%{count} часа"
+msgstr[2] "%{count} часов"
 
 #: lib/l10n/translator.ex:173
 msgid "%{count} microsecond"
 msgid_plural "%{count} microseconds"
 msgstr[0] "%{count} микросекунда"
 msgstr[1] "%{count} микросекунды"
-msgstr[2] "%{count} микросекунды"
+msgstr[2] "%{count} микросекунд"
 
 #: lib/l10n/translator.ex:174
 msgid "%{count} millisecond"
 msgid_plural "%{count} milliseconds"
 msgstr[0] "%{count} миллисекунда"
 msgstr[1] "%{count} миллисекунды"
-msgstr[2] "%{count} миллисекунды"
+msgstr[2] "%{count} миллисекунд"
 
 #: lib/l10n/translator.ex:176
 msgid "%{count} minute"
 msgid_plural "%{count} minutes"
 msgstr[0] "%{count} минута"
 msgstr[1] "%{count} минуты"
-msgstr[2] "%{count} минуты"
+msgstr[2] "%{count} минут"
 
 #: lib/l10n/translator.ex:180
 msgid "%{count} month"
 msgid_plural "%{count} months"
 msgstr[0] "%{count} месяц"
 msgstr[1] "%{count} месяца"
-msgstr[2] "%{count} месяца"
+msgstr[2] "%{count} месяцев"
 
 #: lib/l10n/translator.ex:172
 msgid "%{count} nanosecond"
 msgid_plural "%{count} nanoseconds"
 msgstr[0] "%{count} наносекунда"
 msgstr[1] "%{count} наносекунды"
-msgstr[2] "%{count} наносекунды"
+msgstr[2] "%{count} наносекунд"
 
 #: lib/l10n/translator.ex:175
 msgid "%{count} second"
 msgid_plural "%{count} seconds"
 msgstr[0] "%{count} секунда"
 msgstr[1] "%{count} секунды"
-msgstr[2] "%{count} секунды"
+msgstr[2] "%{count} секунд"
 
 #: lib/l10n/translator.ex:179
 msgid "%{count} week"
 msgid_plural "%{count} weeks"
 msgstr[0] "%{count} неделя"
 msgstr[1] "%{count} недели"
-msgstr[2] "%{count} недели"
+msgstr[2] "%{count} недель"
 
 #: lib/l10n/translator.ex:181
 msgid "%{count} year"
 msgid_plural "%{count} years"
 msgstr[0] "%{count} год"
 msgstr[1] "%{count} года"
-msgstr[2] "%{count} года"
+msgstr[2] "%{count} лет"
