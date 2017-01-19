@@ -6,7 +6,6 @@ defmodule DateFormatTest.FormatStrftime do
   @aug180003 Timex.to_datetime({{3,8,18}, {12,30,5}})
   @jan12015 Timex.to_datetime({{2015,1,1}, {0,0,0}})
   @jan152015 Timex.to_datetime({{2015,1,15}, {0,0,0}})
-  @dec312015 Timex.to_datetime({{2015,12,31}, {0,0,0}})
   @dec312012 Timex.to_datetime({{2012,12,31}, {0,0,0}})
 
   test "exceptions" do

@@ -40,6 +40,8 @@ defmodule Timex.Format.DateTime.Formatter do
   @spec lformat!(Types.calendar_types, String.t, String.t, atom | nil) :: String.t | no_return
   def lformat!(date, format_string, locale, formatter \\ Default)
 
+  def lformat!({:error, _} = err, _format_string, _locale, _formatter),
+    do: err
   def lformat!(datetime, format_string, locale, :strftime),
     do: lformat!(datetime, format_string, locale, Strftime)
   def lformat!(datetime, format_string, locale, :relative),
@@ -65,6 +67,9 @@ defmodule Timex.Format.DateTime.Formatter do
   """
   @spec lformat(Types.calendar_types, String.t, String.t, atom | nil) :: {:ok, String.t} | {:error, term}
   def lformat(date, format_string, locale, formatter \\ Default)
+
+  def lformat({:error, _} = err, _format_string, _locale, _formatter),
+    do: err
   def lformat(datetime, format_string, locale, :strftime),
     do: lformat(datetime, format_string, locale, Strftime)
   def lformat(datetime, format_string, locale, :relative),
