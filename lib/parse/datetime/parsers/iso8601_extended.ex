@@ -138,6 +138,7 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
   def parse_offset(<<dir::utf8,rest::binary>>, acc, count) when dir in [?+,?-] do
     parse_offset(dir, rest, acc, count+1)
   end
+  def parse_offset(str, _acc, count), do: {:error, "Expected either Z or a valid timezone offset, but got `#{str}`", count}
   # +/-HH:MM:SS (seconds are currently unhandled in offsets)
   def parse_offset(dir, <<h1::utf8,h2::utf8,":",m1::utf8,m2::utf8,":",s1::utf8,s2::utf8,rest::binary>>, acc, count) when
     h1 >= ?0 and h1 < ?2 and
