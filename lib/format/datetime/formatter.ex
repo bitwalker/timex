@@ -521,7 +521,7 @@ defmodule Timex.Format.DateTime.Formatter do
     do: pad_numeric(0, flags, width)
   def format_token(_locale, :sec_fractional, %{microsecond: {us, precision}}, _modifiers, flags, _width) when precision > 0 do
     padded = pad_numeric(us, flags, width_spec(6..6))
-    ".#{:erlang.binary_part(padded, {0, precision})}"
+    ".#{:erlang.binary_part(padded, 0, precision)}"
   end
   def format_token(_locale, :sec_fractional, _date, _modifiers, _flags, _width),
     do: ""
@@ -637,7 +637,7 @@ defmodule Timex.Format.DateTime.Formatter do
         cond do
           min_width == -1 && max_width == nil  -> number_str
           len < min_width && max_width == nil  -> String.duplicate(pad_char(pad_type), min_width - len) <> number_str
-          max_width != nil && len < max_width -> String.duplicate(pad_char(pad_type), max_width - len) <> number_str
+          max_width != nil && len < max_width  -> String.duplicate(pad_char(pad_type), max_width - len) <> number_str
           true                                 -> number_str
         end
     end
