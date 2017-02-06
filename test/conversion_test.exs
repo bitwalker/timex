@@ -82,4 +82,14 @@ defmodule ConversionTests do
     assert 0 == Timex.to_unix({{1970,1,1}, {0,0,0}})
   end
 
+
+  ## Map conversions
+
+  test "map with timezone to_datetime" do
+    datetime = %{"year" => "2015", "month" => "2",
+      "day" => "28", "hour" => "13", "minute" => "37",
+      "time_zone" => "Europe/Copenhagen"}
+    |> Timex.Convert.convert_map
+    assert ^datetime = Timex.to_datetime(~N[2015-02-28T13:37:00], "Europe/Copenhagen")
+  end
 end
