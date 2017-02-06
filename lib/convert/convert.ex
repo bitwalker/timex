@@ -22,7 +22,7 @@ defmodule Timex.Convert do
               hour ->
                 minute = Map.get(datetime_map, :minute, 0)
                 second = Map.get(datetime_map, :second, 0)
-                us     = Map.get(datetime_map, :microsecond, {0, 0})
+                us     = Map.get(datetime_map, :microsecond, 0)
                 tz     = Map.get(datetime_map, :time_zone, nil)
                 case tz do
                   s when is_binary(s) ->
