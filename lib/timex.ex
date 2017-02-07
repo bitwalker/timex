@@ -869,7 +869,7 @@ defmodule Timex do
   and the result will be an integer value of those units or a Duration.
   """
   @spec diff(Comparable.comparable, Comparable.comparable, Comparable.granularity) ::
-    Duration.t | non_neg_integer | {:error, term}
+    Duration.t | integer | {:error, term}
   defdelegate diff(a, b, granularity), to: Timex.Comparable
 
   @doc """
