@@ -48,23 +48,7 @@ defmodule Timex.Comparable.Diff do
     end
   end
   defp do_diff(a, b, :months) do
-    {ly,lm,ld,ey,em,ed,sign} = cond do
-      a > b ->
-        {{ly,lm,ld},_} = :calendar.gregorian_seconds_to_datetime(div(a, 1_000*1_000))
-        {{ey,em,ed},_} = :calendar.gregorian_seconds_to_datetime(div(b, 1_000*1_000))
-        {ly,lm,ld,ey,em,ed,1}
-      :else ->
-        {{ey,em,ed},_} = :calendar.gregorian_seconds_to_datetime(div(a, 1_000*1_000))
-        {{ly,lm,ld},_} = :calendar.gregorian_seconds_to_datetime(div(b, 1_000*1_000))
-        {ly,lm,ld,ey,em,ed,-1}
-    end
-    x = cond do
-      ld >= ed -> 0
-      :else -> -1
-    end
-    y = ly - ey
-    z = lm - em
-    (x+y*12+z)*sign
+    div(do_diff(a, b, :days), 30)
   end
   defp do_diff(a, b, :years) do
     div(do_diff(a, b, :months), 12)
