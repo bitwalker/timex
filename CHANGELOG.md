@@ -7,8 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Translations for zh_CN (chinese)
-- Translations for pl (polish)
+- Translations for zh_CN (Chinese)
+- Translations for pl (Polish)
 - #244 - Support for fractional offsets
 
 ### Fixed
@@ -17,7 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Fix #262 - Day of week calculation in Julian calendar - Mark Meeus
 - Fix #260 - Duration formatting edge case - Slava Kisel
 - Fix #257 - Fix from_iso_triplet logic - Mathew Bramson
-- Fix #252 - Formatting/parsing of fractional seconds was not roundtripable
+- Fix #252 - Formatting/parsing of fractional seconds was not round-trippable
 - Fix #248 - Make fractional second formatting consistent with standard library
 - Add application callback so we can provide better errors if :tzdata isn't started
 - Enable fallback_to_any in Timex.Protocol
@@ -46,7 +46,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Implementation of Timex.Protocol for Map. This is primarily useful (and intended) 
+- Implementation of Timex.Protocol for Map. This is primarily useful (and intended)
   for dealing with deserialized date/time structs.
 
 ### Fixed
@@ -157,7 +157,7 @@ config :timex, default_locale: "ru" # or whatever locale you want
 - Locale awareness throughout the core API, so functions such as `day_name` will return the day name in the configured locale,
   if translations for that locale were provided
 - `Timex.lformat`, and `Timex.lformat!` variants of the formatting functions, which take a locale to use in formatting
-- Added a relative time formatter, which functions very similarily to Moment.js's relative time formatting
+- Added a relative time formatter, which functions very similarly to Moment.js's relative time formatting
   You can use it with `Timex.format!` or `Timex.format`, by providing :relative as the formatter, and using the `{relative}` token in your
   format string. NOTE: The relative formatter does not support other tokens, only `{relative}` for now, if it seems like there
   is a use case where `{relative}` should support other tokens, I'll consider adding that.
