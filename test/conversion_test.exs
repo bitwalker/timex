@@ -24,8 +24,8 @@ defmodule ConversionTests do
   ## DateTime conversions
 
   test "DateTime with fractional offset to NaiveDateTime" do
-    datetime = Timex.to_datetime({2016, 3, 5}, "Asia/Kolkata")
-    assert ~N[2016-03-05T05:30:00] = Timex.to_naive_datetime(datetime)
+    datetime = Timex.to_datetime({{2016, 3, 5}, {0,0,0}}, "Asia/Kolkata")
+    assert ~N[2016-03-04T18:30:00] = Timex.to_naive_datetime(datetime)
   end
 
   test "to_gregorian_seconds" do

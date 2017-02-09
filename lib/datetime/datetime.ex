@@ -56,7 +56,7 @@ defimpl Timex.Protocol, for: DateTime do
       hour: d.hour, minute: d.minute, second: d.second,
       microsecond: d.microsecond
     }
-    Timex.shift(nd, [seconds: Timex.Timezone.total_offset(d.std_offset, d.utc_offset)])
+    Timex.shift(nd, [seconds: -1 * Timex.Timezone.total_offset(d.std_offset, d.utc_offset)])
   end
 
   @spec to_erl(DateTime.t) :: Types.datetime
