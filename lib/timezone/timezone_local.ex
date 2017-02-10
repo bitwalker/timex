@@ -131,8 +131,8 @@ defmodule Timex.Timezone.Local do
       # Windows 7/Vista
       # On some systems the string value might be padded with excessive \0 bytes, trim them
       time_zone_name
+      |> Enum.take_while(fn ?\0 -> false; _ -> true end)
       |> IO.iodata_to_binary
-      |> String.strip(?\0)
       |> Utils.to_olson
     else
      # Windows 2000 or XP
