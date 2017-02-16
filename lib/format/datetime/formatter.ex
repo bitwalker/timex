@@ -455,28 +455,27 @@ defmodule Timex.Format.DateTime.Formatter do
     {_, week} = Timex.iso_week(date)
     pad_numeric(week, flags, width)
   end
-  def format_token(_locale, :week_mon, date, _modifiers, flags, width) do
-    {_, week} = Timex.iso_week(date)
-    pad_numeric(week, flags, width)
+  def format_token(_locale, :week_mon, %{:year => year} = date, _modifiers, flags, width) do
+    {:ok, jan1} = Date.new(year,1,1)
+    Timex.Interval.new(from: jan1, until: Timex.shift(date, days: 1))
+    |> Enum.reduce(0, fn d, acc ->
+      case Timex.weekday(d) do
+        1 -> acc+1
+        _ -> acc
+      end
+    end)
+    |> pad_numeric(flags, width)
   end
   def format_token(_locale, :week_sun, %{:year => year} = date, _modifiers, flags, width) do
-    weeks_in_year = case Timex.iso_week({year, 12, 31}) do
-      {^year, 53} -> 53
-      _           -> 52
-    end
-    ordinal = Timex.day(date)
-    weekday = case Timex.weekday(date) do # shift back one since our week starts with Sunday instead of Monday
-      7 -> 0
-      x -> x
-    end
-    week = div(ordinal - weekday + 10, 7)
-    week = cond do
-      week < 1  -> 52
-      week < 53 -> week
-      week > 52 && weeks_in_year == 52 -> 1
-      true -> 53
-    end
-    pad_numeric(week, flags, width)
+    {:ok, jan1} = Date.new(year,1,1)
+    Timex.Interval.new(from: jan1, until: Timex.shift(date, days: 1))
+    |> Enum.reduce(0, fn d, acc ->
+      case Timex.weekday(d) do
+        7 -> acc+1
+        _ -> acc
+      end
+    end)
+    |> pad_numeric(flags, width)
   end
   def format_token(_locale, :wday_mon, date, _modifiers, flags, width),
     do: pad_numeric(Timex.weekday(date), flags, width)
