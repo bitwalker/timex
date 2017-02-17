@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## 3.1.13
+
+### Added
+
+- Romanian translations (Cezar Halmagean)
+
+### Fixed
+
+- #280 - formatting of non-ISO week numbers
+
+## 3.1.6-12
+
+Sorry I didn't keep this up to date, please review the commits in git for these versions.
+
 ## 3.1.6
 
 ### Added
