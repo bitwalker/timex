@@ -104,7 +104,7 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   * `{ASN1:UTCtime}`    - `YYMMDD<time>Z`. Full 2-digit year date and time in UTC without
                         separators (e.g. `070813134801Z`)
 
-  * `{ASN1:GeneralizedTime}` - `YYYYMMDD<time>`. Full 4-digit year date and time in local timezon without
+  * `{ASN1:GeneralizedTime}` - `YYYYMMDD<time>`. Full 4-digit year date and time in local timezone without
                         separators and with optional fractional seconds (e.g. `20070813134801.032`)
   * `{ASN1:GeneralizedTime:Z}` - `YYYYMMDD<time>Z`. Full 4-digit year date and time in UTC without
                         separators and with optional fractional seconds (e.g. `20070813134801.032Z`)
