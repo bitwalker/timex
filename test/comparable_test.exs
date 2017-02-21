@@ -36,10 +36,13 @@ defmodule ComparableTests do
   end
 
   test "calculate difference in months" do
-    assert   0 == Comparable.diff({2017,4,30}, {2017,3,31}, :months)
-    assert   1 == Comparable.diff({2017,4,30}, {2017,3,30}, :months)
-    assert  12 == Comparable.diff({2017,5, 1}, {2016,4,30}, :months)
-    assert -12 == Comparable.diff({2016,4,30}, {2017,5, 1}, :months)
+    assert   0 == Comparable.diff({2017, 4,30}, {2017, 3,31}, :months)
+    assert   1 == Comparable.diff({2017, 4,30}, {2017, 3,30}, :months)
+    assert   1 == Comparable.diff({2017, 1, 1}, {2016,12, 1}, :months)
+    assert  -2 == Comparable.diff({2015,12,29}, {2016, 2,29}, :months)
+    assert   2 == Comparable.diff({2016, 3,28}, {2015,12,29}, :months)
+    assert  12 == Comparable.diff({2017, 5, 1}, {2016, 4,30}, :months)
+    assert -12 == Comparable.diff({2016, 4,30}, {2017, 5, 1}, :months)
   end
 
   test "calculate difference in years" do
@@ -47,4 +50,5 @@ defmodule ComparableTests do
     assert   0 == Comparable.diff({2017,4, 10}, {2016,4,15}, :years)
     assert  -1 == Comparable.diff({2015,2, 28}, {2016,2,28}, :years)
   end
+
 end
