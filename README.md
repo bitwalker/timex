@@ -119,6 +119,10 @@ You can provide your own formatter/parser for datetime strings by implementing t
   more recent versions of :tzdata are unable to work in an escript because of the need to load ETS table files
   from priv, and due to the way ETS loads these files, it's not possible to do so.
 
+### Automatic time zone updates
+
+Times includes the [Tzdata](https://github.com/lau/tzdata) library for time zone data. Tzdata has an automatic update capability that fetches updates from IANA and which is enabled by default; if you want to disable it, check [the Tzdata documentation](https://github.com/lau/tzdata#automatic-data-updates) for details.
+
 ## Migrating
 
 If you have been using Timex pre-3.x, and you are looking to migrate, it will be fairly painless as long as you review the `CHANGELOG.md` file and make note of anything that has changed which you are using. In almost every single case, the functionality has simply moved, or is accessed slightly differently. In some cases behaviour has changed, but the old behaviour can be achieved manually. For those things which were removed or are no longer available, it is almost certainly because those things are no longer recommended, or no longer make sense for this library. If I have missed something, or there is a good justification for re-adding something which was removed, I'm always open to discussing it on the issue tracker.
