@@ -121,7 +121,7 @@ You can provide your own formatter/parser for datetime strings by implementing t
 
 ### Automatic time zone updates
 
-Times includes the [Tzdata](https://github.com/lau/tzdata) library for time zone data. Tzdata has an automatic update capability that fetches updates from IANA and which is enabled by default; if you want to disable it, check [the Tzdata documentation](https://github.com/lau/tzdata#automatic-data-updates) for details.
+Timex includes the [Tzdata](https://github.com/lau/tzdata) library for time zone data. Tzdata has an automatic update capability that fetches updates from IANA and which is enabled by default; if you want to disable it, check [the Tzdata documentation](https://github.com/lau/tzdata#automatic-data-updates) for details.
 
 ## Migrating
 
