@@ -68,7 +68,7 @@ msgstr[1] "%{count} dagen geleden"
 msgid "%{count} hour ago"
 msgid_plural "%{count} hours ago"
 msgstr[0] "%{count} uur geleden"
-msgstr[1] "%{count} uren geleden"
+msgstr[1] "%{count} uur geleden"
 
 #: lib/l10n/translator.ex:281
 msgid "%{count} minute ago"
@@ -103,44 +103,44 @@ msgstr[1] "%{count} jaren geleden"
 #: lib/l10n/translator.ex:252
 msgid "in %{count} day"
 msgid_plural "in %{count} days"
-msgstr[0] "in %{count} dag"
-msgstr[1] "in %{count} dagen"
+msgstr[0] "over %{count} dag"
+msgstr[1] "over %{count} dagen"
 
 #: lib/l10n/translator.ex:277
 msgid "in %{count} hour"
 msgid_plural "in %{count} hours"
-msgstr[0] "in %{count} uur"
-msgstr[1] "in %{count} uur"
+msgstr[0] "over %{count} uur"
+msgstr[1] "over %{count} uur"
 
 #: lib/l10n/translator.ex:280
 msgid "in %{count} minute"
 msgid_plural "in %{count} minutes"
-msgstr[0] "in %{count} minuut"
-msgstr[1] "in %{count} minuten"
+msgstr[0] "over %{count} minuut"
+msgstr[1] "over %{count} minuten"
 
 #: lib/l10n/translator.ex:240
 msgid "in %{count} month"
 msgid_plural "in %{count} months"
-msgstr[0] "in %{count} maand"
-msgstr[1] "in %{count} maanden"
+msgstr[0] "over %{count} maand"
+msgstr[1] "over %{count} maanden"
 
 #: lib/l10n/translator.ex:283
 msgid "in %{count} second"
 msgid_plural "in %{count} seconds"
-msgstr[0] "in %{count} seconde"
-msgstr[1] "in %{count} seconden"
+msgstr[0] "over %{count} seconde"
+msgstr[1] "over %{count} seconden"
 
 #: lib/l10n/translator.ex:246
 msgid "in %{count} week"
 msgid_plural "in %{count} weeks"
-msgstr[0] "in %{count} week"
-msgstr[1] "in %{count} weken"
+msgstr[0] "over %{count} week"
+msgstr[1] "over %{count} weken"
 
 #: lib/l10n/translator.ex:234
 msgid "in %{count} year"
 msgid_plural "in %{count} years"
-msgstr[0] "in %{count} jaar"
-msgstr[1] "in %{count} jaar"
+msgstr[0] "over %{count} jaar"
+msgstr[1] "over %{count} jaar"
 
 #: lib/l10n/translator.ex:267
 msgid "last friday"
@@ -172,31 +172,31 @@ msgstr "afgelopen woensdag"
 
 #: lib/l10n/translator.ex:269
 msgid "next friday"
-msgstr "volgende vrijdag"
+msgstr "aankomende vrijdag"
 
 #: lib/l10n/translator.ex:257
 msgid "next monday"
-msgstr "volgende maandag"
+msgstr "aankomende maandag"
 
 #: lib/l10n/translator.ex:272
 msgid "next saturday"
-msgstr "volgende zaterdag"
+msgstr "aankomende zaterdag"
 
 #: lib/l10n/translator.ex:275
 msgid "next sunday"
-msgstr "volgende zondag"
+msgstr "aankomende zondag"
 
 #: lib/l10n/translator.ex:266
 msgid "next thursday"
-msgstr "volgende donderdag"
+msgstr "aankomende donderdag"
 
 #: lib/l10n/translator.ex:260
 msgid "next tuesday"
-msgstr "volgende dinsdag"
+msgstr "aankomende dinsdag"
 
 #: lib/l10n/translator.ex:263
 msgid "next wednesday"
-msgstr "volgende woensdag"
+msgstr "aankomende woensdag"
 
 #: lib/l10n/translator.ex:268
 msgid "this friday"
