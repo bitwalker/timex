@@ -236,11 +236,11 @@ defmodule Timex.Timezone.Local do
 
   @spec get_real_path(String.t) :: String.t
   defp get_real_path(path) do
-    case path |> String.to_char_list |> :file.read_link_info do
+    case path |> String.to_charlist |> :file.read_link_info do
       {:ok, {:file_info, _, :regular, _, _, _, _, _, _, _, _, _, _, _}} ->
         path
       {:ok, {:file_info, _, :symlink, _, _, _, _, _, _, _, _, _, _, _}} ->
-        {:ok, sym} = path |> String.to_char_list |> :file.read_link
+        {:ok, sym} = path |> String.to_charlist |> :file.read_link
         case sym |> :filename.pathtype do
           :absolute ->
             sym |> IO.iodata_to_binary
