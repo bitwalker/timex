@@ -11,16 +11,16 @@ defmodule IntervalTests do
     assert ["2014-09-22", "2014-09-23", "2014-09-24"] == dates
   end
 
-  test "can exclude end date" do
-    dates = Interval.new(from: ~D[2014-09-22], until: [days: 3], left_open: false, right_open: false)
+  test "can include end date" do
+    dates = Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
             |> Enum.map(&(Timex.format!(&1, "%Y-%m-%d", :strftime)))
     assert ["2014-09-22", "2014-09-23", "2014-09-24", "2014-09-25"] == dates
   end
 
   test "can exclude start date" do
-    dates = Interval.new(from: ~D[2014-09-22], until: [days: 3], left_open: true, right_open: false)
+    dates = Interval.new(from: ~D[2014-09-22], until: [days: 3], left_open: true)
             |> Enum.map(&(Timex.format!(&1, "%Y-%m-%d", :strftime)))
-    assert ["2014-09-23", "2014-09-24", "2014-09-25"] == dates
+    assert ["2014-09-23", "2014-09-24"] == dates
   end
 
   test "can enumerate by other units in an interval" do
