@@ -11,16 +11,16 @@ defmodule IntervalTests do
     assert ["2014-09-22", "2014-09-23", "2014-09-24"] == dates
   end
 
-  test "can exclude end date" do
-    dates = Interval.new(from: ~D[2014-09-22], until: [days: 3], left_open: false, right_open: false)
+  test "can include end date" do
+    dates = Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
             |> Enum.map(&(Timex.format!(&1, "%Y-%m-%d", :strftime)))
     assert ["2014-09-22", "2014-09-23", "2014-09-24", "2014-09-25"] == dates
   end
 
   test "can exclude start date" do
-    dates = Interval.new(from: ~D[2014-09-22], until: [days: 3], left_open: true, right_open: false)
+    dates = Interval.new(from: ~D[2014-09-22], until: [days: 3], left_open: true)
             |> Enum.map(&(Timex.format!(&1, "%Y-%m-%d", :strftime)))
-    assert ["2014-09-23", "2014-09-24", "2014-09-25"] == dates
+    assert ["2014-09-23", "2014-09-24"] == dates
   end
 
   test "can enumerate by other units in an interval" do
@@ -38,5 +38,32 @@ defmodule IntervalTests do
     duration = Interval.new(from: ~N[2014-09-22T15:30:00], until: [minutes: 20])
                |> Interval.duration(:duration)
     assert Duration.from_minutes(20) == duration
+  end
+
+  describe "member" do
+    test "membership includes start date" do
+      interval = Interval.new(from: ~D[2014-09-22], until: [days: 3])
+      assert ~D[2014-09-22] in interval
+    end
+
+    test "membership does not include end date" do
+      interval = Interval.new(from: ~D[2014-09-22], until: [days: 3])
+      refute ~D[2014-09-25] in interval
+    end
+
+    test "can exclude start date from membership" do
+      interval = Interval.new(from: ~D[2014-09-22], until: [days: 3], left_open: true)
+      refute ~D[2014-09-22] in interval
+    end
+
+    test "can include end date in membership" do
+      interval = Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
+      assert ~D[2014-09-25] in interval
+    end
+
+    test "open and closed interval" do
+      interval = Interval.new(from: ~D[2014-09-22], until: ~D[2014-09-22])
+      refute ~D[2014-09-22] in interval
+    end
   end
 end
