@@ -194,15 +194,20 @@ defmodule Timex.Interval do
       do_reduce({get_starting_date(interval), interval.until, interval.right_open, interval.step}, acc, fun)
     end
 
-    def member?(%Timex.Interval{from: from, until: until}, value) do
-      # Just tests for set membership (date is within the provided (inclusive) range)
+    def member?(%Timex.Interval{} = interval, value) do
       result = cond do
-        Timex.compare(value, from) < 1  -> false
-        Timex.compare(value, until) > 0 -> false
+        before?(interval, value) -> false
+        after?(interval, value) -> false
         :else -> true
       end
       {:ok, result}
     end
+
+    defp before?(%Timex.Interval{from: from, left_open: true}, value), do: Timex.compare(value, from) <= 0
+    defp before?(%Timex.Interval{from: from, left_open: false}, value), do: Timex.compare(value, from) < 0
+
+    defp after?(%Timex.Interval{until: until, right_open: true}, value), do: Timex.compare(value, until) >= 0
+    defp after?(%Timex.Interval{until: until, right_open: false}, value), do: Timex.compare(value, until) > 0
 
     def count(_interval) do
       {:error, __MODULE__}

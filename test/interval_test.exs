@@ -39,4 +39,31 @@ defmodule IntervalTests do
                |> Interval.duration(:duration)
     assert Duration.from_minutes(20) == duration
   end
+
+  describe "member" do
+    test "membership includes start date" do
+      interval = Interval.new(from: ~D[2014-09-22], until: [days: 3])
+      assert ~D[2014-09-22] in interval
+    end
+
+    test "membership does not include end date" do
+      interval = Interval.new(from: ~D[2014-09-22], until: [days: 3])
+      refute ~D[2014-09-25] in interval
+    end
+
+    test "can exclude start date from membership" do
+      interval = Interval.new(from: ~D[2014-09-22], until: [days: 3], left_open: true)
+      refute ~D[2014-09-22] in interval
+    end
+
+    test "can include end date in membership" do
+      interval = Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
+      assert ~D[2014-09-25] in interval
+    end
+
+    test "open and closed interval" do
+      interval = Interval.new(from: ~D[2014-09-22], until: ~D[2014-09-22])
+      refute ~D[2014-09-22] in interval
+    end
+  end
 end
