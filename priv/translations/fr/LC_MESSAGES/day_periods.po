@@ -1,0 +1,28 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: fr\n"
+
+#: lib/l10n/translator.ex:183
+msgid "AM"
+msgstr "AM"
+
+#: lib/l10n/translator.ex:185
+msgid "PM"
+msgstr "PM"
+
+#: lib/l10n/translator.ex:184
+msgid "am"
+msgstr "am"
+
+#: lib/l10n/translator.ex:186
+msgid "pm"
+msgstr "pm"
