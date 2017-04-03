@@ -15,6 +15,15 @@ defmodule Timex.Interval do
     end
   end
 
+  @type t :: %__MODULE__{}
+  @type valid_interval_step :: [microseconds: integer()] |
+                               [milliseconds: integer()] |
+                               [seconds:      integer()] |
+                               [minutes:      integer()] |
+                               [hours:        integer()] |
+                               [days:         integer()] |
+                               [weeks:        integer()]
+
   @enforce_keys [:from, :until]
   defstruct from:       nil,
             until:      nil,
@@ -69,6 +78,7 @@ defmodule Timex.Interval do
       "[15:30, 15:50]"
 
   """
+  @spec new(Keyword.t) :: Interval.t | {:error, :invalid_until} | {:error, :invalid_step}
   def new(options \\ []) do
     from = case Keyword.get(options, :from) do
       nil -> Timex.Protocol.NaiveDateTime.now()
@@ -86,14 +96,29 @@ defmodule Timex.Interval do
               %Date{} = d          -> Timex.to_naive_datetime(d)
               _ -> {:error, :invalid_until}
             end
-    case until do
-      {:error, _} = err -> err
-      _ ->
-        %__MODULE__{from: from, until: until,
-                    left_open: left_open, right_open: right_open,
-                    step: step}
-    end
+
+    attrs = %{from: from,
+              until: until,
+              left_open: left_open,
+              right_open: right_open,
+              step: valid_step_or_error(step)}
+    build_struct_or_error(attrs)
   end
+
+  @spec build_struct_or_error(map()) :: Interval.t | {:error, atom()}
+  defp build_struct_or_error(%{until: err = {:error, _}}), do: err
+  defp build_struct_or_error(%{step:  err = {:error, _}}), do: err
+  defp build_struct_or_error(valid_attrs),                 do: struct(__MODULE__, valid_attrs)
+
+  @spec valid_step_or_error(any()) :: valid_interval_step | {:error, :invalid_step}
+  defp valid_step_or_error(step = [milliseconds: _]), do: step
+  defp valid_step_or_error(step = [microseconds: _]), do: step
+  defp valid_step_or_error(step = [seconds: _]),      do: step
+  defp valid_step_or_error(step = [minutes: _]),      do: step
+  defp valid_step_or_error(step = [hours: _]),        do: step
+  defp valid_step_or_error(step = [days: _]),         do: step
+  defp valid_step_or_error(step = [weeks: _]),        do: step
+  defp valid_step_or_error(_),                        do: {:error, :invalid_step}
 
   @doc """
   Return the interval duration, given a unit.
@@ -145,8 +170,12 @@ defmodule Timex.Interval do
       ["2014-09-22", "2014-09-25"]
 
   """
+  @spec with_step(Interval.t, any()) :: Interval.t | {:error, :invalid_step}
   def with_step(%__MODULE__{} = interval, step) do
-    %__MODULE__{interval | :step => step}
+    case valid_step_or_error(step) do
+      error = {:error, _} -> error
+      step                -> %__MODULE__{interval | step: step}
+    end
   end
 
   @doc """
@@ -220,8 +249,14 @@ defmodule Timex.Interval do
       if has_recursion_ended?(current_date, end_date, right_open) do
         {:done, acc}
       else
-        next_date = Timex.shift(current_date, keywords)
-        do_reduce({next_date, end_date, right_open, keywords}, fun.(current_date, acc), fun)
+        case Timex.shift(current_date, keywords) do
+          {:error, {:unknown_shift_unit, _}} ->
+            raise FormatError, message: "Invalid step unit for %Timex.Interval{}"
+          {:error, e} ->
+            raise FormatError, message: "Timex.shift error during reduce of %Timex.Interval{}: #{inspect e}"
+          next_date ->
+            do_reduce({next_date, end_date, right_open, keywords}, fun.(current_date, acc), fun)
+        end
       end
     end
 

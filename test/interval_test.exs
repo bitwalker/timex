@@ -5,6 +5,64 @@ defmodule IntervalTests do
 
   doctest Timex.Interval
 
+  describe "new/1" do
+    test "returns an Interval when given no options" do
+      assert %Interval{} = Interval.new()
+    end
+
+    test "returns an Interval when given a valid step unit" do
+      assert %Interval{step: [microseconds: 5]} = Interval.new(step: [microseconds: 5])
+      assert %Interval{step: [milliseconds: 5]} = Interval.new(step: [milliseconds: 5])
+      assert %Interval{step: [seconds: 5]}      = Interval.new(step: [seconds: 5])
+      assert %Interval{step: [minutes: 5]}      = Interval.new(step: [minutes: 5])
+      assert %Interval{step: [hours: 5]}        = Interval.new(step: [hours: 5])
+      assert %Interval{step: [days: 5]}         = Interval.new(step: [days: 5])
+      assert %Interval{step: [weeks: 5]}        = Interval.new(step: [weeks: 5])
+    end
+
+    test "returns an error tuple when given an invalid step" do
+      assert {:error, :invalid_step} = Interval.new(step: [invalid_step: 5])
+    end
+
+    test "returns an Interval when given a valid until field" do
+      assert %Interval{until: %NaiveDateTime{}} = Interval.new(until: %NaiveDateTime{year: 2017, month: 4, day: 3,
+                                                                                     hour: 1, minute: 1, second: 1})
+      assert %Interval{until: %NaiveDateTime{}} = Interval.new(until: DateTime.utc_now())
+      assert %Interval{until: %NaiveDateTime{}} = Interval.new(until: %Date{year: 2017, month: 4, day: 3})
+    end
+
+    test "returns an Interval with shifted until when given a shift for until" do
+      interval = Interval.new(from: ~D[2014-04-03], until: [days: 10])
+      assert %Interval{until: ~N[2014-04-13 00:00:00]} = interval
+    end
+
+    test "returns an error tuple when given an invalid until" do
+      assert {:error, :invalid_until} = Interval.new(until: "invalid_until")
+    end
+
+    test "returns same type of error when given until that is error tuple" do
+      assert {:error, :error_type} = Interval.new(until: {:error, :error_type})
+    end
+  end
+
+  describe "with_step/2" do
+    test "updates step to step with valid step unit" do
+      interval = Interval.new()
+      assert %Interval{step: [microseconds: 5]} = Interval.with_step(interval, [microseconds: 5])
+      assert %Interval{step: [milliseconds: 5]} = Interval.with_step(interval, [milliseconds: 5])
+      assert %Interval{step: [seconds: 5]}      = Interval.with_step(interval, [seconds: 5])
+      assert %Interval{step: [minutes: 5]}      = Interval.with_step(interval, [minutes: 5])
+      assert %Interval{step: [hours: 5]}        = Interval.with_step(interval, [hours: 5])
+      assert %Interval{step: [days: 5]}         = Interval.with_step(interval, [days: 5])
+      assert %Interval{step: [weeks: 5]}        = Interval.with_step(interval, [weeks: 5])
+    end
+
+    test "returns error tuple when given invalid step unit" do
+      interval = Interval.new()
+      assert {:error, :invalid_step} = Interval.with_step(interval, [invalid_step: 3])
+    end
+  end
+
   test "can enumerate days in an interval" do
     dates = Interval.new(from: ~D[2014-09-22], until: [days: 3])
             |> Enum.map(&(Timex.format!(&1, "%Y-%m-%d", :strftime)))
@@ -28,6 +86,13 @@ defmodule IntervalTests do
             |> Interval.with_step(minutes: 10)
             |> Enum.map(&(Timex.format!(&1, "%H:%M", :strftime)))
     assert ["15:00", "15:10", "15:20", "15:30", "15:40", "15:50"] == steps
+  end
+
+  test "raises FormatError when enumerating with an invalid step unit" do
+    interval = %Interval{from: ~D[2017-04-02], until: ~D[2017-05-02], step: [invalid_step: 1]}
+    assert_raise Interval.FormatError, "Invalid step unit for %Timex.Interval{}", fn ->
+      Enum.count(interval)
+    end
   end
 
   test "can get duration of an interval" do
