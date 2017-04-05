@@ -964,8 +964,8 @@ defmodule Timex do
     abbr_cased = month_name |> String.slice(0..2)
     abbr_lower = lower |> String.slice(0..2)
     symbol     = abbr_lower |> String.to_atom
-    full_chars = month_name |> String.to_char_list
-    abbr_chars = abbr_cased |> String.to_char_list
+    full_chars = month_name |> String.to_charlist
+    abbr_chars = abbr_cased |> String.to_charlist
 
     month_quoted = quote do
       def month_to_num(unquote(month_name)), do: unquote(month_num)
