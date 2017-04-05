@@ -1375,7 +1375,7 @@ defmodule Timex do
   Same as `shift(date, Duration.from_minutes(5), :duration)`.
   """
   @spec add(Convertable.t, Duration.t) ::
-    Date.t | NaiveDateTime.t | DateTime.t | {:error, term}
+    Types.valid_datetime | AmbiguousDateTime.t | {:error, term}
   def add(date, %Duration{megaseconds: mega, seconds: sec, microseconds: micro}),
     do: shift(date, [seconds: (mega * @million) + sec, microseconds: micro])
 
@@ -1383,7 +1383,8 @@ defmodule Timex do
   Subtract time from a date using a Duration
   Same as `shift(date, Duration.from_minutes(5) |> Duration.invert, :timestamp)`.
   """
-  @spec subtract(Convertable.t, Types.timestamp) :: DateTime.t | {:error, term}
+  @spec subtract(Convertable.t, Types.timestamp) ::
+    Types.valid_datetime | AmbiguousDateTime.t | {:error, term}
   def subtract(date, %Duration{megaseconds: mega, seconds: sec, microseconds: micro}),
     do: shift(date, [seconds: (-mega * @million) - sec, microseconds: -micro])
 
@@ -1435,7 +1436,8 @@ defmodule Timex do
     months: integer,
     years: integer
   ]
-  @spec shift(Types.valid_datetime, shift_options) :: Types.valid_datetime | {:error, term}
+  @spec shift(Types.valid_datetime, shift_options) ::
+    Types.valid_datetime | AmbiguousDateTime.t | {:error, term}
   defdelegate shift(date, options), to: Timex.Protocol
 
   @doc """
