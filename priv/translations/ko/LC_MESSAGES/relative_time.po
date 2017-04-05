@@ -1,0 +1,227 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ko\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+
+#: lib/l10n/translator.ex:237
+msgid "last month"
+msgstr "지난 달"
+
+#: lib/l10n/translator.ex:243
+msgid "last week"
+msgstr "지난 주"
+
+#: lib/l10n/translator.ex:231
+msgid "last year"
+msgstr "작년"
+
+#: lib/l10n/translator.ex:239
+msgid "next month"
+msgstr "다음 달"
+
+#: lib/l10n/translator.ex:245
+msgid "next week"
+msgstr "다음 주"
+
+#: lib/l10n/translator.ex:233
+msgid "next year"
+msgstr "내년"
+
+#: lib/l10n/translator.ex:238
+msgid "this month"
+msgstr "이번 달"
+
+#: lib/l10n/translator.ex:244
+msgid "this week"
+msgstr "이번 주"
+
+#: lib/l10n/translator.ex:232
+msgid "this year"
+msgstr "올해"
+
+#: lib/l10n/translator.ex:250
+msgid "today"
+msgstr "오늘"
+
+#: lib/l10n/translator.ex:251
+msgid "tomorrow"
+msgstr "내일"
+
+#: lib/l10n/translator.ex:249
+msgid "yesterday"
+msgstr "어제"
+
+#: lib/l10n/translator.ex:253
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "%{count}일 전"
+
+#: lib/l10n/translator.ex:278
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "%{count}시간 전"
+
+#: lib/l10n/translator.ex:281
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "%{count}분 전"
+
+#: lib/l10n/translator.ex:241
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "%{count}달 전"
+
+#: lib/l10n/translator.ex:284
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "%{count}초 전"
+
+#: lib/l10n/translator.ex:247
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "%{count}주 전"
+
+#: lib/l10n/translator.ex:235
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "%{count}년 전"
+
+#: lib/l10n/translator.ex:252
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "%{count}일 후"
+
+#: lib/l10n/translator.ex:277
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "%{count}시간 후"
+
+#: lib/l10n/translator.ex:280
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "%{count}분 후"
+
+#: lib/l10n/translator.ex:240
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "%{count}개월 후"
+
+#: lib/l10n/translator.ex:283
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "%{count}초 후"
+
+#: lib/l10n/translator.ex:246
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "%{count}주 후"
+
+#: lib/l10n/translator.ex:234
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "%{count}년 후"
+
+#: lib/l10n/translator.ex:267
+msgid "last friday"
+msgstr "지난 금요일"
+
+#: lib/l10n/translator.ex:255
+msgid "last monday"
+msgstr "지난 월요일"
+
+#: lib/l10n/translator.ex:270
+msgid "last saturday"
+msgstr "지난 토요일"
+
+#: lib/l10n/translator.ex:273
+msgid "last sunday"
+msgstr "지난 일요일"
+
+#: lib/l10n/translator.ex:264
+msgid "last thursday"
+msgstr "지난 목요일"
+
+#: lib/l10n/translator.ex:258
+msgid "last tuesday"
+msgstr "지난 화요일"
+
+#: lib/l10n/translator.ex:261
+msgid "last wednesday"
+msgstr "지난 수요일"
+
+#: lib/l10n/translator.ex:269
+msgid "next friday"
+msgstr "다음 금요일"
+
+#: lib/l10n/translator.ex:257
+msgid "next monday"
+msgstr "다음 월요일"
+
+#: lib/l10n/translator.ex:272
+msgid "next saturday"
+msgstr "다음 토요일"
+
+#: lib/l10n/translator.ex:275
+msgid "next sunday"
+msgstr "다음 일요일"
+
+#: lib/l10n/translator.ex:266
+msgid "next thursday"
+msgstr "다음 목요일"
+
+#: lib/l10n/translator.ex:260
+msgid "next tuesday"
+msgstr "다음 화요일"
+
+#: lib/l10n/translator.ex:263
+msgid "next wednesday"
+msgstr "다음 수요일"
+
+#: lib/l10n/translator.ex:268
+msgid "this friday"
+msgstr "이번 금요일"
+
+#: lib/l10n/translator.ex:256
+msgid "this monday"
+msgstr "이번 월요일"
+
+#: lib/l10n/translator.ex:271
+msgid "this saturday"
+msgstr "이번 토요일"
+
+#: lib/l10n/translator.ex:274
+msgid "this sunday"
+msgstr "이번 일요일"
+
+#: lib/l10n/translator.ex:265
+msgid "this thursday"
+msgstr "이번 목요일"
+
+#: lib/l10n/translator.ex:259
+msgid "this tuesday"
+msgstr "이번 화요일"
+
+#: lib/l10n/translator.ex:262
+msgid "this wednesday"
+msgstr "이번 수요일"
+
+#: lib/l10n/translator.ex:286
+msgid "now"
+msgstr "지금"
