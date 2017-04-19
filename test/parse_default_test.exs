@@ -205,6 +205,7 @@ defmodule DateFormatTest.ParseDefault do
     date = Timex.to_datetime({{2014, 6, 5}, {23, 20, 59}}, "Etc/GMT+12")
     assert {:ok, ^date} = parse("Mon, 05 Jun 14 23:20:59 Y", "{RFC822}")
     assert {:ok, ^date} = parse("Mon, 5 Jun 14 23:20:59 Y", "{RFC822}")
+    assert {:ok, ^date} = parse("5 Jun 14 23:20:59 Y", "{RFC822}")
 
     # * `{RFC822z}`     - e.g. `Mon, 05 Jun 14 23:20:59 Z`
     date = Timex.to_datetime({{2014, 6, 5}, {23, 20, 59}}, "UTC")

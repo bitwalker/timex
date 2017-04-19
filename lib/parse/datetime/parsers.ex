@@ -311,8 +311,10 @@ defmodule Timex.Parse.DateTime.Parsers do
   def rfc822(opts \\ []) do
     is_zulu? = get_in(opts, [:zulu])
     parts = [
-      weekday_short(opts),
-      literal(string(", ")),
+      option(sequence([
+        weekday_short(opts),
+        literal(string(", ")),
+      ])),
       day_of_month([padding: :zeroes, min: 1, max: 2]),
       literal(space()),
       month_short(opts),
