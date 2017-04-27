@@ -4,7 +4,7 @@ How to format DateTimes as strings with Timex's DateFormat module, and time inte
 
 ### Formatting DateTimes
 
-Formatting DateTimes in Timex is done via the `Timex` module. There are two built in formatters, :default and :strftime. The details of how to construct format strings can be found in the docs for **[Timex.Format.DateTime.Formatters.Default](http://hexdocs.pm/timex/Timex.Format.DateTime.Formatters.Default.html)** and **[Timex.Format.DateTime.Formatters.Strftime](http://hexdocs.pm/timex/Timex.Format.DateTime.Formatters.StrftimeFormatter.html)**, so this document will be a brief overview of the DateFormat API and how you use it typically.
+Formatting DateTimes in Timex is done via the `Timex` module. There are two built in formatters, :default and :strftime. The details of how to construct format strings can be found in the docs for [`Timex.Format.DateTime.Formatters.Default`](http://hexdocs.pm/timex/Timex.Format.DateTime.Formatters.Default.html) and [`Timex.Format.DateTime.Formatters.Strftime`](http://hexdocs.pm/timex/Timex.Format.DateTime.Formatters.Strftime.html), so this document will be a brief overview of the DateFormat API and how you use it typically.
 
 ```elixir
 # By default the :default formatter is used
