@@ -53,7 +53,7 @@ msgstr "Marzo"
 
 #: lib/l10n/translator.ex:221
 msgid "May"
-msgstr "Mag"
+msgstr "Maggio"
 
 #: lib/l10n/translator.ex:227
 msgid "November"
