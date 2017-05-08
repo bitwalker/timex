@@ -633,7 +633,7 @@ defmodule Timex do
       {year, month, day} = Helpers.iso_day_to_date_tuple(year, iso_day)
       %Date{year: year, month: month, day: day}
   end
-  def from_iso_triplet(_, _, _), do: {:error, {:from_iso_triplet, :invalid_triplet}}
+  def from_iso_triplet({_, _, _}), do: {:error, {:from_iso_triplet, :invalid_triplet}}
 
   @doc """
   Returns a list of all valid timezone names in the Olson database
