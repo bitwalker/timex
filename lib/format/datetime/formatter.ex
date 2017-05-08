@@ -196,8 +196,12 @@ defmodule Timex.Format.DateTime.Formatter do
     ms    = format_token(locale, :sec_fractional, date, modifiers, flags, width_spec(-1, nil))
     case token do
       :iso_8601_extended ->
-        tz = format_token(locale, :zoffs_colon, date, modifiers, flags, width_spec(-1, nil))
-        "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}#{tz}"
+        case format_token(locale, :zoffs_colon, date, modifiers, flags, width_spec(-1, nil)) do
+          "" ->
+            {:error, {:missing_timezone_information, date}}
+          tz ->
+            "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}#{tz}"
+        end
       :iso_8601_extended_z ->
         "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}Z"
     end
@@ -218,8 +222,12 @@ defmodule Timex.Format.DateTime.Formatter do
     ms    = format_token(locale, :sec_fractional, date, modifiers, flags, width_spec(-1, nil))
     case token do
       :iso_8601_basic ->
-        tz = format_token(locale, :zoffs, date, modifiers, flags, width_spec(-1, nil))
-        "#{year}#{month}#{day}T#{hour}#{min}#{sec}#{ms}#{tz}"
+        case format_token(locale, :zoffs, date, modifiers, flags, width_spec(-1, nil)) do
+          "" ->
+            {:error, {:missing_timezone_information, date}}
+          tz ->
+            "#{year}#{month}#{day}T#{hour}#{min}#{sec}#{ms}#{tz}"
+        end
       :iso_8601_basic_z ->
         "#{year}#{month}#{day}T#{hour}#{min}#{sec}#{ms}Z"
     end
@@ -241,8 +249,12 @@ defmodule Timex.Format.DateTime.Formatter do
     wday  = format_token(locale, :wdshort, date, modifiers, flags, width_spec(-1, nil))
     case token do
       :rfc_822 ->
-        tz = format_token(locale, :zoffs, date, modifiers, flags, width_spec(-1, nil))
-        "#{wday}, #{day} #{month} #{year} #{hour}:#{min}:#{sec} #{tz}"
+        case format_token(locale, :zoffs, date, modifiers, flags, width_spec(-1, nil)) do
+          "" ->
+            {:error, {:missing_timezone_information, date}}
+          tz ->
+            "#{wday}, #{day} #{month} #{year} #{hour}:#{min}:#{sec} #{tz}"
+        end
       :rfc_822z ->
         "#{wday}, #{day} #{month} #{year} #{hour}:#{min}:#{sec} Z"
     end
@@ -264,8 +276,12 @@ defmodule Timex.Format.DateTime.Formatter do
     wday  = format_token(locale, :wdshort, date, modifiers, flags, width_spec(-1, nil))
     case token do
       :rfc_1123 ->
-        tz = format_token(locale, :zoffs, date, modifiers, flags, width_spec(-1, nil))
-        "#{wday}, #{day} #{month} #{year} #{hour}:#{min}:#{sec} #{tz}"
+        case format_token(locale, :zoffs, date, modifiers, flags, width_spec(-1, nil)) do
+          "" ->
+            {:error, {:missing_timezone_information, date}}
+          tz ->
+            "#{wday}, #{day} #{month} #{year} #{hour}:#{min}:#{sec} #{tz}"
+        end
       :rfc_1123z ->
         "#{wday}, #{day} #{month} #{year} #{hour}:#{min}:#{sec} Z"
     end
@@ -287,8 +303,12 @@ defmodule Timex.Format.DateTime.Formatter do
     ms    = format_token(locale, :sec_fractional, date, modifiers, flags, width_spec(-1, nil))
     case token do
       :rfc_3339 ->
-        tz = format_token(locale, :zoffs_colon, date, modifiers, flags, width_spec(-1, nil))
-        "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}#{tz}"
+        case format_token(locale, :zoffs_colon, date, modifiers, flags, width_spec(-1, nil)) do
+          "" ->
+            {:error, {:missing_timezone_information, date}}
+          tz ->
+            "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}#{tz}"
+        end
       :rfc_3339z ->
         "#{year}-#{month}-#{day}T#{hour}:#{min}:#{sec}#{ms}Z"
     end
