@@ -18,6 +18,8 @@ defimpl Timex.Protocol, for: Tuple do
     do: :calendar.datetime_to_gregorian_seconds({date,{0,0,0}})
   def to_gregorian_seconds({{y,m,d},{h,mm,s}} = dt) when is_datetime(y,m,d,h,mm,s),
     do: :calendar.datetime_to_gregorian_seconds(dt)
+  def to_gregorian_seconds({{y,m,d},{h,mm,s,_us}}) when is_datetime(y,m,d,h,mm,s),
+    do: :calendar.datetime_to_gregorian_seconds({{y,m,d},{h,mm,s}})
   def to_gregorian_seconds(_), do: {:error, :invalid_date}
 
   @spec to_gregorian_microseconds(Types.date | Types.datetime) :: integer
@@ -25,12 +27,16 @@ defimpl Timex.Protocol, for: Tuple do
     do: (to_gregorian_seconds(date)*(1_000*1_000))
   def to_gregorian_microseconds({{y,m,d},{h,mm,s}} = date) when is_datetime(y,m,d,h,mm,s),
     do: (to_gregorian_seconds(date)*(1_000*1_000))
+  def to_gregorian_microseconds({{y,m,d},{h,mm,s,us}} = date) when is_datetime(y,m,d,h,mm,s),
+    do: (to_gregorian_seconds(date)*(1_000*1_000))+us
   def to_gregorian_microseconds(_), do: {:error, :invalid_date}
 
   @spec to_unix(Types.date | Types.datetime) :: integer
   def to_unix({y,m,d} = date) when is_date(y,m,d),
     do: (:calendar.datetime_to_gregorian_seconds({date,{0,0,0}}) - @epoch)
   def to_unix({{y,m,d},{h,mm,s}} = dt) when is_datetime(y,m,d,h,mm,s),
+    do: (:calendar.datetime_to_gregorian_seconds(dt) - @epoch)
+  def to_unix({{y,m,d},{h,mm,s,_us}} = dt) when is_datetime(y,m,d,h,mm,s),
     do: (:calendar.datetime_to_gregorian_seconds(dt) - @epoch)
   def to_unix(_), do: {:error, :invalid_date}
 
@@ -49,6 +55,9 @@ defimpl Timex.Protocol, for: Tuple do
   def to_datetime({{y,m,d},{h,mm,s}} = dt, timezone) when is_datetime(y,m,d,h,mm,s) do
     Timex.DateTime.Helpers.construct(dt, timezone)
   end
+  def to_datetime({{y,m,d},{h,mm,s,_us}} = dt, timezone) when is_datetime(y,m,d,h,mm,s) do
+    Timex.DateTime.Helpers.construct(dt, timezone)
+  end
   def to_date(_, _), do: {:error, :invalid_date}
 
   @spec to_naive_datetime(Types.date | Types.datetime) :: NaiveDateTime.t
@@ -58,11 +67,16 @@ defimpl Timex.Protocol, for: Tuple do
   def to_naive_datetime({{y,m,d},{h,mm,s}}) when is_datetime(y,m,d,h,mm,s) do
     %NaiveDateTime{year: y, month: m, day: d, hour: h, minute: mm, second: s, microsecond: {0,0}}
   end
+  def to_naive_datetime({{y,m,d},{h,mm,s,us}}) when is_datetime(y,m,d,h,mm,s) do
+    us = Timex.DateTime.Helpers.construct_microseconds(us)
+    %NaiveDateTime{year: y, month: m, day: d, hour: h, minute: mm, second: s, microsecond: us}
+  end
   def to_naive_datetime(_), do: {:error, :invalid_date}
 
   @spec to_erl(Types.date | Types.datetime) :: Types.date | Types.datetime
   def to_erl({y,m,d} = date) when is_date(y,m,d), do: date
   def to_erl({{y,m,d},{h,mm,s}} = dt) when is_datetime(y,m,d,h,mm,s), do: dt
+  def to_erl({{y,m,d},{h,mm,s,_us}}) when is_datetime(y,m,d,h,mm,s), do: {{y,m,d},{h,mm,s}}
   def to_erl(_), do: {:error, :invalid_date}
 
   @spec century(Types.date | Types.datetime) :: non_neg_integer
@@ -72,18 +86,18 @@ defimpl Timex.Protocol, for: Tuple do
 
   @spec is_leap?(Types.date | Types.datetime) :: boolean
   def is_leap?({y,m,d}) when is_date(y,m,d), do: :calendar.is_leap_year(y)
-  def is_leap?({{y,m,d},{h,mm,s}}) when is_datetime(y,m,d,h,mm,s), do: :calendar.is_leap_year(y)
+  def is_leap?({{y,m,d},_}) when is_date(y,m,d), do: :calendar.is_leap_year(y)
   def is_leap?(_), do: {:error, :invalid_date}
 
   @spec beginning_of_day(Types.date | Types.datetime) :: Types.date | Types.datetime
   def beginning_of_day({y,m,d} = date) when is_date(y,m,d), do: date
-  def beginning_of_day({{y,m,d}=date,{h,mm,s}}) when is_datetime(y,m,d,h,mm,s),
+  def beginning_of_day({{y,m,d}=date,_}) when is_date(y,m,d),
     do: {date, {0,0,0}}
   def beginning_of_day(_), do: {:error, :invalid_date}
 
   @spec end_of_day(Types.date | Types.datetime) :: Types.date | Types.datetime
   def end_of_day({y,m,d} = date) when is_date(y,m,d), do: date
-  def end_of_day({{y,m,d}=date,{h,mm,s}}) when is_datetime(y,m,d,h,mm,s),
+  def end_of_day({{y,m,d}=date,_}) when is_date(y,m,d),
     do: {date, {23,59,59}}
   def end_of_day(_), do: {:error, :invalid_date}
 
@@ -94,10 +108,10 @@ defimpl Timex.Protocol, for: Tuple do
       days -> shift(date, [days: -days])
     end
   end
-  def beginning_of_week({{y,m,d},{h,mm,s}} = date, weekstart) when is_datetime(y,m,d,h,mm,s) do
-    case Timex.days_to_beginning_of_week(date, weekstart) do
+  def beginning_of_week({{y,m,d} = date,_}, weekstart) when is_date(y,m,d) do
+    case Timex.days_to_beginning_of_week({date,{0,0,0}}, weekstart) do
       {:error, _} = err -> err
-      days -> beginning_of_day(shift(date, [days: -days]))
+      days -> beginning_of_day(shift({date,{0,0,0}}, [days: -days]))
     end
   end
   def beginning_of_week(_,_), do: {:error, :invalid_date}
@@ -110,7 +124,7 @@ defimpl Timex.Protocol, for: Tuple do
         shift(date, [days: days_to_end])
     end
   end
-  def end_of_week({{y,m,d},{h,mm,s}} = date, weekstart) when is_datetime(y,m,d,h,mm,s) do
+  def end_of_week({{y,m,d} = date,_}, weekstart) when is_date(y,m,d) do
     case Timex.days_to_end_of_week(date, weekstart) do
       {:error, _} = err -> err
       days_to_end ->
@@ -122,14 +136,14 @@ defimpl Timex.Protocol, for: Tuple do
   @spec beginning_of_year(Types.date | Types.datetime) :: Types.date | Types.datetime
   def beginning_of_year({y,m,d}) when is_date(y,m,d),
     do: {y,1,1}
-  def beginning_of_year({{y,m,d},{h,mm,s}}) when is_datetime(y,m,d,h,mm,s),
+  def beginning_of_year({{y,m,d},_}) when is_date(y,m,d),
     do: {{y,1,1},{0,0,0}}
   def beginning_of_year(_), do: {:error, :invalid_date}
 
   @spec end_of_year(Types.date | Types.datetime) :: Types.date | Types.datetime
   def end_of_year({y,m,d}) when is_date(y,m,d),
     do: {y,12,31}
-  def end_of_year({{y,m,d},{h,mm,s}}) when is_datetime(y,m,d,h,mm,s),
+  def end_of_year({{y,m,d},_}) when is_date(y,m,d),
     do: {{y,12,31},{23,59,59}}
   def end_of_year(_), do: {:error, :invalid_date}
 
@@ -139,6 +153,10 @@ defimpl Timex.Protocol, for: Tuple do
     {y,month,1}
   end
   def beginning_of_quarter({{y,m,d},{h,mm,s} = time}) when is_datetime(y,m,d,h,mm,s) do
+    month = 1 + (3 * (Timex.quarter(m) - 1))
+    {{y,month,1},time}
+  end
+  def beginning_of_quarter({{y,m,d},{h,mm,s,_us} = time}) when is_datetime(y,m,d,h,mm,s) do
     month = 1 + (3 * (Timex.quarter(m) - 1))
     {{y,month,1},time}
   end
@@ -153,25 +171,29 @@ defimpl Timex.Protocol, for: Tuple do
     month = 3 * Timex.quarter(m)
     end_of_month({{y,month,d}, time})
   end
+  def end_of_quarter({{y,m,d},{h,mm,s,_us} = time}) when is_datetime(y,m,d,h,mm,s) do
+    month = 3 * Timex.quarter(m)
+    end_of_month({{y,month,d}, time})
+  end
   def end_of_quarter(_), do: {:error, :invalid_date}
 
   @spec beginning_of_month(Types.date | Types.datetime) :: Types.date | Types.datetime
   def beginning_of_month({y,m,d}) when is_date(y,m,d),
     do: {y,m,1}
-  def beginning_of_month({{y,m,d},{h,mm,s}}) when is_datetime(y,m,d,h,mm,s),
+  def beginning_of_month({{y,m,d},_}) when is_date(y,m,d),
     do: {{y,m,1},{0,0,0}}
   def beginning_of_month(_), do: {:error, :invalid_date}
 
   @spec end_of_month(Types.date | Types.datetime) :: Types.date | Types.datetime
   def end_of_month({y,m,d} = date) when is_date(y,m,d),
     do: {y,m,days_in_month(date)}
-  def end_of_month({{y,m,d},{h,mm,s}} = date) when is_datetime(y,m,d,h,mm,s),
+  def end_of_month({{y,m,d},_} = date) when is_date(y,m,d),
     do: {{y,m,days_in_month(date)},{23,59,59}}
   def end_of_month(_), do: {:error, :invalid_date}
 
   @spec quarter(Types.date | Types.datetime) :: integer
   def quarter({y,m,d}) when is_date(y,m,d), do: Timex.quarter(m)
-  def quarter({{y,m,d},{h,mm,s}}) when is_datetime(y,m,d,h,mm,s), do: Timex.quarter(m)
+  def quarter({{y,m,d},_}) when is_date(y,m,d), do: Timex.quarter(m)
   def quarter(_), do: {:error, :invalid_date}
 
   def days_in_month({y,m,d}) when is_date(y,m,d), do: Timex.days_in_month(y, m)
@@ -194,6 +216,7 @@ defimpl Timex.Protocol, for: Tuple do
 
   def is_valid?({y,m,d}) when is_date(y,m,d), do: true
   def is_valid?({{y,m,d},{h,mm,s}}) when is_datetime(y,m,d,h,mm,s), do: true
+  def is_valid?({{y,m,d},{h,mm,s,_us}}) when is_datetime(y,m,d,h,mm,s), do: true
   def is_valid?(_), do: false
 
   def iso_week({y,m,d}) when is_date(y,m,d),
@@ -210,6 +233,10 @@ defimpl Timex.Protocol, for: Tuple do
     {year, month, day_of_month} = Timex.Helpers.iso_day_to_date_tuple(y, day)
     {{year, month, day_of_month}, time}
   end
+  def from_iso_day({{y,m,d},{_,_,_,_}=time}, day) when is_day_of_year(day) and is_date(y,m,d) do
+    {year, month, day_of_month} = Timex.Helpers.iso_day_to_date_tuple(y, day)
+    {{year, month, day_of_month}, time}
+  end
   def from_iso_day(_,_), do: {:error, :invalid_date}
 
   @spec set(Types.date | Types.datetime, list({atom(), term})) :: Types.date | Types.datetime | {:error, term}
@@ -217,6 +244,10 @@ defimpl Timex.Protocol, for: Tuple do
     do: do_set({d,{0,0,0}}, options, :date)
   def set({{y,m,d},{h,mm,s}} = d, options) when is_datetime(y,m,d,h,mm,s),
     do: do_set(d, options, :datetime)
+  def set({{y,m,d},{h,mm,s,us}} = d, options) when is_datetime(y,m,d,h,mm,s) do
+    {date,{h,mm,s}} = do_set({{y,m,d},{h,mm,s}}, options, :datetime)
+    {date,{h,mm,s,us}}
+  end
   def set(_,_), do: {:error, :invalid_date}
 
   defp do_set(date, options, datetime_type) do
@@ -226,7 +257,8 @@ defimpl Timex.Protocol, for: Tuple do
         err
       option, result ->
         case option do
-          {:validate, _} -> result
+          {:validate, _} ->
+            result
           {:datetime, {{_,_,_} = date, {_,_,_} = time} = dt} ->
             if validate? do
               case datetime_type do
@@ -353,6 +385,8 @@ defimpl Timex.Protocol, for: Tuple do
   def shift({y,m,d}=date, options) when is_date(y,m,d),
     do: do_shift(date, options, :date)
   def shift({{y,m,d},{h,mm,s}}=datetime, options) when is_datetime(y,m,d,h,mm,s),
+    do: do_shift(datetime, options, :datetime)
+  def shift({{y,m,d},{h,mm,s,_us}}=datetime, options) when is_datetime(y,m,d,h,mm,s),
     do: do_shift(datetime, options, :datetime)
   def shift(_, _), do: {:error, :invalid_date}
 
