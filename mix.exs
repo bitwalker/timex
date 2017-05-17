@@ -1,7 +1,7 @@
 defmodule Timex.Mixfile do
   use Mix.Project
 
-  @version "3.1.14"
+  @version "3.1.15"
 
   def project do
     [ app: :timex,
