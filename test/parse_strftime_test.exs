@@ -23,11 +23,13 @@ defmodule DateFormatTest.ParseStrftime do
     date = Timex.to_naive_datetime({{2015,7,13}, {14,1,21}})
     date = %{date | :microsecond => {53021, 6}}
     assert {:ok, ^date} = parse("20150713 14:01:21.053021", "%Y%m%d %H:%M:%S.%f")
+
+    assert {:ok, ~N[2017-04-05 15:34:37.348]} = parse("2017-04-05 15:34:37.348", "%Y-%m-%d %H:%M:%S.%f")
   end
 
   test "parse format with milliseconds" do
     date = Timex.to_naive_datetime({{2015,7,13}, {14,1,21}})
-    date = %{date | :microsecond => {38000,6}}
+    date = %{date | :microsecond => {38000,3}}
     assert {:ok, ^date} = parse("20150713 14:01:21.038", "%Y%m%d %H:%M:%S.%L")
   end
 

@@ -146,10 +146,10 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("seconds since epoch")
   end
   def microseconds(_) do
-    label(map(integer(), fn us -> [us: us] end), "microseconds")
+    label(map(word_of(~r/\d{1,6}/), &Helpers.parse_microseconds/1), "microseconds")
   end
   def milliseconds(_) do
-    label(map(integer(), fn ms -> [ms: ms] end), "milliseconds")
+    label(map(word_of(~r/\d{1,3}/), &Helpers.parse_milliseconds/1), "milliseconds")
   end
 
   def zname(_) do

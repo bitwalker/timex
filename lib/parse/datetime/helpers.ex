@@ -54,6 +54,25 @@ defmodule Timex.Parse.DateTime.Helpers do
     end
   end
 
+  def parse_milliseconds(ms) do
+    n = ms |> String.trim("0") |> String.to_integer
+    n = n * 1_000
+    [sec_fractional: Timex.DateTime.Helpers.construct_microseconds(n)]
+  end
+  def parse_microseconds(us) do
+    n_width = byte_size(us)
+    leading = n_width - byte_size(String.trim_leading(us, "0"))
+    trailing = n_width - byte_size(String.trim_trailing(us, "0"))
+    cond do
+      n_width - leading - trailing == 0 ->
+        [sec_fractional: {0,0}]
+      :else ->
+        n = us |> String.trim("0") |> String.to_integer
+        p = n_width - trailing
+        [sec_fractional: {n * trunc(:math.pow(10, 6-p)), p}]
+    end
+  end
+
   def to_ampm("am"), do: [am: "am"]
   def to_ampm("AM"), do: [AM: "AM"]
   def to_ampm("pm"), do: [am: "pm"]
