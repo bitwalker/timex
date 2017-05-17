@@ -84,7 +84,7 @@ defimpl Timex.Protocol, for: Date do
 
   @spec end_of_quarter(Date.t) :: Date.t
   def end_of_quarter(%Date{month: month} = date) do
-    month = 3 * quarter(month)
+    month = 3 * Timex.quarter(month)
     end_of_month(%{date | :month => month, :day => 1})
   end
 
