@@ -12,7 +12,7 @@ To use Timex with your projects, edit your `mix.exs` file and add it as a depend
 
 ```elixir
 def application do
-  [applications: [:timex]]
+  [applications: [:timex, :tzdata]]
 end
 
 defp deps do
