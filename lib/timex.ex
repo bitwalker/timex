@@ -825,7 +825,9 @@ defmodule Timex do
   - :hours
   - :minutes
   - :seconds
-  - :timestamp
+  - :milliseconds
+  - :microseconds (default)
+  - :duration
 
   and the dates will be compared with the cooresponding accuracy.
   The default granularity is :microseconds.
