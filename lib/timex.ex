@@ -771,8 +771,11 @@ defmodule Timex do
 
   @doc """
   Returns a boolean indicating whether the two `Timex.Comparable` values are equivalent.
-  Equality here implies that the two Comparables represent the same moment in time,
-  not equality of the data structure.
+
+  Equality here implies that the two Comparables represent the same moment in time (with
+  the given granularity), not equality of the data structure.
+
+  The options for granularity is the same as for `compare/3`, defaults to `:seconds`.
 
   ## Examples
 
@@ -786,9 +789,10 @@ defmodule Timex do
       ...> #{__MODULE__}.equal?(date1, date2)
       true
   """
-  @spec equal?(Comparable.comparable, Comparable.comparable) :: boolean | {:error, :badarg}
-  def equal?(a, a), do: true
-  def equal?(a, b), do: Comparable.compare(a, b, :seconds) == 0
+  @spec equal?(Comparable.comparable, Comparable.comparable, Comparable.granularity) :: boolean | {:error, :badarg}
+  def equal?(a, a, granularity \\ :seconds)
+  def equal?(a, a, _granularity), do: true
+  def equal?(a, b, granularity), do: Comparable.compare(a, b, granularity) == 0
 
   @doc """
   See docs for `compare/3`

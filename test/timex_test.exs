@@ -220,6 +220,13 @@ defmodule TimexTests do
     refute Timex.equal?(Timex.today, Timex.epoch)
     assert Timex.equal?(Timex.today, Timex.today)
     refute Timex.equal?(Timex.now, Timex.epoch)
+
+    date1 = Timex.to_datetime({{2013,3,18},{13,44,0, 50000}}, 2)
+    date2 = Timex.to_datetime({{2013,3,18},{8,44,0}}, -3)
+    date3 = Timex.to_datetime({{2013,3,18},{7,45,0}}, -3)
+    assert Timex.equal?(date1, date2)
+    refute Timex.equal?(date1, date2, :microseconds)
+    assert Timex.equal?(date2, date3, :hours)
   end
 
   test "diff" do
