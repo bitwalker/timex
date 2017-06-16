@@ -35,4 +35,5 @@ defmodule Timex.Types do
   @type datetime :: { date, time }
   @type iso_triplet :: { year, weeknum, weekday }
   @type valid_datetime :: Date.t | DateTime.t | NaiveDateTime.t | datetime | date
+  @type weekstart :: weekday | binary | atom
 end

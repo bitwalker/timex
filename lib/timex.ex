@@ -1242,7 +1242,7 @@ defmodule Timex do
       1
 
   """
-  @spec days_to_beginning_of_week(Types.valid_datetime, Types.weekday) :: integer | {:error, term}
+  @spec days_to_beginning_of_week(Types.valid_datetime, Types.weekstart) :: integer | {:error, term}
   def days_to_beginning_of_week(date, weekstart \\ 1)
 
   def days_to_beginning_of_week(date, weekstart) when is_atom(weekstart) or is_binary(weekstart)  do
@@ -1282,7 +1282,7 @@ defmodule Timex do
       5
 
   """
-  @spec days_to_end_of_week(Types.valid_datetime, Types.weekday) :: integer | {:error, term}
+  @spec days_to_end_of_week(Types.valid_datetime, Types.weekstart) :: integer | {:error, term}
   def days_to_end_of_week(date, weekstart \\ :mon) do
     case days_to_beginning_of_week(date, weekstart) do
       {:error, _} = err -> err
@@ -1306,7 +1306,7 @@ defmodule Timex do
       ~D[2015-11-29]
 
   """
-  @spec beginning_of_week(Types.valid_datetime, Types.weekday) :: Types.valid_datetime | {:error, term}
+  @spec beginning_of_week(Types.valid_datetime, Types.weekstart) :: Types.valid_datetime | {:error, term}
   defdelegate beginning_of_week(date, weekstart \\ :mon), to: Timex.Protocol
 
   @doc """
@@ -1327,7 +1327,7 @@ defmodule Timex do
       ~D[2015-12-05]
 
   """
-  @spec end_of_week(Types.valid_datetime, Types.weekday) :: Types.valid_datetime | {:error, term}
+  @spec end_of_week(Types.valid_datetime, Types.weekstart) :: Types.valid_datetime | {:error, term}
   defdelegate end_of_week(datetime, weekstart \\ 1), to: Timex.Protocol
 
   @doc """

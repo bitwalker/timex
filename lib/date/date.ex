@@ -51,7 +51,7 @@ defimpl Timex.Protocol, for: Date do
   @spec end_of_day(Date.t) :: Date.t
   def end_of_day(%Date{} = date), do: date
 
-  @spec beginning_of_week(Date.t, Types.weekday) :: Date.t
+  @spec beginning_of_week(Date.t, Types.weekstart) :: Date.t
   def beginning_of_week(%Date{} = date, weekstart) do
     case Timex.days_to_beginning_of_week(date, weekstart) do
       {:error, _} = err -> err
@@ -59,7 +59,7 @@ defimpl Timex.Protocol, for: Date do
     end
   end
 
-  @spec end_of_week(Date.t, Types.weekday) :: Date.t
+  @spec end_of_week(Date.t, Types.weekstart) :: Date.t
   def end_of_week(%Date{} = date, weekstart) do
     case Timex.days_to_end_of_week(date, weekstart) do
       {:error, _} = err -> err
