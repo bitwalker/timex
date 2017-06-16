@@ -1009,9 +1009,9 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.month_name(1)
-      "January"
-      iex> #{__MODULE__}.month_name(0)
+      iex> #{__MODULE__}.month_shortname(1)
+      "Jan"
+      iex> #{__MODULE__}.month_shortname(0)
       {:error, :invalid_month_number}
   """
   @spec month_shortname(Types.month) :: String.t | {:error, :invalid_month_number}
