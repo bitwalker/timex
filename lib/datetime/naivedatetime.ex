@@ -241,10 +241,17 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   end
   defp shift_by(%NaiveDateTime{:year => year, :month => month} = datetime, value, :months) do
     m = month + value
-    shifted = cond do
-      m > 0  -> %{datetime | :year => year + div(m - 1, 12), :month => rem(m - 1, 12) + 1}
-      m <= 0 -> %{datetime | :year => year + div(m, 12) - 1, :month => 12 + rem(m, 12)}
-    end
+    shifted =
+      cond do
+        m > 0 ->
+          years = div(m - 1, 12)
+          month = rem(m - 1, 12) + 1
+          %{datetime | :year => year + years, :month => month}
+        m <= 0 ->
+          years = div(m, 12) - 1
+          month = 12 + rem(m, 12)
+          %{datetime | :year => year + years, :month => month}
+      end
 
     # If the shift fails, it's because it's a high day number, and the month
     # shifted to does not have that many days. This will be handled by always
