@@ -973,15 +973,26 @@ defmodule Timex do
     full_chars = month_name |> String.to_charlist
     abbr_chars = abbr_cased |> String.to_charlist
 
-    month_quoted = quote do
-      def month_to_num(unquote(month_name)), do: unquote(month_num)
-      def month_to_num(unquote(lower)),      do: unquote(month_num)
-      def month_to_num(unquote(abbr_cased)), do: unquote(month_num)
-      def month_to_num(unquote(abbr_lower)), do: unquote(month_num)
-      def month_to_num(unquote(symbol)),     do: unquote(month_num)
-      def month_to_num(unquote(full_chars)), do: unquote(month_num)
-      def month_to_num(unquote(abbr_chars)), do: unquote(month_num)
-    end
+    # Account for months where full and abbr are equal
+    month_quoted =
+      if month_name == abbr_cased do
+        quote do
+          def month_to_num(unquote(month_name)), do: unquote(month_num)
+          def month_to_num(unquote(lower)),      do: unquote(month_num)
+          def month_to_num(unquote(symbol)),     do: unquote(month_num)
+          def month_to_num(unquote(full_chars)), do: unquote(month_num)
+        end
+      else
+        quote do
+          def month_to_num(unquote(month_name)), do: unquote(month_num)
+          def month_to_num(unquote(lower)),      do: unquote(month_num)
+          def month_to_num(unquote(abbr_cased)), do: unquote(month_num)
+          def month_to_num(unquote(abbr_lower)), do: unquote(month_num)
+          def month_to_num(unquote(symbol)),     do: unquote(month_num)
+          def month_to_num(unquote(full_chars)), do: unquote(month_num)
+          def month_to_num(unquote(abbr_chars)), do: unquote(month_num)
+        end
+      end
     Module.eval_quoted __MODULE__, month_quoted, [], __ENV__
   end)
   # Make an attempt at cleaning up the provided string
