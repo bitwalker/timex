@@ -60,7 +60,7 @@ defimpl Timex.Protocol, for: NaiveDateTime do
     %{datetime | :hour => 23, :minute => 59, :second => 59, :microsecond => {999_999, 6}}
   end
 
-  @spec beginning_of_week(NaiveDateTime.t, Types.weekday) :: NaiveDateTime.t
+  @spec beginning_of_week(NaiveDateTime.t, Types.weekstart) :: NaiveDateTime.t
   def beginning_of_week(%NaiveDateTime{} = date, weekstart) do
     case Timex.days_to_beginning_of_week(date, weekstart) do
       {:error, _} = err -> err
@@ -69,7 +69,7 @@ defimpl Timex.Protocol, for: NaiveDateTime do
     end
   end
 
-  @spec end_of_week(NaiveDateTime.t, Types.weekday) :: NaiveDateTime.t
+  @spec end_of_week(NaiveDateTime.t, Types.weekstart) :: NaiveDateTime.t
   def end_of_week(%NaiveDateTime{} = date, weekstart) do
     case Timex.days_to_end_of_week(date, weekstart) do
       {:error, _} = err -> err

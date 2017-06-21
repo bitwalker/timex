@@ -101,7 +101,7 @@ defimpl Timex.Protocol, for: Tuple do
     do: {date, {23,59,59}}
   def end_of_day(_), do: {:error, :invalid_date}
 
-  @spec beginning_of_week(Types.date | Types.datetime, Types.weekday) :: Types.date | Types.datetime
+  @spec beginning_of_week(Types.date | Types.datetime, Types.weekstart) :: Types.date | Types.datetime
   def beginning_of_week({y,m,d} = date, weekstart) when is_date(y,m,d) do
     case Timex.days_to_beginning_of_week(date, weekstart) do
       {:error, _} = err -> err
@@ -116,7 +116,7 @@ defimpl Timex.Protocol, for: Tuple do
   end
   def beginning_of_week(_,_), do: {:error, :invalid_date}
 
-  @spec end_of_week(Types.date | Types.datetime, Types.weekday) :: Types.date | Types.datetime
+  @spec end_of_week(Types.date | Types.datetime, Types.weekstart) :: Types.date | Types.datetime
   def end_of_week({y,m,d} = date, weekstart) when is_date(y,m,d) do
     case Timex.days_to_end_of_week(date, weekstart) do
       {:error, _} = err -> err
