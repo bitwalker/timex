@@ -48,15 +48,37 @@ defmodule Timex.Comparable.Diff do
     end
   end
   defp do_diff(a, b, :months) do
-    div(do_diff(a, b, :days), 30)
+    {high_y, high_m, high_d, low_y, low_m, low_d, sign} = convert_to_signed_date_tuples(a, b)
+
+    nof_months = (high_y * 12 + high_m) - (low_y * 12 + low_m)
+    nof_months = if (nof_months == 0 || low_d <= high_d),  do: nof_months, else: nof_months - 1
+    nof_months * sign
   end
   defp do_diff(a, b, :years) do
-    div(do_diff(a, b, :months), 12)
+    {high_y, high_m, high_d, low_y, low_m, low_d, sign} = convert_to_signed_date_tuples(a, b)
+
+    nof_years = high_y - low_y
+    nof_years = if (nof_years == 0 || {low_y, low_m, low_d} <= {high_y - nof_years, high_m, high_d}),  do: nof_years, else: nof_years - 1
+    nof_years * sign
   end
+
   defp do_diff(_, _, granularity) when not granularity in @units,
     do: {:error, {:invalid_granularity, granularity}}
 
   defp zero(:duration), do: Duration.zero
   defp zero(_type), do: 0
+
+  defp convert_to_signed_date_tuples(a, b) do
+    cond do
+      a > b ->
+        {{high_y, high_m, high_d}, _} = :calendar.gregorian_seconds_to_datetime(div(a, 1_000*1_000))
+        {{low_y, low_m, low_d}, _}    = :calendar.gregorian_seconds_to_datetime(div(b, 1_000*1_000))
+        {high_y, high_m, high_d, low_y, low_m, low_d, 1}
+      :else ->
+        {{low_y, low_m, low_d}, _}    = :calendar.gregorian_seconds_to_datetime(div(a, 1_000*1_000))
+        {{high_y, high_m, high_d}, _} = :calendar.gregorian_seconds_to_datetime(div(b, 1_000*1_000))
+        {high_y, high_m, high_d, low_y, low_m, low_d, -1}
+    end
+  end
 
 end
