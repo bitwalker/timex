@@ -303,36 +303,45 @@ defimpl Timex.Protocol, for: DateTime do
   end
   defp shift_by(%DateTime{:year => year, :month => month} = datetime, value, :months) do
     m = month + value
-    shifted = cond do
-      value == 12  -> %{datetime | :year => year + 1}
-      value == -12 -> %{datetime | :year => year - 1}
-      m == 0 -> %{datetime | :year => year - 1, :month => 12}
-      m > 12 -> %{datetime | :year => year + div(m, 12), :month => rem(m, 12)}
-      m < 0  -> %{datetime | :year => year + min(div(m, 12), -1), :month => 12 + rem(m, 12)}
-      :else  -> %{datetime | :month => m}
-    end
+    shifted =
+      cond do
+        m > 0 ->
+          years = div(m - 1, 12)
+          month = rem(m - 1, 12) + 1
+          %{datetime | :year => year + years, :month => month}
+        m <= 0  ->
+          years = div(m, 12) - 1
+          month = 12 + rem(m, 12)
+          %{datetime | :year => year + years, :month => month}
+      end
 
     # setting months to remainders may result in invalid :month => 0
-    shifted = case shifted.month do
-      0 -> %{ shifted | :year => shifted.year - 1, :month => 12 }
-      _ -> shifted
-    end
+    shifted =
+      case shifted.month do
+        0 -> %{shifted | :year => shifted.year - 1, :month => 12}
+        _ -> shifted
+      end
 
     # If the shift fails, it's because it's a high day number, and the month
-    # shifted to does not have that many days. This will be handled by always
-    # shifting to the last day of the month shifted to.
-    case :calendar.valid_date({shifted.year,shifted.month,shifted.day}) do
-      false ->
-        last_day = :calendar.last_day_of_the_month(shifted.year, shifted.month)
-        shifted = cond do
-          shifted.day <= last_day ->
+    # shifted to does not have that many days. We will handle this by shifting
+    # the leftover days into the next month
+    if :calendar.valid_date({shifted.year,shifted.month,shifted.day}) do
+      last_day = :calendar.last_day_of_the_month(shifted.year, shifted.month)
+      shifted_year = shifted.year
+      shifted_month = shifted.month
+      shifted_day = shifted.day
+      shifted =
+        cond do
+          shifted_day <= last_day ->
             shifted
-          :else ->
-            %{shifted | :day => last_day}
+          shifted_day > last_day && shifted_month < 12 ->
+            %{shifted | :day => shifted_day - last_day, :month => shifted_month + 1}
+          shifted_day > last_day && shifted_month == 12 ->
+            %{shifted | :day => shifted_day - last_day, :month => 1, :year => shifted_year+1}
         end
-        resolve_timezone_info(shifted)
-      true ->
-        resolve_timezone_info(shifted)
+      resolve_timezone_info(shifted)
+    else
+      resolve_timezone_info(shifted)
     end
   end
   defp shift_by(%DateTime{microsecond: {current_usecs, _}} = datetime, value, :microseconds) do
