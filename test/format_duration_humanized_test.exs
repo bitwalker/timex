@@ -17,4 +17,8 @@ defmodule DurationFormatHumanizedTest do
     assert "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds, 590.264 milliseconds" =
         format(-1435, -180354, -590264)
   end
+
+  test "format zero duration" do
+    assert "0 microseconds" = format(0, 0, 0)
+  end
 end
