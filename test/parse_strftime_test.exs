@@ -19,6 +19,10 @@ defmodule DateFormatTest.ParseStrftime do
     assert {:ok, ^date2} = parse("Mon Jul 06 2015 00:00:00 GMT +0200 (CST)", "%a %b %d %Y %H:%M:%S %Z %z (%Z)")
   end
 
+  test "issue #319 - should parse microseconds even if 0" do
+    assert {:ok, %NaiveDateTime{microsecond: {0, 6}}} = parse("2017-06-15T12:42:20.000000", "%FT%T.%f")
+  end
+
   test "parse format with microseconds" do
     date = Timex.to_naive_datetime({{2015,7,13}, {14,1,21}})
     date = %{date | :microsecond => {53021, 6}}

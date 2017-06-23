@@ -61,14 +61,13 @@ defmodule Timex.Parse.DateTime.Helpers do
   end
   def parse_microseconds(us) do
     n_width = byte_size(us)
-    leading = n_width - byte_size(String.trim_leading(us, "0"))
     trailing = n_width - byte_size(String.trim_trailing(us, "0"))
     cond do
-      n_width - leading - trailing == 0 ->
-        [sec_fractional: {0,0}]
+      n_width == trailing ->
+        [sec_fractional: {0, n_width}]
       :else ->
-        n = us |> String.trim("0") |> String.to_integer
         p = n_width - trailing
+        n = us |> String.trim("0") |> String.to_integer
         [sec_fractional: {n * trunc(:math.pow(10, 6-p)), p}]
     end
   end
