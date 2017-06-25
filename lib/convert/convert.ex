@@ -18,11 +18,11 @@ defmodule Timex.Convert do
           not(is_nil(year)) and not(is_nil(month)) and not(is_nil(day)) ->
             case Map.get(datetime_map, :hour) do
               nil ->
-                Date.new(year, month, day)
+                with {:ok, date} <- Date.new(year, month, day), do: date
               hour ->
                 minute = Map.get(datetime_map, :minute, 0)
                 second = Map.get(datetime_map, :second, 0)
-                us     = Map.get(datetime_map, :microsecond, 0)
+                us     = Map.get(datetime_map, :microsecond, {0, 0})
                 tz     = Map.get(datetime_map, :time_zone, nil)
                 case tz do
                   s when is_binary(s) ->
@@ -84,39 +84,22 @@ defmodule Timex.Convert do
           %{"full_name" => s} -> Map.put(acc, :time_zone, s)
           _ -> acc
         end
-      {k, v}, acc when k in @allowed_keys and is_atom(k) and is_integer(v) ->
-        case Map.get(@valid_keys_map, k) do
-          nil -> Map.put(acc, k, v)
-          vk  -> Map.put(acc, vk, v)
-        end
       {k, v}, acc when k in @allowed_keys and is_integer(v) ->
-        ak = String.to_atom(k)
-        case Map.get(@valid_keys_map, ak) do
-          nil -> Map.put(acc, ak, v)
-          vk  -> Map.put(acc, vk, v)
-        end
-      {k, v}, acc when k in @allowed_keys and is_atom(k) and is_binary(v) ->
-        case Integer.parse(v) do
-          {n, _} ->
-            case Map.get(@valid_keys_map, k) do
-              nil -> Map.put(acc, k, n)
-              vk  -> Map.put(acc, vk, n)
-            end
-          :error ->
-            {:error, {:expected_integer, for: k, got: v}}
-        end
+        Map.put(acc, get_valid_key(k), v)
       {k, v}, acc when k in @allowed_keys and is_binary(v) ->
         case Integer.parse(v) do
           {n, _} ->
-            ak = String.to_atom(k)
-            case Map.get(@valid_keys_map, ak) do
-              nil -> Map.put(acc, ak, n)
-              vk  -> Map.put(acc, vk, n)
-            end
+            Map.put(acc, get_valid_key(k), n)
           :error ->
             {:error, {:expected_integer, for: k, got: v}}
         end
       {_, _}, acc -> acc
     end)
   end
+
+  defp get_valid_key(key) when is_atom(key),
+    do: Map.get(@valid_keys_map, key, key)
+
+  defp get_valid_key(key),
+    do: key |> String.to_atom() |> get_valid_key()
 end

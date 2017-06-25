@@ -85,11 +85,157 @@ defmodule ConversionTests do
 
   ## Map conversions
 
+  @default_map %{"year" => "2015", "month" => "2", "day" => "28", "hour" => "13", "minute" => "37", "second" => "12", "time_zone" => "UTC"}
+  @default_utc_datetime Timex.to_datetime(~N[2015-02-28T13:37:12], "UTC")
+  @default_cph_datetime Timex.to_datetime(~N[2015-02-28T13:37:12], "Europe/Copenhagen")
+
   test "map with timezone to_datetime" do
-    datetime = %{"year" => "2015", "month" => "2",
-      "day" => "28", "hour" => "13", "minute" => "37",
-      "time_zone" => "Europe/Copenhagen"}
-    |> Timex.Convert.convert_map
-    assert ^datetime = Timex.to_datetime(~N[2015-02-28T13:37:00], "Europe/Copenhagen")
+    datetime =
+      @default_map
+      |> Map.put("time_zone", "Europe/Copenhagen")
+      |> Timex.Convert.convert_map
+    assert ^datetime = @default_cph_datetime
+  end
+
+  test "map with timezone as full_name" do
+    datetime =
+      @default_map
+      |> Map.put("time_zone", %{"full_name" => "Europe/Copenhagen"})
+      |> Timex.Convert.convert_map
+    assert ^datetime = @default_cph_datetime
+  end
+
+  test "map with invalid timezone format" do
+    datetime =
+      @default_map
+      |> Map.put("time_zone", 0)
+      |> Timex.Convert.convert_map
+    assert ^datetime = @default_utc_datetime |> DateTime.to_naive()
+  end
+
+  test "map with microsecond tuple" do
+    datetime =
+      @default_map
+      |> Map.put("microsecond", {0, 6})
+      |> Timex.Convert.convert_map
+    assert datetime == @default_utc_datetime |> Map.put(:microsecond, {0, 6})
+  end
+
+  test "map with microsecond int" do
+    datetime =
+      @default_map
+      |> Map.put("microsecond", 0)
+      |> Timex.Convert.convert_map
+    assert datetime == @default_utc_datetime |> Map.put(:microsecond, {0, 6})
+  end
+
+  test "map with invalid microsecond" do
+    datetime =
+      @default_map
+      |> Map.put("microsecond", "0")
+      |> Timex.Convert.convert_map
+    assert datetime == @default_utc_datetime
+  end
+
+  test "map with int millisecond" do
+    datetime =
+      @default_map
+      |> Map.put("millisecond", 33)
+      |> Timex.Convert.convert_map
+    assert datetime == @default_utc_datetime |> Map.put(:microsecond, {33000, 3})
+  end
+
+  test "map with atom key" do
+    datetime =
+      @default_map
+      |> Map.delete("minute")
+      |> Map.put(:minute, @default_map["minute"])
+      |> Timex.Convert.convert_map
+    assert datetime == @default_utc_datetime
+  end
+
+  test "map with atom key and int value" do
+    datetime =
+      @default_map
+      |> Map.delete("minute")
+      |> Map.put(:minute, String.to_integer(@default_map["minute"]))
+      |> Timex.Convert.convert_map
+    assert datetime == @default_utc_datetime
+  end
+
+  test "map with int value" do
+    datetime =
+      @default_map
+      |> Map.put("minute", String.to_integer(@default_map["minute"]))
+      |> Timex.Convert.convert_map
+    assert datetime == @default_utc_datetime
+  end
+
+  test "map with int value and old style key" do
+    datetime =
+      @default_map
+      |> Map.delete("second")
+      |> Map.put("sec", String.to_integer(@default_map["second"]))
+      |> Timex.Convert.convert_map
+    assert datetime == @default_utc_datetime
+  end
+
+  test "map with old style key" do
+    datetime =
+      @default_map
+      |> Map.delete("second")
+      |> Map.put("sec", @default_map["second"])
+      |> Timex.Convert.convert_map
+    assert datetime == @default_utc_datetime
+  end
+
+  test "map with old style atom key" do
+    datetime =
+      @default_map
+      |> Map.delete("second")
+      |> Map.put(:sec, @default_map["second"])
+      |> Timex.Convert.convert_map
+    assert datetime == @default_utc_datetime
+  end
+
+  test "map with unparseable string int value" do
+    datetime =
+      @default_map
+      |> Map.put("minute", "")
+      |> Timex.Convert.convert_map
+    assert datetime == {:error, {:expected_integer, [for: "minute", got: ""]}}
+  end
+
+  test "map with unknown key" do
+    datetime =
+      @default_map
+      |> Map.put("foo bar", "")
+      |> Timex.Convert.convert_map
+    assert datetime == @default_utc_datetime
+  end
+
+  test "map without hour is treated as date" do
+    date =
+      @default_map
+      |> Map.delete("hour")
+      |> Timex.Convert.convert_map
+    assert date == @default_utc_datetime |> Timex.to_date()
+  end
+
+  test "map without minute and second" do
+    datetime =
+      @default_map
+      |> Map.delete("minute")
+      |> Map.delete("second")
+      |> Timex.Convert.convert_map
+    assert datetime == %DateTime{@default_utc_datetime | minute: 0, second: 0}
+  end
+
+  test "map without timezone" do
+    datetime =
+      @default_map
+      |> Map.delete("time_zone")
+      |> Timex.Convert.convert_map
+    assert datetime == @default_utc_datetime |> DateTime.to_naive()
   end
 end
