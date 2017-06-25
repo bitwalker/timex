@@ -435,30 +435,19 @@ defimpl Timex.Protocol, for: DateTime do
   end
 
   @spec to_seconds(DateTime.t, :epoch | :zero) :: integer | {:error, atom}
-  @spec to_seconds(DateTime.t, :epoch | :zero, [utc: false | true]) :: integer | {:error, atom}
-  defp to_seconds(date, reference, options \\ [utc: true])
-
-  defp to_seconds(%DateTime{} = date, :epoch, utc: true) do
-    case to_seconds(date, :zero, utc: true) do
+  defp to_seconds(%DateTime{} = date, :epoch) do
+    case to_seconds(date, :zero) do
       {:error, _} = err -> err
       secs -> secs - @epoch_seconds
     end
   end
-  defp to_seconds(%DateTime{} = date, :zero, utc: true) do
+  defp to_seconds(%DateTime{} = date, :zero) do
     total_offset = Timezone.total_offset(date.std_offset, date.utc_offset) * -1
     date = %{date | :time_zone => "Etc/UTC", :zone_abbr => "UTC", :std_offset => 0, :utc_offset => 0}
     date = Timex.shift(date, seconds: total_offset)
     utc_to_secs(date)
   end
-  defp to_seconds(%DateTime{} = date, :epoch, utc: false) do
-    case to_seconds(date, :zero, utc: false) do
-      {:error, _} = err -> err
-      secs -> secs - @epoch_seconds
-    end
-  end
-  defp to_seconds(%DateTime{} = date, :zero, utc: false),
-    do: utc_to_secs(date)
-  defp to_seconds(_, _, _), do: {:error, :badarg}
+  defp to_seconds(_, _), do: {:error, :badarg}
 
   defp utc_to_secs(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => mm, :second => s}) do
     :calendar.datetime_to_gregorian_seconds({{y,m,d},{h,mm,s}})
