@@ -407,7 +407,7 @@ defmodule Timex.Timezone do
     # Calculate the difference between `date`'s timezone, and the provided timezone
     difference = diff(date, tz)
     # Offset the provided date's time by the difference
-    {seconds_from_zeroyear, microsecs} = do_shift(date, :seconds, difference)
+    {seconds_from_zeroyear, microsecs} = do_shift(date, difference)
     case resolve(name, seconds_from_zeroyear) do
       {:error, _} = err -> err
       ^tz ->
@@ -421,7 +421,7 @@ defmodule Timex.Timezone do
                   :std_offset => tz.offset_std}
       %TimezoneInfo{} = new_zone ->
         difference = diff(tz, new_zone)
-        {shifted, microsecs} = do_shift(seconds_from_zeroyear, microsecs, :seconds, difference)
+        {shifted, microsecs} = do_shift(seconds_from_zeroyear, microsecs, difference)
         {{y,m,d},{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(shifted)
         %DateTime{:year => y, :month => m, :day => d,
                   :hour => h, :minute => mm, :second => s,
@@ -432,9 +432,9 @@ defmodule Timex.Timezone do
                   :std_offset => new_zone.offset_std}
       %AmbiguousTimezoneInfo{:before => before_tz, :after => after_tz} ->
         before_diff = diff(tz, before_tz)
-        {before_shifted, before_us} = do_shift(seconds_from_zeroyear, microsecs, :seconds, before_diff)
+        {before_shifted, before_us} = do_shift(seconds_from_zeroyear, microsecs, before_diff)
         after_diff = diff(tz, after_tz)
-        {after_shifted, after_us} = do_shift(seconds_from_zeroyear, microsecs, :seconds, after_diff)
+        {after_shifted, after_us} = do_shift(seconds_from_zeroyear, microsecs, after_diff)
         {{y,m,d},{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(before_shifted)
         before_dt = %DateTime{:year => y, :month => m, :day => d,
                               :hour => h, :minute => mm, :second => s,
@@ -464,29 +464,20 @@ defmodule Timex.Timezone do
     convert(Timex.to_datetime(date), tz)
   end
 
-  defp do_shift(%DateTime{:microsecond => us} = datetime, unit, value) do
+  defp do_shift(%DateTime{:microsecond => us} = datetime, seconds) do
     secs_from_zero = :calendar.datetime_to_gregorian_seconds({
       {datetime.year,datetime.month,datetime.day},
       {datetime.hour,datetime.minute,datetime.second}
     })
-    do_shift(secs_from_zero, us, unit, value)
+    do_shift(secs_from_zero, us, seconds)
   end
-  defp do_shift(secs_from_zero, microseconds, unit, value)
+  defp do_shift(secs_from_zero, microseconds, seconds)
     when is_integer(secs_from_zero) do
-    shift_by = case unit do
-      :seconds      -> value
-      :minutes      -> value * 60
-      :hours        -> value * 60 * 60
-      :days         -> value * 60 * 60 * 24
-      :weeks        -> value * 60 * 60 * 24 * 7
-      _ ->
-        raise "unknown shift unit provided to do_shift"
-    end
-    case shift_by do
+    case seconds do
       0 ->
         {secs_from_zero, microseconds}
       _ ->
-        new_secs_from_zero = secs_from_zero + shift_by
+        new_secs_from_zero = secs_from_zero + seconds
         cond do
           new_secs_from_zero <= 0 ->
             raise "cannot shift a datetime before the beginning of the gregorian calendar!"
