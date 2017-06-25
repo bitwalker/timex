@@ -745,13 +745,23 @@ defmodule Timex do
   Returns a boolean indicating whether the first `Timex.Comparable` occurs before the second
   """
   @spec before?(Comparable.comparable, Comparable.comparable) :: boolean | {:error, term}
-  def before?(a, b), do: Comparable.compare(a, b) == -1
+  def before?(a, b) do
+    case Comparable.compare(a, b) do
+      result when is_integer(result) -> result == -1
+      {:error, _} = res -> res
+    end
+  end
 
   @doc """
   Returns a boolean indicating whether the first `Timex.Comparable` occurs after the second
   """
   @spec after?(Comparable.comparable, Comparable.comparable) :: boolean | {:error, term}
-  def after?(a, b), do: Comparable.compare(a, b) == 1
+  def after?(a, b) do
+    case Comparable.compare(a, b) do
+      result when is_integer(result) -> result == 1
+      {:error, _} = res -> res
+    end
+  end
 
   @doc """
   Returns a boolean indicating whether the first `Timex.Comparable` occurs between the second and third
