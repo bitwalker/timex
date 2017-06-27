@@ -105,39 +105,40 @@ defmodule Timex.Parse.DateTime.Parser do
   defp do_parse(str, [%Directive{:type => type}], _tokenizer)
     when type in [:iso_8601_extended, :iso_8601_extended_z, :rfc_3339, :rfc_3339z] do
     case Combine.parse(str, Timex.Parse.DateTime.Parsers.ISO8601Extended.parse) do
-      {:error, _} = err -> err
-      [[{:year4, y}, {:month, m}, {:day, d}, {:hour24, h}, {:zname, tzname}]] ->
-        tz = Timezone.get(tzname, {{y,m,d},{h,0,0}})
-        {:ok, %DateTime{:year => y, :month => m, :day => d,
-                        :hour => h, :minute => 0, :second => 0, :microsecond => {0,0},
-                        :time_zone => tz.full_name,
-                        :zone_abbr => tz.abbreviation,
-                        :utc_offset => tz.offset_utc,
-                        :std_offset => tz.offset_std}}
-      [[{:year4, y}, {:month, m}, {:day, d}, {:hour24, h}, {:min, mm}, {:zname, tzname}]] ->
-        tz = Timezone.get(tzname, {{y,m,d},{h,mm,0}})
-        {:ok, %DateTime{:year => y, :month => m, :day => d,
-                        :hour => h, :minute => mm, :second => 0, :microsecond => {0,0},
-                        :time_zone => tz.full_name,
-                        :zone_abbr => tz.abbreviation,
-                        :utc_offset => tz.offset_utc,
-                        :std_offset => tz.offset_std}}
-      [[{:year4, y}, {:month, m}, {:day, d}, {:hour24, h}, {:min, mm}, {:sec, s}, {:zname, tzname}]] ->
-        tz = Timezone.get(tzname, {{y,m,d},{h,mm,s}})
-        {:ok, %DateTime{:year => y, :month => m, :day => d,
-                        :hour => h, :minute => mm, :second => s, :microsecond => {0,0},
-                        :time_zone => tz.full_name,
-                        :zone_abbr => tz.abbreviation,
-                        :utc_offset => tz.offset_utc,
-                        :std_offset => tz.offset_std}}
-      [[{:year4, y}, {:month, m}, {:day, d}, {:hour24, h}, {:min, mm}, {:sec, s}, {:sec_fractional, us}, {:zname, tzname}]] ->
-        tz = Timezone.get(tzname, {{y,m,d},{h,mm,s}})
-        {:ok, %DateTime{:year => y, :month => m, :day => d,
-                        :hour => h, :minute => mm, :second => s, :microsecond => us,
-                        :time_zone => tz.full_name,
-                        :zone_abbr => tz.abbreviation,
-                        :utc_offset => tz.offset_utc,
-                        :std_offset => tz.offset_std}}
+      {:error, _} = err ->
+        err
+      [parts] when is_list(parts) ->
+        case Enum.into(parts, %{}) do
+          %{year4: y, month: m, day: d, hour24: h, zname: tzname} = mapped ->
+            mm = Map.get(mapped, :min, 0)
+            ss = Map.get(mapped, :sec, 0)
+            us = Map.get(mapped, :sec_fractional, {0,0})
+            tz = Timezone.get(tzname, {{y,m,d},{h,mm,ss}})
+            {:ok, %DateTime{
+                year: y,
+                month: m,
+                day: d,
+                hour: h,
+                minute: mm,
+                second: ss,
+                microsecond: us,
+                time_zone: tz.full_name,
+                zone_abbr: tz.abbreviation,
+                utc_offset: tz.offset_utc,
+                std_offset: tz.offset_std}}
+          %{year4: y, month: m, day: d, hour24: h} = mapped ->
+            mm = Map.get(mapped, :min, 0)
+            ss = Map.get(mapped, :sec, 0)
+            us = Map.get(mapped, :sec_fractional, {0,0})
+            {:ok, %NaiveDateTime{
+                year: y,
+                month: m,
+                day: d,
+                hour: h,
+                minute: mm,
+                second: ss,
+                microsecond: us}}
+        end
     end
   end
   defp do_parse(str, directives, tokenizer) do
