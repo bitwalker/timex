@@ -57,6 +57,7 @@ defmodule Timex.DateTime.Helpers do
     end
   end
 
+  def construct_microseconds({us, p} = us_tuple) when is_integer(us) and is_integer(p), do: us_tuple
   def construct_microseconds(0), do: {0,0}
   def construct_microseconds(n), do: {n, precision(n)}
 
