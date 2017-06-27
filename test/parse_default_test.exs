@@ -79,6 +79,12 @@ defmodule DateFormatTest.ParseDefault do
     assert {:ok, ^date2013_11} = parse("20131108", "{0YYYY}{0M}{0D}")
   end
 
+  test "parse ISO week" do
+    assert ~N[2016-11-28 00:00:00] = Timex.parse!("2016-W48", "{ISOweek}")
+    assert ~N[2009-12-28 00:00:00] = Timex.parse!("2009-W53", "{ISOweek}")
+    assert ~N[2007-11-19 00:00:00] = Timex.parse!("2007-W47", "{ISOweek}")
+  end
+
   test "parse ISO year4/year2" do
     date = Timex.to_naive_datetime({2007,1,1})
     year = date.year

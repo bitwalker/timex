@@ -74,6 +74,7 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> map(fn n -> [week_of_year: n] end)
     |> label("week of year")
   end
+  defdelegate week_of_year_sun(opts \\ []), to: __MODULE__, as: :week_of_year
   def weekday(_) do
     fixed_integer(1)
     |> satisfy(fn day -> day >= 1 && day <= 7 end)

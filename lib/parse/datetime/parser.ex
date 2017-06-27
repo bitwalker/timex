@@ -197,8 +197,8 @@ defmodule Timex.Parse.DateTime.Parser do
     do: {:ok, Timex.DateTime.Helpers.empty()}
   defp apply_directives(tokens, tokenizer),
     do: apply_directives(tokens, Timex.DateTime.Helpers.empty(), tokenizer)
-  defp apply_directives([], %DateTime{} = date, _), do: {:ok, date}
-  defp apply_directives([{token, value}|tokens], %DateTime{} = date, tokenizer) do
+  defp apply_directives([], date, _), do: {:ok, date}
+  defp apply_directives([{token, value}|tokens], date, tokenizer) do
     case update_date(date, token, value, tokenizer) do
       {:error, _} = error -> error
       updated             -> apply_directives(tokens, updated, tokenizer)
@@ -212,7 +212,7 @@ defmodule Timex.Parse.DateTime.Parser do
     ad = update_date(adt.after, token, value, tokenizer)
     %{adt | :before => bd, :after => ad}
   end
-  defp update_date(%DateTime{year: year, hour: hh} = date, token, value, tokenizer) when is_atom(token) do
+  defp update_date(%{year: year, hour: hh} = date, token, value, tokenizer) when is_atom(token) do
     case token do
       # Formats
       clock when clock in [:kitchen, :strftime_iso_kitchen] ->
@@ -239,10 +239,9 @@ defmodule Timex.Parse.DateTime.Parser do
         # Special case for UNIX format dates, where the year is parsed after the timezone,
         # so we must lookup the timezone again to ensure it's properly set
         case date do
-          %DateTime{time_zone: nil} ->
-            %{date | :year => value}
-          %DateTime{time_zone: tzname} ->
+          %{time_zone: tzname} when is_nil(tzname) == false ->
             seconds_from_zeroyear = Timex.to_gregorian_seconds(date)
+            date = to_datetime(date)
             case Timezone.resolve(tzname, seconds_from_zeroyear) do
               %TimezoneInfo{} = tz ->
                 %{date | :year => value,
@@ -263,6 +262,8 @@ defmodule Timex.Parse.DateTime.Parser do
                        :std_offset => a.offset_std}
                 %AmbiguousDateTime{:before => bd, :after => ad}
             end
+          _ ->
+            %{date | :year => value}
         end
       # Months
       :month ->
@@ -328,6 +329,7 @@ defmodule Timex.Parse.DateTime.Parser do
         end
       # Timezones
       :zoffs ->
+        date = to_datetime(date)
         case value do
           <<sign::utf8, h1::utf8, h2::utf8>> ->
             hour    = <<h1::utf8,h2::utf8>>
@@ -400,6 +402,7 @@ defmodule Timex.Parse.DateTime.Parser do
         case Timezone.name_of(value) do
           {:error, _} = err -> err
           tzname ->
+            date = to_datetime(date)
             case Timezone.resolve(tzname, seconds_from_zeroyear) do
               %TimezoneInfo{} = tz ->
                 %{date |
@@ -422,6 +425,7 @@ defmodule Timex.Parse.DateTime.Parser do
             end
         end
       :zoffs_colon ->
+        date = to_datetime(date)
         case value do
           <<sign::utf8, h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8>> ->
             hour    = <<h1::utf8,h2::utf8>>
@@ -462,6 +466,7 @@ defmodule Timex.Parse.DateTime.Parser do
             {:error, "invalid offset: #{inspect value}"}
         end
       :zoffs_sec ->
+        date = to_datetime(date)
         case value do
           <<sign::utf8, h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8, ?:, s1::utf8, s2::utf8>> ->
             hour    = <<h1::utf8,h2::utf8>>
@@ -504,6 +509,7 @@ defmodule Timex.Parse.DateTime.Parser do
             {:error, "invalid offset: #{inspect value}"}
         end
       :force_utc ->
+        date = to_datetime(date)
         case date.time_zone do
           nil ->
             %{date | :time_zone => "Etc/UTC", :zone_abbr => "UTC", :utc_offset => 0, :std_offset => 0}
@@ -512,6 +518,10 @@ defmodule Timex.Parse.DateTime.Parser do
         end
       :literal ->
         date
+      :week_of_year ->
+        shift_to_week_of_year(:mon, date, value)
+      :week_of_year_sun ->
+        shift_to_week_of_year(:sun, date, value)
       _ ->
         case tokenizer.apply(date, token, value) do
           {:ok, date}       -> date
@@ -522,4 +532,48 @@ defmodule Timex.Parse.DateTime.Parser do
     end
   end
 
+  defp shift_to_week_of_year(:mon, %{year: y} = datetime, value) when is_integer(value) do
+    shift =
+      case :calendar.day_of_the_week({y, 1, 1}) do
+        n when n < 5 -> # Week 1, seek backwards to beginning of week
+          [days: -(7-(7-(n-1)))]
+        n -> # Part of last year's week, seek forwards to beginning of week
+          [days: (7-(7-(n-1))) - 1]
+      end
+    datetime = Timex.to_naive_datetime(datetime)
+    do_shift_to_week_of_year(Timex.shift(%{datetime | month: 1, day: 1}, shift), value)
+  end
+  defp shift_to_week_of_year(:sun, %{year: y} = datetime, value) when is_integer(value) do
+    n = :calendar.day_of_the_week({y, 1, 1})
+    shift = [days: -1 - (7-(7-(n-1)))]
+    datetime = Timex.to_naive_datetime(datetime)
+    do_shift_to_week_of_year(Timex.shift(%{datetime | month: 1, day: 1}, shift), value)
+  end
+  defp do_shift_to_week_of_year(%{year: y} = datetime, weeks) do
+    # On leap years which start on Thursday, week numbers
+    # are incremented by 1 from March thru the rest of the year
+    shifted = Timex.shift(datetime, days: 7 * (weeks-1))
+    if :calendar.is_leap_year(y) do
+      case :calendar.day_of_the_week({y,1,1}) do
+        4 ->
+          case shifted do
+            %{month: m} when m < 3 ->
+              shifted
+            _ ->
+              Timex.shift(shifted, days: 7)
+          end
+        _n ->
+          shifted
+      end
+    else
+      shifted
+    end
+  end
+
+  defp to_datetime(%DateTime{} = dt), do: dt
+  defp to_datetime(%NaiveDateTime{year: y, month: m, day: d, hour: h, minute: mm, second: ss, microsecond: us}) do
+    %DateTime{year: y, month: m, day: d,
+              hour: h, minute: mm, second: ss, microsecond: us,
+              time_zone: "Etc/UTC", zone_abbr: "UTC", utc_offset: 0, std_offset: 0}
+  end
 end
