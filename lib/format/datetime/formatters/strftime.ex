@@ -37,22 +37,22 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
 
   ### Years and centuries
 
-  * `%Y` - full year number (0000..9999)
-  * `%y` - the last two digits of the year number (00.99)
+  * `%Y` - full year number (0..9999)
+  * `%y` - the last two digits of the year number (0..99)
   * `%C` - century number (00..99)
   * `%G` - year number corresponding to the date's ISO week (0..9999)
-  * `%g` - year number (2 digits) corresponding to the date's ISO week (0.99)
+  * `%g` - year number (2 digits) corresponding to the date's ISO week (0..99)
 
   ### Months
 
-  * `%m` - month number (01..12)
+  * `%m` - month number (1..12)
   * `%b` - abbreviated month name (Jan..Dec, no padding)
   * `%h` - same is `%b`
   * `%B` - full month name (January..December, no padding)
 
   ### Days, and days of week
 
-  * `%d` - day number (01..31)
+  * `%d` - day number (1..31)
   * `%e` - same as `%d`, but padded with spaces ( 1..31)
   * `%j` - ordinal day of the year (001..366)
   * `%u` - weekday, Monday first (1..7)
@@ -72,9 +72,10 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
   * `%k` - same as `%H`, but padded with spaces ( 0..23)
   * `%I` - hour of the day (1..12)
   * `%l` - same as `%I`, but padded with spaces ( 1..12)
-  * `%M` - minutes of the hour (0..59)
-  * `%S` - seconds of the minute (0..60)
+  * `%M` - minutes of the hour (00..59)
+  * `%S` - seconds of the minute (00..60)
   * `%f` - microseconds in zero padded decimal form, i.e. 025000
+  * `%L` - milliseconds (000..999)
   * `%s` - number of seconds since UNIX epoch
   * `%P` - lowercase am or pm (no padding)
   * `%p` - uppercase AM or PM (no padding)
