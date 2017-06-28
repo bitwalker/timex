@@ -552,15 +552,11 @@ defmodule Timex.Format.DateTime.Formatter do
         pad_numeric(Timex.to_unix(date), flags, width)
     end
   end
-  def format_token(_locale, :us, %{microsecond: {us, precision}}, _modifiers, flags, width) do
-    p = cond do
-      width > precision -> precision
-      :else -> width
-    end
-    pad_numeric(us, flags, width_spec(p..p))
+  def format_token(_locale, :us, %{microsecond: {us, _precision}}, _modifiers, _flags, _width) do
+    pad_numeric(us, [padding: :zeroes], width_spec(6..6))
   end
-  def format_token(_locale, :us, _date, _modifiers, flags, width) do
-    pad_numeric(0, flags, width)
+  def format_token(_locale, :us, _date, _modifiers, _flags, _width) do
+    pad_numeric(0, [padding: :zeroes], width_spec(6..6))
   end
   def format_token(locale, :am, %{hour: hour}, _modifiers, _flags, _width) do
     day_periods = Translator.get_day_periods(locale)
