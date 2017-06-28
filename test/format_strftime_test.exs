@@ -385,6 +385,11 @@ defmodule DateFormatTest.FormatStrftime do
     assert format(dt, "%j") == {:ok, "366"}
   end
 
+  test "issue #322 - should pad with zeroes even if microseconds = 0" do
+    dt = Timex.to_datetime({{2014, 11, 3}, {1, 41, 2}})
+    assert format(dt, "%f") == {:ok, "000000"}
+  end
+
   defp format(date, fmt) do
     Timex.format(date, fmt, :strftime)
   end
