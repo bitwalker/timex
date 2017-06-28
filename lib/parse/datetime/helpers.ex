@@ -67,6 +67,7 @@ defmodule Timex.Parse.DateTime.Helpers do
         [sec_fractional: {0, n_width}]
       :else ->
         p = n_width - trailing
+        p = if p > 6, do: 6, else: p
         n = us |> String.trim("0") |> String.to_integer
         [sec_fractional: {n * trunc(:math.pow(10, 6-p)), p}]
     end

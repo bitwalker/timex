@@ -100,6 +100,8 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
         {:ok, fraction, count, rest} ->
           seconds = String.to_integer(<<s1::utf8,s2::utf8>>)
           precision  = byte_size(fraction)
+          fraction   = if precision > 6, do: binary_part(fraction, 0, 6), else: fraction
+          precision  = if precision > 6, do: 6, else: precision
           fractional = String.to_integer(fraction)
           fractional = fractional * div(1_000_000, trunc(:math.pow(10, precision)))
           cond do

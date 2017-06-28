@@ -66,6 +66,7 @@ defmodule Timex.DateTime.Helpers do
     ns = Integer.to_string(n)
     n_width = byte_size(ns)
     trimmed = byte_size(String.trim_trailing(ns, "0"))
-    6 - (n_width - trimmed)
+    p = 6 - (n_width - trimmed)
+    if p > 6, do: 6, else: p
   end
 end

@@ -391,6 +391,11 @@ defmodule DateFormatTest.ParseDefault do
     assert ^now = Timex.parse!(formatted, format)
   end
 
+  test "roundtrip bug #318" do
+    {:ok, d} = Timex.parse("2017-06-27T08:32:55.80011111123333Z", "{ISO:Extended}")
+    assert "2017-06-27T08:32:55.800111+00:00" = Timex.format!(d, "{ISO:Extended}")
+  end
+
   defp parse(date, fmt) do
     Timex.parse(date, fmt)
   end
