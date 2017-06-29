@@ -2,6 +2,11 @@ defmodule ShiftTests do
   use ExUnit.Case, async: true
   use Timex
 
+  test "shift to invalid date" do
+    date = Timex.shift(~N[2015-06-29T12:00:00], months: -4)
+    assert ~N[2015-02-28T12:00:00] = date
+  end
+
   test "shift by year" do
     date = Timex.shift(Timex.epoch, years: 3)
     expected = ~D[1973-01-01]

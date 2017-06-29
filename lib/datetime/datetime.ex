@@ -326,6 +326,8 @@ defimpl Timex.Protocol, for: DateTime do
     # shifted to does not have that many days. We will handle this by shifting
     # the leftover days into the next month
     if :calendar.valid_date({shifted.year,shifted.month,shifted.day}) do
+      resolve_timezone_info(shifted)
+    else
       last_day = :calendar.last_day_of_the_month(shifted.year, shifted.month)
       shifted_year = shifted.year
       shifted_month = shifted.month
@@ -339,8 +341,6 @@ defimpl Timex.Protocol, for: DateTime do
           shifted_day > last_day && shifted_month == 12 ->
             %{shifted | :day => shifted_day - last_day, :month => 1, :year => shifted_year+1}
         end
-      resolve_timezone_info(shifted)
-    else
       resolve_timezone_info(shifted)
     end
   end
