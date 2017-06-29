@@ -12,7 +12,6 @@ defmodule DateFormatTest.FormatStrftime do
     date = Timex.to_datetime({2013,03,02})
 
     formatter = Timex.Format.DateTime.Formatters.Strftime
-    assert "2013-03-02" = formatter.format!(date, "%Y-%m-%d")
     assert_raise(Timex.Format.FormatError, fn ->
       formatter.format!(date, "%.")
     end)
@@ -231,10 +230,9 @@ defmodule DateFormatTest.FormatStrftime do
 
     assert { :ok, "4" }  = format(date, "%-I")
     assert { :ok, "04" } = format(date, "%I")
-    assert { :ok, "4" }  = format(date, "%-I")
-    assert { :ok, "04" } = format(date, "%I")
-    assert { :ok, "04" } = format(date, "%0I")
-    assert { :ok, " 4" } = format(date, "%_I")
+    assert { :ok, "04" }  = format(date, "%0I")
+    assert { :ok, "04" } = format(date, "%02I")
+    assert { :ok, " 4" } = format(date, "%_2I")
   end
 
   test "format %l" do
@@ -343,7 +341,7 @@ defmodule DateFormatTest.FormatStrftime do
     assert format(dt, "%B") == {:ok, "November"}
     assert format(dt, "%d") == {:ok, "03"}
     assert format(dt, "%e") == {:ok, " 3"}
-    assert format(dt, "%f") == {:ok, "123000"}
+    assert format(dt, "%f") == {:ok, "123"}
     assert format(dt, "%u") == {:ok, "1"}
     assert format(dt, "%w") == {:ok, "1"}
     assert format(dt_sunday, "%u") == {:ok, "7"}

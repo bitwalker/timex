@@ -75,7 +75,7 @@ defmodule DateFormatTest.ParseDefault do
     date2013_11 = Timex.to_naive_datetime({2013,11,8})
 
     assert {:ok, ^date2013_11} = parse("2013-11-08", "{YYYY}-{M}-{D}")
-    assert {:error, "Expected `1-2 digit month` at line 1, column 6."} = parse("2013- 1- 8", "{YYYY}-{0M}-{0D}")
+    assert {:error, "Expected `2 digit month` at line 1, column 6."} = parse("2013- 1- 8", "{YYYY}-{0M}-{0D}")
     assert {:ok, ^date2013_11} = parse("20131108", "{0YYYY}{0M}{0D}")
   end
 

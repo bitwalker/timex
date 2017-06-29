@@ -74,39 +74,39 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
   defp map_directive(directive, opts) do
     case directive do
       # Years/Centuries
-      "Y" -> set_width(1, 4, :year4, directive, opts)
-      "y" -> set_width(1, 2, :year2, directive, opts)
-      "C" -> set_width(1, 2, :century, directive, opts)
-      "G" -> set_width(1, 4, :iso_year4, directive, opts)
+      "Y" -> force_width(4, :year4, directive, opts)
+      "y" -> force_width(2, :year2, directive, opts)
+      "C" -> force_width(2, :century, directive, opts)
+      "G" -> force_width(4, :iso_year4, directive, opts)
       "g" -> force_width(2, :iso_year2, directive, opts)
       # Months
-      "m" -> set_width(1, 2, :month, directive, opts)
+      "m" -> force_width(2, :month, directive, opts)
       "B" -> Directive.get(:mfull, directive, opts)
       "b" -> Directive.get(:mshort, directive, opts)
       "h" -> Directive.get(:mshort, directive, opts)
       # Days
-      "d" -> set_width(1, 2, :day, directive, opts)
-      "e" -> set_width(1, 2, :day, directive, Keyword.merge(opts, flags: Keyword.merge([padding: :spaces], get_in(opts, [:flags]))))
-      "j" -> set_width(1, 3, :oday, directive, opts)
+      "d" -> force_width(2, :day, directive, opts)
+      "e" -> force_width(2, :day, directive, Keyword.merge(opts, flags: Keyword.merge([padding: :spaces], get_in(opts, [:flags]))))
+      "j" -> force_width(3, :oday, directive, opts)
       # Weeks
-      "V" -> set_width(1, 2, :iso_weeknum, directive, opts)
-      "W" -> set_width(1, 2, :week_mon, directive, opts)
-      "U" -> set_width(1, 2, :week_sun, directive, opts)
+      "V" -> force_width(2, :iso_weeknum, directive, opts)
+      "W" -> force_width(2, :week_mon, directive, opts)
+      "U" -> force_width(2, :week_sun, directive, opts)
       "u" -> Directive.get(:wday_mon, directive, opts)
       "w" -> Directive.get(:wday_sun, directive, opts)
       "a" -> Directive.get(:wdshort, directive, opts)
       "A" -> Directive.get(:wdfull, directive, opts)
       # Hours
       "H" -> force_width(2, :hour24, directive, opts)
-      "k" -> set_width(1, 2, :hour24, directive, Keyword.merge(opts, flags: Keyword.merge([padding: :spaces], get_in(opts, [:flags]))))
-      "I" -> set_width(1, 2, :hour12, directive, opts)
-      "l" -> set_width(1, 2, :hour12, directive, Keyword.merge(opts, flags: Keyword.merge([padding: :spaces], get_in(opts, [:flags]))))
+      "k" -> force_width(2, :hour24, directive, Keyword.merge(opts, flags: Keyword.merge([padding: :spaces], get_in(opts, [:flags]))))
+      "I" -> force_width(2, :hour12, directive, opts)
+      "l" -> force_width(2, :hour12, directive, Keyword.merge(opts, flags: Keyword.merge([padding: :spaces], get_in(opts, [:flags]))))
       "M" -> force_width(2, :min, directive, opts)
       "S" -> force_width(2, :sec, directive, opts)
       "s" -> Directive.get(:sec_epoch, directive, opts)
       "P" -> Directive.get(:am, directive, opts)
       "p" -> Directive.get(:AM, directive, opts)
-      "f" -> Directive.get(:us, directive, opts)
+      "f" -> Directive.get(:us, directive, Keyword.merge(opts, flags: Keyword.merge([padding: :zeroes], get_in(opts, [:flags]))))
       "L" -> force_width(3, :ms, directive, opts)
       # Timezones
       "Z"   -> Directive.get(:zname, directive, opts)
@@ -120,15 +120,12 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
       "r" -> Directive.get(:strftime_kitchen, directive, opts)
       "T" -> Directive.get(:strftime_iso_clock_full, directive, opts)
       "v" -> Directive.get(:strftime_iso_shortdate, directive, opts)
+      # Literals
+      "n" -> %Directive{value: "\n"}
+      "t" -> %Directive{value: "\t"}
     end
   end
 
-
-  defp set_width(min, max, type, directive, opts) do
-    flags = Keyword.merge([padding: :zeroes], get_in(opts, [:flags]))
-    opts = Keyword.merge(opts, [width: [min: min, max: max], flags: flags])
-    Directive.get(type, directive, opts)
-  end
 
   defp force_width(size, type, directive, opts) do
     flags     = Keyword.merge([padding: :zeroes], get_in(opts, [:flags]))

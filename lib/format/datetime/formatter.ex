@@ -538,12 +538,31 @@ defmodule Timex.Format.DateTime.Formatter do
     do: pad_numeric(sec, flags, width)
   def format_token(_locale, :sec, _date, _modifiers, flags, width),
     do: pad_numeric(0, flags, width)
-  def format_token(_locale, :sec_fractional, %{microsecond: {us, precision}}, _modifiers, _flags, _width) when precision > 0 do
-    padded = pad_numeric(us, [padding: :zeroes], width_spec(6..6))
-    ".#{:erlang.binary_part(padded, 0, precision)}"
+  def format_token(_locale, :sec_fractional, %{microsecond: {us, precision}}, _modifiers, _flags, width) when precision > 0 do
+    min_width =
+      case Keyword.get(width, :min) do
+        nil -> precision
+        n when n < 0 -> precision
+        n -> n
+      end
+    max_width =
+      case Keyword.get(width, :max) do
+        nil -> precision
+        n when n < min_width -> min_width
+        n -> n
+      end
+    padded = pad_numeric(us, [padding: :zeroes], width_spec(min_width..max_width))
+    ".#{padded}"
   end
-  def format_token(_locale, :sec_fractional, _date, _modifiers, _flags, _width),
-    do: ""
+  def format_token(_locale, :sec_fractional, _date, _modifiers, _flags, width) do
+    case Keyword.get(width, :min) do
+      n when is_integer(n) and n > 0 ->
+        padded = pad_numeric(0, [padding: :zeroes], width_spec(n..n))
+        ".#{padded}"
+      _ ->
+        ""
+    end
+  end
   def format_token(_locale, :sec_epoch, date, _modifiers, flags, width) do
     case get_in(flags, [:padding]) do
       padding when padding in [:zeroes, :spaces] ->
@@ -553,11 +572,20 @@ defmodule Timex.Format.DateTime.Formatter do
     end
   end
   def format_token(_locale, :us, %{microsecond: {us, precision}}, _modifiers, flags, width) do
-    p = cond do
-      width > precision -> precision
-      :else -> width
-    end
-    pad_numeric(us, flags, width_spec(p..p))
+    min =
+      case Keyword.get(width, :min) do
+        nil -> precision
+        n when n < 1 -> precision
+        n -> n
+      end
+    max =
+      case Keyword.get(width, :max) do
+        nil -> precision
+        n when n < 1 -> precision
+        n when n < min -> min
+        n -> n
+      end
+    pad_numeric(us, flags, width_spec(min..max))
   end
   def format_token(_locale, :us, _date, _modifiers, flags, width) do
     pad_numeric(0, flags, width)
@@ -650,14 +678,16 @@ defmodule Timex.Format.DateTime.Formatter do
   end
   defp pad_numeric(number_str, flags, [min: min_width, max: max_width]) do
     case get_in(flags, [:padding]) do
-      pad_type when pad_type in [nil, :none] -> number_str
+      pad_type when pad_type in [nil, :none] ->
+        number_str
       pad_type ->
-        len = String.length(number_str)
+        len = byte_size(number_str)
         cond do
-          min_width == -1 && max_width == nil  -> number_str
-          len < min_width && max_width == nil  -> String.duplicate(pad_char(pad_type), min_width - len) <> number_str
-          max_width != nil && len < max_width  -> String.duplicate(pad_char(pad_type), max_width - len) <> number_str
-          true                                 -> number_str
+          len == min_width                    -> number_str
+          min_width == -1 && max_width == nil -> number_str
+          len < min_width                     -> String.duplicate(pad_char(pad_type), min_width - len) <> number_str
+          len > min_width && len > max_width  -> binary_part(number_str, 0, max_width)
+          len > min_width                     -> number_str
         end
     end
   end

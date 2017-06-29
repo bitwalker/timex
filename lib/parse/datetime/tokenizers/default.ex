@@ -149,8 +149,14 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
   end
 
   defp set_width(min, max, type, directive, opts) do
-    opts = Keyword.merge(opts, [width: [min: min, max: max]])
-    Directive.get(type, directive, opts)
+    case get_in(opts, [:flags, :padding]) do
+      pad_type when pad_type in [nil, :none] ->
+        opts = Keyword.merge(opts, [width: [min: min, max: max]])
+        Directive.get(type, directive, opts)
+      pad_type when pad_type in [:spaces, :zeroes] ->
+        opts = Keyword.merge(opts, [width: [min: max, max: max]])
+        Directive.get(type, directive, opts)
+    end
   end
 
   defp force_width(size, type, directive, opts) do

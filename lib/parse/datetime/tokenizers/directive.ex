@@ -27,7 +27,8 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
   """
   @spec get(atom, String.t, [{atom, term}] | []) :: Directive.t
   def get(type, directive, opts \\ []) do
-    width     = Keyword.get(opts, :width, [min: 1, max: nil])
+    min_width = Keyword.get(opts, :min_width, -1)
+    width     = Keyword.get(opts, :width, [min: min_width, max: nil])
     flags     = Keyword.merge(Keyword.get(opts, :flags, []), width)
     modifiers = Keyword.get(opts, :modifiers, [])
     get(type, directive, flags, modifiers, width)
