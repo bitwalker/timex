@@ -215,6 +215,19 @@ defmodule TimexTests do
     assert Timex.compare(date3, date4, :seconds) === -1
   end
 
+  test "before?/after?" do
+    now = Timex.now()
+    assert false == Timex.before?(now, now)
+    assert false == Timex.after?(now, now)
+    assert true == Timex.before?(Timex.epoch, now)
+    assert false == Timex.after?(Timex.epoch, now)
+
+    assert true == Timex.before?({{2013, 1, 1}, {1, 1, 1}}, {{2013, 1, 1}, {1, 1, 2}})
+    assert true == Timex.after?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 1}})
+    assert {:error, :invalid_date} == Timex.before?({}, {{2013, 1, 1}, {1, 1, 2}})
+    assert {:error, :invalid_date} == Timex.after?({{2013, 1, 1}, {1, 1, 2}}, {})
+  end
+
   test "equal" do
     assert Timex.equal?(Timex.today, Timex.today)
     refute Timex.equal?(Timex.today, Timex.epoch)
