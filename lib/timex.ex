@@ -1518,6 +1518,7 @@ defmodule Timex do
   """
   @spec normalize(:date, {integer,integer,integer}) :: Types.date
   @spec normalize(:time, {integer,integer,integer} | {integer,integer,integer,integer}) :: Types.time
+  @spec normalize(:day, {integer,integer,integer}) :: non_neg_integer
   @spec normalize(:year | :month | :day | :hour | :minute | :second | :millisecond | :microsecond, integer) :: non_neg_integer
   def normalize(:date, {year, month, day}) do
     year  = normalize(:year, year)
@@ -1583,7 +1584,9 @@ defmodule Timex do
   def normalize(:day, {year, month, day}) do
     year  = normalize(:year, year)
     month = normalize(:month, month)
-    ndays = Timex.days_in_month(year, month)
+    ndays = case Timex.days_in_month(year, month) do
+      n when is_integer(n) -> n
+    end
     cond do
       day < 1     -> 1
       day > ndays -> ndays

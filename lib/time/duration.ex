@@ -259,6 +259,7 @@ defmodule Timex.Duration do
       1
   """
   @spec to_hours(__MODULE__.t) :: float
+  @spec to_hours(__MODULE__.t, to_options) :: float | integer
   def to_hours(%__MODULE__{} = d),   do: to_microseconds(d) / (1_000*1_000*60*60)
   def to_hours(%__MODULE__{} = d, [truncate: true]), do: trunc(to_hours(d))
   def to_hours(%__MODULE__{} = d, _opts),            do: to_hours(d)
@@ -274,6 +275,7 @@ defmodule Timex.Duration do
       1
   """
   @spec to_days(__MODULE__.t) :: float
+  @spec to_days(__MODULE__.t, to_options) :: float | integer
   def to_days(%__MODULE__{} = d),   do: to_microseconds(d) / (1_000*1_000*60*60*24)
   def to_days(%__MODULE__{} = d, [truncate: true]), do: trunc(to_days(d))
   def to_days(%__MODULE__{} = d, _opts),            do: to_days(d)
@@ -289,6 +291,7 @@ defmodule Timex.Duration do
       1
   """
   @spec to_weeks(__MODULE__.t) :: float
+  @spec to_weeks(__MODULE__.t, to_options) :: float | integer
   def to_weeks(%__MODULE__{} = d),   do: to_microseconds(d) / (1_000*1_000*60*60*24*7)
   def to_weeks(%__MODULE__{} = d, [truncate: true]), do: trunc(to_weeks(d))
   def to_weeks(%__MODULE__{} = d, _opts),            do: to_weeks(d)
@@ -500,7 +503,7 @@ defmodule Timex.Duration do
   """
   @spec epoch() :: __MODULE__.t
   def epoch() do
-    from_seconds(epoch(:seconds))
+    epoch(nil)
   end
 
   @doc """
@@ -528,7 +531,8 @@ defmodule Timex.Duration do
       iex> Timex.Duration.epoch(nil)
       %Timex.Duration{megaseconds: 62_167, seconds: 219_200, microseconds: 0}
   """
-  @spec epoch(units) :: __MODULE__.t
+  @spec epoch(nil) :: __MODULE__.t
+  @spec epoch(units) :: non_neg_integer
   def epoch(type) do
     seconds = :calendar.datetime_to_gregorian_seconds({{1970,1,1}, {0,0,0}})
     case type do
@@ -569,6 +573,7 @@ defmodule Timex.Duration do
       %Timex.Duration{megaseconds: 1483, seconds: 141562, microseconds: 536938}
   """
   @spec now() :: __MODULE__.t
+  @spec now(nil) :: __MODULE__.t
   @spec now(units) :: non_neg_integer
   def now(type \\ nil)
 

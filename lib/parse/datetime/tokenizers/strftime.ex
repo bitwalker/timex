@@ -27,7 +27,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
   @doc """
   Applies a given token + value to the DateTime represented by the current input string.
   """
-  @spec apply(DateTime.t, atom, term) :: {:ok, DateTime.t} | {:error, term} | :unrecognized
+  @spec apply(DateTime.t, atom, term) :: DateTime.t | {:error, term} | :unrecognized
   def apply(_, _, _), do: :unrecognized
 
   defp flags(),     do: map(one_of(char(), ["-", "0", "_"]), &map_flag/1)

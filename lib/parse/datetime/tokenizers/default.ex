@@ -28,7 +28,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
   @doc """
   Applies a given token + value to the DateTime represented by the current input string.
   """
-  @spec apply(DateTime.t, atom, term) :: {:ok, DateTime.t} | {:error, term} | :unrecognized
+  @spec apply(DateTime.t, atom, term) :: DateTime.t | {:error, term} | :unrecognized
   def apply(_, _, _), do: :unrecognized
 
   @spec directives() :: (Combine.ParserState.t -> Combine.ParserState.t)
