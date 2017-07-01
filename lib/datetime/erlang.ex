@@ -4,7 +4,7 @@ defimpl Timex.Protocol, for: Tuple do
 
   @epoch :calendar.datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}})
 
-  @spec to_julian(Types.date | Types.datetime) :: integer
+  @spec to_julian(Types.date | Types.datetime) :: float | {:error, term}
   def to_julian({y,m,d}) when is_date(y,m,d) do
     Timex.Calendar.Julian.julian_date(y, m, d)
   end
@@ -13,7 +13,7 @@ defimpl Timex.Protocol, for: Tuple do
   end
   def to_julian(_), do: {:error, :invalid_date}
 
-  @spec to_gregorian_seconds(Types.date | Types.datetime) :: integer
+  @spec to_gregorian_seconds(Types.date | Types.datetime) :: non_neg_integer
   def to_gregorian_seconds({y,m,d} = date) when is_date(y,m,d),
     do: :calendar.datetime_to_gregorian_seconds({date,{0,0,0}})
   def to_gregorian_seconds({{y,m,d},{h,mm,s}} = dt) when is_datetime(y,m,d,h,mm,s),
@@ -22,7 +22,7 @@ defimpl Timex.Protocol, for: Tuple do
     do: :calendar.datetime_to_gregorian_seconds({{y,m,d},{h,mm,s}})
   def to_gregorian_seconds(_), do: {:error, :invalid_date}
 
-  @spec to_gregorian_microseconds(Types.date | Types.datetime) :: integer
+  @spec to_gregorian_microseconds(Types.date | Types.datetime) :: non_neg_integer
   def to_gregorian_microseconds({y,m,d} = date) when is_date(y,m,d),
     do: (to_gregorian_seconds(date)*(1_000*1_000))
   def to_gregorian_microseconds({{y,m,d},{h,mm,s}} = date) when is_datetime(y,m,d,h,mm,s),
@@ -31,7 +31,7 @@ defimpl Timex.Protocol, for: Tuple do
     do: (to_gregorian_seconds(date)*(1_000*1_000))+us
   def to_gregorian_microseconds(_), do: {:error, :invalid_date}
 
-  @spec to_unix(Types.date | Types.datetime) :: integer
+  @spec to_unix(Types.date | Types.datetime) :: non_neg_integer
   def to_unix({y,m,d} = date) when is_date(y,m,d),
     do: (:calendar.datetime_to_gregorian_seconds({date,{0,0,0}}) - @epoch)
   def to_unix({{y,m,d},{h,mm,s}} = dt) when is_datetime(y,m,d,h,mm,s),
@@ -124,7 +124,7 @@ defimpl Timex.Protocol, for: Tuple do
         shift(date, [days: days_to_end])
     end
   end
-  def end_of_week({{y,m,d} = date,_}, weekstart) when is_date(y,m,d) do
+  def end_of_week({{y,m,d},_} = date, weekstart) when is_date(y,m,d) do
     case Timex.days_to_end_of_week(date, weekstart) do
       {:error, _} = err -> err
       days_to_end ->
@@ -152,13 +152,13 @@ defimpl Timex.Protocol, for: Tuple do
     month = 1 + (3 * (Timex.quarter(m) - 1))
     {y,month,1}
   end
-  def beginning_of_quarter({{y,m,d},{h,mm,s} = time}) when is_datetime(y,m,d,h,mm,s) do
+  def beginning_of_quarter({{y,m,d},{h,mm,s} = _time}) when is_datetime(y,m,d,h,mm,s) do
     month = 1 + (3 * (Timex.quarter(m) - 1))
-    {{y,month,1},time}
+    {{y,month,1},{0,0,0}}
   end
-  def beginning_of_quarter({{y,m,d},{h,mm,s,_us} = time}) when is_datetime(y,m,d,h,mm,s) do
+  def beginning_of_quarter({{y,m,d},{h,mm,s,_us} = _time}) when is_datetime(y,m,d,h,mm,s) do
     month = 1 + (3 * (Timex.quarter(m) - 1))
-    {{y,month,1},time}
+    {{y,month,1},{0,0,0,0}}
   end
   def beginning_of_quarter(_), do: {:error, :invalid_date}
 
@@ -191,7 +191,7 @@ defimpl Timex.Protocol, for: Tuple do
     do: {{y,m,days_in_month(date)},{23,59,59}}
   def end_of_month(_), do: {:error, :invalid_date}
 
-  @spec quarter(Types.date | Types.datetime) :: integer
+  @spec quarter(Types.date | Types.datetime) :: 1..4
   def quarter({y,m,d}) when is_date(y,m,d), do: Timex.quarter(m)
   def quarter({{y,m,d},_}) when is_date(y,m,d), do: Timex.quarter(m)
   def quarter(_), do: {:error, :invalid_date}

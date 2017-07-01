@@ -9,18 +9,18 @@ defimpl Timex.Protocol, for: Date do
 
   @epoch_seconds :calendar.datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}})
 
-  @spec to_julian(Date.t) :: integer
+  @spec to_julian(Date.t) :: float
   def to_julian(%Date{:year => y, :month => m, :day => d}) do
     Timex.Calendar.Julian.julian_date(y, m, d)
   end
 
-  @spec to_gregorian_seconds(Date.t) :: integer
+  @spec to_gregorian_seconds(Date.t) :: non_neg_integer
   def to_gregorian_seconds(date), do: to_seconds(date, :zero)
 
-  @spec to_gregorian_microseconds(Date.t) :: integer
+  @spec to_gregorian_microseconds(Date.t) :: non_neg_integer
   def to_gregorian_microseconds(date), do: (to_seconds(date, :zero) * (1_000*1_000))
 
-  @spec to_unix(Date.t) :: integer
+  @spec to_unix(Date.t) :: non_neg_integer
   def to_unix(date), do: trunc(to_seconds(date, :epoch))
 
   @spec to_date(Date.t) :: Date.t
@@ -78,7 +78,7 @@ defimpl Timex.Protocol, for: Date do
 
   @spec beginning_of_quarter(Date.t) :: Date.t
   def beginning_of_quarter(%Date{month: month} = date) do
-    month = 1 + (3 * (quarter(month) - 1))
+    month = 1 + (3 * (Timex.quarter(month) - 1))
     %{date | :month => month, :day => 1}
   end
 
@@ -96,7 +96,7 @@ defimpl Timex.Protocol, for: Date do
   def end_of_month(%Date{} = date),
     do: %{date | :day => days_in_month(date)}
 
-  @spec quarter(Date.t) :: integer
+  @spec quarter(Date.t) :: 1..4
   def quarter(%Date{month: month}), do: Timex.quarter(month)
 
   def days_in_month(%Date{:year => y, :month => m}), do: Timex.days_in_month(y, m)
@@ -115,9 +115,9 @@ defimpl Timex.Protocol, for: Date do
   def iso_week(%Date{:year => y, :month => m, :day => d}),
     do: Timex.iso_week(y, m, d)
 
-  def from_iso_day(%Date{year: year} = date, day) when is_day_of_year(day) do
+  def from_iso_day(%Date{year: year}, day) when is_day_of_year(day) do
     {year, month, day_of_month} = Timex.Helpers.iso_day_to_date_tuple(year, day)
-    %{date | :year => year, :month => month, :day => day_of_month}
+    %Date{year: year, month: month, day: day_of_month}
   end
 
   @doc """

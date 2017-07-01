@@ -71,6 +71,15 @@ defmodule TimexTests do
     assert Timex.iso_triplet(Timex.epoch()) === {1970,1,4}
   end
 
+  test "from_iso_day" do
+    localdate = {{2016,3,17},{11,59,10}}
+    expected = {{2016,2,29},{11,59,10}}
+    assert Timex.from_iso_day(60, localdate) === expected
+    assert Timex.from_iso_day(60, Timex.to_datetime(localdate)) === Timex.to_datetime(expected)
+    assert Timex.from_iso_day(60, Timex.to_date(localdate)) === Timex.to_date(expected)
+    assert Timex.from_iso_day(60, Timex.to_naive_datetime(localdate)) === Timex.to_naive_datetime(expected)
+  end
+
   describe "from_iso_triplet" do
     test "first day of first iso week is first day of the year" do
       assert Timex.from_iso_triplet({2001, 1, 1}) === Timex.to_date({2001, 1, 1})
@@ -349,6 +358,7 @@ defmodule TimexTests do
     assert Timex.beginning_of_quarter({2016,5,15}) == {2016,4,1}
     assert Timex.beginning_of_quarter({2016,8,15}) == {2016,7,1}
     assert Timex.beginning_of_quarter({2016,11,15}) == {2016,10,1}
+    assert {2016,3,15} |> Timex.to_date() |> Timex.beginning_of_quarter() == Timex.to_date({2016, 1, 1})
 
     assert {:error, :invalid_date} = Timex.beginning_of_quarter("Made up date")
     assert {:error, :invalid_date} = Timex.beginning_of_quarter(nil)
@@ -559,5 +569,30 @@ defmodule TimexTests do
 
     assert {:error, :invalid_date} == Timex.end_of_day({"Made up date"})
     assert {:error, :invalid_date} == Timex.end_of_day(nil)
+  end
+
+  test "start and end for all types" do
+    datetime = Timex.now()
+
+    for type_fn <- [:to_datetime, :to_date, :to_naive_datetime, :to_erl],
+      modifier_fn_base <- ["day", "week", "month", "quarter", "year"],
+      start_or_end <- ["beginning", "end"] do
+        modifier_fn = String.to_atom("#{start_or_end}_of_#{modifier_fn_base}")
+
+        datetime_result = apply(Timex, modifier_fn, [datetime])
+
+        # should always set the clock to the first or last second in the given date
+        case start_or_end do
+          "beginning" -> assert {_, {0, 0, 0}} = Timex.to_erl(datetime_result)
+          "end" -> assert {_, {23, 59, 59}} = Timex.to_erl(datetime_result)
+        end
+
+        # should return the same value for each implementation
+        expected_result = apply(Timex, type_fn, [datetime_result])
+        input = apply(Timex, type_fn, [datetime])
+        result = apply(Timex, modifier_fn, [input])
+        assert expected_result == result,
+          "#{modifier_fn} for #{type_fn}:\n#{inspect(expected_result)} should equal #{inspect(result)}"
+    end
   end
 end
