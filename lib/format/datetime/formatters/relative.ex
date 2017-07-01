@@ -64,7 +64,7 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
     end
   end
 
-  @spec lformat(Types.calendar_types, String.t, String.t) :: String.t | no_return
+  @spec lformat!(Types.calendar_types, String.t, String.t) :: String.t | no_return
   def lformat!(date, format_string, locale) do
     case lformat(date, format_string, locale) do
       {:ok, result}    -> result
@@ -92,7 +92,6 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
   @year @month * 12
 
   defp do_format(_locale, _date, _relative, [], result),             do: {:ok, result}
-  defp do_format(_locale, _date, _relative, _, {:error, _} = error), do: error
   defp do_format(locale, date, relative, [%Directive{type: :literal, value: char} | dirs], result) when is_binary(char) do
     do_format(locale, date, relative, dirs, <<result::binary, char::binary>>)
   end
