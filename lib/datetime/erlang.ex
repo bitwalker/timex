@@ -240,11 +240,11 @@ defimpl Timex.Protocol, for: Tuple do
   def from_iso_day(_,_), do: {:error, :invalid_date}
 
   @spec set(Types.date | Types.datetime, list({atom(), term})) :: Types.date | Types.datetime | {:error, term}
-  def set({y,m,d} = d, options) when is_date(y,m,d),
-    do: do_set({d,{0,0,0}}, options, :date)
-  def set({{y,m,d},{h,mm,s}} = d, options) when is_datetime(y,m,d,h,mm,s),
-    do: do_set(d, options, :datetime)
-  def set({{y,m,d},{h,mm,s,us}} = d, options) when is_datetime(y,m,d,h,mm,s) do
+  def set({y,m,d} = date, options) when is_date(y,m,d),
+    do: do_set({date,{0,0,0}}, options, :date)
+  def set({{y,m,d},{h,mm,s}} = datetime, options) when is_datetime(y,m,d,h,mm,s),
+    do: do_set(datetime, options, :datetime)
+  def set({{y,m,d},{h,mm,s,us}}, options) when is_datetime(y,m,d,h,mm,s) do
     {date,{h,mm,s}} = do_set({{y,m,d},{h,mm,s}}, options, :datetime)
     {date,{h,mm,s,us}}
   end

@@ -171,6 +171,7 @@ defmodule TimexTests do
 
     assert {{1,1,1},{13,26,59}} == Timex.to_erl(Timex.set(date, [date: {1,1,1}, hour: 13, second: 61, timezone: utc]))
     assert {{0,1,1},{23,26,59}} == Timex.to_erl(Timex.set(date, [date: {-1,-2,-3}, hour: 33, second: 61, timezone: utc]))
+    assert {{0,1,1},{23,26,59}} == Timex.to_erl(Timex.set(Timex.to_erl(date), [date: {-1,-2,-3}, hour: 33, second: 61, timezone: utc]))
   end
 
   test "compare" do
