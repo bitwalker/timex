@@ -131,6 +131,9 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
     digit >= ?0 and digit <= ?9 do
       parse_fractional_seconds(rest, count+1, <<acc::binary,digit::utf8>>)
   end
+  def parse_fractional_seconds(_rest, count, "") do
+    {:error, "Expected at least one digit after the decimal sign, but found none", count}
+  end
   def parse_fractional_seconds(rest, count, acc) do
     {:ok, acc, count, rest}
   end

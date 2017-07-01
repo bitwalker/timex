@@ -334,6 +334,7 @@ defmodule DateFormatTest.ParseDefault do
     assert {:ok, ^date1} = parse("2014-08-14T12:34:33+00", "{ISO:Extended}")
     assert {:ok, ^date1} = parse("2014-08-14T12:34:33Z", "{ISO:Extended}")
     assert {:ok, ^date1} = parse("2014-08-14T12:34:33Z", "{ISO:Extended:Z}")
+    assert {:error, "Expected at least one digit" <> _} = parse("2014-08-14T12:34:33.Z", "{ISO:Extended}")
 
     assert {:ok, ^date2} = parse("2014-08-14T12:34:33.199+00:00", "{ISO:Extended}")
     assert {:ok, ^date2} = parse("2014-08-14T12:34:33.199+0000", "{ISO:Extended}")
