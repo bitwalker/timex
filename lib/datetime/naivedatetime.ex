@@ -12,21 +12,21 @@ defimpl Timex.Protocol, for: NaiveDateTime do
     Timex.to_naive_datetime(Timex.from_unix(:os.system_time, :native))
   end
 
-  @spec to_julian(NaiveDateTime.t) :: integer
+  @spec to_julian(NaiveDateTime.t) :: float
   def to_julian(%NaiveDateTime{:year => y, :month => m, :day => d}) do
     Timex.Calendar.Julian.julian_date(y, m, d)
   end
 
-  @spec to_gregorian_seconds(NaiveDateTime.t) :: integer
+  @spec to_gregorian_seconds(NaiveDateTime.t) :: non_neg_integer
   def to_gregorian_seconds(date), do: to_seconds(date, :zero)
 
-  @spec to_gregorian_microseconds(NaiveDateTime.t) :: integer
+  @spec to_gregorian_microseconds(NaiveDateTime.t) :: non_neg_integer
   def to_gregorian_microseconds(%NaiveDateTime{microsecond: {us,_}} = date) do
     s = to_seconds(date, :zero)
     (s*(1_000*1_000))+us
   end
 
-  @spec to_unix(NaiveDateTime.t) :: integer
+  @spec to_unix(NaiveDateTime.t) :: non_neg_integer
   def to_unix(date), do: trunc(to_seconds(date, :epoch))
 
   @spec to_date(NaiveDateTime.t) :: Date.t
@@ -108,7 +108,7 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   def end_of_month(%NaiveDateTime{} = date),
     do: %{date | :day => days_in_month(date), :hour => 23, :minute => 59, :second => 59, :microsecond => {999_999, 6}}
 
-  @spec quarter(NaiveDateTime.t) :: integer
+  @spec quarter(NaiveDateTime.t) :: 1..4
   def quarter(%NaiveDateTime{month: month}), do: Timex.quarter(month)
 
   def days_in_month(%NaiveDateTime{:year => y, :month => m}), do: Timex.days_in_month(y, m)

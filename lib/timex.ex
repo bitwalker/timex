@@ -98,13 +98,13 @@ defmodule Timex do
   @doc """
   Convert a date/time value to a Date struct.
   """
-  @spec to_date(Types.calendar_types | Types.date | Types.datetime) :: Date.t
+  @spec to_date(Types.valid_datetime) :: Date.t | {:error, term}
   defdelegate to_date(date), to: Timex.Protocol
 
   @doc """
   Convert a date/time value to a NaiveDateTime struct.
   """
-  @spec to_naive_datetime(Types.calendar_types | Types.date | Types.datetime) :: NaiveDateTime.t
+  @spec to_naive_datetime(Types.valid_datetime) :: NaiveDateTime.t | {:error, term}
   defdelegate to_naive_datetime(date), to: Timex.Protocol
 
   @doc """
@@ -114,8 +114,8 @@ defmodule Timex do
 
   If no timezone is provided, "Etc/UTC" will be used
   """
-  @spec to_datetime(Types.calendar_types | Types.date | Types.datetime) :: DateTime.t | {:error, term}
-  @spec to_datetime(Types.calendar_types | Types.date | Types.datetime, Types.valid_timezone) ::
+  @spec to_datetime(Types.valid_datetime) :: DateTime.t | {:error, term}
+  @spec to_datetime(Types.valid_datetime, Types.valid_timezone) ::
     DateTime.t | AmbiguousDateTime.t | {:error, term}
   def to_datetime(from), do: Timex.Protocol.to_datetime(from, "Etc/UTC")
   defdelegate to_datetime(from, timezone), to: Timex.Protocol
@@ -128,13 +128,13 @@ defmodule Timex do
   @doc """
   Convert a date/time value to it's Erlang representation
   """
-  @spec to_date(Types.valid_datetime) :: Types.date | Types.datetime
+  @spec to_erl(Types.valid_datetime) :: Types.date | Types.datetime | {:error, term}
   defdelegate to_erl(date), to: Timex.Protocol
 
   @doc """
   Convert a date/time value to a Julian calendar date number
   """
-  @spec to_julian(Types.valid_datetime) :: integer
+  @spec to_julian(Types.valid_datetime) :: integer | {:error, term}
   defdelegate to_julian(datetime), to: Timex.Protocol
 
   @doc """
@@ -466,7 +466,7 @@ defmodule Timex do
       21
 
   """
-  @spec century() :: non_neg_integer
+  @spec century() :: non_neg_integer | {:error, term}
   def century(), do: century(:calendar.universal_time())
 
   @doc """
@@ -482,7 +482,7 @@ defmodule Timex do
       21
 
   """
-  @spec century(Types.year | Types.valid_datetime) :: non_neg_integer
+  @spec century(Types.year | Types.valid_datetime) :: non_neg_integer | {:error, term}
   def century(year) when is_integer(year) do
     base_century = div(year, 100)
     years_past   = rem(year, 100)
@@ -667,7 +667,7 @@ defmodule Timex do
       {"Etc/GMT-2", "+02"}
 
   """
-  @spec timezone(Types.valid_timezone, Convertable.t) ::
+  @spec timezone(Types.valid_timezone, Types.valid_datetime) ::
     TimezoneInfo.t | AmbiguousTimezoneInfo.t | {:error, term}
   def timezone(:utc, _),      do: %TimezoneInfo{}
   def timezone("UTC", _),     do: %TimezoneInfo{}
@@ -706,7 +706,7 @@ defmodule Timex do
       false
 
   """
-  @spec is_valid?(Convertable.t) :: boolean
+  @spec is_valid?(Types.valid_datetime) :: boolean | {:error, term}
   defdelegate is_valid?(datetime), to: Timex.Protocol
 
   @doc """
@@ -1401,7 +1401,7 @@ defmodule Timex do
   Add time to a date using a Duration
   Same as `shift(date, Duration.from_minutes(5), :duration)`.
   """
-  @spec add(Convertable.t, Duration.t) ::
+  @spec add(Types.valid_datetime, Duration.t) ::
     Types.valid_datetime | AmbiguousDateTime.t | {:error, term}
   def add(date, %Duration{megaseconds: mega, seconds: sec, microseconds: micro}),
     do: shift(date, [seconds: (mega * @million) + sec, microseconds: micro])
@@ -1410,7 +1410,7 @@ defmodule Timex do
   Subtract time from a date using a Duration
   Same as `shift(date, Duration.from_minutes(5) |> Duration.invert, :timestamp)`.
   """
-  @spec subtract(Convertable.t, Types.timestamp) ::
+  @spec subtract(Types.valid_datetime, Duration.t) ::
     Types.valid_datetime | AmbiguousDateTime.t | {:error, term}
   def subtract(date, %Duration{megaseconds: mega, seconds: sec, microseconds: micro}),
     do: shift(date, [seconds: (-mega * @million) - sec, microseconds: -micro])

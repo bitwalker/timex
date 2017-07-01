@@ -18,21 +18,21 @@ defimpl Timex.Protocol, for: DateTime do
 
   @epoch_seconds :calendar.datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}})
 
-  @spec to_julian(DateTime.t) :: integer
+  @spec to_julian(DateTime.t) :: float
   def to_julian(%DateTime{:year => y, :month => m, :day => d}) do
     Timex.Calendar.Julian.julian_date(y, m, d)
   end
 
-  @spec to_gregorian_seconds(DateTime.t) :: integer
+  @spec to_gregorian_seconds(DateTime.t) :: non_neg_integer
   def to_gregorian_seconds(date), do: to_seconds(date, :zero)
 
-  @spec to_gregorian_microseconds(DateTime.t) :: integer
+  @spec to_gregorian_microseconds(DateTime.t) :: non_neg_integer
   def to_gregorian_microseconds(%DateTime{microsecond: {us,_}} = date) do
     s = to_seconds(date, :zero)
     (s*(1_000*1_000))+us
   end
 
-  @spec to_unix(DateTime.t) :: integer
+  @spec to_unix(DateTime.t) :: non_neg_integer
   def to_unix(date), do: trunc(to_seconds(date, :epoch))
 
   @spec to_date(DateTime.t) :: Date.t
@@ -132,7 +132,7 @@ defimpl Timex.Protocol, for: DateTime do
   def end_of_month(%DateTime{year: year, month: month, time_zone: tz} = date),
     do: Timex.DateTime.Helpers.construct({{year, month, days_in_month(date)},{23,59,59,999_999}}, tz)
 
-  @spec quarter(DateTime.t) :: integer
+  @spec quarter(DateTime.t) :: 1..4
   def quarter(%DateTime{month: month}), do: Timex.quarter(month)
 
   def days_in_month(%DateTime{:year => y, :month => m}), do: Timex.days_in_month(y, m)
