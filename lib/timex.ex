@@ -27,7 +27,7 @@ defmodule Timex do
   alias Timex.{Duration, AmbiguousDateTime}
   alias Timex.{Timezone, TimezoneInfo, AmbiguousTimezoneInfo}
   alias Timex.{Types, Helpers, Translator}
-  alias Timex.{Convertable, Comparable}
+  alias Timex.{Comparable}
 
   use Timex.Constants
   import Timex.Macros
@@ -178,7 +178,8 @@ defmodule Timex do
   can either alias and pass Strftime by module name, or as a shortcut, you can pass :strftime
   instead.
 
-  Formatting uses the Convertable protocol to convert non-DateTime structs to DateTime structs.
+  Formatting will convert other dates than Elixir date types (Date, DateTime, NaiveDateTime)
+  to a NaiveDateTime using `to_naive_datetime/1` before formatting.
 
   ## Examples
 
@@ -190,7 +191,7 @@ defmodule Timex do
       ...> Timex.format!(datetime, "{ISO:Extended}")
       "2016-02-29T22:25:00+00:00"
   """
-  @spec format(Convertable.t, format :: String.t) :: {:ok, String.t} | {:error, term}
+  @spec format(Types.valid_datetime, format :: String.t) :: {:ok, String.t} | {:error, term}
   defdelegate format(datetime, format_string), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -203,7 +204,7 @@ defmodule Timex do
       iex> Timex.format!(datetime, "%FT%T%:z", :strftime)
       "2016-02-29T22:25:00-06:00"
   """
-  @spec format(Convertable.t, format :: String.t, formatter :: atom) ::
+  @spec format(Types.valid_datetime, format :: String.t, formatter :: atom) ::
     {:ok, String.t} | {:error, term}
   defdelegate format(datetime, format_string, formatter), to: Timex.Format.DateTime.Formatter
 
@@ -213,7 +214,7 @@ defmodule Timex do
   Translations only apply to units, relative time phrases, and only for the locales in the
   list of supported locales in the Timex documentation.
   """
-  @spec lformat(Convertable.t, format :: String.t, locale :: String.t) ::
+  @spec lformat(Types.valid_datetime, format :: String.t, locale :: String.t) ::
     {:ok, String.t} | {:error, term}
   defdelegate lformat(datetime, format_string, locale), to: Timex.Format.DateTime.Formatter
 
@@ -223,7 +224,7 @@ defmodule Timex do
   Translations only apply to units, relative time phrases, and only for the locales in the
   list of supported locales in the Timex documentation.
   """
-  @spec lformat(Convertable.t, format :: String.t, locale :: String.t, formatter :: atom) ::
+  @spec lformat(Types.valid_datetime, format :: String.t, locale :: String.t, formatter :: atom) ::
      {:ok, String.t} | {:error, term}
   defdelegate lformat(datetime, format_string, locale, formatter),
     to: Timex.Format.DateTime.Formatter
@@ -233,7 +234,7 @@ defmodule Timex do
 
   See format/2 docs for usage examples.
   """
-  @spec format!(Convertable.t, format :: String.t) :: String.t | no_return
+  @spec format!(Types.valid_datetime, format :: String.t) :: String.t | no_return
   defdelegate format!(datetime, format_string), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -241,7 +242,7 @@ defmodule Timex do
 
   See format/3 docs for usage examples
   """
-  @spec format!(Convertable.t, format :: String.t, formatter :: atom) :: String.t | no_return
+  @spec format!(Types.valid_datetime, format :: String.t, formatter :: atom) :: String.t | no_return
   defdelegate format!(datetime, format_string, formatter), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -249,7 +250,7 @@ defmodule Timex do
 
   See lformat/3 docs for usage examples.
   """
-  @spec lformat!(Convertable.t, format :: String.t, locale :: String.t) :: String.t | no_return
+  @spec lformat!(Types.valid_datetime, format :: String.t, locale :: String.t) :: String.t | no_return
   defdelegate lformat!(datetime, format_string, locale), to: Timex.Format.DateTime.Formatter
 
   @doc """
@@ -257,7 +258,7 @@ defmodule Timex do
 
   See lformat/4 docs for usage examples
   """
-  @spec lformat!(Convertable.t, format :: String.t, locale :: String.t, formatter :: atom) ::
+  @spec lformat!(Types.valid_datetime, format :: String.t, locale :: String.t, formatter :: atom) ::
     String.t | no_return
   defdelegate lformat!(datetime, format_string, locale, formatter),
     to: Timex.Format.DateTime.Formatter
@@ -276,7 +277,7 @@ defmodule Timex do
       ...> Timex.from_now(Timex.shift(DateTime.utc_now(), days: -2))
       "2 days ago"
   """
-  @spec from_now(Convertable.t) :: String.t | {:error, term}
+  @spec from_now(Types.valid_datetime) :: String.t | {:error, term}
   def from_now(datetime), do: from_now(datetime, Timex.Translator.default_locale)
 
   @doc """
@@ -308,7 +309,7 @@ defmodule Timex do
   @doc """
   Formats a DateTime using a fuzzy relative duration, with a reference datetime other than now
   """
-  @spec from_now(Convertable.t, Convertable.t) :: String.t | {:error, term}
+  @spec from_now(Types.valid_datetime, Types.valid_datetime) :: String.t | {:error, term}
   def from_now(datetime, reference_date),
     do: from_now(datetime, reference_date, Timex.Translator.default_locale)
 
@@ -361,28 +362,28 @@ defmodule Timex do
       "46 years, 2 months, 1 week, 3 days, 22 hours, 25 minutes"
 
   """
-  @spec format_duration(Types.timestamp) :: String.t | {:error, term}
+  @spec format_duration(Duration.t) :: String.t | {:error, term}
   defdelegate format_duration(timestamp),
     to: Timex.Format.Duration.Formatter, as: :format
 
   @doc """
   Same as format_duration/1, except it also accepts a formatter
   """
-  @spec format_duration(Types.timestamp, atom) :: String.t | {:error, term}
+  @spec format_duration(Duration.t, atom) :: String.t | {:error, term}
   defdelegate format_duration(timestamp, formatter),
     to: Timex.Format.Duration.Formatter, as: :format
 
   @doc """
   Same as format_duration/1, except takes a locale for use in translation
   """
-  @spec lformat_duration(Types.timestamp, locale :: String.t) :: String.t | {:error, term}
+  @spec lformat_duration(Duration.t, locale :: String.t) :: String.t | {:error, term}
   defdelegate lformat_duration(timestamp, locale),
     to: Timex.Format.Duration.Formatter, as: :lformat
 
   @doc """
   Same as lformat_duration/2, except takes a formatter as an argument
   """
-  @spec lformat_duration(Types.timestamp, locale :: String.t, atom) :: String.t | {:error, term}
+  @spec lformat_duration(Duration.t, locale :: String.t, atom) :: String.t | {:error, term}
   defdelegate lformat_duration(timestamp, locale, formatter),
     to: Timex.Format.Duration.Formatter, as: :lformat
 
@@ -1084,7 +1085,7 @@ defmodule Timex do
   defdelegate days_in_month(year, month), to: Timex.Helpers
 
   @doc """
-  Given a Convertable, this function returns the week number of the date provided, starting at 1.
+  Returns the week number of the date provided, starting at 1.
 
   ## Examples
 

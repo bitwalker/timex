@@ -37,7 +37,7 @@ defmodule Timex.Format.DateTime.Formatter do
 
   If an error is encountered during formatting, `lformat!` will raise
   """
-  @spec lformat!(Types.calendar_types, String.t, String.t, atom | nil) :: String.t | no_return
+  @spec lformat!(Types.valid_datetime, String.t, String.t, atom | nil) :: String.t | no_return
   def lformat!(date, format_string, locale, formatter \\ Default)
 
   def lformat!({:error, _} = err, _format_string, _locale, _formatter),
@@ -65,7 +65,7 @@ defmodule Timex.Format.DateTime.Formatter do
   locale, and formatter. If the locale provided does not have translations, "en" is used by
   default. If a formatter is not provided, the formatter used is `Timex.Format.DateTime.Formatters.DefaultFormatter`
   """
-  @spec lformat(Types.calendar_types, String.t, String.t, atom | nil) :: {:ok, String.t} | {:error, term}
+  @spec lformat(Types.valid_datetime, String.t, String.t, atom | nil) :: {:ok, String.t} | {:error, term}
   def lformat(date, format_string, locale, formatter \\ Default)
 
   def lformat({:error, _} = err, _format_string, _locale, _formatter),
@@ -100,7 +100,7 @@ defmodule Timex.Format.DateTime.Formatter do
 
   If an error is encountered during formatting, `format!` will raise.
   """
-  @spec format!(Types.calendar_types, String.t, atom | nil) :: String.t | no_return
+  @spec format!(Types.valid_datetime, String.t, atom | nil) :: String.t | no_return
   def format!(date, format_string, formatter \\ Default)
 
   def format!(date, format_string, formatter),
@@ -113,7 +113,7 @@ defmodule Timex.Format.DateTime.Formatter do
 
   Formatting will use the configured default locale, "en" if no other default is given.
   """
-  @spec format(Types.calendar_types, String.t, atom | nil) :: {:ok, String.t} | {:error, term}
+  @spec format(Types.valid_datetime, String.t, atom | nil) :: {:ok, String.t} | {:error, term}
   def format(date, format_string, formatter \\ Default)
 
   def format(datetime, format_string, :strftime),

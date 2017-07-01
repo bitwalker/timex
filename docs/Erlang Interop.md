@@ -39,8 +39,10 @@ iex> time |> Duration.to_seconds |> Timex.from_unix
 
 ### Converting DateTimes to Erlang datetime tuples
 
+`Timex.to_erl/1` converts any valid Timex date/datetime to an erlang date or
+datetime tuple.
+
 ```elixir
-# Use the Timex.Convertable module (it's API is exposed via the Timex module as well)
 iex> date = Timex.now
 ...> Timex.to_erl(date)
 {{2015, 6, 24}, {4, 18, 33}}
