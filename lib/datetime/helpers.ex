@@ -22,6 +22,7 @@ defmodule Timex.DateTime.Helpers do
   """
   @spec construct(Types.date, Types.valid_timezone) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
   @spec construct(Types.datetime, Types.valid_timezone) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
+  @spec construct(Types.microsecond_datetime, Types.valid_timezone) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
   def construct({_, _, _} = date, timezone) do
     construct({date, {0,0,0,0}}, timezone)
   end
