@@ -10,9 +10,17 @@ defmodule Timex.Comparable.Diff do
           :duration]
 
   @spec diff(Types.microseconds, Types.microseconds, Comparable.granularity) :: integer
+  @spec diff(Types.valid_datetime, Types.valid_datetime, Comparable.granularity) :: integer
   def diff(a, a, granularity) when is_integer(a), do: zero(granularity)
   def diff(a, b, granularity) when is_integer(a) and is_integer(b) and is_atom(granularity) do
     do_diff(a, b, granularity)
+  end
+  def diff(a, b, granularity) do
+    case {Timex.to_gregorian_microseconds(a), Timex.to_gregorian_microseconds(b)} do
+      {{:error, _} = err, _} -> err
+      {_, {:error, _} = err} -> err
+      {au, bu} when is_integer(au) and is_integer(bu) -> diff(au, bu, granularity)
+    end
   end
 
   defp do_diff(a, a, type),      do: zero(type)

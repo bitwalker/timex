@@ -2,7 +2,7 @@ defimpl Timex.Comparable, for: NaiveDateTime do
   alias Timex.AmbiguousDateTime
   alias Timex.Comparable.Utils
   alias Timex.Comparable.Diff
-  import Timex.Macros
+  require Timex.Macros
 
   def compare(a, :epoch, granularity),           do: compare(a, Timex.epoch(), granularity)
   def compare(a, :zero, granularity),            do: compare(a, Timex.zero(), granularity)
@@ -16,10 +16,5 @@ defimpl Timex.Comparable, for: NaiveDateTime do
 
   def diff(_, %AmbiguousDateTime{} = b, _granularity),
     do: {:error, {:ambiguous_comparison, b}}
-  def diff(a, b, granularity) do
-    case {Timex.to_gregorian_microseconds(a), ok!(Timex.to_gregorian_microseconds(b))} do
-      {_, {:error, _} = err} -> err
-      {au, {:ok, bu}}   -> Diff.diff(au, bu, granularity)
-    end
-  end
+  defdelegate diff(a, b, granularity), to: Diff
 end

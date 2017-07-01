@@ -18,10 +18,7 @@ defimpl Timex.Comparable, for: Date do
   def diff(a, b, granularity) do
     case Timex.to_date(b) do
       {:error, _} = err -> err
-      %Date{} = b ->
-        au = Timex.to_gregorian_microseconds(a)
-        bu = Timex.to_gregorian_microseconds(b)
-        Diff.diff(au, bu, granularity)
+      %Date{} = b -> Diff.diff(a, b, granularity)
     end
   end
 end

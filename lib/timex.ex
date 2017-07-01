@@ -591,13 +591,13 @@ defmodule Timex do
   @spec iso_triplet(Types.valid_datetime) ::
     {Types.year, Types.weeknum, Types.weekday} | {:error, term}
   def iso_triplet(datetime) do
-    case ok!(to_erl(datetime)) do
+    case to_erl(datetime) do
       {:error, _} = err ->
         err
-      {:ok, {y,m,d} = date} ->
+      {y,m,d} = date ->
         {iso_year, iso_week} = iso_week(y,m,d)
         {iso_year, iso_week, Timex.weekday(date)}
-      {:ok, {{y,m,d} = date,_}} ->
+      {{y,m,d} = date,_} ->
         {iso_year, iso_week} = iso_week(y,m,d)
         {iso_year, iso_week, Timex.weekday(date)}
     end
@@ -674,17 +674,17 @@ defmodule Timex do
   def timezone("UTC", _),     do: %TimezoneInfo{}
   def timezone("Etc/UTC", _), do: %TimezoneInfo{}
   def timezone(tz, datetime) when is_binary(tz) do
-    case ok!(to_gregorian_seconds(datetime)) do
+    case to_gregorian_seconds(datetime) do
       {:error, _} = err -> err
-      {:ok, seconds_from_zeroyear} ->
+      seconds_from_zeroyear ->
         Timezone.resolve(tz, seconds_from_zeroyear)
     end
   end
   def timezone(%TimezoneInfo{} = tz, datetime), do: Timezone.get(tz, datetime)
   def timezone(tz, datetime) do
-    case ok!(to_gregorian_seconds(datetime)) do
+    case to_gregorian_seconds(datetime) do
       {:error, _} = err -> err
-      {:ok, seconds_from_zeroyear} ->
+      seconds_from_zeroyear ->
         case Timezone.name_of(tz) do
           {:error, _} = err -> err
           tzname ->
