@@ -6,7 +6,7 @@ defmodule Timex.Types do
   @type month :: Calendar.month
   @type day :: Calendar.day
   @type daynum :: non_neg_integer
-  @type weekday :: non_neg_integer
+  @type weekday :: 1..7
   @type weeknum :: non_neg_integer
   # Time types
   @type hour :: Calendar.hour

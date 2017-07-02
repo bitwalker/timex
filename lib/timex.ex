@@ -892,6 +892,9 @@ defmodule Timex do
   @doc """
   Get the day of the week corresponding to the given name.
 
+  The name can be given as a string of the weekday name or its first three characters
+  (lowercase or capitalized) or as a corresponding atom (lowercase only).
+
   ## Examples
 
       iex> #{__MODULE__}.day_to_num("Monday")
@@ -904,21 +907,25 @@ defmodule Timex do
       1
       iex> #{__MODULE__}.day_to_num(:mon)
       1
+      iex> #{__MODULE__}.day_to_num(:sunday)
+      7
 
   """
-  @spec day_to_num(binary | atom()) :: integer | {:error, :invalid_day_name}
+  @spec day_to_num(binary | atom()) :: Types.weekday | {:error, :invalid_day_name}
   Enum.each(@weekdays, fn {day_name, day_num} ->
     lower      = day_name |> String.downcase
     abbr_cased = day_name |> String.slice(0..2)
     abbr_lower = lower |> String.slice(0..2)
-    symbol     = abbr_lower |> String.to_atom
+    abbr_atom  = abbr_lower |> String.to_atom
+    atom       = lower |> String.to_atom
 
     day_quoted = quote do
       def day_to_num(unquote(day_name)),   do: unquote(day_num)
       def day_to_num(unquote(lower)),      do: unquote(day_num)
       def day_to_num(unquote(abbr_cased)), do: unquote(day_num)
       def day_to_num(unquote(abbr_lower)), do: unquote(day_num)
-      def day_to_num(unquote(symbol)),     do: unquote(day_num)
+      def day_to_num(unquote(abbr_atom)),do: unquote(day_num)
+      def day_to_num(unquote(atom)),     do: unquote(day_num)
     end
     Module.eval_quoted __MODULE__, day_quoted, [], __ENV__
   end)
@@ -1251,7 +1258,8 @@ defmodule Timex do
   @doc """
   Number of days to the beginning of the week
 
-  The weekstart can between 1..7, an atom e.g. :mon, or a string e.g. "Monday"
+  The weekstart determines which is the first day of the week, defaults to monday. It can be a number
+  between 1..7 (1 is monday, 7 is sunday), or any value accepted by `day_to_num/1`.
 
   ## Examples
 
