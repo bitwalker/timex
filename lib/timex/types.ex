@@ -1,5 +1,4 @@
 defmodule Timex.Types do
-  @moduledoc false
 
   # Date types
   @type year :: Calendar.year
