@@ -23,9 +23,8 @@ defmodule Timex.Types do
   @type zone_abbr :: Calendar.zone_abbr
   @type utc_offset :: Calendar.utc_offset
   @type std_offset :: Calendar.std_offset
-  @type tz_offset :: -12..12
-  @type tz_offset_seconds :: integer
-  @type valid_timezone :: String.t | tz_offset | tz_offset_seconds | :utc | :local
+  @type tz_offset :: -14..12
+  @type valid_timezone :: String.t | tz_offset | :utc | :local
   # Complex types
   @type weekday_name :: :monday | :tuesday | :wednesday | :thursday | :friday | :saturday | :sunday
   @type shift_units :: :milliseconds | :seconds | :minutes | :hours | :days | :weeks | :years
