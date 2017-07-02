@@ -109,15 +109,6 @@ defmodule Timex.Macros do
   end
 
   @doc """
-  A guard macro which asserts that the given value is an integer in the range of -12-12
-  """
-  defmacro is_tz_offset(offset) do
-    quote do
-      is_integer_in_range(unquote(offset), -12, 12)
-    end
-  end
-
-  @doc """
   A guard macro which asserts that the given value is a valid Gregorian year value
   """
   defmacro is_year(y) do
@@ -135,14 +126,6 @@ defmodule Timex.Macros do
     end
   end
 
-  @doc """
-  A guard macro which asserts that the given value is an integer in the range of 0-6
-  """
-  defmacro is_day_of_week(d, :sun) do
-    quote do
-      is_integer_in_range(unquote(d), 0, 6)
-    end
-  end
   @doc """
   A guard macro which asserts that the given value is an integer in the range of 1-7
   """
@@ -259,28 +242,6 @@ defmodule Timex.Macros do
   end
 
   @doc """
-  A guard macro which asserts that the given values are a valid hour, minute,
-  second, and timezone composed of an offset and an abbrevation.
-
-  This reflects the gregorian type as returned by the to_gregorian conversion
-  """
-  defmacro is_gregorian(y,m,d,h,mm,s,offset,tz) do
-    quote do
-      (is_datetime(unquote(y),unquote(m),unquote(d),unquote(h),unquote(mm),unquote(s)) and
-       is_gregorian_tz(unquote(offset), unquote(tz)))
-    end
-  end
-
-  @doc """
-  A guard macro which asserts that the given values are a valid timezone offset and name string
-  """
-  defmacro is_gregorian_tz(offset, tz) do
-    quote do
-      (is_tz_offset(unquote(offset)) and is_binary(unquote(tz)))
-    end
-  end
-
-  @doc """
   A guard macro which asserts that the given values are a valid year, month, day, hour,
   minute, second, and optional millisecond
   """
@@ -299,15 +260,6 @@ defmodule Timex.Macros do
       (is_positive_integer(unquote(mega)) and
        is_positive_integer(unquote(secs)) and
        is_positive_integer(unquote(micro)))
-    end
-  end
-
-  @doc """
-  A guard macro which asserts that the given value is either a string, a valid offset, :utc, or :local
-  """
-  defmacro is_tz_value(tz) do
-    quote do
-      (is_binary(unquote(tz)) or is_tz_offset(unquote(tz)) or unquote(tz) in [:utc, :local])
     end
   end
 
