@@ -31,10 +31,12 @@ defmodule Timex.Types do
   @type shift_units :: :milliseconds | :seconds | :minutes | :hours | :days | :weeks | :years
   @type time_units :: :microseconds | :milliseconds | :seconds | :minutes | :hours | :days | :weeks | :years
   @type time :: { hour, minute, second }
+  @type microsecond_time :: { hour, minute, second, microsecond | microseconds}
   @type date :: { year, month, day }
   @type datetime :: { date, time }
+  @type microsecond_datetime :: { date, microsecond_time }
   @type iso_triplet :: { year, weeknum, weekday }
   @type calendar_types :: Date.t | DateTime.t | NaiveDateTime.t
-  @type valid_datetime :: Date.t | DateTime.t | NaiveDateTime.t | datetime | date
+  @type valid_datetime :: Date.t | DateTime.t | NaiveDateTime.t | datetime | date | microsecond_datetime
   @type weekstart :: weekday | binary | atom
 end
