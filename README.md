@@ -32,7 +32,7 @@ To use Timex with your projects, edit your `mix.exs` file and add it as a depend
 
 ```elixir
 defp deps do
-  [{:timex, "~> 3.0"}]
+  [{:timex, "~> 3.1"}]
 end
 
 defp application do
