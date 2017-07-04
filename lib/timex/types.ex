@@ -4,9 +4,9 @@ defmodule Timex.Types do
   @type year :: Calendar.year
   @type month :: Calendar.month
   @type day :: Calendar.day
-  @type daynum :: non_neg_integer
+  @type daynum :: 1..366
   @type weekday :: 1..7
-  @type weeknum :: non_neg_integer
+  @type weeknum :: 1..53
   # Time types
   @type hour :: Calendar.hour
   @type minute :: Calendar.minute
@@ -15,7 +15,6 @@ defmodule Timex.Types do
   @type timestamp :: {megaseconds, seconds, microseconds }
   @type megaseconds :: non_neg_integer
   @type seconds :: non_neg_integer
-  @type milliseconds :: non_neg_integer
   @type microseconds :: non_neg_integer
   # Timezone types
   @type time_zone :: Calendar.time_zone
