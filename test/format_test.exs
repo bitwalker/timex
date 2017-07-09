@@ -9,6 +9,13 @@ defmodule DateFormatTest.GeneralFormatting do
     assert Timex.from_now(utc_date, ref_date) == Timex.from_now(cst_date, ref_date)
   end
 
+  test "converts maps and tuples before formatting" do
+    map = %{day: 9, hour: 15, min: 40, month: 7, sec: 33, usec: 0, year: 2017}
+    tuple = {{2017, 7, 9}, {15, 40, 33}} = Timex.to_erl(map)
+    assert "15:40:33" == Timex.format!(map, "{h24}:{m}:{s}")
+    assert "15:40:33" == Timex.format!(tuple, "{h24}:{m}:{s}")
+  end
+
   test "fractional seconds padding obeys formatting rules" do
     t = Timex.parse!("2017-06-28 20:21:22.000000", "%F %T.%f", :strftime)
     assert {0, 6} = t.microsecond
