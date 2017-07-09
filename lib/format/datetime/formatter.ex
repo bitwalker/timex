@@ -46,13 +46,14 @@ defmodule Timex.Format.DateTime.Formatter do
     do: lformat!(datetime, format_string, locale, Strftime)
   def lformat!(datetime, format_string, locale, :relative),
     do: lformat!(datetime, format_string, locale, Relative)
-  def lformat!(datetime, format_string, locale, formatter)
-    when is_tuple(datetime),
-    do: lformat!(Timex.to_naive_datetime(datetime), format_string, locale, formatter)
   def lformat!(date, format_string, locale, formatter)
     when is_binary(format_string) and is_binary(locale) and is_atom(formatter)
     do
-      case formatter.lformat(date, format_string, locale) do
+      date = case date do
+         %{__struct__: struct} when struct in [Date, DateTime, NaiveDateTime] -> date
+         _other -> Timex.to_naive_datetime(date)
+      end
+      case formatter.lformat(date, format_string, locale)do
         {:ok, result}    -> result
         {:error, reason} -> raise FormatError, message: reason
       end
