@@ -668,7 +668,7 @@ defmodule Timex do
       {"Etc/GMT-2", "+02"}
 
   """
-  @spec timezone(Types.valid_timezone, Types.valid_datetime) ::
+  @spec timezone(Types.valid_timezone | TimezoneInfo.t, Types.valid_datetime) ::
     TimezoneInfo.t | AmbiguousTimezoneInfo.t | {:error, term}
   def timezone(:utc, _),      do: %TimezoneInfo{}
   def timezone("UTC", _),     do: %TimezoneInfo{}

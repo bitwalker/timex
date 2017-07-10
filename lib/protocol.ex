@@ -6,6 +6,8 @@ defprotocol Timex.Protocol do
 
   @fallback_to_any true
 
+  alias Timex.Types
+
   @doc """
   Convert a date/time value to a Julian calendar date number
   """
@@ -42,7 +44,7 @@ defprotocol Timex.Protocol do
   """
   @spec to_datetime(Types.valid_datetime) :: DateTime.t | {:error, term}
   @spec to_datetime(Types.valid_datetime, Types.valid_timezone) ::
-    DateTime.t | AmbiguousDateTime.t | {:error, term}
+    DateTime.t | Timex.AmbiguousDateTime.t | {:error, term}
   def to_datetime(datetime, timezone \\ :utc)
 
   @doc """
@@ -75,13 +77,13 @@ defprotocol Timex.Protocol do
   Shift a date/time value using a list of shift unit/value pairs
   """
   @spec shift(Types.valid_datetime, Timex.shift_options) ::
-    Types.valid_datetime | AmbiguousDateTime.t | {:error, term}
+    Types.valid_datetime | Timex.AmbiguousDateTime.t | {:error, term}
   def shift(datetime, options)
 
   @doc """
   Set fields on a date/time value using a list of unit/value pairs
   """
-  @spec set(Types.valid_datetime, Timex.  set_options) :: Types.valid_datetime
+  @spec set(Types.valid_datetime, Timex.set_options) :: Types.valid_datetime | {:error, term}
   def set(datetime, options)
 
   @doc """
@@ -161,7 +163,7 @@ defprotocol Timex.Protocol do
   @doc """
   Get the week number of the given date/time value, starting at 1
   """
-  @spec week_of_month(Types.valid_datetime) :: Types.week_of_month
+  @spec week_of_month(Types.valid_datetime) :: Types.week_of_month | {:error, term}
   def week_of_month(datetime)
 
   @doc """
