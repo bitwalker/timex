@@ -5,7 +5,7 @@ defmodule Timex.Convert do
   Converts a map to a Date, NaiveDateTime or DateTime, depending on the amount
   of date/time information in the map.
   """
-  @spec convert_map(Map.t) :: Date.t | DateTime.t | NaiveDateTime.t | {:error, term}
+  @spec convert_map(map) :: Date.t | DateTime.t | NaiveDateTime.t | {:error, term}
   def convert_map(map) when is_map(map) do
     case convert_keys(map) do
       {:error, _} = err ->

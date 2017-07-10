@@ -18,6 +18,7 @@ defmodule Timex.Timezone do
   alias Timex.Timezone.Local, as: Local
   alias Timex.Parse.Timezones.Posix
   alias Timex.Parse.Timezones.Posix.PosixTimezone, as: PosixTz
+  alias Timex.Types
   import Timex.Macros
 
   @doc """
@@ -67,10 +68,19 @@ defmodule Timex.Timezone do
   If a string is provided which isn't recognized, it is returned untouched,
   only when `get/2` is called will the timezone lookup fail.
   """
-  @spec name_of(Types.valid_timezone) :: String.t | {:error, {:invalid_timezone, term}}
+  @spec name_of(Types.valid_timezone | TimezoneInfo.t | AmbiguousTimezoneInfo.t) ::
+          String.t |
+          {:error, {:invalid_timezone, term}} |
+          {:error, {:no_such_zone, term}} |
+          {:error, term}
   def name_of(%TimezoneInfo{:full_name => name}), do: name
   def name_of(:utc),   do: "Etc/UTC"
-  def name_of(:local), do: name_of(local(DateTime.utc_now()))
+  def name_of(:local) do
+    case local(DateTime.utc_now()) do
+      {:error, _} = err -> err
+      tz -> name_of(tz)
+    end
+  end
   def name_of("UTC"),  do: "Etc/UTC"
   def name_of(0),      do: "Etc/UTC"
   def name_of("A"),    do: name_of(1)
@@ -559,7 +569,7 @@ defmodule Timex.Timezone do
     end
   end
 
-  @spec tzdata_to_timezone(Map.t, String.t) :: TimezoneInfo.t
+  @spec tzdata_to_timezone(map, String.t) :: TimezoneInfo.t
   def tzdata_to_timezone(%{from: %{wall: from}, std_off: std_off_secs, until: %{wall: until}, utc_off: utc_off_secs, zone_abbr: abbr} = _tzdata, zone) do
     start_bound = boundary_to_erlang_datetime(from)
     end_bound   = boundary_to_erlang_datetime(until)

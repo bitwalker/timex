@@ -2,6 +2,7 @@ defmodule Timex.Helpers do
   @moduledoc false
   use Timex.Constants
   import Timex.Macros
+  alias Timex.Types
 
   @doc """
   Given a {year, day} tuple where the day is the iso day of that year, returns 

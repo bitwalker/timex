@@ -80,7 +80,7 @@ defimpl Timex.Protocol, for: DateTime do
     Timex.Timezone.end_of_day(datetime)
   end
 
-  @spec beginning_of_week(DateTime.t, Types.weekstart) :: DateTime.t | AmbiguousDateTime.t
+  @spec beginning_of_week(DateTime.t, Types.weekstart) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
   def beginning_of_week(%DateTime{} = date, weekstart) do
     case Timex.days_to_beginning_of_week(date, weekstart) do
       {:error, _} = err -> err
@@ -88,7 +88,7 @@ defimpl Timex.Protocol, for: DateTime do
     end
   end
 
-  @spec end_of_week(DateTime.t, Types.weekstart) :: DateTime.t | AmbiguousDateTime.t
+  @spec end_of_week(DateTime.t, Types.weekstart) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
   def end_of_week(%DateTime{} = date, weekstart) do
     case Timex.days_to_end_of_week(date, weekstart) do
       {:error, _} = err -> err
