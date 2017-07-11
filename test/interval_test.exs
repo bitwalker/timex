@@ -18,6 +18,8 @@ defmodule IntervalTests do
       assert %Interval{step: [hours: 5]}        = Interval.new(step: [hours: 5])
       assert %Interval{step: [days: 5]}         = Interval.new(step: [days: 5])
       assert %Interval{step: [weeks: 5]}        = Interval.new(step: [weeks: 5])
+      assert %Interval{step: [months: 5]}       = Interval.new(step: [months: 5])
+      assert %Interval{step: [years: 5]}       =  Interval.new(step: [years: 5])
     end
 
     test "returns an error tuple when given an invalid step" do
@@ -55,6 +57,8 @@ defmodule IntervalTests do
       assert %Interval{step: [hours: 5]}        = Interval.with_step(interval, [hours: 5])
       assert %Interval{step: [days: 5]}         = Interval.with_step(interval, [days: 5])
       assert %Interval{step: [weeks: 5]}        = Interval.with_step(interval, [weeks: 5])
+      assert %Interval{step: [months: 5]}       = Interval.with_step(interval, [months: 5])
+      assert %Interval{step: [years: 5]}       =  Interval.with_step(interval, [years: 5])
     end
 
     test "returns error tuple when given invalid step unit" do
