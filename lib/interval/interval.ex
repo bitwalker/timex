@@ -22,7 +22,9 @@ defmodule Timex.Interval do
                                [minutes:      integer()] |
                                [hours:        integer()] |
                                [days:         integer()] |
-                               [weeks:        integer()]
+                               [weeks:        integer()] |
+                               [months:       integer()] |
+                               [year:         integer()]
 
   @enforce_keys [:from, :until]
   defstruct from:       nil,
@@ -78,7 +80,7 @@ defmodule Timex.Interval do
       "[15:30, 15:50]"
 
   """
-  @spec new(Keyword.t) :: t | {:error, :invalid_until} | {:error, :invalid_step}
+  @spec new(Keyword.t) :: Interval.t | {:error, :invalid_until} | {:error, :invalid_step}
   def new(options \\ []) do
     from = case Keyword.get(options, :from) do
       nil -> Timex.Protocol.NaiveDateTime.now()
@@ -105,7 +107,7 @@ defmodule Timex.Interval do
     build_struct_or_error(attrs)
   end
 
-  @spec build_struct_or_error(map()) :: t | {:error, atom()}
+  @spec build_struct_or_error(map()) :: Interval.t | {:error, atom()}
   defp build_struct_or_error(%{until: err = {:error, _}}), do: err
   defp build_struct_or_error(%{step:  err = {:error, _}}), do: err
   defp build_struct_or_error(valid_attrs),                 do: struct(__MODULE__, valid_attrs)
@@ -118,6 +120,8 @@ defmodule Timex.Interval do
   defp valid_step_or_error(step = [hours: _]),        do: step
   defp valid_step_or_error(step = [days: _]),         do: step
   defp valid_step_or_error(step = [weeks: _]),        do: step
+  defp valid_step_or_error(step = [months: _]),       do: step
+  defp valid_step_or_error(step = [years: _]),       do: step
   defp valid_step_or_error(_),                        do: {:error, :invalid_step}
 
   @doc """
@@ -170,7 +174,7 @@ defmodule Timex.Interval do
       ["2014-09-22", "2014-09-25"]
 
   """
-  @spec with_step(t, any()) :: t | {:error, :invalid_step}
+  @spec with_step(Interval.t, any()) :: Interval.t | {:error, :invalid_step}
   def with_step(%__MODULE__{} = interval, step) do
     case valid_step_or_error(step) do
       error = {:error, _} -> error
