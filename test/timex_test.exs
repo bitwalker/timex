@@ -255,6 +255,25 @@ defmodule TimexTests do
     assert {:error, :invalid_date} == Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {})
   end
 
+  test "between? inclusive" do
+    date1 = Timex.to_datetime({{2013,1,1},{0, 0, 0}})
+    date2 = Timex.to_datetime({{2013,1,5},{0, 0, 0}})
+    date3 = Timex.to_datetime({{2013,1,9},{0, 0, 0}})
+
+    options = [inclusive: true]
+
+    assert true == Timex.between?(date2, date1, date3, options)
+    assert true == Timex.between?(date1, date1, date3, options)
+    assert true == Timex.between?(date3, date1, date3, options)
+
+    assert false == Timex.between?(date1, date2, date3, options)
+    assert false == Timex.between?(date3, date1, date2, options)
+
+    assert {:error, :invalid_date} == Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    assert {:error, :invalid_date} == Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    assert {:error, :invalid_date} == Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+  end
+
   test "equal" do
     assert Timex.equal?(Timex.today, Timex.today)
     refute Timex.equal?(Timex.today, Timex.epoch)

@@ -765,17 +765,29 @@ defmodule Timex do
   end
 
   @doc """
-  Returns a boolean indicating whether the first `Timex.Comparable` occurs between the second and third
+  Returns a boolean indicating whether the first `Timex.Comparable` occurs between the second
+  and third.
+
+  By default, the `start`and `ending` bounds are *exclusive*. You can opt for inclusive bounds
+  by setting the `:inclusive` option to `true`.
+
   """
-  @spec between?(Comparable.comparable, Comparable.comparable, Comparable.comparable) ::
+  @type between_options :: [
+    inclusive: boolean
+  ]
+  @spec between?(Comparable.comparable, Comparable.comparable, Comparable.comparable, between_options) ::
     boolean | {:error, term}
-  def between?(a, start, ending) do
-    is_after_start? = after?(a, start)
-    is_before_end?  = before?(a, ending)
-    case {is_after_start?, is_before_end?} do
-      {{:error, _} = err, _} -> err
-      {_, {:error, _} = err} -> err
-      {true, true} -> true
+  def between?(a, start, ending, options \\ []) do
+    inclusive = Keyword.get(options, :inclusive, false)
+
+    after_start = compare(a, start)
+    before_ending = compare(a, ending)
+
+    case {inclusive, after_start, before_ending} do
+      {_, {:error, _} = err, _} -> err
+      {_, _, {:error, _} = err} -> err
+      {true, lo, hi} when lo >= 0 and hi <= 0 -> true
+      {false, 1, -1} -> true
       _ -> false
     end
   end
