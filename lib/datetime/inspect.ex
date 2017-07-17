@@ -11,12 +11,15 @@ defimpl Inspect, for: Timex.AmbiguousDateTime do
 end
 
 
-defimpl Inspect, for: DateTime do
-  def instpect(datetime, %{:structs => false} = opts) do
-    Inspect.Algebra.to_doc(datetime, opts)
-  end
+# Only provide Inspect for versions < 1.5.0-rc*
+if System.version |> Version.parse! |> Version.compare(Version.parse!("1.5.0-rc1")) == :lt do
+  defimpl Inspect, for: DateTime do
+    def instpect(datetime, %{:structs => false} = opts) do
+      Inspect.Algebra.to_doc(datetime, opts)
+    end
 
-  def inspect(%DateTime{} = d, _opts) do
-    "#<DateTime(#{DateTime.to_iso8601(d)} #{d.time_zone})>"
+    def inspect(%DateTime{} = d, _opts) do
+      "#<DateTime(#{DateTime.to_iso8601(d)} #{d.time_zone})>"
+    end
   end
 end
