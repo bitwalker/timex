@@ -12,7 +12,7 @@ end
 
 
 # Only provide Inspect for versions < 1.5.0-rc*
-if System.version |> Version.parse! |> Version.compare(Version.parse!("1.5.0-rc1")) == :lt do
+if System.version |> Version.parse! |> Version.compare(Version.parse!("1.5.0-rc.1")) == :lt do
   defimpl Inspect, for: DateTime do
     def instpect(datetime, %{:structs => false} = opts) do
       Inspect.Algebra.to_doc(datetime, opts)
