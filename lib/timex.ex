@@ -745,22 +745,26 @@ defmodule Timex do
   @doc """
   Returns a boolean indicating whether the first `Timex.Comparable` occurs before the second
   """
+  @spec before?(Time, Time) :: boolean | {:error, term}
   @spec before?(Comparable.comparable, Comparable.comparable) :: boolean | {:error, term}
   def before?(a, b) do
-    case Comparable.compare(a, b) do
-      result when is_integer(result) -> result == -1
+    case compare(a, b) do
+      -1                -> true
       {:error, _} = res -> res
+      _                 -> false
     end
   end
 
   @doc """
   Returns a boolean indicating whether the first `Timex.Comparable` occurs after the second
   """
+  @spec after?(Time, Time) :: boolean | {:error, term}
   @spec after?(Comparable.comparable, Comparable.comparable) :: boolean | {:error, term}
   def after?(a, b) do
-    case Comparable.compare(a, b) do
-      result when is_integer(result) -> result == 1
+    case compare(a, b) do
+      1                 -> true
       {:error, _} = res -> res
+      _                 -> false
     end
   end
 
@@ -775,6 +779,7 @@ defmodule Timex do
   @type between_options :: [
     inclusive: boolean
   ]
+  @spec between?(Time, Time, Time, between_options) :: boolean | {:error, term}
   @spec between?(Comparable.comparable, Comparable.comparable, Comparable.comparable, between_options) ::
     boolean | {:error, term}
   def between?(a, start, ending, options \\ []) do
@@ -812,16 +817,26 @@ defmodule Timex do
       ...> #{__MODULE__}.equal?(date1, date2)
       true
   """
+  @spec equal?(Time, Time, Comparable.granularity) :: boolean | {:error, :badarg}
   @spec equal?(Comparable.comparable, Comparable.comparable, Comparable.granularity) :: boolean | {:error, :badarg}
   def equal?(a, a, granularity \\ :seconds)
   def equal?(a, a, _granularity), do: true
-  def equal?(a, b, granularity), do: Comparable.compare(a, b, granularity) == 0
+  def equal?(a, b, granularity) do
+    case compare(a, b, granularity) do
+      0                 -> true
+      {:error, _} = res -> res
+      _                 -> false
+    end
+  end
 
   @doc """
   See docs for `compare/3`
   """
-  @spec compare(Comparable.comparable, Comparable.comparable) ::
-    Comparable.compare_result | {:error, term}
+  @spec compare(Time, Time) :: Comparable.compare_result
+  def compare(%Time{} = a, %Time{} = b) do
+    compare(a, b, :microseconds)
+  end
+  @spec compare(Comparable.comparable, Comparable.comparable) :: Comparable.compare_result
   defdelegate compare(a, b), to: Timex.Comparable
 
   @doc """
@@ -867,15 +882,18 @@ defmodule Timex do
       0
 
   """
-
+  @spec compare(Time, Time, Comparable.granularity) :: Comparable.compare_result
   @spec compare(Comparable.comparable, Comparable.comparable, Comparable.granularity) ::
-    Comparable.compare_result | {:error, term}
+    Comparable.compare_result
+  def compare(%Time{} = a, %Time{} = b, granularity), do: Timex.Comparable.Utils.to_compare_result(diff(a, b, granularity))
   defdelegate compare(a, b, granularity), to: Timex.Comparable
 
   @doc """
   See docs for `diff/3`
   """
+  @spec diff(Time, Time) :: Types.timestamp | {:error, term}
   @spec diff(Comparable.comparable, Comparable.comparable) :: Types.timestamp | {:error, term}
+  def diff(%Time{} = a, %Time{} = b), do: diff(a, b, :microseconds)
   defdelegate diff(a, b), to: Timex.Comparable
 
   @doc """
@@ -897,8 +915,25 @@ defmodule Timex do
 
   and the result will be an integer value of those units or a Duration.
   """
+  @spec diff(Time, Time, Comparable.granularity) :: Duration.t | integer | {:error, term}
   @spec diff(Comparable.comparable, Comparable.comparable, Comparable.granularity) ::
     Duration.t | integer | {:error, term}
+  def diff(%Time{}, %Time{}, granularity) when granularity in [:days, :weeks, :calendar_weeks, :months, :years] do
+    0
+  end
+  def diff(%Time{} = a, %Time{} = b, granularity) do
+    a = ((a.hour*60+a.minute)*60+a.second)*1_000*1_000+elem(a.microsecond, 0)
+    b = ((b.hour*60+b.minute)*60+b.second)*1_000*1_000+elem(b.microsecond, 0)
+    case granularity do
+      :duration     -> Duration.from_seconds(div(a - b, 1_000*1_000))
+      :microseconds -> a - b
+      :milliseconds -> div(a - b, 1_000)
+      :seconds      -> div(a - b, 1_000*1_000)
+      :minutes      -> div(a - b, 1_000*1_000*60)
+      :hours        -> div(a - b, 1_000*1_000*60*60)
+      _             -> {:error, {:invalid_granularity, granularity}}
+    end
+  end
   defdelegate diff(a, b, granularity), to: Timex.Comparable
 
   @doc """
