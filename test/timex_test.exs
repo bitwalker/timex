@@ -205,6 +205,10 @@ defmodule TimexTests do
     assert Timex.compare(date, :zero) === 1
     assert Timex.compare(date, :distant_past) === 1
     assert Timex.compare(date, :distant_future) === -1
+
+    assert Timex.compare(~T[09:00:00], ~T[12:00:00]) === -1
+    assert Timex.compare(~T[09:00:00], ~T[09:00:00]) === 0
+    assert Timex.compare(~T[09:00:00], ~T[07:00:00]) === 1
   end
 
   test "compare with granularity" do
@@ -223,6 +227,9 @@ defmodule TimexTests do
     assert Timex.compare(date1, date2, :hours) === 0
     assert Timex.compare(date3, date4, :minutes) === 0
     assert Timex.compare(date3, date4, :seconds) === -1
+
+    assert Timex.compare(~T[09:00:00], ~T[09:00:00.56423], :hours) === 0
+    assert Timex.compare(~T[09:00:00], ~T[09:00:00.56423], :milliseconds) === -1
   end
 
   test "before?/after?" do
@@ -236,6 +243,11 @@ defmodule TimexTests do
     assert true == Timex.after?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 1}})
     assert {:error, :invalid_date} == Timex.before?({}, {{2013, 1, 1}, {1, 1, 2}})
     assert {:error, :invalid_date} == Timex.after?({{2013, 1, 1}, {1, 1, 2}}, {})
+
+    assert Timex.before?(~T[09:00:00], ~T[12:00:00])
+    refute Timex.before?(~T[09:00:00], ~T[09:00:00])
+    assert Timex.after?(~T[09:00:00], ~T[07:00:00])
+    refute Timex.after?(~T[09:00:00], ~T[12:00:00])
   end
 
   test "between?" do
@@ -253,6 +265,9 @@ defmodule TimexTests do
     assert {:error, :invalid_date} == Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}})
     assert {:error, :invalid_date} == Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}})
     assert {:error, :invalid_date} == Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {})
+
+    assert Timex.between?(~T[12:00:00], ~T[09:00:00], ~T[17:00:00])
+    refute Timex.between?(~T[07:00:00], ~T[09:00:00], ~T[17:00:00])
   end
 
   test "between? inclusive" do
@@ -286,6 +301,10 @@ defmodule TimexTests do
     assert Timex.equal?(date1, date2)
     refute Timex.equal?(date1, date2, :microseconds)
     assert Timex.equal?(date2, date3, :hours)
+
+    assert Timex.equal?(~T[12:00:00], ~T[12:00:00])
+    assert Timex.equal?(~T[12:00:00], ~T[12:00:00.0123], :seconds)
+    refute Timex.equal?(~T[12:00:00], ~T[12:00:00.0123], :milliseconds)
   end
 
   test "diff" do
@@ -342,6 +361,8 @@ defmodule TimexTests do
     date2 = Timex.to_datetime({1969,2,11})
     assert Timex.diff(date1, date2, :months) === 25
     assert Timex.diff(date2, date1, :months) === -25
+
+    assert Timex.diff(~T[09:00:00], ~T[12:30:23]) == -((3*60+30)*60+23)*1_000*1_000
   end
 
   test "timestamp diff same datetime" do
