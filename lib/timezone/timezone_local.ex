@@ -79,7 +79,7 @@ defmodule Timex.Timezone.Local do
             # Fallback and ask systemsetup
             {tz, 0} = System.cmd("systemsetup", ["-gettimezone"])
             tz = tz
-            |> String.strip(?\n)
+            |> String.trim("\n")
             |> String.replace("Time Zone: ", "")
             if String.length(tz) > 0 do
               tz
@@ -191,7 +191,7 @@ defmodule Timex.Timezone.Local do
           true ->
             [no_hostdefs | _] = String.split(etctz, " ", [global: false, trim: true])
             [no_comments | _] = String.split(no_hostdefs, "#", [global: false, trim: true])
-            {:ok, no_comments |> String.replace(" ", "_") |> String.strip(?\n)}
+            {:ok, no_comments |> String.replace(" ", "_") |> String.trim("\n")}
         end
       {:error, _} ->
         nil
