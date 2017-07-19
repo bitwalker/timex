@@ -12,7 +12,7 @@ defimpl Timex.Protocol, for: Map do
     quote do
       case Timex.Convert.convert_map(unquote(map)) do
         {:error, reason} -> raise reason
-        converted        -> apply(Timex.Protocol, unquote(function), [converted | unquote(args)])
+        converted        -> Timex.Protocol.unquote(function)(converted, unquote_splicing(args))
       end
     end
   end
@@ -21,7 +21,7 @@ defimpl Timex.Protocol, for: Map do
     quote do
       case Timex.Convert.convert_map(unquote(map)) do
         {:error, _} = err -> err
-        converted         -> apply(Timex.Protocol, unquote(function), [converted | unquote(args)])
+        converted         -> Timex.Protocol.unquote(function)(converted, unquote_splicing(args))
       end
     end
   end
