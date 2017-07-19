@@ -6,6 +6,9 @@ defmodule Timex.Convert do
   of date/time information in the map.
   """
   @spec convert_map(map) :: Date.t | DateTime.t | NaiveDateTime.t | {:error, term}
+  def convert_map(%{__struct__: _} = struct) do
+    convert_map(Map.from_struct(struct))
+  end
   def convert_map(map) when is_map(map) do
     case convert_keys(map) do
       {:error, _} = err ->

@@ -199,34 +199,93 @@ defprotocol Timex.Protocol do
 end
 
 defimpl Timex.Protocol, for: Any do
+  def to_julian(%{__struct__: _} = d), do: Timex.to_julian(Map.from_struct(d))
   def to_julian(_datetime), do: {:error, :invalid_date}
+
+  def to_gregorian_seconds(%{__struct__: _} = d), do: Timex.to_gregorian_seconds(Map.from_struct(d))
   def to_gregorian_seconds(_datetime), do: {:error, :invalid_date}
+
+  def to_gregorian_microseconds(%{__struct__: _} = d), do: Timex.to_gregorian_microseconds(Map.from_struct(d))
   def to_gregorian_microseconds(_datetime), do: {:error, :invalid_date}
+
+  def to_unix(%{__struct__: _} = d), do: Timex.to_unix(Map.from_struct(d))
   def to_unix(_datetime), do: {:error, :invalid_date}
+
+  def to_date(%{__struct__: _} = d), do: Timex.to_date(Map.from_struct(d))
   def to_date(_datetime), do: {:error, :invalid_date}
+
+  def to_datetime(%{__struct__: _} = d, timezone), do: Timex.to_datetime(Map.from_struct(d), timezone)
   def to_datetime(_datetime, _timezone), do: {:error, :invalid_date}
+
+  def to_naive_datetime(%{__struct__: _} = d), do: Timex.to_naive_datetime(Map.from_struct(d))
   def to_naive_datetime(_datetime), do: {:error, :invalid_date}
+
+  def to_erl(%{__struct__: _} = d), do: Timex.to_erl(Map.from_struct(d))
   def to_erl(_datetime), do: {:error, :invalid_date}
+
+  def century(%{__struct__: _} = d), do: Timex.century(Map.from_struct(d))
   def century(_datetime), do: {:error, :invalid_date}
+
+  def is_leap?(%{__struct__: _} = d), do: Timex.is_leap?(Map.from_struct(d))
   def is_leap?(_datetime), do: {:error, :invalid_date}
+
+  def shift(%{__struct__: _} = d, options), do: Timex.shift(Map.from_struct(d), options)
   def shift(_datetime, _options), do: {:error, :invalid_date}
+
+  def set(%{__struct__: _} = d, options), do: Timex.set(Map.from_struct(d), options)
   def set(_datetime, _options), do: {:error, :invalid_date}
+
+  def beginning_of_day(%{__struct__: _} = d), do: Timex.beginning_of_day(Map.from_struct(d))
   def beginning_of_day(_datetime), do: {:error, :invalid_date}
+
+  def end_of_day(%{__struct__: _} = d), do: Timex.end_of_day(Map.from_struct(d))
   def end_of_day(_datetime), do: {:error, :invalid_date}
+
+  def beginning_of_week(%{__struct__: _} = d, weekstart), do: Timex.beginning_of_week(Map.from_struct(d), weekstart)
   def beginning_of_week(_datetime, _weekstart), do: {:error, :invalid_date}
+
+  def end_of_week(%{__struct__: _} = d, weekstart), do: Timex.end_of_week(Map.from_struct(d), weekstart)
   def end_of_week(_datetime, _weekstart), do: {:error, :invalid_date}
+
+  def beginning_of_year(%{__struct__: _} = d), do: Timex.beginning_of_year(Map.from_struct(d))
   def beginning_of_year(_datetime), do: {:error, :invalid_date}
+
+  def end_of_year(%{__struct__: _} = d), do: Timex.end_of_year(Map.from_struct(d))
   def end_of_year(_datetime), do: {:error, :invalid_date}
+
+  def beginning_of_quarter(%{__struct__: _} = d), do: Timex.beginning_of_quarter(Map.from_struct(d))
   def beginning_of_quarter(_datetime), do: {:error, :invalid_date}
+
+  def end_of_quarter(%{__struct__: _} = d), do: Timex.end_of_quarter(Map.from_struct(d))
   def end_of_quarter(_datetime), do: {:error, :invalid_date}
+
+  def beginning_of_month(%{__struct__: _} = d), do: Timex.beginning_of_month(Map.from_struct(d))
   def beginning_of_month(_datetime), do: {:error, :invalid_date}
+
+  def end_of_month(%{__struct__: _} = d), do: Timex.end_of_month(Map.from_struct(d))
   def end_of_month(_datetime), do: {:error, :invalid_date}
+
+  def quarter(%{__struct__: _} = d), do: Timex.quarter(Map.from_struct(d))
   def quarter(_datetime), do: {:error, :invalid_date}
+
+  def days_in_month(%{__struct__: _} = d), do: Timex.days_in_month(Map.from_struct(d))
   def days_in_month(_datetime), do: {:error, :invalid_date}
+
+  def week_of_month(%{__struct__: _} = d), do: Timex.week_of_month(Map.from_struct(d))
   def week_of_month(_datetime), do: {:error, :invalid_date}
+
+  def weekday(%{__struct__: _} = d), do: Timex.weekday(Map.from_struct(d))
   def weekday(_datetime), do: {:error, :invalid_date}
+
+  def day(%{__struct__: _} = d), do: Timex.day(Map.from_struct(d))
   def day(_datetime), do: {:error, :invalid_date}
-  def is_valid?(_datetime), do: {:error, :invalid_date}
+
+  def is_valid?(%{__struct__: _} = d), do: Timex.is_valid?(Map.from_struct(d))
+  def is_valid?(_datetime), do: false
+
+  def iso_week(%{__struct__: _} = d), do: Timex.iso_week(Map.from_struct(d))
   def iso_week(_datetime), do: {:error, :invalid_date}
+
+  def from_iso_day(%{__struct__: _} = d, _day), do: Timex.from_iso_day(Map.from_struct(d))
   def from_iso_day(_datetime, _day), do: {:error, :invalid_date}
 end
