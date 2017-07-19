@@ -136,9 +136,9 @@ defmodule TimexTests do
   end
 
   test "is_leap" do
-    assert not Timex.is_leap?(Timex.epoch())
+    refute Timex.is_leap?(Timex.epoch())
     assert Timex.is_leap?(2012)
-    assert not Timex.is_leap?(2100)
+    refute Timex.is_leap?(2100)
 
     assert {:error, :invalid_date} = Timex.is_leap?("Made up year")
     assert {:error, :invalid_date} = Timex.is_leap?(nil)
@@ -156,17 +156,17 @@ defmodule TimexTests do
                          hour: 0, minute: 0, second: 0, microsecond: {0,0},
                          time_zone: "Etc/UTC", zone_abbr: "UTC",
                          utc_offset: 0, std_offset: 0}
-    assert not Timex.is_valid?(Timex.set(new_date, [date: {12,13,14}, validate: false]))
-    assert not Timex.is_valid?(Timex.set(new_date, [date: {12,12,34}, validate: false]))
-    assert not Timex.is_valid?(Timex.set(new_date, [date: {1,0,1}, validate: false]))
-    assert not Timex.is_valid?(Timex.set(new_date, [date: {1,1,0}, validate: false]))
-    assert not Timex.is_valid?(Timex.set(new_date, [datetime: {{12,12,12}, {24,0,0}}, validate: false]))
-    assert not Timex.is_valid?(Timex.set(new_date, [datetime: {{12,12,12}, {23,60,0}}, validate: false]))
-    assert not Timex.is_valid?(Timex.set(new_date, [datetime: {{12,12,12}, {23,59,60}}, validate: false]))
-    assert not Timex.is_valid?(Timex.set(new_date, [datetime: {{12,12,12}, {-1,59,59}}, validate: false]))
+    refute Timex.is_valid?(Timex.set(new_date, [date: {12,13,14}, validate: false]))
+    refute Timex.is_valid?(Timex.set(new_date, [date: {12,12,34}, validate: false]))
+    refute Timex.is_valid?(Timex.set(new_date, [date: {1,0,1}, validate: false]))
+    refute Timex.is_valid?(Timex.set(new_date, [date: {1,1,0}, validate: false]))
+    refute Timex.is_valid?(Timex.set(new_date, [datetime: {{12,12,12}, {24,0,0}}, validate: false]))
+    refute Timex.is_valid?(Timex.set(new_date, [datetime: {{12,12,12}, {23,60,0}}, validate: false]))
+    refute Timex.is_valid?(Timex.set(new_date, [datetime: {{12,12,12}, {23,59,60}}, validate: false]))
+    refute Timex.is_valid?(Timex.set(new_date, [datetime: {{12,12,12}, {-1,59,59}}, validate: false]))
 
-    assert {:error, :invalid_date} = Timex.is_valid?("Made up date")
-    assert {:error, :invalid_date} = Timex.is_valid?(nil)
+    refute Timex.is_valid?("Made up date")
+    refute Timex.is_valid?(nil)
   end
 
   test "set" do
