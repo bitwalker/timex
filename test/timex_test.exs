@@ -3,6 +3,39 @@ defmodule TimexTests do
   use Timex
   doctest Timex
 
+  describe "local" do
+    test "without argument" do
+      date = %DateTime{} = Timex.local()
+      assert Timex.equal?(Timex.now(), date)
+    end
+
+    test "with now" do
+      now = Timex.now()
+      assert Timex.equal?(Timex.local(now), now)
+    end
+
+    test "with ambiguous datetime" do
+      Application.put_env(:timex, :local_timezone, "America/Sao_Paulo")
+      naive_datetime1 = ~N[2017-02-18T22:30:00]
+      naive_datetime2 = Timex.shift(naive_datetime1, hours: 1)
+      naive_datetime3 = Timex.shift(naive_datetime1, hours: 2)
+      naive_datetime4 = Timex.shift(naive_datetime1, hours: 3)
+      naive_datetime5 = Timex.shift(naive_datetime1, hours: 4)
+
+      datetime1 = %DateTime{} = Timex.Timezone.convert(naive_datetime1, "America/Sao_Paulo")
+      datetime2 = %DateTime{} = Timex.Timezone.convert(naive_datetime2, "America/Sao_Paulo")
+      datetime3 = %DateTime{} = Timex.Timezone.convert(naive_datetime3, "America/Sao_Paulo")
+      datetime4 = %DateTime{} = Timex.Timezone.convert(naive_datetime4, "America/Sao_Paulo")
+      datetime5 = %DateTime{} = Timex.Timezone.convert(naive_datetime5, "America/Sao_Paulo")
+      assert datetime1 == Timex.local(naive_datetime1)
+      assert datetime2 == Timex.local(naive_datetime2)
+      assert datetime3 == Timex.local(naive_datetime3)
+      assert datetime4 == Timex.local(naive_datetime4)
+      assert datetime5 == Timex.local(naive_datetime5)
+      Application.put_env(:timex, :local_timezone, nil)
+    end
+  end
+
   test "century" do
     assert 21 === Timex.century
 

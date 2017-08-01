@@ -58,29 +58,14 @@ defmodule Timex do
   Returns a DateTime representing the current moment in time in the local timezone.
   """
   @spec local() :: DateTime.t | AmbiguousDateTime.t | {:error, term}
-  def local() do
-    case Timezone.local(:calendar.local_time) do
-      %AmbiguousTimezoneInfo{after: a, before: b} ->
-        d = now()
-        ad = Timezone.convert(d, a.full_name)
-        bd = Timezone.convert(d, b.full_name)
-        %AmbiguousDateTime{after: ad, before: bd}
-      %TimezoneInfo{full_name: tz} ->
-        now(tz)
-      {:error, _} = err -> err
-    end
-  end
+  def local(), do: local(now())
 
   @doc """
   Returns a DateTime representing the given date/time in the local timezone
   """
   @spec local(Types.valid_datetime) :: DateTime.t | AmbiguousDateTime.t | {:error, term}
   def local(date) do
-    reference_date = to_erl(date)
-    case Timezone.local(reference_date) do
-      {:error, _} = err -> err
-      tz -> Timezone.convert(date, tz.full_name)
-    end
+    Timezone.convert(date, :local)
   end
 
   @doc """
