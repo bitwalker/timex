@@ -118,12 +118,12 @@ defmodule TimezoneTests do
     # the date time represented here *is* ambiguous, i.e. 2AM is a repeat hour,
     # but we have extra context when converting from UTC to disambiguate
     datetime3 = {{2015,10,25},{0,12,34}}
-    assert %AmbiguousDateTime{} = Timex.to_datetime(datetime3, "UTC") |> Timezone.convert("Europe/Zurich")
+    assert %DateTime{utc_offset: 3600, std_offset: 3600} = Timex.to_datetime(datetime3, "UTC") |> Timezone.convert("Europe/Zurich")
 
     # Should not error out about missing key
     # Should be ambiguous, because 1AM in UTC is during the second 2AM hour of Europe/Zurich
     datetime4 = {{2015,10,25},{1,12,34}}
-    assert %AmbiguousDateTime{} = Timex.to_datetime(datetime4, "UTC") |> Timezone.convert("Europe/Zurich")
+    assert %DateTime{utc_offset: 3600, std_offset: 0} = Timex.to_datetime(datetime4, "UTC") |> Timezone.convert("Europe/Zurich")
   end
 
   test "Issue #220 - Timex.Timezone.convert gives wrong result date/tz sets resulting ambiguous timezones" do
@@ -133,15 +133,21 @@ defmodule TimezoneTests do
       datetime
       |> Timex.to_datetime("Etc/UTC")
       |> Timezone.convert("Europe/Amsterdam")
-      |> Map.get(:after)
       |> Timex.to_erl
 
-    assert {{2016, 10, 30}, {1, 0, 0}} = converted
+    assert {{2016, 10, 30}, {2, 0, 0}} = converted
   end
 
   test "another issue related to #142" do
     datetime = {{2016,10,30}, {3,59,0}}
 
     assert 63645015540 = Timex.to_gregorian_seconds(Timex.to_datetime(datetime, "Europe/Vienna"))
+  end
+
+  test "converting to custom TimeZoneInfo" do
+    datetime = Timex.to_datetime({{2017,1,1}, {1,1,1}}, :utc)
+    tz = Timex.TimezoneInfo.create("madeup", "mdp", 45, 1, nil, nil)
+    converted = Timezone.convert(datetime, tz)
+    assert %DateTime{hour: 1, minute: 1, second: 47} = converted
   end
 end
