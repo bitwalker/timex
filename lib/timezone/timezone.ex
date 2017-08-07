@@ -414,13 +414,14 @@ defmodule Timex.Timezone do
     %AmbiguousDateTime{:before => before_date, :after => after_date}
   end
   def convert(%DateTime{} = date, %TimezoneInfo{full_name: name} = tz) do
-    # Calculate the difference between `date`'s timezone, and the provided timezone
-    difference = diff(date, tz)
+    # Calculate the difference between `date`'s timezone, and UTC
+    secs = Timex.to_gregorian_seconds(date)
     # Offset the provided date's time by the difference
-    {seconds_from_zeroyear, microsecs} = do_shift(date, difference)
-    case resolve(name, seconds_from_zeroyear) do
+    case resolve(name, secs, :utc) do
       {:error, _} = err -> err
       ^tz ->
+        difference = diff(date, tz)
+        {seconds_from_zeroyear, microsecs} = do_shift(date, difference)
         {{y,m,d},{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(seconds_from_zeroyear)
         %DateTime{:year => y, :month => m, :day => d,
                   :hour => h, :minute => mm, :second => s,
@@ -430,9 +431,9 @@ defmodule Timex.Timezone do
                   :utc_offset => tz.offset_utc,
                   :std_offset => tz.offset_std}
       %TimezoneInfo{} = new_zone ->
-        difference = diff(tz, new_zone)
-        {shifted, microsecs} = do_shift(seconds_from_zeroyear, microsecs, difference)
-        {{y,m,d},{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(shifted)
+        difference = diff(date, new_zone)
+        {seconds_from_zeroyear, microsecs} = do_shift(date, difference)
+        {{y,m,d},{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(seconds_from_zeroyear)
         %DateTime{:year => y, :month => m, :day => d,
                   :hour => h, :minute => mm, :second => s,
                   :microsecond => microsecs,
@@ -441,10 +442,10 @@ defmodule Timex.Timezone do
                   :utc_offset => new_zone.offset_utc,
                   :std_offset => new_zone.offset_std}
       %AmbiguousTimezoneInfo{:before => before_tz, :after => after_tz} ->
-        before_diff = diff(tz, before_tz)
-        {before_shifted, before_us} = do_shift(seconds_from_zeroyear, microsecs, before_diff)
-        after_diff = diff(tz, after_tz)
-        {after_shifted, after_us} = do_shift(seconds_from_zeroyear, microsecs, after_diff)
+        before_diff = diff(date, before_tz)
+        {before_shifted, before_us} = do_shift(date, before_diff)
+        after_diff = diff(date, after_tz)
+        {after_shifted, after_us} = do_shift(date, after_diff)
         {{y,m,d},{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(before_shifted)
         before_dt = %DateTime{:year => y, :month => m, :day => d,
                               :hour => h, :minute => mm, :second => s,
