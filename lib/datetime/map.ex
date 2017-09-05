@@ -11,8 +11,8 @@ defimpl Timex.Protocol, for: Map do
   defmacro convert!(map, function, args \\ []) when is_list(args) do
     quote do
       case Timex.Convert.convert_map(unquote(map)) do
-        {:error, reason} -> raise reason
-        converted        -> Timex.Protocol.unquote(function)(converted, unquote_splicing(args))
+        {:error, _} = err -> raise Timex.ConvertError, err
+        converted -> Timex.Protocol.unquote(function)(converted, unquote_splicing(args))
       end
     end
   end
@@ -21,7 +21,7 @@ defimpl Timex.Protocol, for: Map do
     quote do
       case Timex.Convert.convert_map(unquote(map)) do
         {:error, _} = err -> err
-        converted         -> Timex.Protocol.unquote(function)(converted, unquote_splicing(args))
+        converted -> Timex.Protocol.unquote(function)(converted, unquote_splicing(args))
       end
     end
   end
