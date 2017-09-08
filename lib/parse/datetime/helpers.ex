@@ -55,7 +55,8 @@ defmodule Timex.Parse.DateTime.Helpers do
   end
 
   def parse_milliseconds(ms) do
-    n = ms |> String.trim("0") |> String.to_integer
+    n = ms |> String.trim_leading("0")
+    n = if n == "", do: 0, else: String.to_integer(n)
     n = n * 1_000
     [sec_fractional: Timex.DateTime.Helpers.construct_microseconds(n)]
   end
