@@ -50,7 +50,7 @@ defmodule Timex.Format.DateTime.Formatter do
     when is_binary(format_string) and is_binary(locale) and is_atom(formatter)
     do
       date = case date do
-         %{__struct__: struct} when struct in [Date, DateTime, NaiveDateTime] -> date
+         %{__struct__: struct} when struct in [Date, DateTime, NaiveDateTime, Time] -> date
          _other -> Timex.to_naive_datetime(date)
       end
       case formatter.lformat(date, format_string, locale)do
