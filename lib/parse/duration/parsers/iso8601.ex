@@ -24,6 +24,10 @@ defmodule Timex.Parse.Duration.Parsers.ISO8601Parser do
       ...> Timex.Format.Duration.Formatter.format(d)
       "PT3H12M25.001S"
 
+      iex> {:ok, d} = #{__MODULE__}.parse("P2W")
+      ...> Timex.Format.Duration.Formatter.format(d)
+      "P14D"
+
       iex> #{__MODULE__}.parse("P15YT3D")
       {:error, "invalid use of date component after time separator"}
 
@@ -34,6 +38,8 @@ defmodule Timex.Parse.Duration.Parsers.ISO8601Parser do
     case parse_components(rest, []) do
       {:error, _} = err ->
         err
+      [{?W, w}] ->
+        {:ok, Duration.from_days(7*w)}
       components when is_list(components) ->
         result = Enum.reduce(components, {false, Duration.zero}, fn
           _, {:error, _} = err ->
@@ -54,6 +60,9 @@ defmodule Timex.Parse.Duration.Parsers.ISO8601Parser do
             {true, Duration.add(d, Duration.from_minutes(m))}
           {?S, s}, {true, d} ->
             {true, Duration.add(d, Duration.from_seconds(s))}
+          {?W, _w}, {_, _} ->
+            {:error, "Found 'W', a basic format designator, but the parse indicates " <>
+              "this is an extended format, mixing the two formats is disallowed"}
           {unit, _}, {true, _d} when unit in [?Y,?D] ->
             {:error, "invalid use of date component after time separator"}
           {unit, _}, {false, _d} when unit in [?H,?S] ->
@@ -89,7 +98,7 @@ defmodule Timex.Parse.Duration.Parsers.ISO8601Parser do
 
   defp parse_component(<<c::utf8>>, _acc) when c in @numeric,
     do: {:error, "unexpected end of input at #{<<c::utf8>>}"}
-  defp parse_component(<<c::utf8>>, acc) when c in 'YMDHS' do
+  defp parse_component(<<c::utf8>>, acc) when c in 'WYMDHS' do
     cond do
       String.contains?(acc, ".") ->
         case Float.parse(acc) do
@@ -106,7 +115,7 @@ defmodule Timex.Parse.Duration.Parsers.ISO8601Parser do
   defp parse_component(<<c::utf8, rest::binary>>, acc) when c in @numeric do
     parse_component(rest, <<acc::binary, c::utf8>>)
   end
-  defp parse_component(<<c::utf8, rest::binary>>, acc) when c in 'YMDHS' do
+  defp parse_component(<<c::utf8, rest::binary>>, acc) when c in 'WYMDHS' do
     cond do
       String.contains?(acc, ".") ->
         case Float.parse(acc) do
