@@ -77,6 +77,7 @@ defmodule Timex.Parse.Duration.Parsers.ISO8601Parser do
   def parse(<<c::utf8, _::binary>>), do: {:error, "expected P, got #{<<c::utf8>>}"}
   def parse(s) when is_binary(s), do: {:error, "unexpected end of input"}
 
+  @spec parse_components(binary, [{integer, number}]) :: [{integer, number}] | {:error, String.t}
   defp parse_components(<<>>, acc),
     do: Enum.reverse(acc)
   defp parse_components(<<?T>>, _acc),
@@ -96,6 +97,7 @@ defmodule Timex.Parse.Duration.Parsers.ISO8601Parser do
   defp parse_components(<<c::utf8, _::binary>>, _acc),
     do: {:error, "expected numeric, but got #{<<c::utf8>>}"}
 
+  @spec parse_component(binary, binary) :: {integer, number, binary}
   defp parse_component(<<c::utf8>>, _acc) when c in @numeric,
     do: {:error, "unexpected end of input at #{<<c::utf8>>}"}
   defp parse_component(<<c::utf8>>, acc) when c in 'WYMDHS' do
