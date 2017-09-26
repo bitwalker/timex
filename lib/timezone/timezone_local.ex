@@ -103,7 +103,7 @@ defmodule Timex.Timezone.Local do
         # defs are set up, if we find a value, it's just passed
         # along through the pipe until we're done. If we don't,
         # this will try each fallback location in order.
-        {:ok, tz} = read_timezone_data(@_ETC_TIMEZONE, date)
+        {:ok, tz} = read_timezone_data(nil, @_ETC_TIMEZONE, date)
         |> read_timezone_data(@_ETC_SYS_CLOCK, date)
         |> read_timezone_data(@_ETC_CONF_CLOCK, date)
         |> read_timezone_data(@_ETC_LOCALTIME, date)
