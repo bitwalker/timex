@@ -45,13 +45,13 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label(expected_digits)
   end
   def month_full(_) do
-    one_of(word(), Helpers.months)
+    one_of(word_of(~r/[[:alpha:]]/u), Helpers.months)
     |> map(&Helpers.to_month_num/1)
     |> label("full month name")
   end
   def month_short(_) do
     abbrs = Helpers.months |> Enum.map(fn m -> String.slice(m, 0, 3) end)
-    one_of(word(), abbrs)
+    one_of(word_of(~r/[[:alpha:]]/), abbrs)
     |> map(&Helpers.to_month_num/1)
     |> label("month abbreviation")
   end
@@ -82,13 +82,13 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("ordinal weekday")
   end
   def weekday_short(_) do
-    word()
+    word_of(~r/[[:alpha:]]/u)
     |> satisfy(&Helpers.is_weekday/1)
     |> map(fn name -> Helpers.to_weekday(name) end)
     |> label("weekday abbreviation")
   end
   def weekday_full(_) do
-    word()
+    word_of(~r/[[:alpha:]]/u)
     |> satisfy(&Helpers.is_weekday/1)
     |> map(fn name -> Helpers.to_weekday(name) end)
     |> label("weekday name")
