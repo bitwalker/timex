@@ -628,6 +628,16 @@ defmodule TimexTests do
     assert {:error, :invalid_date} == Timex.end_of_day(nil)
   end
 
+  test "to_datetime with invalid dates" do
+    # invalid date tuple
+    assert {:error, :invalid_date} == Timex.to_datetime({2015, 1}, {0,0,0})
+    assert {:error, :invalid_date} == Timex.to_datetime({2015, 1, 1, 1}, {0,0,0})
+
+    # just plain wrong
+    assert {:error, :invalid_date} == Timex.to_datetime("some day", {0,0,0})
+    assert {:error, :invalid_date} == Timex.to_datetime("some day", "some time")
+  end
+
   test "start and end for all types" do
     datetime = Timex.now()
 

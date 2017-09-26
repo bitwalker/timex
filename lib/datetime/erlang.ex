@@ -45,7 +45,7 @@ defimpl Timex.Protocol, for: Tuple do
   def to_datetime({{y,m,d},{h,mm,s,_us}} = dt, timezone) when is_datetime(y,m,d,h,mm,s) do
     Timex.DateTime.Helpers.construct(dt, timezone)
   end
-  def to_date(_, _), do: {:error, :invalid_date}
+  def to_datetime(_, _), do: {:error, :invalid_date}
 
   @spec to_naive_datetime(Types.date | Types.datetime | Types.microsecond_datetime) :: NaiveDateTime.t
   def to_naive_datetime({{y,m,d},{h,mm,s,us}}) when is_datetime(y,m,d,h,mm,s) do
