@@ -37,6 +37,16 @@ defmodule DateFormatTest.ParseStrftime do
     assert {:ok, ^date} = parse("20150713 14:01:21.038", "%Y%m%d %H:%M:%S.%L")
   end
 
+  test "issue #356 - millisecond parsing" do
+    {:ok, ms1} = parse("000", "%L")
+    {:ok, ms2} = parse("010", "%L")
+    {:ok, ms3} = parse("100", "%L")
+
+    assert elem(ms1.microsecond, 0) == 0
+    assert elem(ms2.microsecond, 0) == 10 * 1_000
+    assert elem(ms3.microsecond, 0) == 100 * 1_000
+  end
+
   defp parse(date, fmt) do
     Timex.parse(date, fmt, :strftime)
   end
