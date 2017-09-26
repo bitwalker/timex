@@ -69,33 +69,50 @@ defmodule Timex.Timezone.Local do
   @spec localtz(:osx | :unix | :win, gregorian_seconds) :: String.t | no_return
   defp localtz(:osx, date) do
     # Allow TZ environment variable to override lookup
-    case System.get_env("TZ") do
-      nil ->
-        # Most accurate local timezone will come from /etc/localtime,
-        # since we can lookup proper timezones for arbitrary dates
-        case read_timezone_data(nil, @_ETC_LOCALTIME, date) do
-          {:ok, tz} -> tz
-          _ ->
-            # Fallback and ask systemsetup
-            {tz, 0} = System.cmd("systemsetup", ["-gettimezone"])
-            tz = tz
-            |> String.trim("\n")
-            |> String.replace("Time Zone: ", "")
-            if String.length(tz) > 0 do
-              tz
-            else
-              raise("Unable to find local timezone.")
-            end
+    tz =
+      case System.get_env("TZ") do
+        nil ->
+          # Most accurate local timezone will come from /etc/localtime,
+          # since we can lookup proper timezones for arbitrary dates
+          read_timezone_data(nil, @_ETC_LOCALTIME, date)
+        ":" <> path ->
+          read_timezone_data(nil, path, date)
+        tz ->
+          {:ok, tz}
+      end
+    case tz do
+      {:ok, tz} ->
+        tz
+      _ ->
+        # Fallback and ask systemsetup
+        {tz, 0} = System.cmd("systemsetup", ["-gettimezone"])
+        tz = tz
+        |> String.trim("\n")
+        |> String.replace("Time Zone: ", "")
+        if String.length(tz) > 0 do
+          tz
+        else
+          raise("Unable to find local timezone.")
         end
-      tz -> tz
     end
   end
 
   # Get the locally configured timezone on *NIX systems
   defp localtz(:unix, date) do
-    case System.get_env("TZ") do
-      # Not found
-      nil ->
+    tz =
+      case System.get_env("TZ") do
+        # Not found
+        nil ->
+          nil
+        ":" <> path ->
+          read_timezone_data(nil, path, date)
+        tz ->
+          {:ok, tz}
+      end
+    case tz do
+      {:ok, tz} ->
+        tz
+      _ ->
         # Since that failed, check distro specific config files
         # containing the timezone name. To clean up the code here
         # we're using pipes, even though we may find the value we
@@ -109,7 +126,6 @@ defmodule Timex.Timezone.Local do
         |> read_timezone_data(@_ETC_LOCALTIME, date)
         |> read_timezone_data(@_USR_ETC_LOCALTIME, date)
         tz
-      tz  -> tz
     end
   end
 
@@ -173,7 +189,7 @@ defmodule Timex.Timezone.Local do
   # Attempt to read timezone data from /etc/timezone
   @spec read_timezone_data({:ok, String.t} | nil, String.t, gregorian_seconds) ::
     {:ok, String.t} | nil | no_return
-  defp read_timezone_data(result \\ nil, file, date)
+  defp read_timezone_data(result, file, date)
 
   # If we've found a timezone, just keep on piping it through
   defp read_timezone_data({:ok, _} = result, _, _),
