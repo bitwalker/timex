@@ -1517,7 +1517,8 @@ defmodule Timex do
     days: integer,
     weeks: integer,
     months: integer,
-    years: integer
+    years: integer,
+    duration: Duration.t
   ]
   @spec shift(Types.valid_datetime, shift_options) ::
     Types.valid_datetime | AmbiguousDateTime.t | {:error, term}
