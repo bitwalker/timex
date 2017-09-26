@@ -16,6 +16,11 @@ defmodule DateFormatTest.GeneralFormatting do
     assert "15:40:33" == Timex.format!(tuple, "{h24}:{m}:{s}")
   end
 
+  test "issue #358 - formatting a Time returns wrong result" do
+    time = ~T[17:00:00]
+    assert "17:00:00" == Timex.format!(time,"{h24}:{m}:{s}")
+  end
+
   test "fractional seconds padding obeys formatting rules" do
     t = Timex.parse!("2017-06-28 20:21:22.000000", "%F %T.%f", :strftime)
     assert {0, 6} = t.microsecond
