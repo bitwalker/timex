@@ -365,6 +365,39 @@ defmodule TimexTests do
     assert Timex.diff(~T[09:00:00], ~T[12:30:23]) == -((3*60+30)*60+23)*1_000*1_000
   end
 
+  test "month diff is asymetrical for months of different lengths" do
+    assert Timex.diff(~D[2017-02-28], ~D[2017-01-27], :months) === 1
+    assert Timex.diff(~D[2017-02-28], ~D[2017-01-28], :months) === 1
+    assert Timex.diff(~D[2017-02-28], ~D[2017-01-29], :months) === 0
+    assert Timex.diff(~D[2017-02-28], ~D[2017-01-30], :months) === 0
+    assert Timex.diff(~D[2017-02-28], ~D[2017-01-31], :months) === 0
+
+    assert Timex.diff(~D[2017-01-27], ~D[2017-02-28], :months) === -1
+    assert Timex.diff(~D[2017-01-28], ~D[2017-02-28], :months) === -1
+    assert Timex.diff(~D[2017-01-29], ~D[2017-02-28], :months) === -1
+    assert Timex.diff(~D[2017-01-30], ~D[2017-02-28], :months) === -1
+    assert Timex.diff(~D[2017-01-31], ~D[2017-02-28], :months) === -1
+
+    assert Timex.diff(~D[2017-01-27], ~D[2017-02-27], :months) === -1
+    assert Timex.diff(~D[2017-01-28], ~D[2017-02-27], :months) === 0
+    assert Timex.diff(~D[2017-01-29], ~D[2017-02-27], :months) === 0
+    assert Timex.diff(~D[2017-01-30], ~D[2017-02-27], :months) === 0
+    assert Timex.diff(~D[2017-01-31], ~D[2017-02-27], :months) === 0
+  end
+
+  test "month diff matches month shift for native dates" do
+    date = ~D[2017-01-27]
+    Enum.each(0..34, fn(x) ->
+      date1 = Timex.shift(date, days: x)
+
+      date2 = Timex.shift(date1, months: 1)
+      assert Timex.diff(date1, date2, :months) === -1
+
+      date2 = Timex.shift(date1, months: -1)
+      assert Timex.diff(date1, date2, :months) === 1
+    end)
+  end
+
   test "timestamp diff same datetime" do
       dt = Timex.to_datetime({1984, 5, 10})
       assert Timex.diff(dt, dt, :duration) === Duration.zero
