@@ -398,6 +398,19 @@ defmodule TimexTests do
     end)
   end
 
+  test "month diff matches month shift for datetimes" do
+    date = ~D[2017-01-27] |> Timex.to_datetime
+    Enum.each(0..34, fn(x) ->
+      date1 = Timex.shift(date, days: x)
+
+      date2 = Timex.shift(date1, months: 1)
+      assert Timex.diff(date1, date2, :months) === -1
+
+      date2 = Timex.shift(date1, months: -1)
+      assert Timex.diff(date1, date2, :months) === 1
+    end)
+  end
+
   test "timestamp diff same datetime" do
       dt = Timex.to_datetime({1984, 5, 10})
       assert Timex.diff(dt, dt, :duration) === Duration.zero
