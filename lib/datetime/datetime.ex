@@ -194,6 +194,8 @@ defimpl Timex.Protocol, for: DateTime do
             else
               %{result | :hour => h, :minute => m, :second => s}
             end
+          {:time, t} ->
+            Timex.set(result, [time: {t.hour, t.minute, t.second}])
           {:day, d} ->
             if validate? do
               %{result | :day => Timex.normalize(:day, {result.year, result.month, d})}
