@@ -1,0 +1,66 @@
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: sv\n"
+
+#: lib/l10n/translator.ex:192
+msgid "Fri"
+msgstr "Fre"
+
+#: lib/l10n/translator.ex:200
+msgid "Friday"
+msgstr "Fredag"
+
+#: lib/l10n/translator.ex:188
+msgid "Mon"
+msgstr "Mån"
+
+#: lib/l10n/translator.ex:196
+msgid "Monday"
+msgstr "Måndag"
+
+#: lib/l10n/translator.ex:193
+msgid "Sat"
+msgstr "Lör"
+
+#: lib/l10n/translator.ex:201
+msgid "Saturday"
+msgstr "Lördag"
+
+#: lib/l10n/translator.ex:194
+msgid "Sun"
+msgstr "Sön"
+
+#: lib/l10n/translator.ex:202
+msgid "Sunday"
+msgstr "Söndag"
+
+#: lib/l10n/translator.ex:191
+msgid "Thu"
+msgstr "Tors"
+
+#: lib/l10n/translator.ex:199
+msgid "Thursday"
+msgstr "Torsdag"
+
+#: lib/l10n/translator.ex:189
+msgid "Tue"
+msgstr "Tis"
+
+#: lib/l10n/translator.ex:197
+msgid "Tuesday"
+msgstr "Tisdag"
+
+#: lib/l10n/translator.ex:190
+msgid "Wed"
+msgstr "Ons"
+
+#: lib/l10n/translator.ex:198
+msgid "Wednesday"
+msgstr "Onsdag"

@@ -1,0 +1,230 @@
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: sv\n"
+
+#: lib/l10n/translator.ex:237
+msgid "last month"
+msgstr "förra månaden"
+
+#: lib/l10n/translator.ex:243
+msgid "last week"
+msgstr "förra veckan"
+
+#: lib/l10n/translator.ex:231
+msgid "last year"
+msgstr "förra året"
+
+#: lib/l10n/translator.ex:239
+msgid "next month"
+msgstr "nästa månad"
+
+#: lib/l10n/translator.ex:245
+msgid "next week"
+msgstr "nästa vecka"
+
+#: lib/l10n/translator.ex:233
+msgid "next year"
+msgstr "nästa år"
+
+#: lib/l10n/translator.ex:238
+msgid "this month"
+msgstr "denna månad"
+
+#: lib/l10n/translator.ex:244
+msgid "this week"
+msgstr "denna vecka"
+
+#: lib/l10n/translator.ex:232
+msgid "this year"
+msgstr "detta år"
+
+#: lib/l10n/translator.ex:250
+msgid "today"
+msgstr "idag"
+
+#: lib/l10n/translator.ex:251
+msgid "tomorrow"
+msgstr "imorgon"
+
+#: lib/l10n/translator.ex:249
+msgid "yesterday"
+msgstr "igår"
+
+#: lib/l10n/translator.ex:253
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "%{count} dag sedan"
+msgstr[1] "%{count} dagar sedan"
+
+#: lib/l10n/translator.ex:278
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "%{count} timme sedan"
+msgstr[1] "%{count} timmar sedan"
+
+#: lib/l10n/translator.ex:281
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "%{count} minut sedan"
+msgstr[1] "%{count} minuter sedan"
+
+#: lib/l10n/translator.ex:241
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "%{count} månad sedan"
+msgstr[1] "%{count} månader sedan"
+
+#: lib/l10n/translator.ex:284
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "%{count} sekund sedan"
+msgstr[1] "%{count} sekunder sedan"
+
+#: lib/l10n/translator.ex:247
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "%{count} vecka sedan"
+msgstr[1] "%{count} veckor sedan"
+
+#: lib/l10n/translator.ex:235
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "%{count} år sedan"
+msgstr[1] "%{count} år sedan"
+
+#: lib/l10n/translator.ex:252
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "om %{count} dag"
+msgstr[1] "om %{count} dagar"
+
+#: lib/l10n/translator.ex:277
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "om %{count} timme"
+msgstr[1] "om %{count} timmar"
+
+#: lib/l10n/translator.ex:280
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "om %{count} minut"
+msgstr[1] "om %{count} minuter"
+
+#: lib/l10n/translator.ex:240
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "om %{count} månad"
+msgstr[1] "om %{count} månader"
+
+#: lib/l10n/translator.ex:283
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "om %{count} sekund"
+msgstr[1] "om %{count} sekunder"
+
+#: lib/l10n/translator.ex:246
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "om %{count} vecka"
+msgstr[1] "om %{count} veckor"
+
+#: lib/l10n/translator.ex:234
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "om %{count} år"
+msgstr[1] "om %{count} år"
+
+#: lib/l10n/translator.ex:267
+msgid "last friday"
+msgstr "förra fredagen"
+
+#: lib/l10n/translator.ex:255
+msgid "last monday"
+msgstr "förra måndagen"
+
+#: lib/l10n/translator.ex:270
+msgid "last saturday"
+msgstr "förra lördagen"
+
+#: lib/l10n/translator.ex:273
+msgid "last sunday"
+msgstr "förra söndagen"
+
+#: lib/l10n/translator.ex:264
+msgid "last thursday"
+msgstr "förra torsdagen"
+
+#: lib/l10n/translator.ex:258
+msgid "last tuesday"
+msgstr "förra tisdagen"
+
+#: lib/l10n/translator.ex:261
+msgid "last wednesday"
+msgstr "förra onsdagen"
+
+#: lib/l10n/translator.ex:269
+msgid "next friday"
+msgstr "nästa fredag"
+
+#: lib/l10n/translator.ex:257
+msgid "next monday"
+msgstr "nästa måndag"
+
+#: lib/l10n/translator.ex:272
+msgid "next saturday"
+msgstr "nästa lördag"
+
+#: lib/l10n/translator.ex:275
+msgid "next sunday"
+msgstr "nästa söndag"
+
+#: lib/l10n/translator.ex:266
+msgid "next thursday"
+msgstr "nästa torsdag"
+
+#: lib/l10n/translator.ex:260
+msgid "next tuesday"
+msgstr "nästa tisdag"
+
+#: lib/l10n/translator.ex:263
+msgid "next wednesday"
+msgstr "nästa onsdag"
+
+#: lib/l10n/translator.ex:268
+msgid "this friday"
+msgstr "på fredag"
+
+#: lib/l10n/translator.ex:256
+msgid "this monday"
+msgstr "på måndag"
+
+#: lib/l10n/translator.ex:271
+msgid "this saturday"
+msgstr "på lördag"
+
+#: lib/l10n/translator.ex:274
+msgid "this sunday"
+msgstr "på söndag"
+
+#: lib/l10n/translator.ex:265
+msgid "this thursday"
+msgstr "på torsdag"
+
+#: lib/l10n/translator.ex:259
+msgid "this tuesday"
+msgstr "på tisdag"
+
+#: lib/l10n/translator.ex:262
+msgid "this wednesday"
+msgstr "på onsdag"
+
+#: lib/l10n/translator.ex:286
+msgid "now"
+msgstr "nu"
