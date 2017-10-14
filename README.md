@@ -71,7 +71,7 @@ Here's a few simple examples:
 > strftime_str = Timex.format!(datetime, "%FT%T%:z", :strftime)
 "2016-02-29T12:30:30+00:00"
 
-> Timex.parse(default_str, "{ISO:Extended}")
+> Timex.parse(strftime_str, "{ISO:Extended}")
 {:ok, #<DateTime(2016-02-29T12:30:30.120+00:00 Etc/Utc)}
 
 > Timex.parse!(strftime_str, "%FT%T%:z", :strftime)
@@ -113,11 +113,13 @@ You can provide your own formatter/parser for datetime strings by implementing t
 
 ## Common Issues
 
-**Warning**: Timex functions of the form `iso_*` behave based on how the ISO calendar represents dates/times and not the ISO8601 date format. This confusion has occurred before, and it's important to note this!
+### `iso_*` Functions
 
-- If you need to use Timex from within an escript, add `{:tzdata, "~> 0.1.8", override: true}` to your deps,
-  more recent versions of :tzdata are unable to work in an escript because of the need to load ETS table files
-  from priv, and due to the way ETS loads these files, it's not possible to do so.
+Timex functions of the form `iso_*` behave based on how the ISO calendar represents dates/times and not the ISO8601 date format. This confusion has occurred before, and it's important to note this!
+
+### Timex with escript
+
+If you need to use Timex from within an escript, add `{:tzdata, "~> 0.1.8", override: true}` to your deps, more recent versions of :tzdata are unable to work in an escript because of the need to load ETS table files from priv, and due to the way ETS loads these files, it's not possible to do so.
 
 ### Automatic time zone updates
 
