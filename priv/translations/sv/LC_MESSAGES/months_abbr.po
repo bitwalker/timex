@@ -1,0 +1,58 @@
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: sv\n"
+
+#: lib/l10n/translator.ex:207
+msgid "Apr"
+msgstr "Apr"
+
+#: lib/l10n/translator.ex:211
+msgid "Aug"
+msgstr "Aug"
+
+#: lib/l10n/translator.ex:215
+msgid "Dec"
+msgstr "Dec"
+
+#: lib/l10n/translator.ex:205
+msgid "Feb"
+msgstr "Feb"
+
+#: lib/l10n/translator.ex:204
+msgid "Jan"
+msgstr "Jan"
+
+#: lib/l10n/translator.ex:210
+msgid "Jul"
+msgstr "Jul"
+
+#: lib/l10n/translator.ex:209
+msgid "Jun"
+msgstr "Jun"
+
+#: lib/l10n/translator.ex:206
+msgid "Mar"
+msgstr "Mar"
+
+#: lib/l10n/translator.ex:208
+msgid "May"
+msgstr "Maj"
+
+#: lib/l10n/translator.ex:214
+msgid "Nov"
+msgstr "Nov"
+
+#: lib/l10n/translator.ex:213
+msgid "Oct"
+msgstr "Okt"
+
+#: lib/l10n/translator.ex:212
+msgid "Sep"
+msgstr "Sep"

@@ -1,0 +1,70 @@
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: sv\n"
+
+#: lib/l10n/translator.ex:178
+msgid "%{count} day"
+msgid_plural "%{count} days"
+msgstr[0] "%{count} dag"
+msgstr[1] "%{count} dagar"
+
+#: lib/l10n/translator.ex:177
+msgid "%{count} hour"
+msgid_plural "%{count} hours"
+msgstr[0] "%{count} timme"
+msgstr[1] "%{count} timmar"
+
+#: lib/l10n/translator.ex:173
+msgid "%{count} microsecond"
+msgid_plural "%{count} microseconds"
+msgstr[0] "%{count} mikrosekund"
+msgstr[1] "%{count} mikrosekunder"
+
+#: lib/l10n/translator.ex:174
+msgid "%{count} millisecond"
+msgid_plural "%{count} milliseconds"
+msgstr[0] "%{count} millisekund"
+msgstr[1] "%{count} millisekunder"
+
+#: lib/l10n/translator.ex:176
+msgid "%{count} minute"
+msgid_plural "%{count} minutes"
+msgstr[0] "%{count} minut"
+msgstr[1] "%{count} minuter"
+
+#: lib/l10n/translator.ex:180
+msgid "%{count} month"
+msgid_plural "%{count} months"
+msgstr[0] "%{count} månad"
+msgstr[1] "%{count} månader"
+
+#: lib/l10n/translator.ex:172
+msgid "%{count} nanosecond"
+msgid_plural "%{count} nanoseconds"
+msgstr[0] "%{count} nanosekund"
+msgstr[1] "%{count} nanosekunder"
+
+#: lib/l10n/translator.ex:175
+msgid "%{count} second"
+msgid_plural "%{count} seconds"
+msgstr[0] "%{count} sekund"
+msgstr[1] "%{count} sekunder"
+
+#: lib/l10n/translator.ex:179
+msgid "%{count} week"
+msgid_plural "%{count} weeks"
+msgstr[0] "%{count} vecka"
+msgstr[1] "%{count} veckor"
+
+#: lib/l10n/translator.ex:181
+msgid "%{count} year"
+msgid_plural "%{count} years"
+msgstr[0] "%{count} år"
+msgstr[1] "%{count} år"
