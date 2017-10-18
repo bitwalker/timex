@@ -603,7 +603,7 @@ defmodule Timex.Duration do
 
   Valid measurement units for this function are:
 
-      :microseconds, :milliseconds, :seconds, :minutes, :hours, or :weeks
+      :microseconds, :milliseconds, :seconds, :minutes, :hours, :days, or :weeks
 
   ## Examples
 
