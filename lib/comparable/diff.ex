@@ -106,34 +106,20 @@ defmodule Timex.Comparable.Diff do
       do_diff_months(start_date, end_date) * -1
     end
   end
-  defp do_diff_months({y,m,_}, {y,m,_}), do: 0
+  defp do_diff_months({y, m, _}, {y, m, _}), do: 0
   defp do_diff_months({y1, m1, d1}, {y2, m2, d2}) when y1 <= y2 and m1 < m2 do
     year_diff = y2 - y1
-    month_diff = if d2 >= d1, do: m2 - m1, else: (m2-1)-m1
-    (year_diff*12)+month_diff
+    month_diff = if d2 >= d1, do: m2 - m1, else: (m2 - 1) - m1
+    (year_diff * 12) + month_diff
   end
-  defp do_diff_months({y1,m1,d1}, {y2,m2,d2}) when y1 < y2 and m1 > m2 do
-    year_diff = y2 - (y1+1)
-    month_diff =
-      cond do
-        d2 == d1 ->
-          12 - (m1-m2)
-        d2 > d1 ->
-          12 - ((m1-1)-m2)
-        d2 < d1 ->
-          12 - (m1-m2)
-      end
-    (year_diff*12)+month_diff
+  defp do_diff_months({y1, m1, d1}, {y2, m2, d2}) when y1 < y2 and m1 > m2 do
+    year_diff = y2 - (y1 + 1)
+    month_diff = if d2 >= d1, do: 12 - (m1 - m2), else: 12 - (m1 - (m2 - 1))
+    (year_diff * 12) + month_diff
   end
-  defp do_diff_months({y1,m,d1}, {y2,m,d2}) when y1 < y2 do
-    year_diff = y2 - (y1+1)
-    month_diff =
-      cond do
-        d2 > d1 ->
-          11
-        :else ->
-          12
-      end
-    (year_diff*12)+month_diff
+  defp do_diff_months({y1, m, d1}, {y2, m, d2}) when y1 < y2 do
+    year_diff = y2 - (y1 + 1)
+    month_diff = if d2 >= d1, do: 12, else: 11
+    (year_diff * 12) + month_diff
   end
 end

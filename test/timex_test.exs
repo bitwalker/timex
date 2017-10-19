@@ -363,6 +363,26 @@ defmodule TimexTests do
     assert Timex.diff(date2, date1, :months) === -25
 
     assert Timex.diff(~T[09:00:00], ~T[12:30:23]) == -((3*60+30)*60+23)*1_000*1_000
+
+    assert Timex.diff(~D[2017-12-18], ~D[2017-10-19], :months) == 1
+    assert Timex.diff(~D[2017-12-19], ~D[2017-10-19], :months) == 2
+    assert Timex.diff(~D[2017-12-20], ~D[2017-10-19], :months) == 2
+
+    assert Timex.diff(~D[2018-01-18], ~D[2017-10-19], :months) == 2
+    assert Timex.diff(~D[2018-01-19], ~D[2017-10-19], :months) == 3
+    assert Timex.diff(~D[2018-01-20], ~D[2017-10-19], :months) == 3
+
+    assert Timex.diff(~D[2018-09-18], ~D[2017-10-19], :months) == 10
+    assert Timex.diff(~D[2018-09-19], ~D[2017-10-19], :months) == 11
+    assert Timex.diff(~D[2018-09-20], ~D[2017-10-19], :months) == 11
+
+    assert Timex.diff(~D[2018-10-18], ~D[2017-10-19], :months) == 11
+    assert Timex.diff(~D[2018-10-19], ~D[2017-10-19], :months) == 12
+    assert Timex.diff(~D[2018-10-20], ~D[2017-10-19], :months) == 12
+
+    assert Timex.diff(~D[2018-11-18], ~D[2017-10-19], :months) == 12
+    assert Timex.diff(~D[2018-11-19], ~D[2017-10-19], :months) == 13
+    assert Timex.diff(~D[2018-11-20], ~D[2017-10-19], :months) == 13
   end
 
   test "timestamp diff same datetime" do
