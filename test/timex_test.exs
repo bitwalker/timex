@@ -363,6 +363,10 @@ defmodule TimexTests do
     assert Timex.diff(date2, date1, :months) === -25
 
     assert Timex.diff(~T[09:00:00], ~T[12:30:23]) == -((3*60+30)*60+23)*1_000*1_000
+
+    assert {:error, {:invalid_granularity, :dayz}} === Timex.diff(date1, date1, :dayz)
+    assert {:error, {:invalid_granularity, :dayz}} === Timex.diff(d1, d1, :dayz)
+    assert {:error, {:invalid_granularity, :dayz}} === Timex.diff(~T[12:00:00], ~T[12:00:00], :dayz)
   end
 
   test "timestamp diff same datetime" do
