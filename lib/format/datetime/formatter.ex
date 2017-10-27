@@ -552,7 +552,10 @@ defmodule Timex.Format.DateTime.Formatter do
         n when n < min_width -> min_width
         n -> n
       end
-    padded = pad_numeric(us, [padding: :zeroes], width_spec(min_width..max_width))
+
+    us_str = "#{us}"
+    padded_us_str = String.duplicate(pad_char(:zeroes), 6 - byte_size(us_str)) <> us_str
+    padded = pad_numeric(padded_us_str, [padding: :zeroes], width_spec(min_width..max_width))
     ".#{padded}"
   end
   def format_token(_locale, :sec_fractional, _date, _modifiers, _flags, width) do
@@ -572,19 +575,18 @@ defmodule Timex.Format.DateTime.Formatter do
         pad_numeric(Timex.to_unix(date), flags, width)
     end
   end
-  def format_token(_locale, :us, %{microsecond: {us, precision}}, _modifiers, flags, width) do
+  def format_token(_locale, :us, %{microsecond: {us, _precision}}, _modifiers, flags, width) do
     min =
       case Keyword.get(width, :min) do
-        nil -> precision
-        n when n < 1 -> precision
+        nil -> 6
+        n when n < 0 -> 6
         n -> n
       end
     max =
       case Keyword.get(width, :max) do
-        nil -> precision
-        n when n < 1 -> precision
-        n when n < min -> min
-        n -> n
+        nil -> 6
+        n when n > 6 -> n
+        _ -> 6
       end
     pad_numeric(us, flags, width_spec(min..max))
   end

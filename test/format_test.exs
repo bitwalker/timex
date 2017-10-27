@@ -22,14 +22,14 @@ defmodule DateFormatTest.GeneralFormatting do
   end
 
   test "fractional seconds padding obeys formatting rules" do
-    t = Timex.parse!("2017-06-28 20:21:22.000000", "%F %T.%f", :strftime)
-    assert {0, 6} = t.microsecond
-    assert "000000" = Timex.format!(t, "%f", :strftime)
-    assert "000" = Timex.format!(t, "%03f", :strftime)
+    t = Timex.parse!("2017-06-28 20:21:22.012345", "%F %T.%f", :strftime)
+    assert {12345, 6} = t.microsecond
+    assert "012345" = Timex.format!(t, "%f", :strftime)
+    assert "12345" = Timex.format!(t, "%03f", :strftime)
 
     t = Timex.to_datetime({2017, 6, 22})
     assert {0, 0} = t.microsecond
-    assert "" = Timex.format!(t, "%f", :strftime)
+    assert "000000" = Timex.format!(t, "%f", :strftime)
     assert "000" = Timex.format!(t, "%03f", :strftime)
   end
 end
