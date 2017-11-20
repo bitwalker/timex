@@ -134,5 +134,47 @@ defmodule IntervalTests do
       interval = Interval.new(from: ~D[2014-09-22], until: ~D[2014-09-22])
       refute ~D[2014-09-22] in interval
     end
+
+    test "membership includes datetimes in interval" do
+      interval = Interval.new(from: ~D[2014-09-22], until: ~D[2014-09-24])
+      assert ~N[2014-09-22 00:00:00] in interval
+    end
+  end
+
+  describe "overlaps?/2" do
+    test "non-overlapping" do
+      interval_a = Interval.new(from: ~D[2014-09-20], until: ~D[2014-09-24])
+      interval_b = Interval.new(from: ~D[2014-09-25], until: ~D[2014-09-30])
+
+      refute Interval.overlaps?(interval_a, interval_b)
+    end
+
+    test "first subset of second" do
+      interval_a = Interval.new(from: ~D[2014-09-20], until: ~D[2014-09-24])
+      interval_b = Interval.new(from: ~D[2014-09-20], until: ~D[2014-09-30])
+
+      assert Interval.overlaps?(interval_a, interval_b)
+    end
+
+    test "first superset of second" do
+      interval_a = Interval.new(from: ~D[2014-09-20], until: ~D[2014-09-24])
+      interval_b = Interval.new(from: ~D[2014-09-20], until: ~D[2014-09-22])
+
+      assert Interval.overlaps?(interval_a, interval_b)
+    end
+
+    test "first partially ahead of second" do
+      interval_a = Interval.new(from: ~D[2014-09-20], until: ~D[2014-09-24])
+      interval_b = Interval.new(from: ~D[2014-09-22], until: ~D[2014-09-26])
+
+      assert Interval.overlaps?(interval_a, interval_b)
+    end
+
+    test "first partially behind second" do
+      interval_a = Interval.new(from: ~D[2014-09-23], until: ~D[2014-09-28])
+      interval_b = Interval.new(from: ~D[2014-09-22], until: ~D[2014-09-26])
+
+      assert Interval.overlaps?(interval_a, interval_b)
+    end
   end
 end

@@ -97,6 +97,26 @@ true
 
 > Timex.before?(Timex.shift(Timex.today, days: 1), Timex.today)
 false
+
+> interval = Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3])
+%Timex.Interval{from: ~N[2016-03-03 00:00:00], left_open: false,
+ right_open: true, step: [days: 1], until: ~N[2016-03-06 00:00:00]}
+
+> ~D[2016-03-04] in interval
+true
+
+> ~N[2016-03-04 00:00:00] in interval
+true
+
+> ~N[2016-03-02 00:00:00] in interval
+false
+
+> Timex.Interval.overlaps?(Timex.Interval.new(from: ~D[2016-03-04], until: [days: 1]), interval)
+true
+
+> Timex.Interval.overlaps?(Timex.Interval.new(from: ~D[2016-03-07], until: [days: 1]), interval)
+false
+
 ```
 
 There are a ton of other functions, all of which work with Erlang datetime tuples, Date, NaiveDateTime, and DateTime. The Duration module contains functions for working with Durations, including Erlang timestamps (such as those returned from `:timer.tc`)

@@ -1,6 +1,27 @@
 defmodule Timex.Interval do
   @moduledoc """
   This module is used for creating and manipulating DateTime intervals.
+
+  ## Examples
+
+    iex> Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3])
+    %Timex.Interval{from: ~N[2016-03-03 00:00:00], left_open: false, right_open: true, step: [days: 1], until: ~N[2016-03-06 00:00:00]}
+
+    iex> Timex.Interval.new(from: ~D[2016-03-03], until: ~N[2016-03-10 01:23:45])
+    %Timex.Interval{from: ~N[2016-03-03 00:00:00], left_open: false, right_open: true, step: [days: 1], until: ~N[2016-03-10 01:23:45]}
+
+    iex> ~N[2016-03-04 12:34:56] in Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3])
+    true
+
+    iex> ~D[2016-03-01] in Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3])
+    false
+
+    iex> Timex.Interval.overlaps?(Timex.Interval.new(from: ~D[2016-03-01], until: [days: 5]),  Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3]))
+    true
+
+    iex> Timex.Interval.overlaps?(Timex.Interval.new(from: ~D[2016-03-01], until: [days: 1]),  Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3]))
+    false
+
   """
   alias Timex.Duration
 
@@ -219,6 +240,24 @@ defmodule Timex.Interval do
       {:ok, str} -> str
       {:error, e} -> raise FormatError, message: "#{inspect e}"
     end
+  end
+
+  @doc """
+  Returns true if the first interval shares any point(s) in time with the second.
+
+  ## Examples
+
+      iex> Timex.Interval.overlaps?(Timex.Interval.new(from: ~D[2016-03-04], until: [days: 1]), Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3]))
+      true
+
+      iex> Timex.Interval.overlaps?(Timex.Interval.new(from: ~D[2016-03-07], until: [days: 1]), Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3]))
+      false
+  """
+  @spec overlaps?(__MODULE__.t, __MODULE__.t) :: boolean()
+  def overlaps?(interval_a, interval_b) do
+    interval_a.from in interval_b ||
+      interval_a.until in interval_b ||
+      interval_b.from in interval_a
   end
 
   defimpl Enumerable do
