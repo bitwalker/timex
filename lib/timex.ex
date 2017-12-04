@@ -1479,6 +1479,10 @@ defmodule Timex do
   with the exception of shifting DateTimes, which may result in an AmbiguousDateTime
   if the shift moves to an ambiguous time period for the zone of that DateTime.
 
+  Shifting by months will always return a date in the expected month. Because months
+  have different number of days, shifting to a month with fewer days may may not be
+  the same day of the month as the original date.
+
   If an error occurs, an error tuple will be returned.
 
   ## Examples
@@ -1507,6 +1511,21 @@ defmodule Timex do
       ...> Timex.shift(date, years: -1)
       ~D[2015-02-28]
 
+  ### Shifting by months
+
+      iex> date = ~D[2016-01-15]
+      ...> Timex.shift(date, months: 1)
+      ~D[2016-02-15]
+
+      iex> date = ~D[2016-01-31]
+      ...> Timex.shift(date, months: 1)
+      ~D[2016-02-29]
+
+      iex> date = ~D[2016-01-31]
+      ...> Timex.shift(date, months: 2)
+      ~D[2016-03-31]
+      ...> Timex.shift(date, months: 1) |> Timex.shift(months: 1)
+      ~D[2016-03-29]
   """
   @type shift_options :: [
     microseconds: integer,
