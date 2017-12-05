@@ -45,14 +45,18 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label(expected_digits)
   end
   def month_full(_) do
-    one_of(word_of(~r/[[:alpha:]]/u), Helpers.months)
-    |> map(&Helpers.to_month_num/1)
+    locale = Timex.Translator.current_locale()
+
+    one_of(word_of(~r/[[:alpha:]]/u), Helpers.months(locale))
+    |> map(fn m -> Helpers.to_month_num(m, locale) end)
     |> label("full month name")
   end
   def month_short(_) do
-    abbrs = Helpers.months |> Enum.map(fn m -> String.slice(m, 0, 3) end)
-    one_of(word_of(~r/[[:alpha:]]/), abbrs)
-    |> map(&Helpers.to_month_num/1)
+    locale = Timex.Translator.current_locale()
+    abbrs = Helpers.months(locale) |> Enum.map(fn m -> Helpers.abbreviate_month(m, locale) end)
+
+    one_of(word_of(~r/[[:alpha:]\.]/u), abbrs)
+    |> map(fn m -> Helpers.to_month_num(m, locale) end)
     |> label("month abbreviation")
   end
 
@@ -82,15 +86,19 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("ordinal weekday")
   end
   def weekday_short(_) do
+    locale = Timex.Translator.current_locale()
+
     word_of(~r/[[:alpha:]]/u)
-    |> satisfy(&Helpers.is_weekday/1)
-    |> map(fn name -> Helpers.to_weekday(name) end)
+    |> satisfy(fn w -> Helpers.is_weekday(w, locale) end)
+    |> map(fn name -> Helpers.to_weekday(name, locale) end)
     |> label("weekday abbreviation")
   end
   def weekday_full(_) do
+    locale = Timex.Translator.current_locale()
+
     word_of(~r/[[:alpha:]]/u)
-    |> satisfy(&Helpers.is_weekday/1)
-    |> map(fn name -> Helpers.to_weekday(name) end)
+    |> satisfy(fn w -> Helpers.is_weekday(w, locale) end)
+    |> map(fn name -> Helpers.to_weekday(name, locale) end)
     |> label("weekday name")
   end
 
@@ -107,18 +115,24 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("hour between 1 and 12")
   end
   def ampm_lower(_) do
-    one_of(word(), ["am", "pm"])
-    |> map(&Helpers.to_ampm/1)
+    locale = Timex.Translator.current_locale()
+
+    one_of(word(), Helpers.periods_lower(locale))
+    |> map(fn ampm -> Helpers.to_ampm(ampm, locale) end)
     |> label("am/pm")
   end
   def ampm_upper(_) do
-    one_of(word(), ["AM", "PM"])
-    |> map(&Helpers.to_ampm/1)
+    locale = Timex.Translator.current_locale()
+
+    one_of(word(), Helpers.periods_upper(locale))
+    |> map(fn ampm -> Helpers.to_ampm(ampm, locale) end)
     |> label("AM/PM")
   end
   def ampm(_) do
-    one_of(word(), ["am", "AM", "pm", "PM"])
-    |> map(&Helpers.to_ampm/1)
+    locale = Timex.Translator.current_locale()
+
+    one_of(word(), Helpers.periods(locale))
+    |> map(fn ampm -> Helpers.to_ampm(ampm, locale) end)
     |> label("am/pm or AM/PM")
   end
   def minute(opts \\ []) do

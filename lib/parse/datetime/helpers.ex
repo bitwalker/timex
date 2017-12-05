@@ -3,46 +3,94 @@ defmodule Timex.Parse.DateTime.Helpers do
   import Combine.Parsers.Base
   import Combine.Parsers.Text, except: [integer: 0, integer: 1]
   alias Combine.Parsers.Text
+  alias Timex.Translator
   use Timex.Constants
 
-  def months, do: @month_names
+  @locales [
+    "da",
+    "de",
+    "en",
+    "es",
+    "fr",
+    "id",
+    "it",
+    "ja",
+    "ko",
+    "nb_NO",
+    "nl",
+    "pl",
+    "pt",
+    "pt_BR",
+    "ro",
+    "ru",
+    "sv",
+    "zh_CN"
+  ]
+
+
+
+  Enum.each(@locales, fn locale ->
+    months = Translator.get_months(locale)
+
+    Enum.each(months, fn {index, month} ->
+      abbreviation = Translator.get_months_abbreviated(locale) |> Map.get(index)
+      def abbreviate_month(unquote(month), unquote(locale)), do: unquote(abbreviation)
+    end)
+  end)
+
+  Enum.each(@locales, fn locale ->
+    months = Translator.get_months(locale) |> Map.values
+    def months(unquote(locale)), do: unquote(months)
+  end)
 
   def to_month(month) when is_integer(month), do: [month: month]
 
-  def to_month_num(m) when m in ["January", "Jan"],   do: to_month(1)
-  def to_month_num(m) when m in ["February", "Feb"],  do: to_month(2)
-  def to_month_num(m) when m in ["March", "Mar"],     do: to_month(3)
-  def to_month_num(m) when m in ["April", "Apr"],     do: to_month(4)
-  def to_month_num(m) when m in ["May", "May"],       do: to_month(5)
-  def to_month_num(m) when m in ["June", "Jun"],      do: to_month(6)
-  def to_month_num(m) when m in ["July", "Jul"],      do: to_month(7)
-  def to_month_num(m) when m in ["August", "Aug"],    do: to_month(8)
-  def to_month_num(m) when m in ["September", "Sep"], do: to_month(9)
-  def to_month_num(m) when m in ["October", "Oct"],   do: to_month(10)
-  def to_month_num(m) when m in ["November", "Nov"],  do: to_month(11)
-  def to_month_num(m) when m in ["December", "Dec"],  do: to_month(12)
+  Enum.each(@locales, fn locale ->
+    fulls = Translator.get_months(locale)
+    Enum.each(fulls, fn {index, name} ->
+      def to_month_num(unquote(name), unquote(locale)), do: to_month(unquote(index))
+    end)
 
-  def is_weekday(name) do
-    n = String.downcase(name)
-    cond do
-      n in @weekday_abbrs_lower -> true
-      n in @weekday_names_lower -> true
-      true                      -> false
-    end
-  end
+    abbrs = Translator.get_months_abbreviated(locale)
+    Enum.each(abbrs, fn {index, name} ->
+      def to_month_num(unquote(name), unquote(locale)), do: to_month(unquote(index))
+    end)
+  end)
 
-  def to_weekday(name) do
-    n = String.downcase(name)
-    case n do
-      n when n in ["mon", "monday"]    -> 1
-      n when n in ["tue", "tuesday"]   -> 2
-      n when n in ["wed", "wednesday"] -> 3
-      n when n in ["thu", "thursday"]  -> 4
-      n when n in ["fri", "friday"]    -> 5
-      n when n in ["sat", "saturday"]  -> 6
-      n when n in ["sun", "sunday"]    -> 7
+  Enum.each(@locales, fn locale ->
+    weekday_names_lower = Translator.get_weekdays(locale)
+    |> Map.values
+    |> Enum.map(&String.downcase/1)
+
+    weekday_abbrs_lower = Translator.get_weekdays_abbreviated(locale)
+    |> Map.values
+    |> Enum.map(&String.downcase/1)
+
+
+    def is_weekday(name, unquote(locale)) do
+      n = String.downcase(name)
+      cond do
+        n in unquote(weekday_abbrs_lower) -> true
+        n in unquote(weekday_names_lower) -> true
+        true                              -> false
+      end
     end
-  end
+  end)
+
+  Enum.each(@locales, fn locale ->
+    fulls = Translator.get_weekdays(locale)
+    Enum.each(fulls, fn {index, full} ->
+      defp to_weekday_lower(unquote(String.downcase(full)), unquote(locale)), do: unquote(index)
+    end)
+
+    abbrs = Translator.get_weekdays_abbreviated(locale)
+    Enum.each(abbrs, fn {index, abbrev} ->
+      defp to_weekday_lower(unquote(String.downcase(abbrev)), unquote(locale)), do: unquote(index)
+    end)
+  end)
+
+  def to_weekday(name, locale), do: to_weekday_lower(String.downcase(name), locale)
+
 
   def to_sec_ms(fraction) do
     precision = byte_size(fraction)
@@ -74,10 +122,24 @@ defmodule Timex.Parse.DateTime.Helpers do
     end
   end
 
-  def to_ampm("am"), do: [am: "am"]
-  def to_ampm("AM"), do: [AM: "AM"]
-  def to_ampm("pm"), do: [am: "pm"]
-  def to_ampm("PM"), do: [AM: "PM"]
+  def periods_upper(locale), do: Translator.get_day_periods(locale) |> Map.take([:AM, :PM]) |> Map.values
+  def periods_lower(locale), do: Translator.get_day_periods(locale) |> Map.take([:am, :pm]) |> Map.values
+  def periods(locale), do: Translator.get_day_periods(locale) |> Map.values
+
+  Enum.each(@locales, fn locale ->
+    periods = Translator.get_day_periods(locale)
+
+    Enum.each(periods, fn {key, value} ->
+      label = case key do
+        :am -> :am
+        :AM -> :AM
+        :pm -> :am
+        :PM -> :AM
+      end
+
+      def to_ampm(unquote(value), unquote(locale)), do: [{unquote(label), unquote(value)}]
+    end)
+  end)
 
   def integer(opts \\ []) do
     min_width = get_in(opts, [:min]) || 1
