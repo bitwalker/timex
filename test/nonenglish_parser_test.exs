@@ -4,8 +4,6 @@ defmodule Timex.NonEnglishParser.Test do
 
   use Combine
   import Timex.Parse.DateTime.Parsers
-  alias Timex.Parse.DateTime.Helpers
-
   require Timex.Translator
   alias Timex.Translator
 
@@ -52,8 +50,10 @@ defmodule Timex.NonEnglishParser.Test do
   end
 
   test "parsers: am/pm lower" do
-    assert [[am: "pm"]] = Combine.parse("pm", ampm_lower([]))
-    assert [[am: "am"]] = Combine.parse("am", ampm_lower([]))
-    assert {:error, _} = Combine.parse("fm", ampm_lower([]))
+    Translator.with_locale("ru") do
+      assert [[am: "pm"]] = Combine.parse("пп", ampm_lower([]))
+      assert [[am: "am"]] = Combine.parse("дп", ampm_lower([]))
+      assert {:error, _} = Combine.parse("fm", ampm_lower([]))
+    end
   end
 end

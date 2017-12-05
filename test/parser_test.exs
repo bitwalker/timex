@@ -4,6 +4,7 @@ defmodule Timex.Parser.Test do
 
   use Combine
   import Timex.Parse.DateTime.Parsers
+  alias Timex.Parse.DateTime.Helpers
 
   test "helpers: to_month_num" do
     assert [[month: 1]] = Combine.parse("January", month_full([]))
