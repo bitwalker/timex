@@ -32,4 +32,15 @@ defmodule DateFormatTest.GeneralFormatting do
     assert "" = Timex.format!(t, "%f", :strftime)
     assert "000" = Timex.format!(t, "%03f", :strftime)
   end
+
+  test "issue #402 - formatting a Time sometimes crashes for timezones" do
+    assert Timex.to_datetime({{2016,2,8}, {12,0,0}})
+    |> Timex.Timezone.convert("Canada/Newfoundland")
+    |> Timex.format!("{ISO:Extended}") == "2016-02-08T08:30:00-03:30"
+
+    assert Timex.to_datetime({{2016,2,8}, {12,0,0}})
+    |> Timex.Timezone.convert("Pacific/Marquesas")
+    |> Timex.format!("{ISO:Extended}") == "2016-02-08T02:30:00-09:30"
+
+  end
 end

@@ -651,8 +651,12 @@ defmodule Timex.Format.DateTime.Formatter do
       {:error, _} = err -> err
       "" -> ""
       offset ->
-        [qualifier, <<hour::binary-size(2), min::binary-size(2)>>] = String.split(offset, "", [trim: true, parts: 2])
-        <<qualifier::binary, hour::binary, ?:, min::binary>>
+        case String.split(offset, "", [trim: true, parts: 2]) do
+          [qualifier, <<hour::binary-size(2), min::binary-size(2)>>] ->
+            <<qualifier::binary, hour::binary, ?:, min::binary>>
+          [qualifier, <<hour::binary-size(2), "-", min::binary-size(2)>>] ->
+            <<qualifier::binary, hour::binary, ?:, min::binary>>
+        end
     end
   end
   def format_token(locale, :zoffs_sec, %{std_offset: std, utc_offset: utc} = date, modifiers, flags, width) do
