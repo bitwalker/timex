@@ -9,7 +9,7 @@
 msgid ""
 msgstr ""
 "Language: ro\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2\n"
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
@@ -25,57 +25,67 @@ msgid "%{count} day"
 msgid_plural "%{count} days"
 msgstr[0] "%{count} zi"
 msgstr[1] "%{count} zile"
+msgstr[2] "%{count} de zile"
 
 #: lib/l10n/translator.ex:177
 msgid "%{count} hour"
 msgid_plural "%{count} hours"
 msgstr[0] "%{count} ora"
 msgstr[1] "%{count} ore"
+msgstr[2] "%{count} de ore"
 
 #: lib/l10n/translator.ex:173
 msgid "%{count} microsecond"
 msgid_plural "%{count} microseconds"
 msgstr[0] "%{count} microsecunda"
 msgstr[1] "%{count} microsecunde"
+msgstr[2] "%{count} de microsecunde"
 
 #: lib/l10n/translator.ex:174
 msgid "%{count} millisecond"
 msgid_plural "%{count} milliseconds"
 msgstr[0] "%{count} millisecunda"
 msgstr[1] "%{count} millisecunde"
+msgstr[2] "%{count} de millisecunde"
 
 #: lib/l10n/translator.ex:176
 msgid "%{count} minute"
 msgid_plural "%{count} minutes"
 msgstr[0] "%{count} minut"
 msgstr[1] "%{count} minute"
+msgstr[2] "%{count} de minute"
 
 #: lib/l10n/translator.ex:180
 msgid "%{count} month"
 msgid_plural "%{count} months"
 msgstr[0] "%{count} luna"
 msgstr[1] "%{count} luni"
+msgstr[2] "%{count} de luni"
 
 #: lib/l10n/translator.ex:172
 msgid "%{count} nanosecond"
 msgid_plural "%{count} nanoseconds"
 msgstr[0] "%{count} nanosecunda"
 msgstr[1] "%{count} nanosecunde"
+msgstr[2] "%{count} de nanosecunde"
 
 #: lib/l10n/translator.ex:175
 msgid "%{count} second"
 msgid_plural "%{count} seconds"
 msgstr[0] "%{count} secunda"
 msgstr[1] "%{count} secunde"
+msgstr[2] "%{count} de secunde"
 
 #: lib/l10n/translator.ex:179
 msgid "%{count} week"
 msgid_plural "%{count} weeks"
 msgstr[0] "%{count} saptamana"
 msgstr[1] "%{count} saptamani"
+msgstr[2] "%{count} de saptamani"
 
 #: lib/l10n/translator.ex:181
 msgid "%{count} year"
 msgid_plural "%{count} years"
 msgstr[0] "%{count} an"
 msgstr[1] "%{count} ani"
+msgstr[2] "%{count} ani"
