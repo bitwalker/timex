@@ -11,7 +11,6 @@ defmodule Timex.Comparable.Diff do
 
   @spec diff(Types.microseconds, Types.microseconds, Comparable.granularity) :: integer
   @spec diff(Types.valid_datetime, Types.valid_datetime, Comparable.granularity) :: integer
-  def diff(a, a, granularity) when is_integer(a), do: zero(granularity)
   def diff(a, b, granularity) when is_integer(a) and is_integer(b) and is_atom(granularity) do
     do_diff(a, b, granularity)
   end
@@ -23,7 +22,6 @@ defmodule Timex.Comparable.Diff do
     end
   end
 
-  defp do_diff(a, a, type),      do: zero(type)
   defp do_diff(a, b, :duration), do: Duration.from_seconds(do_diff(a,b,:seconds))
   defp do_diff(a, b, :microseconds), do: a - b
   defp do_diff(a, b, :milliseconds), do: div(a - b, 1_000)
@@ -63,9 +61,6 @@ defmodule Timex.Comparable.Diff do
   end
   defp do_diff(_, _, granularity) when not granularity in @units,
     do: {:error, {:invalid_granularity, granularity}}
-
-  defp zero(:duration), do: Duration.zero
-  defp zero(_type), do: 0
 
   defp diff_years(a, a), do: 0
   defp diff_years(a, b) do
