@@ -3,7 +3,7 @@ defmodule Timex.Format.DateTime.Formatter do
   This module defines the behaviour for custom DateTime formatters.
   """
 
-  alias Timex.{Timezone, Translator, Types}
+  alias Timex.{Timezone, Translator, Types, TimexError}
   alias Timex.Translator
   alias Timex.Format.FormatError
   alias Timex.Format.DateTime.Formatters.{Default, Strftime, Relative}
@@ -40,22 +40,29 @@ defmodule Timex.Format.DateTime.Formatter do
   @spec lformat!(Types.valid_datetime, String.t, String.t, atom | nil) :: String.t | no_return
   def lformat!(date, format_string, locale, formatter \\ Default)
 
-  def lformat!({:error, _} = err, _format_string, _locale, _formatter),
-    do: err
+  def lformat!({:error, reason}, _format_string, _locale, _formatter),
+    do: raise TimexError, message: reason
   def lformat!(datetime, format_string, locale, :strftime),
     do: lformat!(datetime, format_string, locale, Strftime)
   def lformat!(datetime, format_string, locale, :relative),
     do: lformat!(datetime, format_string, locale, Relative)
+  def lformat!(%{__struct__: struct} = date, format_string, locale, formatter)
+    when struct in [Date, DateTime, NaiveDateTime, Time] and is_binary(format_string)
+        and is_binary(locale) and is_atom(formatter) do
+    case formatter.lformat(date, format_string, locale) do
+      {:ok, result}    -> result
+      {:error, reason} -> raise FormatError, message: reason
+    end
+  end
   def lformat!(date, format_string, locale, formatter)
-    when is_binary(format_string) and is_binary(locale) and is_atom(formatter)
-    do
-      date = case date do
-         %{__struct__: struct} when struct in [Date, DateTime, NaiveDateTime, Time] -> date
-         _other -> Timex.to_naive_datetime(date)
-      end
-      case formatter.lformat(date, format_string, locale)do
-        {:ok, result}    -> result
-        {:error, reason} -> raise FormatError, message: reason
+    when is_binary(format_string) and is_binary(locale) and is_atom(formatter) do
+    case Timex.to_naive_datetime(date) do
+      {:error, reason} -> raise TimexError, message: reason
+      datetime ->
+        case formatter.lformat(datetime, format_string, locale) do
+          {:ok, result}    -> result
+          {:error, reason} -> raise FormatError, message: reason
+        end
       end
   end
   def lformat!(a,b,c,d),
@@ -80,7 +87,7 @@ defmodule Timex.Format.DateTime.Formatter do
       try do
         {:ok, lformat!(date, format_string, locale, formatter)}
       catch
-        _type, %FormatError{:message => msg} ->
+        _type, %TimexError{:atom => msg} ->
           {:error, msg}
         _type, %{:message => msg} ->
           {:error, msg}
