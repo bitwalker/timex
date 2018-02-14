@@ -2,8 +2,6 @@ defmodule DateFormatTest.GeneralFormatting do
   use ExUnit.Case, async: true
   use Timex
 
-  alias Timex.TimexError
-
   test "from_now/1" do
     ref_date = Timex.to_datetime({{2016,2,8}, {12,0,0}})
     utc_date = Timex.to_datetime({{2016,2,8}, {12,0,1}})
@@ -47,9 +45,9 @@ defmodule DateFormatTest.GeneralFormatting do
   end
 
   test "format wrong date" do
-    assert_raise TimexError, "invalid_date", fn ->
+    assert_raise ArgumentError, "invalid_date", fn ->
       Timex.format!("", "{M}")
     end
-    assert Timex.format("", "{M}") == {:error, :invalid_date}
+    assert Timex.format("", "{M}") == {:error, "invalid_date"}
   end
 end

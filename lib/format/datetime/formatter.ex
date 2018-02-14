@@ -3,7 +3,7 @@ defmodule Timex.Format.DateTime.Formatter do
   This module defines the behaviour for custom DateTime formatters.
   """
 
-  alias Timex.{Timezone, Translator, Types, TimexError}
+  alias Timex.{Timezone, Translator, Types}
   alias Timex.Translator
   alias Timex.Format.FormatError
   alias Timex.Format.DateTime.Formatters.{Default, Strftime, Relative}
@@ -41,7 +41,7 @@ defmodule Timex.Format.DateTime.Formatter do
   def lformat!(date, format_string, locale, formatter \\ Default)
 
   def lformat!({:error, reason}, _format_string, _locale, _formatter),
-    do: raise TimexError, message: reason
+    do: raise ArgumentError, to_string(reason)
   def lformat!(datetime, format_string, locale, :strftime),
     do: lformat!(datetime, format_string, locale, Strftime)
   def lformat!(datetime, format_string, locale, :relative),
@@ -57,7 +57,7 @@ defmodule Timex.Format.DateTime.Formatter do
   def lformat!(date, format_string, locale, formatter)
     when is_binary(format_string) and is_binary(locale) and is_atom(formatter) do
     case Timex.to_naive_datetime(date) do
-      {:error, reason} -> raise TimexError, message: reason
+      {:error, reason} -> raise ArgumentError, to_string(reason)
       datetime ->
         case formatter.lformat(datetime, format_string, locale) do
           {:ok, result}    -> result
@@ -87,8 +87,6 @@ defmodule Timex.Format.DateTime.Formatter do
       try do
         {:ok, lformat!(date, format_string, locale, formatter)}
       catch
-        _type, %TimexError{:atom => msg} ->
-          {:error, msg}
         _type, %{:message => msg} ->
           {:error, msg}
         _type, reason ->
