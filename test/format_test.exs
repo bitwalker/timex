@@ -43,4 +43,11 @@ defmodule DateFormatTest.GeneralFormatting do
     |> Timex.format!("{ISO:Extended}") == "2016-02-08T02:30:00-09:30"
 
   end
+
+  test "format wrong date" do
+    assert_raise ArgumentError, "invalid_date", fn ->
+      Timex.format!("", "{M}")
+    end
+    assert Timex.format("", "{M}") == {:error, "invalid_date"}
+  end
 end
