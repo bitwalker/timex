@@ -285,6 +285,10 @@ defmodule Timex.Interval do
       {:error, __MODULE__}
     end
 
+    def slice(_interval) do
+      {:error, __MODULE__}
+    end
+
     defp do_reduce(_state, {:halt,    acc}, _fun), do: {:halted, acc}
     defp do_reduce( state, {:suspend, acc},  fun), do: {:suspended, acc, &do_reduce(state, &1, fun)}
 
