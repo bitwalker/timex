@@ -93,6 +93,9 @@ defmodule TimezoneTests do
     assert %DateTime{hour: 7} = Timex.to_datetime({{2014,2,24},{12,0,0}}, gmt_plus_two) |> Timezone.convert(gmt_minus_three)
     # If it's noon in GMT-3, then it's 5'oclock in the evening in GMT+2
     assert %DateTime{hour: 17} = Timex.to_datetime({{2014,2,24},{12,0,0}}, gmt_minus_three) |> Timezone.convert(gmt_plus_two)
+
+    # Return {:error, term} if an invalid date is given
+    assert {:error, :invalid_date} = Timezone.convert(nil, cst)
   end
 
   test "converting across zone boundaries" do
