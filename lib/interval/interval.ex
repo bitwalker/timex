@@ -45,7 +45,7 @@ defmodule Timex.Interval do
                                [days:         integer()] |
                                [weeks:        integer()] |
                                [months:       integer()] |
-                               [year:         integer()]
+                               [years:        integer()]
 
   @enforce_keys [:from, :until]
   defstruct from:       nil,
