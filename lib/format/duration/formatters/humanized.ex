@@ -54,11 +54,11 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
 
       iex> use Timex
       ...> Duration.from_erl({0, 65, 0}) |> #{__MODULE__}.lformat("ru")
-      "1 минута  5 секунд"
+      "1 минута, 5 секунд"
 
       iex> use Timex
       ...> Duration.from_erl({1435, 180354, 590264}) |> #{__MODULE__}.lformat("ru")
-      "45 лет  6 месяцев  5 дней  21 час  12 минут  34 секунды  590.264 миллисекунд"
+      "45 лет, 6 месяцев, 5 дней, 21 час, 12 минут, 34 секунды, 590.264 миллисекунд"
 
   """
   @spec lformat(Duration.t, String.t) :: String.t | {:error, term}
