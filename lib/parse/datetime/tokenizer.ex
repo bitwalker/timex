@@ -4,7 +4,7 @@ defmodule Timex.Parse.DateTime.Tokenizer do
   """
   alias Timex.Parse.DateTime.Tokenizers.Directive
 
-  @callback tokenize(format_string :: String.t) :: [Directive.t] | {:error, term}
+  @callback tokenize(format_string :: String.t) :: {:ok, [Directive.t]} | {:error, term}
   @callback apply(DateTime.t, token :: atom, value :: term) :: DateTime.t | {:error, term} | :unrecognized
 
   defmacro __using__(_) do
