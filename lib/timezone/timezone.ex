@@ -472,7 +472,10 @@ defmodule Timex.Timezone do
     end
   end
   def convert(date, tz) do
-    convert(Timex.to_datetime(date), tz)
+    case Timex.to_datetime(date) do
+      {:error, _} = err -> err
+      date -> convert(date, tz)
+    end
   end
 
   defp do_shift(%DateTime{:microsecond => us} = datetime, seconds) do
