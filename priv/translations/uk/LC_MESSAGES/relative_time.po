@@ -1,14 +1,14 @@
-# # `msgid`s in this file come from POT (.pot) files.
-# #
-# # Do not add, change, or remove `msgid`s manually here as
-# # they're tied to the ones in the corresponding POT file
-# # (with the same domain).
-# #
-# # Use `mix gettext.extract --merge` or `mix gettext.merge`
-# # to merge POT files into PO files.
+## `msgid`s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove `msgid`s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use `mix gettext.extract --merge` or `mix gettext.merge`
+## to merge POT files into PO files.
 msgid ""
 msgstr ""
-"Language: ru\n"
+"Language: uk\n"
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
@@ -22,43 +22,43 @@ msgstr ""
 
 #: lib/l10n/translator.ex:237
 msgid "last month"
-msgstr "в прошлом месяце"
+msgstr "минулого місяця"
 
 #: lib/l10n/translator.ex:243
 msgid "last week"
-msgstr "на прошлой неделе"
+msgstr "минулого тижня"
 
 #: lib/l10n/translator.ex:231
 msgid "last year"
-msgstr "в прошлом году"
+msgstr "минулого року"
 
 #: lib/l10n/translator.ex:239
 msgid "next month"
-msgstr "в следующем месяце"
+msgstr "наступного місяця"
 
 #: lib/l10n/translator.ex:245
 msgid "next week"
-msgstr "на следующей неделе"
+msgstr "на наступній неділі"
 
 #: lib/l10n/translator.ex:233
 msgid "next year"
-msgstr "в следующем году"
+msgstr "наступного року"
 
 #: lib/l10n/translator.ex:238
 msgid "this month"
-msgstr "в этом месяце"
+msgstr "цього місяця"
 
 #: lib/l10n/translator.ex:244
 msgid "this week"
-msgstr "на этой неделе"
+msgstr "цієї неділі"
 
 #: lib/l10n/translator.ex:232
 msgid "this year"
-msgstr "в этому году"
+msgstr "цього року"
 
 #: lib/l10n/translator.ex:250
 msgid "today"
-msgstr "сегодня"
+msgstr "сьогодні"
 
 #: lib/l10n/translator.ex:251
 msgid "tomorrow"
@@ -66,190 +66,190 @@ msgstr "завтра"
 
 #: lib/l10n/translator.ex:249
 msgid "yesterday"
-msgstr "вчера"
+msgstr "вчора"
 
 #: lib/l10n/translator.ex:253
 msgid "%{count} day ago"
 msgid_plural "%{count} days ago"
-msgstr[0] "%{count} день назад"
-msgstr[1] "%{count} дня назад"
-msgstr[2] "%{count} дней назад"
+msgstr[0] "%{count} день тому"
+msgstr[1] "%{count} дня тому"
+msgstr[2] "%{count} днів тому"
 
 #: lib/l10n/translator.ex:278
 msgid "%{count} hour ago"
 msgid_plural "%{count} hours ago"
-msgstr[0] "%{count} час назад"
-msgstr[1] "%{count} часа назад"
-msgstr[2] "%{count} часов назад"
+msgstr[0] "%{count} годину тому"
+msgstr[1] "%{count} години тому"
+msgstr[2] "%{count} годин тому"
 
 #: lib/l10n/translator.ex:281
 msgid "%{count} minute ago"
 msgid_plural "%{count} minutes ago"
-msgstr[0] "%{count} минуту назад"
-msgstr[1] "%{count} минуты назад"
-msgstr[2] "%{count} минут назад"
+msgstr[0] "%{count} хвилину тому"
+msgstr[1] "%{count} хвилини тому"
+msgstr[2] "%{count} хвилин тому"
 
 #: lib/l10n/translator.ex:241
 msgid "%{count} month ago"
 msgid_plural "%{count} months ago"
-msgstr[0] "%{count} месяц назад"
-msgstr[1] "%{count} месяца назад"
-msgstr[2] "%{count} месяцев назад"
+msgstr[0] "%{count} місяць тому"
+msgstr[1] "%{count} місяці тому"
+msgstr[2] "%{count} місяців тому"
 
 #: lib/l10n/translator.ex:284
 msgid "%{count} second ago"
 msgid_plural "%{count} seconds ago"
-msgstr[0] "%{count} секунду назад"
-msgstr[1] "%{count} секунды назад"
-msgstr[2] "%{count} секунд назад"
+msgstr[0] "%{count} секунду тому"
+msgstr[1] "%{count} секунди тому"
+msgstr[2] "%{count} секунд тому"
 
 #: lib/l10n/translator.ex:247
 msgid "%{count} week ago"
 msgid_plural "%{count} weeks ago"
-msgstr[0] "%{count} неделю назад"
-msgstr[1] "%{count} недели назад"
-msgstr[2] "%{count} недель назад"
+msgstr[0] "%{count} тиждень тому"
+msgstr[1] "%{count} тижні тому"
+msgstr[2] "%{count} тижнів тому"
 
 #: lib/l10n/translator.ex:235
 msgid "%{count} year ago"
 msgid_plural "%{count} years ago"
-msgstr[0] "%{count} год назад"
-msgstr[1] "%{count} года назад"
-msgstr[2] "%{count} лет назад"
+msgstr[0] "%{count} рік тому"
+msgstr[1] "%{count} роки тому"
+msgstr[2] "%{count} років тому"
 
 #: lib/l10n/translator.ex:252
 msgid "in %{count} day"
 msgid_plural "in %{count} days"
 msgstr[0] "через %{count} день"
 msgstr[1] "через %{count} дня"
-msgstr[2] "через %{count} дней"
+msgstr[2] "через %{count} днів"
 
 #: lib/l10n/translator.ex:277
 msgid "in %{count} hour"
 msgid_plural "in %{count} hours"
-msgstr[0] "через %{count} час"
-msgstr[1] "через %{count} часа"
-msgstr[2] "через %{count} часов"
+msgstr[0] "через %{count} годину"
+msgstr[1] "через %{count} години"
+msgstr[2] "через %{count} годин"
 
 #: lib/l10n/translator.ex:280
 msgid "in %{count} minute"
 msgid_plural "in %{count} minutes"
-msgstr[0] "через %{count} минуту"
-msgstr[1] "через %{count} минуты"
-msgstr[2] "через %{count} минут"
+msgstr[0] "через %{count} хвилину"
+msgstr[1] "через %{count} хвилини"
+msgstr[2] "через %{count} хвилин"
 
 #: lib/l10n/translator.ex:240
 msgid "in %{count} month"
 msgid_plural "in %{count} months"
-msgstr[0] "через %{count} месяц"
-msgstr[1] "через %{count} месяца"
-msgstr[2] "через %{count} месяцев"
+msgstr[0] "через %{count} місяць"
+msgstr[1] "через %{count} місяця"
+msgstr[2] "через %{count} місяців"
 
 #: lib/l10n/translator.ex:283
 msgid "in %{count} second"
 msgid_plural "in %{count} seconds"
 msgstr[0] "через %{count} секунду"
-msgstr[1] "через %{count} секунды"
+msgstr[1] "через %{count} секунди"
 msgstr[2] "через %{count} секунд"
 
 #: lib/l10n/translator.ex:246
 msgid "in %{count} week"
 msgid_plural "in %{count} weeks"
-msgstr[0] "через %{count} неделю"
-msgstr[1] "через %{count} недели"
-msgstr[2] "через %{count} недель"
+msgstr[0] "через %{count} тиждень"
+msgstr[1] "через %{count} тижні"
+msgstr[2] "через %{count} тижнів"
 
 #: lib/l10n/translator.ex:234
 msgid "in %{count} year"
 msgid_plural "in %{count} years"
-msgstr[0] "через %{count} год"
-msgstr[1] "через %{count} года"
-msgstr[2] "через %{count} лет"
+msgstr[0] "через %{count} рік"
+msgstr[1] "через %{count} року"
+msgstr[2] "через %{count} років"
 
 #: lib/l10n/translator.ex:267
 msgid "last friday"
-msgstr "в прошлую пятницу"
+msgstr "минулої п'ятниці"
 
 #: lib/l10n/translator.ex:255
 msgid "last monday"
-msgstr "в прошлый понедельник"
+msgstr "минулого понеділку"
 
 #: lib/l10n/translator.ex:270
 msgid "last saturday"
-msgstr "в прошлую субботу"
+msgstr "минулої суботи"
 
 #: lib/l10n/translator.ex:273
 msgid "last sunday"
-msgstr "в прошлое воскресенье"
+msgstr "минулої неділі"
 
 #: lib/l10n/translator.ex:264
 msgid "last thursday"
-msgstr "в прошлый четверг"
+msgstr "минулого четверга"
 
 #: lib/l10n/translator.ex:258
 msgid "last tuesday"
-msgstr "в прошлый вторник"
+msgstr "в минулий вівторок"
 
 #: lib/l10n/translator.ex:261
 msgid "last wednesday"
-msgstr "в прошлую среду"
+msgstr "в минулу середу"
 
 #: lib/l10n/translator.ex:269
 msgid "next friday"
-msgstr "в следующую пятницу"
+msgstr "наступної п'ятниці"
 
 #: lib/l10n/translator.ex:257
 msgid "next monday"
-msgstr "в следующий понедельник"
+msgstr "наступного понеділка"
 
 #: lib/l10n/translator.ex:272
 msgid "next saturday"
-msgstr "в следующую субботу"
+msgstr "наступної суботи"
 
 #: lib/l10n/translator.ex:275
 msgid "next sunday"
-msgstr "в следующее воскресенье"
+msgstr "наступної неділі"
 
 #: lib/l10n/translator.ex:266
 msgid "next thursday"
-msgstr "в следующий четверг"
+msgstr "в наступний четвер"
 
 #: lib/l10n/translator.ex:260
 msgid "next tuesday"
-msgstr "в следующий вторник"
+msgstr "в наступний вівторок"
 
 #: lib/l10n/translator.ex:263
 msgid "next wednesday"
-msgstr "в следующую среду"
+msgstr "в наступну середу"
 
 #: lib/l10n/translator.ex:268
 msgid "this friday"
-msgstr "в эту пятницу"
+msgstr "в цю п'ятницю"
 
 #: lib/l10n/translator.ex:256
 msgid "this monday"
-msgstr "в этот понедельник"
+msgstr "цього понеділка"
 
 #: lib/l10n/translator.ex:271
 msgid "this saturday"
-msgstr "в эту субботу"
+msgstr "в цю суботу"
 
 #: lib/l10n/translator.ex:274
 msgid "this sunday"
-msgstr "в это воскресенье"
+msgstr "в цю неділю"
 
 #: lib/l10n/translator.ex:265
 msgid "this thursday"
-msgstr "в этот четверг"
+msgstr "в цей четвер"
 
 #: lib/l10n/translator.ex:259
 msgid "this tuesday"
-msgstr "в этот вторник"
+msgstr "цього вівторка"
 
 #: lib/l10n/translator.ex:262
 msgid "this wednesday"
-msgstr "в эту среду"
+msgstr "в цю середу"
 
 #: lib/l10n/translator.ex:286
 msgid "now"
-msgstr "сейчас"
+msgstr "зараз"
