@@ -124,7 +124,7 @@ defmodule Timex.Comparable.Diff do
     year_diff = y2 - (y1+1)
     month_diff =
       cond do
-        d2 > d1 ->
+        d1 > d2 ->
           11
         :else ->
           12
