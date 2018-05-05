@@ -8,7 +8,7 @@ defprotocol Timex.Comparable do
                        :hours | :minutes | :seconds | :milliseconds | :microseconds |
                        :duration
   @type constants :: :epoch | :zero | :distant_past | :distant_future
-  @type comparable :: Date.t | DateTime.t | NaiveDateTime.t | Types.date | Types.datetime
+  @type comparable :: Timex.DateTime.t | Date.t | DateTime.t | NaiveDateTime.t | Types.date | Types.datetime
   @type compare_result :: -1 | 0 | 1 | {:error, term}
   @type diff_result :: Timex.Duration.t | integer | {:error, term}
 

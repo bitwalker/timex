@@ -22,6 +22,12 @@ defmodule ComparableTests do
     assert {:error, :invalid_date} = Comparable.diff({0,0,0}, {2015,1,1})
   end
 
+  test "compare Timex.DateTime" do
+    assert 0 == Comparable.compare(Timex.DateTime.from_seconds(0), Timex.DateTime.from_seconds(0))
+    assert 1 == Comparable.compare(Timex.DateTime.from_seconds(1), Timex.DateTime.from_seconds(0))
+    assert -1 == Comparable.compare(Timex.DateTime.from_seconds(0), Timex.DateTime.from_seconds(1))
+  end
+
   test "compare ambiguous_datetime" do
     lmt_jwst = Timex.to_datetime({{1895,12,31},{23,55,0}}, "Asia/Taipei")
     assert 0 = Comparable.compare(lmt_jwst, lmt_jwst)
