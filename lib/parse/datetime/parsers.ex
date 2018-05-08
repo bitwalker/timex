@@ -330,7 +330,6 @@ defmodule Timex.Parse.DateTime.Parsers do
   strings for indicating time zones in North America.
   """
   def rfc822(opts \\ []) do
-    IO.inspect opts, label: :rfc822
     is_zulu? = get_in(opts, [:zulu])
     parts = [
       option(sequence([
