@@ -4,7 +4,13 @@ defmodule Timex.Parse.DateTime.Parsers do
   use Combine
 
   def year4(opts \\ []) do
-    min_digits = get_in(opts, [:min]) || 1
+    min_digits =
+      case Keyword.get(opts, :padding) do
+        :none ->
+          1
+        _ ->
+          get_in(opts, [:min]) || 1
+      end
     max_digits = get_in(opts, [:max])
     expected_digits = case {min_digits, max_digits} do
       {min, min} -> "#{min} digit year"
@@ -16,7 +22,13 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label(expected_digits)
   end
   def year2(opts \\ []) do
-    min_digits = get_in(opts, [:min]) || 1
+    min_digits =
+      case Keyword.get(opts, :padding) do
+        :none ->
+          1
+        _ ->
+          get_in(opts, [:min]) || 1
+      end
     max_digits = get_in(opts, [:max])
     expected_digits = case {min_digits, max_digits} do
       {min, min} -> "#{min} digit year"
@@ -33,12 +45,20 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("2 digit century")
   end
   def month2(opts \\ []) do
-    min_digits = get_in(opts, [:min]) || 1
+    min_digits =
+      case Keyword.get(opts, :padding) do
+        :none ->
+            # This may be a one digit month
+            1
+        _ ->
+            get_in(opts, [:min]) || 1
+      end
     max_digits = get_in(opts, [:max])
-    expected_digits = case {min_digits, max_digits} do
-      {min, min} -> "#{min} digit month"
-      {min, max} -> "#{min}-#{max} digit month"
-    end
+    expected_digits = 
+      case {min_digits, max_digits} do
+        {min, min} -> "#{min} digit month"
+        {min, max} -> "#{min}-#{max} digit month"
+      end
     Helpers.integer(opts)
     |> satisfy(fn month -> month in 0..12 end)
     |> map(&Helpers.to_month/1)
