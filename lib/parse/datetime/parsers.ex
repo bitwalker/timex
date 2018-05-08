@@ -11,12 +11,12 @@ defmodule Timex.Parse.DateTime.Parsers do
         _ ->
           get_in(opts, [:min]) || 1
       end
-    max_digits = get_in(opts, [:max])
+    max_digits = get_in(opts, [:max]) || 4
     expected_digits = case {min_digits, max_digits} do
       {min, min} -> "#{min} digit year"
       {min, max} -> "#{min}-#{max} digit year"
     end
-    Helpers.integer(opts)
+    Helpers.integer(Keyword.put(opts, :max, max_digits))
     |> satisfy(fn year -> year > 0 end)
     |> map(fn year -> [year4: year] end)
     |> label(expected_digits)
@@ -29,12 +29,12 @@ defmodule Timex.Parse.DateTime.Parsers do
         _ ->
           get_in(opts, [:min]) || 1
       end
-    max_digits = get_in(opts, [:max])
+    max_digits = get_in(opts, [:max]) || 2
     expected_digits = case {min_digits, max_digits} do
       {min, min} -> "#{min} digit year"
       {min, max} -> "#{min}-#{max} digit year"
     end
-    Helpers.integer(opts)
+    Helpers.integer(Keyword.put(opts, :max, max_digits))
     |> satisfy(fn year -> year >= 0 end)
     |> map(fn year -> [year2: year] end)
     |> label(expected_digits)
@@ -53,13 +53,13 @@ defmodule Timex.Parse.DateTime.Parsers do
         _ ->
             get_in(opts, [:min]) || 1
       end
-    max_digits = get_in(opts, [:max])
+    max_digits = get_in(opts, [:max]) || 2
     expected_digits = 
       case {min_digits, max_digits} do
         {min, min} -> "#{min} digit month"
         {min, max} -> "#{min}-#{max} digit month"
       end
-    Helpers.integer(opts)
+    Helpers.integer(Keyword.put(opts, :max, max_digits))
     |> satisfy(fn month -> month in 0..12 end)
     |> map(&Helpers.to_month/1)
     |> label(expected_digits)
@@ -330,6 +330,7 @@ defmodule Timex.Parse.DateTime.Parsers do
   strings for indicating time zones in North America.
   """
   def rfc822(opts \\ []) do
+    IO.inspect opts, label: :rfc822
     is_zulu? = get_in(opts, [:zulu])
     parts = [
       option(sequence([
