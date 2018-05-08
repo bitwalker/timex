@@ -87,15 +87,21 @@ defmodule Timex.Parse.DateTime.Parser do
           case date_string do
             "" -> raise ParseError, message: "Input datetime string cannot be empty!"
             _  ->
-              case do_parse(date_string, directives, tokenizer) do
-                {:ok, %DateTime{time_zone: nil} = dt} ->
-                  Timex.to_naive_datetime(dt)
-                {:ok, dt} ->
+              datetime =
+                case do_parse(date_string, directives, tokenizer) do
+                  {:ok, %DateTime{time_zone: nil} = dt} ->
+                    Timex.to_naive_datetime(dt)
+                  {:ok, dt} ->
                     dt
-                {:error, reason} when is_binary(reason) ->
-                  raise ParseError, message: reason
-                {:error, reason} ->
-                  raise ParseError, message: "#{inspect reason}"
+                  {:error, reason} when is_binary(reason) ->
+                    raise ParseError, message: reason
+                  {:error, reason} ->
+                    raise ParseError, message: "#{inspect reason}"
+                end
+              if :calendar.valid_date(datetime.year, datetime.month, datetime.day) do
+                datetime
+              else
+                raise ParseError, message: "#{inspect datetime} is an invalid date!"
               end
           end
       end
