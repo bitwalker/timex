@@ -94,40 +94,20 @@ defmodule Timex.Comparable.Diff do
   defp diff_months(a, b) do
     {start_date, _} = :calendar.gregorian_seconds_to_datetime(div(a, 1_000*1_000))
     {end_date, _} = :calendar.gregorian_seconds_to_datetime(div(b, 1_000*1_000))
-    if a > b do
-      do_diff_months(end_date, start_date)
-    else
-      do_diff_months(start_date, end_date) * -1
+    do_diff_months(start_date, end_date)
+  end
+
+  defp do_diff_months({y1, m1, d1}, {y2, m2, d2}) do
+    months = (y1 - y2) * 12 + m1 - m2
+    days_in_month2 = Timex.days_in_month(y2, m2)
+
+    cond do
+      months < 0 && d2 < d1 && (days_in_month2 >= d1 || days_in_month2 != d2) ->
+        months + 1
+      months > 0 && d2 > d1 ->
+        months - 1
+      true ->
+        months
     end
-  end
-  defp do_diff_months({y,m,_}, {y,m,_}), do: 0
-  defp do_diff_months({y1, m1, d1}, {y2, m2, d2}) when y1 <= y2 and m1 < m2 do
-    year_diff = y2 - y1
-    month_diff = if d2 >= d1, do: m2 - m1, else: (m2-1)-m1
-    (year_diff*12)+month_diff
-  end
-  defp do_diff_months({y1,m1,d1}, {y2,m2,d2}) when y1 < y2 and m1 > m2 do
-    year_diff = y2 - (y1+1)
-    month_diff =
-      cond do
-        d2 == d1 ->
-          12 - (m1-m2)
-        d2 > d1 ->
-          12 - ((m1-1)-m2)
-        d2 < d1 ->
-          12 - (m1-m2)
-      end
-    (year_diff*12)+month_diff
-  end
-  defp do_diff_months({y1,m,d1}, {y2,m,d2}) when y1 < y2 do
-    year_diff = y2 - (y1+1)
-    month_diff =
-      cond do
-        d1 > d2 ->
-          11
-        :else ->
-          12
-      end
-    (year_diff*12)+month_diff
   end
 end

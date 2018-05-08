@@ -325,26 +325,20 @@ defimpl Timex.Protocol, for: DateTime do
       end
 
     # If the shift fails, it's because it's a high day number, and the month
-    # shifted to does not have that many days. We will handle this by shifting
-    # the leftover days into the next month
+    # shifted to does not have that many days. This will be handled by always
+    # shifting to the last day of the month shifted to.
     if :calendar.valid_date({shifted.year,shifted.month,shifted.day}) do
-      resolve_timezone_info(shifted)
+      shifted
     else
       last_day = :calendar.last_day_of_the_month(shifted.year, shifted.month)
-      shifted_year = shifted.year
-      shifted_month = shifted.month
-      shifted_day = shifted.day
-      shifted =
-        cond do
-          shifted_day <= last_day ->
-            shifted
-          shifted_day > last_day && shifted_month < 12 ->
-            %{shifted | :day => shifted_day - last_day, :month => shifted_month + 1}
-          shifted_day > last_day && shifted_month == 12 ->
-            %{shifted | :day => shifted_day - last_day, :month => 1, :year => shifted_year+1}
-        end
-      resolve_timezone_info(shifted)
+      cond do
+        shifted.day <= last_day ->
+          shifted
+        :else ->
+          %{shifted | :day => last_day}
+      end
     end
+    |> resolve_timezone_info
   end
   defp shift_by(%DateTime{microsecond: {current_usecs, _}} = datetime, value, :microseconds) do
     usecs_from_zero = :calendar.datetime_to_gregorian_seconds({

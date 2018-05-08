@@ -149,4 +149,10 @@ defmodule ShiftTests do
     date = Timex.shift(~N[2017-10-24 12:00:00.100000], dayz: 1)
     assert {:error, {:unknown_shift_unit, :dayz}} === date
   end
+
+  test "shift datetime by a month from the end of January" do
+    date = ~D[2000-01-31] |> Timex.to_datetime |> Timex.shift(months: 1)
+    expected = ~D[2000-02-29] |> Timex.to_datetime
+    assert expected === date
+  end
 end

@@ -284,7 +284,7 @@ defimpl Timex.Protocol, for: NaiveDateTime do
       seconds_from_zero = div(microseconds_from_zero, 1_000_000)
       rem_microseconds = rem(microseconds_from_zero, 1_000_000)
 
-      shifted = seconds_from_zero
+      seconds_from_zero
       |> :calendar.gregorian_seconds_to_datetime
       |> Timex.to_naive_datetime
       |> Map.put(:microsecond, {rem_microseconds, current_precision})
