@@ -4,23 +4,23 @@ defmodule Timex.Interval do
 
   ## Examples
 
-    iex> Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3])
-    %Timex.Interval{from: ~N[2016-03-03 00:00:00], left_open: false, right_open: true, step: [days: 1], until: ~N[2016-03-06 00:00:00]}
+      iex> Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3])
+      %Timex.Interval{from: ~N[2016-03-03 00:00:00], left_open: false, right_open: true, step: [days: 1], until: ~N[2016-03-06 00:00:00]}
 
-    iex> Timex.Interval.new(from: ~D[2016-03-03], until: ~N[2016-03-10 01:23:45])
-    %Timex.Interval{from: ~N[2016-03-03 00:00:00], left_open: false, right_open: true, step: [days: 1], until: ~N[2016-03-10 01:23:45]}
+      iex> Timex.Interval.new(from: ~D[2016-03-03], until: ~N[2016-03-10 01:23:45])
+      %Timex.Interval{from: ~N[2016-03-03 00:00:00], left_open: false, right_open: true, step: [days: 1], until: ~N[2016-03-10 01:23:45]}
 
-    iex> ~N[2016-03-04 12:34:56] in Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3])
-    true
+      iex> ~N[2016-03-04 12:34:56] in Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3])
+      true
 
-    iex> ~D[2016-03-01] in Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3])
-    false
+      iex> ~D[2016-03-01] in Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3])
+      false
 
-    iex> Timex.Interval.overlaps?(Timex.Interval.new(from: ~D[2016-03-01], until: [days: 5]),  Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3]))
-    true
+      iex> Timex.Interval.overlaps?(Timex.Interval.new(from: ~D[2016-03-01], until: [days: 5]),  Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3]))
+      true
 
-    iex> Timex.Interval.overlaps?(Timex.Interval.new(from: ~D[2016-03-01], until: [days: 1]),  Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3]))
-    false
+      iex> Timex.Interval.overlaps?(Timex.Interval.new(from: ~D[2016-03-01], until: [days: 1]),  Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3]))
+      false
 
   """
   alias Timex.Duration
