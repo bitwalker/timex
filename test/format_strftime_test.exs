@@ -259,6 +259,18 @@ defmodule DateFormatTest.FormatStrftime do
     assert { :ok, "AM  0" } = format(date_midnight, "%p %k")
   end
 
+  test "format %L" do
+    dt = Timex.to_datetime({{2018, 6, 6}, {0, 26, 15}})
+    dt = %{dt | :microsecond => {012_345,6}}
+
+    assert { :ok, "12" }  = format(dt, "%-L")
+    assert { :ok, "012" } = format(dt, "%L")
+    assert { :ok, "012" }  = format(dt, "%0L")
+    assert { :ok, " 12" } = format(dt, "%_L")
+    # the width is forced
+    assert { :ok, "012" } = format(dt, "%04L")
+  end
+
   test "format %p" do
     date_midnight = Timex.to_datetime({{2013,8,18}, {0,3,4}})
 
@@ -342,6 +354,7 @@ defmodule DateFormatTest.FormatStrftime do
     assert format(dt, "%d") == {:ok, "03"}
     assert format(dt, "%e") == {:ok, " 3"}
     assert format(dt, "%f") == {:ok, "012000"}
+    assert format(dt, "%L") == {:ok, "012"}
     assert format(dt, "%u") == {:ok, "1"}
     assert format(dt, "%w") == {:ok, "1"}
     assert format(dt_sunday, "%u") == {:ok, "7"}
