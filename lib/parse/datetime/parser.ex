@@ -305,6 +305,10 @@ defmodule Timex.Parse.DateTime.Parser do
       week_num when week_num in [:week_mon, :week_sun] ->
         reset = %{date | :month => 1, :day => 1}
         reset |> Timex.shift(weeks: value)
+
+      :weekday ->
+        date |> Timex.shift(days: value - 1)
+
       # Hours
       hour when hour in [:hour24, :hour12] ->
         %{date | :hour => value}
