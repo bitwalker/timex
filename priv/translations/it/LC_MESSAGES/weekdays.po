@@ -53,7 +53,7 @@ msgstr "Domenica"
 
 #: lib/l10n/translator.ex:191
 msgid "Thu"
-msgstr "Giu"
+msgstr "Gio"
 
 #: lib/l10n/translator.ex:199
 msgid "Thursday"
