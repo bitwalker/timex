@@ -238,4 +238,4 @@ msgstr "diesen Mittwoch"
 
 #: lib/l10n/translator.ex:286
 msgid "now"
-msgstr ""
+msgstr "jetzt"
