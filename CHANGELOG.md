@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.4.0
+
+**NOTE:** There are breaking changes in this release. This is not going to result in a major
+version bump, as the old behavior did not match the docs, and was incorrect to boot. In other words, the
+breaking changes only affect you if you relied on the incorrect behavior, if you were expecting the
+documented behavior, then these are _not_ breaking changes.
+
+### Fixed
+
+- Interval overlap was being improperly calculated
+- Interval behavior with respect to open/closed bounds was incorrect (open bounds were being treated as closed and vice versa)
+- Intervals could be created with invalid from/until (i.e. creating an interval with an until before the from)
+- Interval documentation improvements for clarity
+
 
 ## 3.1.13
 
