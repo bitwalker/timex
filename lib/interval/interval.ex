@@ -66,6 +66,9 @@ defmodule Timex.Interval do
   - `right_open`: Whether the interval is right open. See explanation below.
   - `step`: The step to use when iterating the interval, defaults to `[days: 1]`
 
+  An interval that is `left_open` is one where `from` is not `in` the interval.
+  An interval that is `right_open` is one where `until` is not `in` the interval.
+
   The terms`left_open` and `right_open` come from the mathematical concept of intervals, the following
   excerpt from Wikipedia gives a good explanation of their meaning:
 
