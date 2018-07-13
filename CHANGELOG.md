@@ -10,6 +10,10 @@ version bump, as the old behavior did not match the docs, and was incorrect to b
 breaking changes only affect you if you relied on the incorrect behavior, if you were expecting the
 documented behavior, then these are _not_ breaking changes.
 
+### Added
+
+- Interval.contains?/2 to test if one interval contains another
+
 ### Fixed
 
 - Interval overlap was being improperly calculated

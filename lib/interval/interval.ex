@@ -281,6 +281,31 @@ defmodule Timex.Interval do
   end
 
   @doc """
+  Returns true if the first interval includes every point in time the second includes.
+
+  ## Examples
+
+  iex> #{__MODULE__}.contains?(#{__MODULE__}.new(from: ~D[2018-01-01], until: ~D[2018-01-31]), #{
+    __MODULE__
+  }.new(from: ~D[2018-01-01], until: ~D[2018-01-30]))
+  true
+
+  iex> #{__MODULE__}.contains?(#{__MODULE__}.new(from: ~D[2018-01-01], until: ~D[2018-01-30]), #{
+    __MODULE__
+  }.new(from: ~D[2018-01-01], until: ~D[2018-01-31]))
+  false
+
+  iex> #{__MODULE__}.contains?(#{__MODULE__}.new(from: ~D[2018-01-01], until: ~D[2018-01-10]), #{
+    __MODULE__
+  }.new(from: ~D[2018-01-05], until: ~D[2018-01-15]))
+  false
+  """
+  @spec contains?(__MODULE__.t(), __MODULE__.t()) :: boolean()
+  def contains?(%__MODULE__{} = a, %__MODULE__{} = b) do
+    Timex.compare(min(a), min(b)) <= 0 && Timex.compare(max(a), max(b)) >= 0
+  end
+
+  @doc """
   Returns true if the first interval shares any point(s) in time with the second.
 
   ## Examples
