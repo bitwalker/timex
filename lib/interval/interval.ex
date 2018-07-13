@@ -96,7 +96,7 @@ defmodule Timex.Interval do
 
   - An "open" bound is inclusive, and a "closed" bound is exclusive
   - So a left-open interval includes the `from` value, and a left-closed interval does not.
-  - Likewise, a right-open interval includes the `until` value, and a right-open interval does not.
+  - Likewise, a right-open interval includes the `until` value, and a right-closed interval does not.
   - An open interval is both left and right open, conversely, a closed interval is both left and right closed.
 
   **Note:** `until` shifts delegate to `Timex.shift`, so the options provided should match its valid options.
