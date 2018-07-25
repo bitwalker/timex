@@ -222,8 +222,13 @@ defmodule Timex.Parse.DateTime.Parser do
     case token do
       # Formats
       clock when clock in [:kitchen, :strftime_iso_kitchen] ->
-        {{y,m,d},_} = :calendar.universal_time()
-        date = %{date | :year => y, :month => m, :day => d}
+        date = cond do
+          date == Timex.DateTime.Helpers.empty() ->
+            {{y,m,d},_} = :calendar.universal_time()
+            %{date | :year => y, :month => m, :day => d}
+          true ->
+            date
+        end
         case apply_directives(value, date, tokenizer) do
           {:error, _} = err -> err
           {:ok, date} when clock == :kitchen ->

@@ -47,6 +47,25 @@ defmodule DateFormatTest.ParseStrftime do
     assert elem(ms3.microsecond, 0) == 100 * 1_000
   end
 
+  test "issue #446 - strftime_iso_kitchen should not discard dates" do
+    input_datetime_str = "July 23, 2018 05:34:04 PM PDT"
+    expected_datetime = %DateTime{
+      calendar: Calendar.ISO,
+      day: 23,
+      hour: 17,
+      microsecond: {0, 0},
+      minute: 34,
+      month: 7,
+      second: 4,
+      std_offset: 3600,
+      time_zone: "PST8PDT",
+      utc_offset: -28800,
+      year: 2018,
+      zone_abbr: "PDT"
+    }
+    assert Timex.parse!(input_datetime_str, "%B %d, %Y %r %Z", :strftime) == expected_datetime
+  end
+
   defp parse(date, fmt) do
     Timex.parse(date, fmt, :strftime)
   end
