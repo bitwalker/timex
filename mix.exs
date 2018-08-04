@@ -33,7 +33,10 @@ defmodule Timex.Mixfile do
     [ files: ["lib", "priv", "mix.exs", "README.md", "LICENSE.md"],
       maintainers: ["Paul Schoenfelder"],
       licenses: ["MIT"],
-      links: %{ "GitHub": "https://github.com/bitwalker/timex" } ]
+      links: %{ 
+        "Changelog": "https://github.com/bitwalker/timex/blob/master/CHANGELOG.md", 
+        "GitHub": "https://github.com/bitwalker/timex"
+    }]
   end
 
   def deps do
