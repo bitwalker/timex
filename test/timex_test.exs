@@ -441,6 +441,7 @@ defmodule TimexTests do
   test "beginning_of_month" do
     assert Timex.beginning_of_month({2016,2,15}) == {2016, 2, 1}
     assert Timex.beginning_of_month(Timex.to_datetime({{2014,2,15},{14,14,14}})) == Timex.to_datetime({{2014,2,1},{0,0,0}})
+    assert Timex.beginning_of_month(Timex.to_datetime({{2018,11,15},{14,14,14}}, "America/New_York")) == Timex.to_datetime({{2018,11,1},{0,0,0}}, "America/New_York")
 
     assert {:error, :invalid_date} = Timex.beginning_of_month("Made up date")
     assert {:error, :invalid_date} = Timex.beginning_of_month(nil)

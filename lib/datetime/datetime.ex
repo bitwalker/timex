@@ -125,8 +125,8 @@ defimpl Timex.Protocol, for: DateTime do
   end
 
   @spec beginning_of_month(DateTime.t) :: DateTime.t
-  def beginning_of_month(%DateTime{microsecond: {_, _precision}} = datetime),
-    do: %{datetime | :day => 1, :hour => 0, :minute => 0, :second => 0, :microsecond => {0, 0}}
+  def beginning_of_month(%DateTime{year: year, month: month, time_zone: tz}),
+    do: Timex.DateTime.Helpers.construct({{year, month, 1}, {0, 0, 0, 0}}, tz)
 
   @spec end_of_month(DateTime.t) :: DateTime.t
   def end_of_month(%DateTime{year: year, month: month, time_zone: tz} = date),
