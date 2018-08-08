@@ -598,6 +598,26 @@ defmodule Timex.Format.DateTime.Formatter do
   def format_token(_locale, :us, _date, _modifiers, flags, width) do
     pad_numeric(0, flags, width)
   end
+  def format_token(_locale, :ms, %{microsecond: {us, _precision}}, _modifiers, flags, width) do
+    min =
+      case Keyword.get(width, :min) do
+        nil -> 3
+        n when n < 3 -> 3
+        n -> n
+      end
+    max =
+      case Keyword.get(width, :max) do
+        nil -> min
+        n when n < min -> min
+        n -> n
+      end
+    us
+    |> div(1000)
+    |> pad_numeric(flags, width_spec(min..max))
+  end
+  def format_token(_locale, :ms, _date, _modifiers, flags, width) do
+    pad_numeric(0, flags, width)
+  end
   def format_token(locale, :am, %{hour: hour}, _modifiers, _flags, _width) do
     day_periods = Translator.get_day_periods(locale)
     {_, am_pm} = Timex.Time.to_12hour_clock(hour)
