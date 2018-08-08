@@ -287,7 +287,7 @@ defmodule Timex do
 
       iex> use Timex
       ...> Timex.from_now(Timex.shift(DateTime.utc_now(), days: 2, hours: 1), "ru")
-      "через 2 дней"
+      "через 2 дня"
 
       iex> use Timex
       ...> Timex.from_now(Timex.shift(DateTime.utc_now(), days: -2), "ru")
@@ -306,9 +306,7 @@ defmodule Timex do
     end
   end
 
-  @doc """
-  Formats a DateTime using a fuzzy relative duration, with a reference datetime other than now
-  """
+  # Formats a DateTime using a fuzzy relative duration, with a reference datetime other than now
   @spec from_now(Types.valid_datetime, Types.valid_datetime) :: String.t | {:error, term}
   def from_now(datetime, reference_date),
     do: from_now(datetime, reference_date, Timex.Translator.default_locale)

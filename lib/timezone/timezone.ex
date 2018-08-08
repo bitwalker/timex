@@ -325,11 +325,9 @@ defmodule Timex.Timezone do
     end
   end
 
-  @doc """
-  This version of resolve/3 takes a timezone name as a string, and an Erlang datetime tuple,
-  and attempts to resolve the date and time in that timezone. Unlike the previous clause of resolve/2,
-  this one will return either an error, a DateTime struct, or an AmbiguousDateTime struct.
-  """
+  # This version of resolve/3 takes a timezone name as a string, and an Erlang datetime tuple,
+  # and attempts to resolve the date and time in that timezone. Unlike the previous clause of resolve/2,
+  # this one will return either an error, a DateTime struct, or an AmbiguousDateTime struct.
   @spec resolve(Types.valid_timezone, Types.datetime, :utc | :wall) :: DateTime.t |
     AmbiguousDateTime.t | {:error, term}
   # These are shorthand for specific time zones

@@ -23,9 +23,7 @@ defmodule Timex.Calendar.Julian do
   def julian_date({year, month, day}),
     do: julian_date(year, month, day)
 
-  @doc """
-  Same as julian_date/1, except takes an Erlang datetime, and returns a more precise Julian date number
-  """
+  # Same as julian_date/1, except takes an Erlang datetime, and returns a more precise Julian date number
   @spec julian_date(Types.datetime) :: float
   def julian_date({{year, month, day}, {hour, minute, second}}) do
     julian_date(year, month, day, hour, minute, second)
@@ -78,7 +76,7 @@ defmodule Timex.Calendar.Julian do
       :mon -> mod(cardinal + 6, 7) + 1
     end
   end
-  def day_of_week(_, _, _, weekstart) when not weekstart in [:sun, :mon] do
+  def day_of_week(_, _, _, weekstart) when weekstart not in [:sun, :mon] do
     {:error, {:bad_weekstart_value, expected: [:sun, :mon], got: weekstart}}
   end
   def day_of_week(_,_,_, _) do
