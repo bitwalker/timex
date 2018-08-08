@@ -1492,7 +1492,8 @@ defmodule Timex do
       iex> use Timex
       ...> datetime = Timex.to_datetime({{2016,3,13}, {1,0,0}}, "America/Chicago")
       ...> # 2-3 AM doesn't exist
-      ...> shifted = Timex.shift(datetime, hours: 1)
+      ...> {:error, {:could_not_resolve_timezone, _, _, _}} = Timex.shift(datetime, hours: 1)
+      ...> shifted = Timex.shift(datetime, hours: 2)
       ...> {datetime.zone_abbr, shifted.zone_abbr, shifted.hour}
       {"CST", "CDT", 3}
 

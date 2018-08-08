@@ -290,8 +290,7 @@ defmodule Timex.Timezone do
   @doc """
   Given a timezone name as a string, and a date/time in the form of the number of seconds since year zero,
   attempt to resolve a TimezoneInfo for that date/time. If the time is ambiguous, AmbiguousTimezoneInfo will
-  be returned. If the time doesn't exist, the clock will shift forward an hour, and try again, and if no result
-  is found, an error will be returned.
+  be returned. If no result is found, an error will be returned.
 
   If an invalid zone name is provided, an error will be returned
   """
@@ -313,20 +312,7 @@ defmodule Timex.Timezone do
       true ->
         case Tzdata.periods_for_time(name, seconds_from_zeroyear, utc_or_wall) do
           [] ->
-            # Shift forward an hour, try again
-            case Tzdata.periods_for_time(name, seconds_from_zeroyear + (60 * 60), utc_or_wall) do
-              # Do not try again, something is wrong
-              [] ->
-                {:error, {:could_not_resolve_timezone, name, seconds_from_zeroyear, utc_or_wall}}
-              # Resolved
-              [period] ->
-                tzdata_to_timezone(period, name)
-              # Ambiguous
-              [before_period, after_period] ->
-                before_tz = tzdata_to_timezone(before_period, name)
-                after_tz  = tzdata_to_timezone(after_period, name)
-                AmbiguousTimezoneInfo.new(before_tz, after_tz)
-            end
+            {:error, {:could_not_resolve_timezone, name, seconds_from_zeroyear, utc_or_wall}}
           # Resolved
           [period] ->
             tzdata_to_timezone(period, name)

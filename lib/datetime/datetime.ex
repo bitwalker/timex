@@ -401,6 +401,8 @@ defimpl Timex.Protocol, for: DateTime do
             {{_y,_m,_d}=date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(new_secs_from_zero)
             resolved = Timezone.resolve(datetime.time_zone, {date, {h,mm,s}})
             case {resolved, units} do
+              {{:error, _reason} = err, _} ->
+                err
               {%DateTime{} = dt, :microseconds} ->
                 apply_microseconds(dt, rem(value+us, 1_000))
               {%DateTime{} = dt, :milliseconds} ->
