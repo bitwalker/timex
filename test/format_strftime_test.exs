@@ -17,6 +17,20 @@ defmodule DateFormatTest.FormatStrftime do
     end)
   end
 
+  test "success!" do
+    date = Timex.to_datetime({2013,03,02})
+
+    formatter = Timex.Format.DateTime.Formatters.Strftime
+    assert "2013-03-02" == formatter.format!(date, "%Y-%m-%d")
+  end
+
+  test "error tuple" do
+    date = Timex.to_datetime({2013,03,02})
+
+    formatter = Timex.Format.DateTime.Formatters.Strftime
+    assert { :error, { :format, "Expected at least one parser to succeed at line 1, column 0." } } == formatter.format(date, "%.")
+  end
+
   test "format %Y" do
     assert { :ok, "2013" } = format(@aug182013, "%Y")
     assert { :ok, "0003" } = format(@aug180003, "%Y")

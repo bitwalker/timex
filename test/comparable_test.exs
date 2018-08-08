@@ -34,4 +34,12 @@ defmodule ComparableTests do
     assert 0 = Comparable.compare(lmt_jwst, lmt_jwst)
     assert {:error, {:ambiguous_comparison, _}} = Comparable.compare(lmt_jwst, Timex.to_naive_datetime({2015, 1, 1}))
   end
+
+  test "compare naive_datetime" do
+    naive_dt = Timex.to_naive_datetime({1970,1,1})
+    assert -1 == Comparable.compare(naive_dt, :distant_future)
+    assert +1 == Comparable.compare(naive_dt, :distant_past)
+    assert 0 == Comparable.compare(naive_dt, :epoch)
+    assert +1 == Comparable.compare(naive_dt, :zero)
+  end
 end
