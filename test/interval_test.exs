@@ -182,4 +182,62 @@ defmodule IntervalTests do
       refute Interval.overlaps?(b, a)
     end
   end
+
+  describe "contains?/2" do
+    test "non-overlapping" do
+      earlier = Interval.new(from: ~D[2018-01-01], until: ~D[2018-01-04])
+      later = Interval.new(from: ~D[2018-01-05], until: ~D[2018-01-10])
+
+      refute Interval.contains?(earlier, later)
+    end
+
+    test "first subset of second" do
+      superset = Interval.new(from: ~D[2018-01-01], until: ~D[2018-01-31])
+      subset_a = Interval.new(from: ~D[2018-01-01], until: ~D[2018-01-30])
+      subset_b = Interval.new(from: ~D[2018-01-02], until: ~D[2018-01-15])
+
+      refute Interval.contains?(subset_a, superset)
+      refute Interval.contains?(subset_b, superset)
+    end
+
+    test "first superset of second" do
+      superset = Interval.new(from: ~D[2018-01-01], until: ~D[2018-01-31])
+      subset_a = Interval.new(from: ~D[2018-01-01], until: ~D[2018-01-30])
+      subset_b = Interval.new(from: ~D[2018-01-02], until: ~D[2018-01-15])
+
+      assert Interval.contains?(superset, subset_a)
+      assert Interval.contains?(superset, subset_b)
+    end
+
+    test "first partially ahead of second" do
+      first = Interval.new(from: ~D[2018-01-01], until: ~D[2018-01-10])
+      second = Interval.new(from: ~D[2018-01-05], until: ~D[2018-01-15])
+
+      refute Interval.contains?(first, second)
+    end
+
+    test "first partially behind second" do
+      first = Interval.new(from: ~D[2018-01-05], until: ~D[2018-01-15])
+      second = Interval.new(from: ~D[2018-01-01], until: ~D[2018-01-10])
+
+      refute Interval.contains?(first, second)
+    end
+
+    test "contains itself" do
+      from = ~D[2018-01-01]
+      until = ~D[2018-01-15]
+
+      interval_a = Interval.new(from: from, until: until, left_open: true, right_open: false)
+      assert Interval.contains?(interval_a, interval_a)
+
+      interval_b = Interval.new(from: from, until: until, left_open: true, right_open: true)
+      assert Interval.contains?(interval_b, interval_b)
+
+      interval_c = Interval.new(from: from, until: until, left_open: false, right_open: true)
+      assert Interval.contains?(interval_c, interval_c)
+
+      interval_d = Interval.new(from: from, until: until, left_open: false, right_open: false)
+      assert Interval.contains?(interval_d, interval_d)
+    end
+  end
 end
