@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+
+### Removed
+- support for Elixir 1.4
+
 ## 3.4.0
 
 **NOTE:** There are breaking changes in this release. This is not going to result in a major
