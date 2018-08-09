@@ -17,14 +17,14 @@ defmodule DateFormatTest.FormatStrftime do
     end)
   end
 
-  test "success!" do
+  test "success! (to hit line 115 in datetime/formatters/strftime.ex)" do
     date = Timex.to_datetime({2013,03,02})
 
     formatter = Timex.Format.DateTime.Formatters.Strftime
     assert "2013-03-02" == formatter.format!(date, "%Y-%m-%d")
   end
 
-  test "error tuple" do
+  test "error returned when invalid directive is given" do
     date = Timex.to_datetime({2013,03,02})
 
     formatter = Timex.Format.DateTime.Formatters.Strftime
