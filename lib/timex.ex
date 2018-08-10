@@ -909,6 +909,8 @@ defmodule Timex do
   - :hours
   - :minutes
   - :seconds
+  - :milliseconds
+  - :microseconds (default)
   - :duration
 
   and the result will be an integer value of those units or a Duration.
