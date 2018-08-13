@@ -31,7 +31,6 @@ defmodule Timex.Parser.Test do
     assert [[month: 12]] = Combine.parse("December", month_full([]))
     assert [[month: 12]] = Combine.parse("Dec", month_short([]))
     assert {:error, "Expected `full month name` at line 1, column 10."} = Combine.parse("Something", month_full([]))
-
   end
 
   test "helpers: is_weekday" do
