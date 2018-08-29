@@ -476,6 +476,17 @@ defmodule Timex.Format.DateTime.Formatter do
     do: pad_numeric(date.day, flags, width)
   def format_token(_locale, :oday, date, _modifiers, flags, width),
     do: pad_numeric(Timex.day(date), flags, width)
+  def format_token(_locale, :dsuff, %{:day => day}, _modifiers, _flags, _width) do
+    remainder = day |> rem(10)
+    suffix =
+      cond do
+        remainder == 1 && day != 11 -> "st"
+        remainder == 2 && day != 12 -> "nd"
+        remainder == 3 && day != 13 -> "rd"
+        true -> "th"
+      end
+    "#{day}" <> suffix
+  end
   # Weeks
   def format_token(_locale, :iso_weeknum, date, _modifiers, flags, width) do
     {_, week} = Timex.iso_week(date)

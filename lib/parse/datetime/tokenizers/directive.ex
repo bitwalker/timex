@@ -42,7 +42,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
   ]
   @mapped_types [iso_year4: :year4, iso_year2: :year2,
     month: :month2, mshort: :month_short, mfull: :month_full,
-    day: :day_of_month, oday: :day_of_year,
+    day: :day_of_month, oday: :day_of_year, dsuff: :day_suffix,
     iso_weeknum: :week_of_year, week_mon: :week_of_year, week_sun: :week_of_year_sun,
     wday_mon: :weekday, wday_sun: :weekday, wdshort: :weekday_short, wdfull: :weekday_full,
     min: :minute, sec: :second, sec_fractional: :second_fractional, sec_epoch: :seconds_epoch,
