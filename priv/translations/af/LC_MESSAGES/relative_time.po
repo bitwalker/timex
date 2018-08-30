@@ -1,0 +1,241 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: af\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+
+#: lib/l10n/translator.ex:237
+msgid "last month"
+msgstr "verlede maand"
+
+#: lib/l10n/translator.ex:243
+msgid "last week"
+msgstr "verlede week"
+
+#: lib/l10n/translator.ex:231
+msgid "last year"
+msgstr "laas jaar"
+
+#: lib/l10n/translator.ex:239
+msgid "next month"
+msgstr "volgende maand"
+
+#: lib/l10n/translator.ex:245
+msgid "next week"
+msgstr "volgende week"
+
+#: lib/l10n/translator.ex:233
+msgid "next year"
+msgstr "volgende jaar"
+
+#: lib/l10n/translator.ex:238
+msgid "this month"
+msgstr "hierdie maand"
+
+#: lib/l10n/translator.ex:244
+msgid "this week"
+msgstr "hierdie week"
+
+#: lib/l10n/translator.ex:232
+msgid "this year"
+msgstr "hierdie jaar"
+
+#: lib/l10n/translator.ex:250
+msgid "today"
+msgstr "vandag"
+
+#: lib/l10n/translator.ex:251
+msgid "tomorrow"
+msgstr "môre"
+
+#: lib/l10n/translator.ex:249
+msgid "yesterday"
+msgstr "gister"
+
+#: lib/l10n/translator.ex:253
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "%{count} dag gelede"
+msgstr[1] "%{count} dae gelede"
+
+#: lib/l10n/translator.ex:278
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "%{count} huur gelede"
+msgstr[1] "%{count} ure gelede"
+
+#: lib/l10n/translator.ex:281
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "%{count} minuut gelede"
+msgstr[1] "%{count} minute gelede"
+
+#: lib/l10n/translator.ex:241
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "%{count} maand gelede"
+msgstr[1] "%{count} maande gelede"
+
+#: lib/l10n/translator.ex:284
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "%{count} sekonde gelede"
+msgstr[1] "%{count} sekondes gelede"
+
+#: lib/l10n/translator.ex:247
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "%{count} week gelede"
+msgstr[1] "%{count} weke gelede"
+
+#: lib/l10n/translator.ex:235
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "%{count} jaar gelede"
+msgstr[1] "%{count} jaar gelede"
+
+#: lib/l10n/translator.ex:252
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "in %{count} dag"
+msgstr[1] "oor %{count} dae"
+
+#: lib/l10n/translator.ex:277
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "oor %{count} uur"
+msgstr[1] "in %{count} uur"
+
+#: lib/l10n/translator.ex:280
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "oor %{count} minuut"
+msgstr[1] "oor %{count} minute"
+
+#: lib/l10n/translator.ex:240
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "in %{count} maand"
+msgstr[1] "oor %{count} maande"
+
+#: lib/l10n/translator.ex:283
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "in %{count} sekondes"
+msgstr[1] "in %{count} sekonde"
+
+#: lib/l10n/translator.ex:246
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "in %{count} week"
+msgstr[1] "oor %{count} weke"
+
+#: lib/l10n/translator.ex:234
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "in %{count} jaar"
+msgstr[1] "in %{count} jaar"
+
+#: lib/l10n/translator.ex:267
+msgid "last friday"
+msgstr "laas Vrydag"
+
+#: lib/l10n/translator.ex:255
+msgid "last monday"
+msgstr "laas Maandag"
+
+#: lib/l10n/translator.ex:270
+msgid "last saturday"
+msgstr "laas Saterdag"
+
+#: lib/l10n/translator.ex:273
+msgid "last sunday"
+msgstr "laas Sondag"
+
+#: lib/l10n/translator.ex:264
+msgid "last thursday"
+msgstr "laas Donderdag"
+
+#: lib/l10n/translator.ex:258
+msgid "last tuesday"
+msgstr "laas Dinsdag"
+
+#: lib/l10n/translator.ex:261
+msgid "last wednesday"
+msgstr "laas Woensdag"
+
+#: lib/l10n/translator.ex:269
+msgid "next friday"
+msgstr "volgende Vrydag"
+
+#: lib/l10n/translator.ex:257
+msgid "next monday"
+msgstr "volgende Maandag"
+
+#: lib/l10n/translator.ex:272
+msgid "next saturday"
+msgstr "volgende Saterdag"
+
+#: lib/l10n/translator.ex:275
+msgid "next sunday"
+msgstr "volgende Sondag"
+
+#: lib/l10n/translator.ex:266
+msgid "next thursday"
+msgstr "volgende Donderdag"
+
+#: lib/l10n/translator.ex:260
+msgid "next tuesday"
+msgstr "volgende Dinsdag"
+
+#: lib/l10n/translator.ex:263
+msgid "next wednesday"
+msgstr "volgende Woensdag"
+
+#: lib/l10n/translator.ex:268
+msgid "this friday"
+msgstr "hierdie Vrydag"
+
+#: lib/l10n/translator.ex:256
+msgid "this monday"
+msgstr "hierdie Maandag"
+
+#: lib/l10n/translator.ex:271
+msgid "this saturday"
+msgstr "hierdie Saterdag"
+
+#: lib/l10n/translator.ex:274
+msgid "this sunday"
+msgstr "hierdie Sondag"
+
+#: lib/l10n/translator.ex:265
+msgid "this thursday"
+msgstr "hierdie Donderdag"
+
+#: lib/l10n/translator.ex:259
+msgid "this tuesday"
+msgstr "hierdie Dinsdag"
+
+#: lib/l10n/translator.ex:262
+msgid "this wednesday"
+msgstr "hierdie Woensdag"
+
+#: lib/l10n/translator.ex:286
+msgid "now"
+msgstr "nou"
