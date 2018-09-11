@@ -76,11 +76,11 @@ defmodule Timex.Calendar.Julian do
       :mon -> mod(cardinal + 6, 7) + 1
     end
   end
-  def day_of_week(_, _, _, weekstart) when weekstart not in [:sun, :mon] do
-    {:error, {:bad_weekstart_value, expected: [:sun, :mon], got: weekstart}}
-  end
-  def day_of_week(_,_,_, _) do
-    {:error, :invalid_date}
+  def day_of_week(_, _, _, weekstart) do
+    case weekstart in [:sun, :mon] do
+      true -> {:error, :invalid_date}
+      false -> {:error, {:bad_weekstart_value, expected: [:sun, :mon], got: weekstart}}
+    end
   end
 
   defp mod(a, b), do: rem(rem(a, b) + b, b)
