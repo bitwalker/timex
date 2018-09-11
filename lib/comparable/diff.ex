@@ -59,8 +59,7 @@ defmodule Timex.Comparable.Diff do
   defp do_diff(a, b, :years) do
     diff_years(a, b)
   end
-  defp do_diff(_, _, granularity) when granularity not in @units,
-    do: {:error, {:invalid_granularity, granularity}}
+  defp do_diff(_, _, granularity), do: {:error, {:invalid_granularity, granularity}}
 
   defp diff_years(a, b) do
     {start_date, _} = :calendar.gregorian_seconds_to_datetime(div(a, 1_000*1_000))
