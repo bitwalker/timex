@@ -770,27 +770,38 @@ defmodule Timex do
   Returns a boolean indicating whether the first `Timex.Comparable` occurs between the second
   and third.
 
-  By default, the `start`and `ending` bounds are *exclusive*. You can opt for inclusive bounds
-  by setting the `:inclusive` option to `true`.
-
+  By default, the `start` and `end` bounds are *exclusive*. You can opt for inclusive bounds with the
+  `inclusive: true` option.
+  To set just one of the bounds as inclusive, use the
+  `inclusive: :start` or `inclusive: :end` option.
   """
   @type between_options :: [
     inclusive: boolean
+    | :start
+    | :end
   ]
   @spec between?(Time, Time, Time, between_options) :: boolean | {:error, term}
   @spec between?(Comparable.comparable, Comparable.comparable, Comparable.comparable, between_options) ::
     boolean | {:error, term}
   def between?(a, start, ending, options \\ []) do
-    inclusive = Keyword.get(options, :inclusive, false)
+    [inclusive_start, inclusive_end] =
+    case Keyword.get(options, :inclusive, false) do
+      :start -> [true, false]
+      :end -> [false, true]
+      true -> [true, true]
+      _ -> [false, false]
+    end
 
     after_start = compare(a, start)
     before_ending = compare(a, ending)
 
-    case {inclusive, after_start, before_ending} do
-      {_, {:error, _} = err, _} -> err
-      {_, _, {:error, _} = err} -> err
-      {true, lo, hi} when lo >= 0 and hi <= 0 -> true
-      {false, 1, -1} -> true
+    case {inclusive_start, inclusive_end, after_start, before_ending} do
+      {_, _, {:error, _} = err, _} -> err
+      {_, _, _, {:error, _} = err} -> err
+      {true, true, lo, hi} when lo >= 0 and hi <= 0 -> true
+      {true, false, lo, -1} when lo >= 0 -> true
+      {false, true, 1, hi} when hi <= 0 -> true
+      {false, false, 1, -1} -> true
       _ -> false
     end
   end
