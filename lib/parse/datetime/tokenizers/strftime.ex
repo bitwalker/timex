@@ -10,7 +10,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
   @doc """
   Tokenizes the given format string and returns an error or a list of directives.
   """
-  @spec tokenize(String.t) :: [Directive.t] | {:error, term}
+  @spec tokenize(String.t) :: {:ok, [Directive.t]} | {:error, term}
   def tokenize(<<>>), do: {:error, "Format string cannot be empty."}
   def tokenize(str) do
     case Combine.parse(str, strftime_format_parser()) do

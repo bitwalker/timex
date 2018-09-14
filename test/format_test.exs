@@ -22,14 +22,32 @@ defmodule DateFormatTest.GeneralFormatting do
   end
 
   test "fractional seconds padding obeys formatting rules" do
-    t = Timex.parse!("2017-06-28 20:21:22.000000", "%F %T.%f", :strftime)
-    assert {0, 6} = t.microsecond
-    assert "000000" = Timex.format!(t, "%f", :strftime)
-    assert "000" = Timex.format!(t, "%03f", :strftime)
+    t = Timex.parse!("2017-06-28 20:21:22.012345", "%F %T.%f", :strftime)
+    assert {12345, 6} = t.microsecond
+    assert "012345" = Timex.format!(t, "%f", :strftime)
+    assert "12345" = Timex.format!(t, "%03f", :strftime)
 
     t = Timex.to_datetime({2017, 6, 22})
     assert {0, 0} = t.microsecond
-    assert "" = Timex.format!(t, "%f", :strftime)
+    assert "000000" = Timex.format!(t, "%f", :strftime)
     assert "000" = Timex.format!(t, "%03f", :strftime)
+  end
+
+  test "issue #402 - formatting a Time sometimes crashes for timezones" do
+    assert Timex.to_datetime({{2016,2,8}, {12,0,0}})
+    |> Timex.Timezone.convert("Canada/Newfoundland")
+    |> Timex.format!("{ISO:Extended}") == "2016-02-08T08:30:00-03:30"
+
+    assert Timex.to_datetime({{2016,2,8}, {12,0,0}})
+    |> Timex.Timezone.convert("Pacific/Marquesas")
+    |> Timex.format!("{ISO:Extended}") == "2016-02-08T02:30:00-09:30"
+
+  end
+
+  test "format wrong date" do
+    assert_raise ArgumentError, "invalid_date", fn ->
+      Timex.format!("", "{M}")
+    end
+    assert Timex.format("", "{M}") == {:error, "invalid_date"}
   end
 end

@@ -289,6 +289,44 @@ defmodule TimexTests do
     assert {:error, :invalid_date} == Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
   end
 
+  test "between? inclusive_start" do
+    date1 = Timex.to_datetime({{2013,1,1},{0, 0, 0}})
+    date2 = Timex.to_datetime({{2013,1,5},{0, 0, 0}})
+    date3 = Timex.to_datetime({{2013,1,9},{0, 0, 0}})
+
+    options = [inclusive: :start]
+
+    assert true == Timex.between?(date2, date1, date3, options)
+    assert true == Timex.between?(date1, date1, date3, options)
+    assert false == Timex.between?(date3, date1, date3, options)
+
+    assert false == Timex.between?(date1, date2, date3, options)
+    assert false == Timex.between?(date3, date1, date2, options)
+
+    assert {:error, :invalid_date} == Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    assert {:error, :invalid_date} == Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    assert {:error, :invalid_date} == Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+  end
+
+  test "between? inclusive_end" do
+    date1 = Timex.to_datetime({{2013,1,1},{0, 0, 0}})
+    date2 = Timex.to_datetime({{2013,1,5},{0, 0, 0}})
+    date3 = Timex.to_datetime({{2013,1,9},{0, 0, 0}})
+
+    options = [inclusive: :end]
+
+    assert true == Timex.between?(date2, date1, date3, options)
+    assert false == Timex.between?(date1, date1, date3, options)
+    assert true == Timex.between?(date3, date1, date3, options)
+
+    assert false == Timex.between?(date1, date2, date3, options)
+    assert false == Timex.between?(date3, date1, date2, options)
+
+    assert {:error, :invalid_date} == Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    assert {:error, :invalid_date} == Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    assert {:error, :invalid_date} == Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+  end
+
   test "equal" do
     assert Timex.equal?(Timex.today, Timex.today)
     refute Timex.equal?(Timex.today, Timex.epoch)
@@ -383,6 +421,56 @@ defmodule TimexTests do
     assert Timex.diff(~D[2018-11-18], ~D[2017-10-19], :months) == 12
     assert Timex.diff(~D[2018-11-19], ~D[2017-10-19], :months) == 13
     assert Timex.diff(~D[2018-11-20], ~D[2017-10-19], :months) == 13
+
+    assert {:error, {:invalid_granularity, :dayz}} === Timex.diff(date1, date1, :dayz)
+    assert {:error, {:invalid_granularity, :dayz}} === Timex.diff(d1, d1, :dayz)
+    assert {:error, {:invalid_granularity, :dayz}} === Timex.diff(~T[12:00:00], ~T[12:00:00], :dayz)
+  end
+
+  test "month diff is asymetrical for months of different lengths" do
+    assert Timex.diff(~D[2017-02-28], ~D[2017-01-27], :months) === 1
+    assert Timex.diff(~D[2017-02-28], ~D[2017-01-28], :months) === 1
+    assert Timex.diff(~D[2017-02-28], ~D[2017-01-29], :months) === 0
+    assert Timex.diff(~D[2017-02-28], ~D[2017-01-30], :months) === 0
+    assert Timex.diff(~D[2017-02-28], ~D[2017-01-31], :months) === 0
+
+    assert Timex.diff(~D[2017-01-27], ~D[2017-02-28], :months) === -1
+    assert Timex.diff(~D[2017-01-28], ~D[2017-02-28], :months) === -1
+    assert Timex.diff(~D[2017-01-29], ~D[2017-02-28], :months) === -1
+    assert Timex.diff(~D[2017-01-30], ~D[2017-02-28], :months) === -1
+    assert Timex.diff(~D[2017-01-31], ~D[2017-02-28], :months) === -1
+
+    assert Timex.diff(~D[2017-01-27], ~D[2017-02-27], :months) === -1
+    assert Timex.diff(~D[2017-01-28], ~D[2017-02-27], :months) === 0
+    assert Timex.diff(~D[2017-01-29], ~D[2017-02-27], :months) === 0
+    assert Timex.diff(~D[2017-01-30], ~D[2017-02-27], :months) === 0
+    assert Timex.diff(~D[2017-01-31], ~D[2017-02-27], :months) === 0
+  end
+
+  test "month diff matches month shift for native dates" do
+    date = ~D[2017-01-27]
+    Enum.each(0..34, fn(x) ->
+      date1 = Timex.shift(date, days: x)
+
+      date2 = Timex.shift(date1, months: 1)
+      assert Timex.diff(date1, date2, :months) === -1
+
+      date2 = Timex.shift(date1, months: -1)
+      assert Timex.diff(date1, date2, :months) === 1
+    end)
+  end
+
+  test "month diff matches month shift for datetimes" do
+    date = ~D[2017-01-27] |> Timex.to_datetime
+    Enum.each(0..34, fn(x) ->
+      date1 = Timex.shift(date, days: x)
+
+      date2 = Timex.shift(date1, months: 1)
+      assert Timex.diff(date1, date2, :months) === -1
+
+      date2 = Timex.shift(date1, months: -1)
+      assert Timex.diff(date1, date2, :months) === 1
+    end)
   end
 
   test "timestamp diff same datetime" do
@@ -411,6 +499,7 @@ defmodule TimexTests do
   test "beginning_of_month" do
     assert Timex.beginning_of_month({2016,2,15}) == {2016, 2, 1}
     assert Timex.beginning_of_month(Timex.to_datetime({{2014,2,15},{14,14,14}})) == Timex.to_datetime({{2014,2,1},{0,0,0}})
+    assert Timex.beginning_of_month(Timex.to_datetime({{2018,11,15},{14,14,14}}, "America/New_York")) == Timex.to_datetime({{2018,11,1},{0,0,0}}, "America/New_York")
 
     assert {:error, :invalid_date} = Timex.beginning_of_month("Made up date")
     assert {:error, :invalid_date} = Timex.beginning_of_month(nil)

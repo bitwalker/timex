@@ -65,7 +65,7 @@ msgstr "вт"
 
 #: lib/l10n/translator.ex:197
 msgid "Tuesday"
-msgstr "вт"
+msgstr "вторник"
 
 #: lib/l10n/translator.ex:190
 msgid "Wed"

@@ -8,7 +8,7 @@
 # # to merge POT files into PO files.
 msgid ""
 msgstr ""
-"Language: it\n"
+"Language: af\n"
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
@@ -21,56 +21,56 @@ msgstr ""
 
 #: lib/l10n/translator.ex:192
 msgid "Fri"
-msgstr "Ven"
+msgstr "Vry"
 
 #: lib/l10n/translator.ex:200
 msgid "Friday"
-msgstr "Venerdì"
+msgstr "Vrydag"
 
 #: lib/l10n/translator.ex:188
 msgid "Mon"
-msgstr "Lun"
+msgstr "Ma"
 
 #: lib/l10n/translator.ex:196
 msgid "Monday"
-msgstr "Lunedì"
+msgstr "Maandag"
 
 #: lib/l10n/translator.ex:193
 msgid "Sat"
-msgstr "Sab"
+msgstr "Sa"
 
 #: lib/l10n/translator.ex:201
 msgid "Saturday"
-msgstr "Sabato"
+msgstr "Saterdag"
 
 #: lib/l10n/translator.ex:194
 msgid "Sun"
-msgstr "Dom"
+msgstr "So"
 
 #: lib/l10n/translator.ex:202
 msgid "Sunday"
-msgstr "Domenica"
+msgstr "Sondag"
 
 #: lib/l10n/translator.ex:191
 msgid "Thu"
-msgstr "Gio"
+msgstr "Do"
 
 #: lib/l10n/translator.ex:199
 msgid "Thursday"
-msgstr "Giovedì"
+msgstr "Donderdag"
 
 #: lib/l10n/translator.ex:189
 msgid "Tue"
-msgstr "Mar"
+msgstr "Di"
 
 #: lib/l10n/translator.ex:197
 msgid "Tuesday"
-msgstr "Martedì"
+msgstr "Dinsdag"
 
 #: lib/l10n/translator.ex:190
 msgid "Wed"
-msgstr "Mer"
+msgstr "Wo"
 
 #: lib/l10n/translator.ex:198
 msgid "Wednesday"
-msgstr "Mercoledì"
+msgstr "Woensdag"

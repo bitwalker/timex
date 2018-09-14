@@ -8,3 +8,6 @@ erl_crash.dump
 bench/snapshots
 priv/tmp_downloads
 cover/
+
+# ignore asdf config
+.tool-versions

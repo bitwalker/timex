@@ -87,15 +87,21 @@ defmodule Timex.Parse.DateTime.Parser do
           case date_string do
             "" -> raise ParseError, message: "Input datetime string cannot be empty!"
             _  ->
-              case do_parse(date_string, directives, tokenizer) do
-                {:ok, %DateTime{time_zone: nil} = dt} ->
-                  Timex.to_naive_datetime(dt)
-                {:ok, dt} ->
+              datetime =
+                case do_parse(date_string, directives, tokenizer) do
+                  {:ok, %DateTime{time_zone: nil} = dt} ->
+                    Timex.to_naive_datetime(dt)
+                  {:ok, dt} ->
                     dt
-                {:error, reason} when is_binary(reason) ->
-                  raise ParseError, message: reason
-                {:error, reason} ->
-                  raise ParseError, message: "#{inspect reason}"
+                  {:error, reason} when is_binary(reason) ->
+                    raise ParseError, message: reason
+                  {:error, reason} ->
+                    raise ParseError, message: "#{inspect reason}"
+                end
+              if :calendar.valid_date(datetime.year, datetime.month, datetime.day) do
+                datetime
+              else
+                raise ParseError, message: "#{inspect datetime} is an invalid date!"
               end
           end
       end
@@ -216,8 +222,13 @@ defmodule Timex.Parse.DateTime.Parser do
     case token do
       # Formats
       clock when clock in [:kitchen, :strftime_iso_kitchen] ->
-        {{y,m,d},_} = :calendar.universal_time()
-        date = %{date | :year => y, :month => m, :day => d}
+        date = cond do
+          date == Timex.DateTime.Helpers.empty() ->
+            {{y,m,d},_} = :calendar.universal_time()
+            %{date | :year => y, :month => m, :day => d}
+          true ->
+            date
+        end
         case apply_directives(value, date, tokenizer) do
           {:error, _} = err -> err
           {:ok, date} when clock == :kitchen ->
@@ -299,6 +310,10 @@ defmodule Timex.Parse.DateTime.Parser do
       week_num when week_num in [:week_mon, :week_sun] ->
         reset = %{date | :month => 1, :day => 1}
         reset |> Timex.shift(weeks: value)
+
+      :weekday ->
+        date |> Timex.shift(days: value - 1)
+
       # Hours
       hour when hour in [:hour24, :hour12] ->
         %{date | :hour => value}

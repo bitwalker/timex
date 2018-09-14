@@ -287,7 +287,7 @@ defmodule Timex do
 
       iex> use Timex
       ...> Timex.from_now(Timex.shift(DateTime.utc_now(), days: 2, hours: 1), "ru")
-      "через 2 дней"
+      "через 2 дня"
 
       iex> use Timex
       ...> Timex.from_now(Timex.shift(DateTime.utc_now(), days: -2), "ru")
@@ -306,9 +306,7 @@ defmodule Timex do
     end
   end
 
-  @doc """
-  Formats a DateTime using a fuzzy relative duration, with a reference datetime other than now
-  """
+  # Formats a DateTime using a fuzzy relative duration, with a reference datetime other than now
   @spec from_now(Types.valid_datetime, Types.valid_datetime) :: String.t | {:error, term}
   def from_now(datetime, reference_date),
     do: from_now(datetime, reference_date, Timex.Translator.default_locale)
@@ -772,27 +770,38 @@ defmodule Timex do
   Returns a boolean indicating whether the first `Timex.Comparable` occurs between the second
   and third.
 
-  By default, the `start`and `ending` bounds are *exclusive*. You can opt for inclusive bounds
-  by setting the `:inclusive` option to `true`.
-
+  By default, the `start` and `end` bounds are *exclusive*. You can opt for inclusive bounds with the
+  `inclusive: true` option.
+  To set just one of the bounds as inclusive, use the
+  `inclusive: :start` or `inclusive: :end` option.
   """
   @type between_options :: [
     inclusive: boolean
+    | :start
+    | :end
   ]
   @spec between?(Time, Time, Time, between_options) :: boolean | {:error, term}
   @spec between?(Comparable.comparable, Comparable.comparable, Comparable.comparable, between_options) ::
     boolean | {:error, term}
   def between?(a, start, ending, options \\ []) do
-    inclusive = Keyword.get(options, :inclusive, false)
+    [inclusive_start, inclusive_end] =
+    case Keyword.get(options, :inclusive, false) do
+      :start -> [true, false]
+      :end -> [false, true]
+      true -> [true, true]
+      _ -> [false, false]
+    end
 
     after_start = compare(a, start)
     before_ending = compare(a, ending)
 
-    case {inclusive, after_start, before_ending} do
-      {_, {:error, _} = err, _} -> err
-      {_, _, {:error, _} = err} -> err
-      {true, lo, hi} when lo >= 0 and hi <= 0 -> true
-      {false, 1, -1} -> true
+    case {inclusive_start, inclusive_end, after_start, before_ending} do
+      {_, _, {:error, _} = err, _} -> err
+      {_, _, _, {:error, _} = err} -> err
+      {true, true, lo, hi} when lo >= 0 and hi <= 0 -> true
+      {true, false, lo, -1} when lo >= 0 -> true
+      {false, true, 1, hi} when hi <= 0 -> true
+      {false, false, 1, -1} -> true
       _ -> false
     end
   end
@@ -911,6 +920,8 @@ defmodule Timex do
   - :hours
   - :minutes
   - :seconds
+  - :milliseconds
+  - :microseconds (default)
   - :duration
 
   and the result will be an integer value of those units or a Duration.
@@ -1479,6 +1490,10 @@ defmodule Timex do
   with the exception of shifting DateTimes, which may result in an AmbiguousDateTime
   if the shift moves to an ambiguous time period for the zone of that DateTime.
 
+  Shifting by months will always return a date in the expected month. Because months
+  have different number of days, shifting to a month with fewer days may may not be
+  the same day of the month as the original date.
+
   If an error occurs, an error tuple will be returned.
 
   ## Examples
@@ -1488,7 +1503,8 @@ defmodule Timex do
       iex> use Timex
       ...> datetime = Timex.to_datetime({{2016,3,13}, {1,0,0}}, "America/Chicago")
       ...> # 2-3 AM doesn't exist
-      ...> shifted = Timex.shift(datetime, hours: 1)
+      ...> {:error, {:could_not_resolve_timezone, _, _, _}} = Timex.shift(datetime, hours: 1)
+      ...> shifted = Timex.shift(datetime, hours: 2)
       ...> {datetime.zone_abbr, shifted.zone_abbr, shifted.hour}
       {"CST", "CDT", 3}
 
@@ -1507,6 +1523,21 @@ defmodule Timex do
       ...> Timex.shift(date, years: -1)
       ~D[2015-02-28]
 
+  ### Shifting by months
+
+      iex> date = ~D[2016-01-15]
+      ...> Timex.shift(date, months: 1)
+      ~D[2016-02-15]
+
+      iex> date = ~D[2016-01-31]
+      ...> Timex.shift(date, months: 1)
+      ~D[2016-02-29]
+
+      iex> date = ~D[2016-01-31]
+      ...> Timex.shift(date, months: 2)
+      ~D[2016-03-31]
+      ...> Timex.shift(date, months: 1) |> Timex.shift(months: 1)
+      ~D[2016-03-29]
   """
   @type shift_options :: [
     microseconds: integer,

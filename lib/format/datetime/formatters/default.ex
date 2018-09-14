@@ -56,7 +56,7 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   * `{h12}`     - hour of the day (1..12)
   * `{m}`       - minutes of the hour (00..59)
   * `{s}`       - seconds of the minute (00..60)
-  * `{ss}`      - seconds of the minute, fractional (00.xxx..60.xxx) (xxx is milliseconds)
+  * `{ss}`      - fractional second, based on precision of microseconds given (.xxx == ms, .xxxxxx == us)
   * `{s-epoch}` - number of seconds since UNIX epoch
   * `{am}`      - lowercase am or pm (no padding)
   * `{AM}`      - uppercase AM or PM (no padding)

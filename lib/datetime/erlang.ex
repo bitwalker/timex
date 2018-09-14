@@ -394,7 +394,9 @@ defimpl Timex.Protocol, for: Tuple do
     do: get_microseconds(time)
 
   defp do_shift(date, options, type) do
-    allowed_options = Enum.filter(options, fn
+    allowed_options = Enum.reject(options, fn
+      {:weeks, _} -> false
+      {:days, _} -> false
       {:hours, value} when value >= 24 or value <= -24 -> true
       {:hours, _} -> false
       {:minutes, value} when value >= 24*60 or value <= -24*60 -> true

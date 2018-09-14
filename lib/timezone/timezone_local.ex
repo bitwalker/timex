@@ -224,7 +224,15 @@ defmodule Timex.Timezone.Local do
         case match do
           nil -> nil
           m   ->
-            [_, tz, _] = String.split(m, "\"")
+            tz =
+              case String.split(m, "\"") do
+                [_, tz, _] ->
+                  tz
+                ["ZONE=" <> tz] ->
+                  tz
+                ["TIMEZONE=" <> tz] ->
+                  tz
+              end
             {:ok, String.replace(tz, " ", "_")}
         end
       _ ->

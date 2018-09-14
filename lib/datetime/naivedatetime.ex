@@ -199,18 +199,9 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   end
   defp apply_shifts(datetime, []),
     do: datetime
-  defp apply_shifts(%NaiveDateTime{microsecond: {ms, precision}} = datetime, [{:duration, %Duration{} = duration} | rest]) do
-    total_microseconds = Duration.to_microseconds(duration)
-    seconds = div(total_microseconds + ms, 1_000*1_000)
-    rem_microseconds = rem(total_microseconds, 1_000*1_000)
-    shifted = shift_by(datetime, seconds, :seconds)
-    shifted = case precision do
-      0 ->
-        %{shifted | :microsecond => Timex.DateTime.Helpers.construct_microseconds(rem_microseconds)}
-      _ ->
-        {new_ms, _} = Timex.DateTime.Helpers.construct_microseconds(ms + rem_microseconds)
-        %{shifted | :microsecond => {new_ms, precision}}
-    end
+  defp apply_shifts(datetime, [{:duration, %Duration{} = duration} | rest]) do
+    duration_microseconds = Duration.to_microseconds(duration)
+    shifted = shift_by(datetime, duration_microseconds, :microseconds)
     apply_shifts(shifted, rest)
   end
   defp apply_shifts(datetime, [{unit, 0} | rest]) when is_atom(unit),
@@ -269,68 +260,38 @@ defimpl Timex.Protocol, for: NaiveDateTime do
         shifted
     end
   end
-  defp shift_by(%NaiveDateTime{microsecond: {current_usecs, _}} = datetime, value, :microseconds) do
-    usecs_from_zero = :calendar.datetime_to_gregorian_seconds({
-      {datetime.year,datetime.month,datetime.day},
-      {datetime.hour,datetime.minute,datetime.second}
-    }) * (1_000*1_000) + current_usecs + value
+  defp shift_by(datetime, value, :weeks),
+    do: shift_by(datetime, (value * 60 * 60 * 24 * 7 * 1_000_000), :microseconds)
+  defp shift_by(datetime, value, :days),
+    do: shift_by(datetime, (value * 60 * 60 * 24 * 1_000_000), :microseconds)
+  defp shift_by(datetime, value, :hours),
+    do: shift_by(datetime, (value * 60 * 60 * 1_000_000), :microseconds)
+  defp shift_by(datetime, value, :minutes),
+    do: shift_by(datetime, (value * 60 * 1_000_000), :microseconds)
+  defp shift_by(datetime, value, :seconds),
+    do: shift_by(datetime, (value * 1_000_000), :microseconds)
+  defp shift_by(datetime, value, :milliseconds),
+    do: shift_by(datetime, (value * 1_000), :microseconds)
+  defp shift_by(%NaiveDateTime{microsecond: {current_microseconds, current_precision}} = datetime, value, :microseconds) do
+    microseconds_from_zero = :calendar.datetime_to_gregorian_seconds({
+      {datetime.year, datetime.month, datetime.day},
+      {datetime.hour, datetime.minute, datetime.second}
+    }) * 1_000_000 + current_microseconds + value
 
-    secs_from_zero = div(usecs_from_zero, 1_000*1_000)
-    rem_microseconds = rem(usecs_from_zero, 1_000*1_000)
+    if microseconds_from_zero < 0 do
+      {:error, :shift_to_invalid_date}
+    else
+      seconds_from_zero = div(microseconds_from_zero, 1_000_000)
+      rem_microseconds = rem(microseconds_from_zero, 1_000_000)
 
-    shifted = :calendar.gregorian_seconds_to_datetime(secs_from_zero)
-    shifted = Timex.to_naive_datetime(shifted)
-    %{shifted | :microsecond => Timex.DateTime.Helpers.construct_microseconds(rem_microseconds)}
-  end
-  defp shift_by(%NaiveDateTime{microsecond: {current_usecs, _}} = datetime, value, :milliseconds) do
-    usecs_from_zero = :calendar.datetime_to_gregorian_seconds({
-      {datetime.year,datetime.month,datetime.day},
-      {datetime.hour,datetime.minute,datetime.second}
-    }) * (1_000*1_000) + current_usecs + (value*1_000)
-
-    secs_from_zero = div(usecs_from_zero, 1_000*1_000)
-    rem_microseconds = rem(usecs_from_zero, 1_000*1_000)
-
-    shifted = :calendar.gregorian_seconds_to_datetime(secs_from_zero)
-    shifted = Timex.to_naive_datetime(shifted)
-    %{shifted | :microsecond => Timex.DateTime.Helpers.construct_microseconds(rem_microseconds)}
-  end
-  defp shift_by(%NaiveDateTime{microsecond: {us, _}} = datetime, value, units) do
-    secs_from_zero = :calendar.datetime_to_gregorian_seconds({
-      {datetime.year,datetime.month,datetime.day},
-      {datetime.hour,datetime.minute,datetime.second}
-    })
-    shift_by = case units do
-      :microseconds -> div(value + us, 1_000*1_000)
-      :milliseconds -> div((value*1_000 + us), 1_000*1_000)
-      :seconds      -> value
-      :minutes      -> value * 60
-      :hours        -> value * 60 * 60
-      :days         -> value * 60 * 60 * 24
-      :weeks        -> value * 60 * 60 * 24 * 7
-      _ ->
-        {:error, {:unknown_shift_unit, units}}
-    end
-    case shift_by do
-      {:error, _} = err -> err
-      0 when units in [:microseconds] ->
-        %{datetime | :microsecond => Timex.DateTime.Helpers.construct_microseconds(value+us)}
-      0 when units in [:milliseconds] ->
-        %{datetime | :microsecond => Timex.DateTime.Helpers.construct_microseconds((value*1_000)+us)}
-      0 ->
-        datetime
-      _ ->
-        new_secs_from_zero = secs_from_zero + shift_by
-        cond do
-          new_secs_from_zero <= 0 ->
-            {:error, :shift_to_invalid_date}
-          :else ->
-            shifted = :calendar.gregorian_seconds_to_datetime(new_secs_from_zero)
-            shifted = Timex.to_naive_datetime(shifted)
-            %{shifted | :microsecond => Timex.DateTime.Helpers.construct_microseconds(us)}
-        end
+      seconds_from_zero
+      |> :calendar.gregorian_seconds_to_datetime
+      |> Timex.to_naive_datetime
+      |> Map.put(:microsecond, {rem_microseconds, current_precision})
     end
   end
+  defp shift_by(_datetime, _value, units),
+    do: {:error, {:unknown_shift_unit, units}}
 
   defp to_seconds(%NaiveDateTime{year: y, month: m, day: d, hour: h, minute: mm, second: s}, :zero) do
     :calendar.datetime_to_gregorian_seconds({{y,m,d},{h,mm,s}})

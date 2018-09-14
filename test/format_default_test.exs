@@ -444,8 +444,8 @@ defmodule DateFormatTest.FormatDefault do
 
   test "milliseconds as fractional seconds via {ss}" do
     date = Timex.to_datetime({{2015,11,9}, {8,37,48}})
-    date = %{date | :microsecond => {655_000,3}}
-    assert { :ok, "2015-11-09T08:37:48.655" } = format(date, "{YYYY}-{0M}-{0D}T{h24}:{m}:{s}{ss}")
+    date = %{date | :microsecond => {065_000,3}}
+    assert { :ok, "2015-11-09T08:37:48.065" } = format(date, "{YYYY}-{0M}-{0D}T{h24}:{m}:{s}{ss}")
   end
 
   test "issue #79 - invalid ISO 8601 string with fractional ms" do

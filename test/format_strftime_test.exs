@@ -332,7 +332,7 @@ defmodule DateFormatTest.FormatStrftime do
 
   test "lau/calendar tests" do
     dt = Timex.to_datetime({{2014, 11, 3}, {1, 41, 2}})
-    dt = %{dt | :microsecond => {123_000,3}}
+    dt = %{dt | :microsecond => {012_000,3}}
     dt_sunday = Timex.to_datetime({{2014, 11, 2}, {1, 41, 2}})
     assert format(dt, "%a") == {:ok, "Mon"}
     assert format(dt, "%A") == {:ok, "Monday"}
@@ -341,7 +341,7 @@ defmodule DateFormatTest.FormatStrftime do
     assert format(dt, "%B") == {:ok, "November"}
     assert format(dt, "%d") == {:ok, "03"}
     assert format(dt, "%e") == {:ok, " 3"}
-    assert format(dt, "%f") == {:ok, "123"}
+    assert format(dt, "%f") == {:ok, "012000"}
     assert format(dt, "%u") == {:ok, "1"}
     assert format(dt, "%w") == {:ok, "1"}
     assert format(dt_sunday, "%u") == {:ok, "7"}

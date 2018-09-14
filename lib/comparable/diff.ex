@@ -11,7 +11,6 @@ defmodule Timex.Comparable.Diff do
 
   @spec diff(Types.microseconds, Types.microseconds, Comparable.granularity) :: integer
   @spec diff(Types.valid_datetime, Types.valid_datetime, Comparable.granularity) :: integer
-  def diff(a, a, granularity) when is_integer(a), do: zero(granularity)
   def diff(a, b, granularity) when is_integer(a) and is_integer(b) and is_atom(granularity) do
     do_diff(a, b, granularity)
   end
@@ -23,7 +22,6 @@ defmodule Timex.Comparable.Diff do
     end
   end
 
-  defp do_diff(a, a, type),      do: zero(type)
   defp do_diff(a, b, :duration), do: Duration.from_seconds(do_diff(a,b,:seconds))
   defp do_diff(a, b, :microseconds), do: a - b
   defp do_diff(a, b, :milliseconds), do: div(a - b, 1_000)
@@ -61,13 +59,8 @@ defmodule Timex.Comparable.Diff do
   defp do_diff(a, b, :years) do
     diff_years(a, b)
   end
-  defp do_diff(_, _, granularity) when not granularity in @units,
-    do: {:error, {:invalid_granularity, granularity}}
+  defp do_diff(_, _, granularity), do: {:error, {:invalid_granularity, granularity}}
 
-  defp zero(:duration), do: Duration.zero
-  defp zero(_type), do: 0
-
-  defp diff_years(a, a), do: 0
   defp diff_years(a, b) do
     {start_date, _} = :calendar.gregorian_seconds_to_datetime(div(a, 1_000*1_000))
     {end_date, _} = :calendar.gregorian_seconds_to_datetime(div(b, 1_000*1_000))
@@ -96,29 +89,24 @@ defmodule Timex.Comparable.Diff do
     end
   end
 
-  defp diff_months(a, a),
-    do: 0
-  defp diff_months(a, b),
-    do: round_month_diff(month_float(a) - month_float(b))
-
-  defp month_float(microseconds) when is_integer(microseconds) do
-    microseconds
-    |> div(1_000_000)
-    |> :calendar.gregorian_seconds_to_datetime()
-    |> month_float()
-  end
-  defp month_float({{year, month, day}, _}) do
-    (year * 12) + month + (day / 32)
+  defp diff_months(a, a), do: 0
+  defp diff_months(a, b) do
+    {start_date, _} = :calendar.gregorian_seconds_to_datetime(div(a, 1_000*1_000))
+    {end_date, _} = :calendar.gregorian_seconds_to_datetime(div(b, 1_000*1_000))
+    do_diff_months(start_date, end_date)
   end
 
-  defp round_month_diff(diff) when diff > 0 do
-    diff
-    |> Float.floor()
-    |> round()
-  end
-  defp round_month_diff(diff) do
-    diff
-    |> Float.ceil()
-    |> round()
+  defp do_diff_months({y1, m1, d1}, {y2, m2, d2}) do
+    months = (y1 - y2) * 12 + m1 - m2
+    days_in_month2 = Timex.days_in_month(y2, m2)
+
+    cond do
+      months < 0 && d2 < d1 && (days_in_month2 >= d1 || days_in_month2 != d2) ->
+        months + 1
+      months > 0 && d2 > d1 ->
+        months - 1
+      true ->
+        months
+    end
   end
 end

@@ -65,3 +65,18 @@ iex> Timex.format!(Timex.to_datetime(~N[2015-06-24T00:04:09.293], "America/Chica
 iex> Timex.format!(Timex.to_datetime(~N[2015-06-24T00:04:09.293], "America/Chicago"), "{ISO:Extended:Z}")
 "2015-06-24T05:04:13.293Z"
 ```
+
+## Testing if one event occurs in an interval
+
+```elixir
+iex> use Timex
+...> event = Timex.to_datetime({{2016, 6, 24}, {0, 0, 0}})
+...> other_event = Timex.to_datetime({{2010, 1, 1}, {0, 0, 0}})
+...> from = Timex.to_datetime({{2015, 1, 1}, {0, 0, 0}})
+...> until = Timex.to_datetime({{2018, 1, 1}, {0, 0, 0}})
+...> interval = Timex.Interval.new(from: from, until: until)
+...> event in interval
+true
+...> other_event in interval
+false
+```

@@ -80,7 +80,13 @@ defmodule Timex.Parse.DateTime.Helpers do
   def to_ampm("PM"), do: [AM: "PM"]
 
   def integer(opts \\ []) do
-    min_width = get_in(opts, [:min]) || 1
+    min_width =
+      case Keyword.get(opts, :padding) do
+        :none ->
+          1
+        _ ->
+          get_in(opts, [:min]) || 1
+      end
     max_width = get_in(opts, [:max])
     padding   = get_in(opts, [:padding])
     case {padding, min_width, max_width} do

@@ -40,22 +40,29 @@ defmodule Timex.Format.DateTime.Formatter do
   @spec lformat!(Types.valid_datetime, String.t, String.t, atom | nil) :: String.t | no_return
   def lformat!(date, format_string, locale, formatter \\ Default)
 
-  def lformat!({:error, _} = err, _format_string, _locale, _formatter),
-    do: err
+  def lformat!({:error, reason}, _format_string, _locale, _formatter),
+    do: raise ArgumentError, to_string(reason)
   def lformat!(datetime, format_string, locale, :strftime),
     do: lformat!(datetime, format_string, locale, Strftime)
   def lformat!(datetime, format_string, locale, :relative),
     do: lformat!(datetime, format_string, locale, Relative)
+  def lformat!(%{__struct__: struct} = date, format_string, locale, formatter)
+    when struct in [Date, DateTime, NaiveDateTime, Time] and is_binary(format_string)
+        and is_binary(locale) and is_atom(formatter) do
+    case formatter.lformat(date, format_string, locale) do
+      {:ok, result}    -> result
+      {:error, reason} -> raise FormatError, message: reason
+    end
+  end
   def lformat!(date, format_string, locale, formatter)
-    when is_binary(format_string) and is_binary(locale) and is_atom(formatter)
-    do
-      date = case date do
-         %{__struct__: struct} when struct in [Date, DateTime, NaiveDateTime, Time] -> date
-         _other -> Timex.to_naive_datetime(date)
-      end
-      case formatter.lformat(date, format_string, locale)do
-        {:ok, result}    -> result
-        {:error, reason} -> raise FormatError, message: reason
+    when is_binary(format_string) and is_binary(locale) and is_atom(formatter) do
+    case Timex.to_naive_datetime(date) do
+      {:error, reason} -> raise ArgumentError, to_string(reason)
+      datetime ->
+        case formatter.lformat(datetime, format_string, locale) do
+          {:ok, result}    -> result
+          {:error, reason} -> raise FormatError, message: reason
+        end
       end
   end
   def lformat!(a,b,c,d),
@@ -80,8 +87,6 @@ defmodule Timex.Format.DateTime.Formatter do
       try do
         {:ok, lformat!(date, format_string, locale, formatter)}
       catch
-        _type, %FormatError{:message => msg} ->
-          {:error, msg}
         _type, %{:message => msg} ->
           {:error, msg}
         _type, reason ->
@@ -552,7 +557,10 @@ defmodule Timex.Format.DateTime.Formatter do
         n when n < min_width -> min_width
         n -> n
       end
-    padded = pad_numeric(us, [padding: :zeroes], width_spec(min_width..max_width))
+
+    us_str = "#{us}"
+    padded_us_str = String.duplicate(pad_char(:zeroes), 6 - byte_size(us_str)) <> us_str
+    padded = pad_numeric(padded_us_str, [padding: :zeroes], width_spec(min_width..max_width))
     ".#{padded}"
   end
   def format_token(_locale, :sec_fractional, _date, _modifiers, _flags, width) do
@@ -572,19 +580,18 @@ defmodule Timex.Format.DateTime.Formatter do
         pad_numeric(Timex.to_unix(date), flags, width)
     end
   end
-  def format_token(_locale, :us, %{microsecond: {us, precision}}, _modifiers, flags, width) do
+  def format_token(_locale, :us, %{microsecond: {us, _precision}}, _modifiers, flags, width) do
     min =
       case Keyword.get(width, :min) do
-        nil -> precision
-        n when n < 1 -> precision
+        nil -> 6
+        n when n < 0 -> 6
         n -> n
       end
     max =
       case Keyword.get(width, :max) do
-        nil -> precision
-        n when n < 1 -> precision
-        n when n < min -> min
-        n -> n
+        nil -> 6
+        n when n > 6 -> n
+        _ -> 6
       end
     pad_numeric(us, flags, width_spec(min..max))
   end
@@ -651,8 +658,12 @@ defmodule Timex.Format.DateTime.Formatter do
       {:error, _} = err -> err
       "" -> ""
       offset ->
-        [qualifier, <<hour::binary-size(2), min::binary-size(2)>>] = String.split(offset, "", [trim: true, parts: 2])
-        <<qualifier::binary, hour::binary, ?:, min::binary>>
+        case String.split(offset, "", [trim: true, parts: 2]) do
+          [qualifier, <<hour::binary-size(2), min::binary-size(2)>>] ->
+            <<qualifier::binary, hour::binary, ?:, min::binary>>
+          [qualifier, <<hour::binary-size(2), "-", min::binary-size(2)>>] ->
+            <<qualifier::binary, hour::binary, ?:, min::binary>>
+        end
     end
   end
   def format_token(locale, :zoffs_sec, %{std_offset: std, utc_offset: utc} = date, modifiers, flags, width) do

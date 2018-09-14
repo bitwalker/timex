@@ -85,6 +85,18 @@ defmodule DateFormatTest.ParseDefault do
     assert ~N[2007-11-19 00:00:00] = Timex.parse!("2007-W47", "{ISOweek}")
   end
 
+  test "parse ISO week with day" do
+    assert ~N[2018-06-25 00:00:00] = Timex.parse!("2018-W26-1", "{ISOweek-day}")
+    assert ~N[2018-06-26 00:00:00] = Timex.parse!("2018-W26-2", "{ISOweek-day}")
+    assert ~N[2018-07-01 00:00:00] = Timex.parse!("2018-W26-7", "{ISOweek-day}")
+
+    assert {:error, "Expected `ordinal weekday` at line 1, column 10."} =
+             Timex.parse("2018-W26-0", "{ISOweek-day}")
+
+    assert {:error, "Expected `ordinal weekday` at line 1, column 10."} =
+             Timex.parse("2018-W26-8", "{ISOweek-day}")
+  end
+
   test "parse ISO year4/year2" do
     date = Timex.to_naive_datetime({2007,1,1})
     year = date.year

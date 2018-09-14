@@ -1,12 +1,12 @@
 defmodule Timex.Mixfile do
   use Mix.Project
 
-  @version "3.1.24"
+  @version "3.4.0"
 
   def project do
     [ app: :timex,
       version: @version,
-      elixir: "~> 1.3",
+      elixir: "~> 1.4",
       description: description(),
       package: package(),
       deps: deps(),
@@ -33,7 +33,10 @@ defmodule Timex.Mixfile do
     [ files: ["lib", "priv", "mix.exs", "README.md", "LICENSE.md"],
       maintainers: ["Paul Schoenfelder"],
       licenses: ["MIT"],
-      links: %{ "GitHub": "https://github.com/bitwalker/timex" } ]
+      links: %{ 
+        "Changelog": "https://github.com/bitwalker/timex/blob/master/CHANGELOG.md", 
+        "GitHub": "https://github.com/bitwalker/timex"
+    }]
   end
 
   def deps do

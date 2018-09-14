@@ -71,7 +71,7 @@ Here's a few simple examples:
 > strftime_str = Timex.format!(datetime, "%FT%T%:z", :strftime)
 "2016-02-29T12:30:30+00:00"
 
-> Timex.parse(default_str, "{ISO:Extended}")
+> Timex.parse(strftime_str, "{ISO:Extended}")
 {:ok, #<DateTime(2016-02-29T12:30:30.120+00:00 Etc/Utc)}
 
 > Timex.parse!(strftime_str, "%FT%T%:z", :strftime)
@@ -97,6 +97,26 @@ true
 
 > Timex.before?(Timex.shift(Timex.today, days: 1), Timex.today)
 false
+
+> interval = Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3])
+%Timex.Interval{from: ~N[2016-03-03 00:00:00], left_open: false,
+ right_open: true, step: [days: 1], until: ~N[2016-03-06 00:00:00]}
+
+> ~D[2016-03-04] in interval
+true
+
+> ~N[2016-03-04 00:00:00] in interval
+true
+
+> ~N[2016-03-02 00:00:00] in interval
+false
+
+> Timex.Interval.overlaps?(Timex.Interval.new(from: ~D[2016-03-04], until: [days: 1]), interval)
+true
+
+> Timex.Interval.overlaps?(Timex.Interval.new(from: ~D[2016-03-07], until: [days: 1]), interval)
+false
+
 ```
 
 There are a ton of other functions, all of which work with Erlang datetime tuples, Date, NaiveDateTime, and DateTime. The Duration module contains functions for working with Durations, including Erlang timestamps (such as those returned from `:timer.tc`)
@@ -113,11 +133,13 @@ You can provide your own formatter/parser for datetime strings by implementing t
 
 ## Common Issues
 
-**Warning**: Timex functions of the form `iso_*` behave based on how the ISO calendar represents dates/times and not the ISO8601 date format. This confusion has occurred before, and it's important to note this!
+### `iso_*` Functions
 
-- If you need to use Timex from within an escript, add `{:tzdata, "~> 0.1.8", override: true}` to your deps,
-  more recent versions of :tzdata are unable to work in an escript because of the need to load ETS table files
-  from priv, and due to the way ETS loads these files, it's not possible to do so.
+Timex functions of the form `iso_*` behave based on how the ISO calendar represents dates/times and not the ISO8601 date format. This confusion has occurred before, and it's important to note this!
+
+### Timex with escript
+
+If you need to use Timex from within an escript, add `{:tzdata, "~> 0.1.8", override: true}` to your deps, more recent versions of :tzdata are unable to work in an escript because of the need to load ETS table files from priv, and due to the way ETS loads these files, it's not possible to do so.
 
 ### Automatic time zone updates
 

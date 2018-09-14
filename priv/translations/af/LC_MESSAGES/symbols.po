@@ -8,7 +8,7 @@
 # # to merge POT files into PO files.
 msgid ""
 msgstr ""
-"Language: ru\n"
+"Language: af\n"
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #: lib/l10n/translator.ex:292
 msgid "+"
-msgstr ""
+msgstr "+"
 
 #: lib/l10n/translator.ex:290
 msgid ","
@@ -29,20 +29,20 @@ msgstr ","
 
 #: lib/l10n/translator.ex:293
 msgid "-"
-msgstr ""
+msgstr "-"
 
 #: lib/l10n/translator.ex:289
 msgid "."
-msgstr ","
+msgstr "."
 
 #: lib/l10n/translator.ex:295
 msgid ":"
-msgstr ""
+msgstr ":"
 
 #: lib/l10n/translator.ex:291
 msgid ";"
-msgstr ""
+msgstr ";"
 
 #: lib/l10n/translator.ex:294
 msgid "E"
-msgstr ""
+msgstr "E"
