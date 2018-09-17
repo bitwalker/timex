@@ -17,6 +17,20 @@ defmodule DateFormatTest.FormatStrftime do
     end)
   end
 
+  test "success! (to hit line 115 in datetime/formatters/strftime.ex)" do
+    date = Timex.to_datetime({2013,03,02})
+
+    formatter = Timex.Format.DateTime.Formatters.Strftime
+    assert "2013-03-02" == formatter.format!(date, "%Y-%m-%d")
+  end
+
+  test "error returned when invalid directive is given" do
+    date = Timex.to_datetime({2013,03,02})
+
+    formatter = Timex.Format.DateTime.Formatters.Strftime
+    assert { :error, { :format, "Expected at least one parser to succeed at line 1, column 0." } } == formatter.format(date, "%.")
+  end
+
   test "format %Y" do
     assert { :ok, "2013" } = format(@aug182013, "%Y")
     assert { :ok, "0003" } = format(@aug180003, "%Y")
@@ -241,6 +255,54 @@ defmodule DateFormatTest.FormatStrftime do
     assert { :ok, " 4" } = format(date, "%l")
     assert { :ok, "4" }  = format(date, "%-l")
     assert { :ok, " 4" } = format(date, "%l")
+  end
+
+  test "format %f" do
+    with_us_5 = {{2018,8,8}, {9,24,0,12345}}
+    with_us_6 = {{2018,8,8}, {9,24,0,123456}}
+    without_us = {{2018,8,8}, {9,24,0}}
+    dt_with_5 = Timex.to_datetime(with_us_5)
+    dt_with_6 = Timex.to_datetime(with_us_6)
+    dt_without = Timex.to_datetime(without_us)
+    assert { :ok, "000000" } = format(dt_without, "%f")
+    assert { :ok, "012345" } = format(dt_with_5, "%f")
+    assert { :ok, "012345" } = format(dt_with_5, "%0f")
+    assert { :ok, "123456" } = format(dt_with_6, "%f")
+    assert { :ok, "0" } = format(dt_without, "%-f")
+    assert { :ok, "12345" } = format(dt_with_5, "%-f")
+    assert { :ok, " 12345" } = format(dt_with_5, "%_f")
+  end
+
+  test "format %L" do
+    with_us_5 = {{2018,8,8}, {9,24,0,12345}}
+    with_us_6 = {{2018,8,8}, {9,24,0,123456}}
+    without_us = {{2018,8,8}, {9,24,0}}
+    dt_with_5 = Timex.to_datetime(with_us_5)
+    dt_with_6 = Timex.to_datetime(with_us_6)
+    dt_without = Timex.to_datetime(without_us)
+    assert { :ok, "000" } = format(dt_without, "%L")
+    assert { :ok, "012" } = format(dt_with_5, "%L")
+    assert { :ok, "012" } = format(dt_with_5, "%0L")
+    assert { :ok, "123" } = format(dt_with_6, "%L")
+    assert { :ok, "0" } = format(dt_without, "%-L")
+    assert { :ok, "12" } = format(dt_with_5, "%-L")
+    assert { :ok, " 12" } = format(dt_with_5, "%_L")
+  end
+
+  test "format %L (rounding)" do
+    with_us_5 = {{2018,8,8}, {9,24,0,12945}}
+    with_us_6 = {{2018,8,8}, {9,24,0,129456}}
+    without_us = {{2018,8,8}, {9,24,0}}
+    dt_with_5 = Timex.to_datetime(with_us_5)
+    dt_with_6 = Timex.to_datetime(with_us_6)
+    dt_without = Timex.to_datetime(without_us)
+    assert { :ok, "000" } = format(dt_without, "%L")
+    assert { :ok, "013" } = format(dt_with_5, "%L")
+    assert { :ok, "013" } = format(dt_with_5, "%0L")
+    assert { :ok, "129" } = format(dt_with_6, "%L")
+    assert { :ok, "0" } = format(dt_without, "%-L")
+    assert { :ok, "13" } = format(dt_with_5, "%-L")
+    assert { :ok, " 13" } = format(dt_with_5, "%_L")
   end
 
   test "various time combinations" do
