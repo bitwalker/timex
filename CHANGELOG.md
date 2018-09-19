@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+TODO
+
+## 3.4.1
+
 ### Added
 - Afrikaans translations (Julian Dicks)
 - The :inclusive option for Timex.between?/4 :start and :end in addition to true
