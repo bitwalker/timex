@@ -5,10 +5,6 @@ defmodule Timex.Comparable.Diff do
   alias Timex.Duration
   alias Timex.Comparable
 
-  @units [:years, :months, :weeks, :calendar_weeks, :days,
-          :hours, :minutes, :seconds, :milliseconds, :microseconds,
-          :duration]
-
   @spec diff(Types.microseconds, Types.microseconds, Comparable.granularity) :: integer
   @spec diff(Types.valid_datetime, Types.valid_datetime, Comparable.granularity) :: integer
   def diff(a, b, granularity) when is_integer(a) and is_integer(b) and is_atom(granularity) do

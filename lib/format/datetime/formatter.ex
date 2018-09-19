@@ -598,7 +598,7 @@ defmodule Timex.Format.DateTime.Formatter do
   def format_token(_locale, :us, _date, _modifiers, flags, width) do
     pad_numeric(0, flags, width)
   end
-  def format_token(_locale, :ms, _date = %{microsecond: {us, _precision}}, _modifiers, flags, width),
+  def format_token(_locale, :ms, _date = %{microsecond: {us, _precision}}, _modifiers, flags, _width),
     do: pad_numeric(Kernel.round(us / 1000), flags, width_spec(3..3))
   def format_token(_locale, :ms, _date, _modifiers, flags, width),
     do: pad_numeric(0, flags, width)
