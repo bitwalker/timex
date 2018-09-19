@@ -6,9 +6,9 @@ elixir:
   - 1.6
   - 1.7
 otp_release:
-  - 19
-  - 20
-  - 21
+  - 19.3
+  - 20.3
+  - 21.0
 script:
   - "MIX_ENV=test mix do deps.get, compile, coveralls.travis"
 notifications:
