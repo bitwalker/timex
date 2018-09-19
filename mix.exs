@@ -4,7 +4,8 @@ defmodule Timex.Mixfile do
   @version "3.4.1"
 
   def project do
-    [ app: :timex,
+    [
+      app: :timex,
       version: @version,
       elixir: "~> 1.4",
       description: description(),
@@ -12,8 +13,17 @@ defmodule Timex.Mixfile do
       deps: deps(),
       docs: docs(),
       compilers: [:gettext] ++ Mix.compilers,
-      test_coverage: [tool: ExCoveralls] ]
-
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        "hex.publish": :docs,
+        docs: :docs,
+        coveralls: :test,
+        "coveralls.html": :test,
+        "coveralls.detail": :test,
+        "coveralls.json": :test,
+        "coveralls.post": :test,
+      ]
+    ]
   end
 
   def application do
@@ -43,10 +53,10 @@ defmodule Timex.Mixfile do
     [{:tzdata, "~> 0.1.8 or ~> 0.5"},
      {:combine, "~> 0.10"},
      {:gettext, "~> 0.10"},
-     {:ex_doc, "~> 0.13", only: :dev},
-     {:benchfella, "~> 0.3", only: :dev},
-     {:dialyze, "~> 0.2", only: :dev},
-     {:excoveralls, "~> 0.4", only: [:dev, :test]}]
+     {:ex_doc, "~> 0.13", only: [:docs]},
+     {:benchfella, "~> 0.3", only: [:bench]},
+     {:dialyze, "~> 0.2", only: [:dev]},
+     {:excoveralls, "~> 0.4", only: [:test]}]
   end
 
   defp docs do
