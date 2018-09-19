@@ -14,3 +14,4 @@ script:
 notifications:
   recipients:
     - paulschoenfelder@gmail.com
+    - chris@chrishildebrand.net

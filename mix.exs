@@ -41,7 +41,7 @@ defmodule Timex.Mixfile do
 
   defp package do
     [ files: ["lib", "priv", "mix.exs", "README.md", "LICENSE.md"],
-      maintainers: ["Paul Schoenfelder"],
+      maintainers: ["Paul Schoenfelder", "Chris Hildebrand"],
       licenses: ["MIT"],
       links: %{ 
         "Changelog": "https://github.com/bitwalker/timex/blob/master/CHANGELOG.md", 
