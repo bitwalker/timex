@@ -397,30 +397,6 @@ defmodule DateFormatTest.ParseDefault do
     assert {:ok, ^date5} = parse("20070405T14Z", "{ISO:Basic}")
   end
 
-  test "parse time struct" do
-    to_change = Timex.to_datetime({{2017, 7, 21}, {1, 2, 3}})
-    changed = Timex.set(to_change, [time: ~T[09:52:33.000]])
-
-    assert 33 == changed.second
-    assert 52 == changed.minute
-    assert 9 == changed.hour
-    assert changed.year == to_change.year
-    assert changed.month == to_change.month
-    assert changed.day == to_change.day
-  end
-
-  test "set from time struct with more than one change requested" do
-    to_change = Timex.to_datetime({{2017, 7, 21}, {1, 2, 3}})
-    changed = Timex.set(to_change, [time: ~T[09:52:33.000], year: 1989])
-
-    assert 1989 == changed.year
-    assert 33 == changed.second
-    assert 52 == changed.minute
-    assert 9 == changed.hour
-    assert changed.month == to_change.month
-    assert changed.day == to_change.day
-  end
-
   test "roundtrip bug #252" do
     format = "{YYYY}-{0M}-{0D}T{0h24}:{0m}:{0s}{0ss}{Zname}"
     now = Timex.now()

@@ -1681,7 +1681,8 @@ defmodule Timex do
   @type set_options :: [
           validate: boolean,
           datetime: Types.datetime(),
-          date: Types.date(),
+          date: Types.valid_date(),
+          time: Types.valid_time(),
           year: Types.year(),
           month: Types.month(),
           day: Types.day(),
