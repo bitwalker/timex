@@ -39,7 +39,7 @@ defmodule Timex.Calendar.Julian do
     y = year + 4800 - a
     m = month + (12 * a) - 3
 
-    jdn = day + (((153 * m) + 2) / 5) +
+    jdn = day + trunc(((153 * m) + 2) / 5) +
                 (365*y) +
                 div(y, 4) - div(y, 100) + div(y, 400) -
                 32045
@@ -54,7 +54,7 @@ defmodule Timex.Calendar.Julian do
   def julian_date(year, month, day, hour, minute, second)
     when is_datetime(year, month, day, hour, minute, second) do
       jdn = julian_date(year, month, day)
-      jdn + div(hour - 12, 24) + div(minute, 1440) + div(second, 86400)
+      jdn + ((hour - 12) / 24) + (minute / 1440) + (second / 86400)
   end
   def julian_date(_,_,_,_,_,_), do: {:error, :invalid_datetime}
 
