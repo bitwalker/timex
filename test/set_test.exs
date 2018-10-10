@@ -1,6 +1,25 @@
 defmodule SetTests do
+  use ExUnitProperties
   use ExUnit.Case, async: true
   use Timex
+
+  property "setting all the properties from the target date should become a target date for a DateTime" do
+    check all input_date <- PropertyHelpers.date_time_generator(:struct),
+              {{year, month, day}, {hour, minute, second}} = target_date <- PropertyHelpers.date_time_generator(:tupple) do
+
+      date = Timex.set(input_date, [year: year, month: month, day: day, hour: hour, minute: minute, second: second])
+      assert Timex.to_erl(date) == target_date
+    end
+  end
+
+  property "setting all the properties from the target date should become a target date for a tupple" do
+    check all input_date <- PropertyHelpers.date_time_generator(:tupple),
+              {{year, month, day}, {hour, minute, second}} = target_date <- PropertyHelpers.date_time_generator(:tupple) do
+
+      date = Timex.set(input_date, [year: year, month: month, day: day, hour: hour, minute: minute, second: second])
+      assert Timex.to_erl(date) == target_date
+    end
+  end
 
   test "sets from time struct" do
     original_date = Timex.to_datetime({{2017, 7, 21}, {1, 2, 3}})
