@@ -1393,7 +1393,8 @@ defmodule Timex do
   end
 
   @doc """
-  Given a Datetime, returns a datetime at the end of a period of N seconds.
+  Given a Datetime, returns a datetime at the beginning of a
+  period of N seconds.
   For example, this could be used to round to the next hour.
 
   iex> Timex.beginning_of_seconds(~N[2018-01-01 00:00:20], 15)
