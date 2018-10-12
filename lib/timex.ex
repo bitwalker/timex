@@ -1362,6 +1362,65 @@ defmodule Timex do
 
   def end_of_quarter(_, _), do: {:error, :invalid_year_or_month}
 
+
+  @doc """
+  Given a Datetime, returns a datetime at the end of a period of N seconds.
+  For example, this could be used to round to the next hour.
+
+  iex> Timex.end_of_seconds(~N[2018-01-01 00:00:13], 15)
+  ~N[2018-01-01 00:00:15]
+
+  iex> Timex.end_of_seconds(~N[2018-01-01 01:47:00], 60 * 60)
+  ~N[2018-01-01 02:00:00]
+  """
+  @spec end_of_seconds(Types.valid_datetime(), integer()) :: Types.valid_datetime() | {:error, term}
+  def end_of_seconds(input_datetime, seconds) do
+    unix = input_datetime |> Timex.to_unix()
+
+    if rem(unix, seconds) == 0 do
+      input_datetime
+    else
+      rounded_down = div(unix, seconds) * seconds
+      rounded_up = rounded_down + seconds
+
+      output_datetime = rounded_up |> Timex.from_unix()
+
+      case input_datetime do
+        %DateTime{} -> output_datetime
+        %NaiveDateTime{} -> output_datetime |> DateTime.to_naive()
+      end
+    end
+  end
+
+  @doc """
+  Given a Datetime, returns a datetime at the end of a period of N seconds.
+  For example, this could be used to round to the next hour.
+
+  iex> Timex.beginning_of_seconds(~N[2018-01-01 00:00:20], 15)
+  ~N[2018-01-01 00:00:15]
+
+  iex> Timex.beginning_of_seconds(~N[2018-01-01 02:47:00], 60 * 60)
+  ~N[2018-01-01 02:00:00]
+  """
+  @spec beginning_of_seconds(Types.valid_datetime(), integer()) :: Types.valid_datetime() | {:error, term}
+  def beginning_of_seconds(input_datetime, seconds) do
+    unix = input_datetime |> Timex.to_unix()
+
+    if rem(unix, seconds) == 0 do
+      input_datetime
+    else
+      rounded_down = div(unix, seconds) * seconds
+
+      output_datetime = rounded_down |> Timex.from_unix()
+
+      # return the same type we were given
+      case input_datetime do
+        %DateTime{} -> output_datetime
+        %NaiveDateTime{} -> output_datetime |> DateTime.to_naive()
+      end
+    end
+  end
+
   @doc """
   Given a date or a number create a date at the beginning of that year
 

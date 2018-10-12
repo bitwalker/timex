@@ -542,6 +542,20 @@ defmodule TimexTests do
     assert {:error, :invalid_date} = Timex.end_of_quarter(nil)
   end
 
+  test "beginning_of_seconds" do
+    assert Timex.beginning_of_seconds(~N[2018-01-01 00:00:47], 15) == ~N[2018-01-01 00:00:45]
+    assert Timex.beginning_of_seconds(~N[2018-01-01 00:00:47], 30) == ~N[2018-01-01 00:00:30]
+    assert Timex.beginning_of_seconds(~N[2018-01-01 00:00:27], 30) == ~N[2018-01-01 00:00:00]
+    assert Timex.beginning_of_seconds(~N[2018-01-01 02:47:00], 60 * 60) == ~N[2018-01-01 02:00:00]
+  end
+
+  test "end_of_seconds" do
+    assert Timex.end_of_seconds(~N[2018-01-01 00:00:13], 15) == ~N[2018-01-01 00:00:15]
+    assert Timex.end_of_seconds(~N[2018-01-01 00:00:13], 30) == ~N[2018-01-01 00:00:30]
+    assert Timex.end_of_seconds(~N[2018-01-01 00:00:31], 30) == ~N[2018-01-01 00:01:00]
+    assert Timex.end_of_seconds(~N[2018-01-01 01:47:00], 60 * 60) == ~N[2018-01-01 02:00:00]
+  end
+
   test "beginning_of_week" do
     # Monday 30th November 2015
     date = Timex.to_datetime({{2015, 11, 30}, {13, 30, 30}})
