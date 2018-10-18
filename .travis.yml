@@ -1,5 +1,9 @@
 language: elixir
 sudo: false
+os:
+  - windows
+  - macos
+  - linux
 elixir:
   - 1.4
   - 1.5
@@ -16,7 +20,7 @@ matrix:
     - elixir: 1.5
       otp_release: 21.0
 script:
-  - "MIX_ENV=test mix do deps.get, compile, coveralls.travis"
+  - if [[ "$TRAVIS_OS_NAME" = 'windows' ]]; then ./bin/build_win32; else ./bin/build; fi
 notifications:
   recipients:
     - paulschoenfelder@gmail.com

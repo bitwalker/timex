@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+choco install erlang
+choco install elixir
+
+export MIX_ENV=test
+export PATH=/C/ProgramData/chocolatey/lib/Elixir/bin:/C/ProgramData/chocolatey/bin:$PATH
+
+refreshenv
+
+mix do deps.get, compile, coveralls.travis
