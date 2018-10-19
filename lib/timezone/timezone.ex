@@ -316,7 +316,12 @@ defmodule Timex.Timezone do
           [period] ->
             tzdata_to_timezone(period, name)
           # Ambiguous
-          [before_period, after_period] ->
+          # TODO:
+          # The pattern here was added because there are apparently some
+          # cases in which more than two periods are known for a given point in time,
+          # case in point ~N[2011-08-11T13:30:31] in Asia/Gaza. We do not have support
+          # at this time for more than two alternates, but this will need to be dealt with
+          [before_period, after_period | _others] ->
             before_tz = tzdata_to_timezone(before_period, name)
             after_tz  = tzdata_to_timezone(after_period, name)
             AmbiguousTimezoneInfo.new(before_tz, after_tz)
