@@ -1598,19 +1598,11 @@ defmodule Timex do
 
       iex> use Timex
       ...> datetime = Timex.to_datetime({{2016,3,13}, {1,0,0}}, "America/Chicago")
-      ...> # 2-3 AM doesn't exist
-      ...> {:error, {:could_not_resolve_timezone, _, _, _}} = Timex.shift(datetime, hours: 1)
+      ...> # 2-3 AM doesn't exist due to leap forward, shift accounts for this
+      ...> %DateTime{hour: 3} = Timex.shift(datetime, hours: 1)
       ...> shifted = Timex.shift(datetime, hours: 2)
       ...> {datetime.zone_abbr, shifted.zone_abbr, shifted.hour}
-      {"CST", "CDT", 3}
-
-  ### Shifting into an ambiguous time period
-
-      iex> use Timex
-      ...> datetime = Timex.to_datetime({{1895,12,31}, {0,0,0}}, "Asia/Taipei")
-      ...> %AmbiguousDateTime{} = expected = Timex.to_datetime({{1895,12,31}, {23,55,0}}, "Asia/Taipei")
-      ...> expected == Timex.shift(datetime, hours: 23, minutes: 53, seconds: 120)
-      true
+      {"CST", "CDT", 4}
 
   ### Shifting and leap days
 

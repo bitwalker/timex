@@ -14,7 +14,6 @@ defimpl Timex.Protocol, for: DateTime do
   alias Timex.{Duration, AmbiguousDateTime}
   alias Timex.{Timezone, TimezoneInfo}
   alias Timex.Types
-  alias Timex.DateTime.Helpers
 
   @epoch_seconds :calendar.datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}})
 
@@ -229,209 +228,165 @@ defimpl Timex.Protocol, for: DateTime do
   See docs for Timex.shift/2 for details.
   """
   @spec shift(DateTime.t, list({atom(), term})) :: DateTime.t | {:error, term}
-  def shift(%DateTime{} = datetime, shifts) when is_list(shifts) do
-    apply_shifts(datetime, shifts)
+  def shift(%DateTime{time_zone: tz, microsecond: {_us, precision}} = datetime, shifts) when is_list(shifts) do
+    {logical_shifts, shifts} = Keyword.split(shifts, [:years, :months, :weeks, :days])
+    datetime =
+      datetime
+      |> Timezone.convert("Etc/UTC")
+      |> logical_shift(logical_shifts)
+    us = to_gregorian_microseconds(datetime)
+    shift = calculate_shift(shifts)
+    shifted_us = us + shift
+    shifted_secs = div(shifted_us, 1_000*1_000)
+    rem_us = rem(shifted_us, 1_000*1_000)
+
+    # Convert back to DateTime in UTC
+    shifted = raw_convert(shifted_secs, {rem_us, precision})
+
+    # Convert to original timezone
+    case Timezone.convert(shifted, tz) do
+      {:error, {:could_not_resolve_timezone, _, _, _}} ->
+        # This occurs when the shifted date/time doesn't exist because of a leap forward
+        # This doesn't mean the shift is invalid, simply that we need to ask for the right wall time
+        # Which in these cases means asking for the time + 1h
+        shifted = raw_convert(shifted_secs + 60, {rem_us, precision})
+        Timezone.convert(shifted, tz)
+      result ->
+        result
+    end
+  catch
+    :throw, {:error, _} = err ->
+      err
   end
-  defp apply_shifts(datetime, []),
-    do: datetime
-  defp apply_shifts(datetime, [{:duration, %Duration{} = duration} | rest]) do
+
+  defp raw_convert(secs, {us, precision}) do
+    {date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs)
+    if precision == 0 do
+      Timex.DateTime.Helpers.construct({date, {h,mm,s,us}}, "Etc/UTC")
+    else
+      %DateTime{microsecond: {us, _}} = dt = Timex.DateTime.Helpers.construct({date, {h,mm,s,us}}, "Etc/UTC")
+      %DateTime{dt | microsecond: {us, precision}}
+    end
+  end
+
+  defp logical_shift(datetime, []), do: datetime
+  defp logical_shift(datetime, shifts) do
+    sorted = Enum.sort_by(shifts, &elem(&1, 0), &compare_unit/2)
+    do_logical_shift(datetime, sorted)
+  end
+
+  defp do_logical_shift(datetime, []), do: datetime
+  defp do_logical_shift(datetime, [{unit, value} | rest]) do
+    do_logical_shift(shift_by(datetime, value, unit), rest)
+  end
+
+  # Consider compare_unit/2 an analog of Kernel.<=/2
+  defp compare_unit(:years, _), do: false
+  defp compare_unit(_, :years), do: true
+  defp compare_unit(:months, _), do: false
+  defp compare_unit(_, :months), do: true
+  defp compare_unit(:weeks, _), do: false
+  defp compare_unit(_, :weeks), do: true
+  defp compare_unit(:days, _), do: false
+  defp compare_unit(_, :days), do: true
+
+  defp calculate_shift(shifts), do: calculate_shift(shifts, 0)
+
+  defp calculate_shift([], acc), do: acc
+  defp calculate_shift([{:duration, %Duration{} = duration} | rest], acc) do
     total_microseconds = Duration.to_microseconds(duration)
-    seconds = div(total_microseconds, 1_000*1_000)
-    rem_microseconds = rem(total_microseconds, 1_000*1_000)
-    shifted = case shift_by(datetime, seconds, :seconds) do
-      %AmbiguousDateTime{before: b, after: a} = adt ->
-        %{adt | :before => apply_microseconds(b, rem_microseconds),
-                :after => apply_microseconds(a, rem_microseconds)}
-      %DateTime{} = dt ->
-        apply_microseconds(dt, rem_microseconds)
-    end
-    apply_shifts(shifted, rest)
+    calculate_shift(rest, acc + total_microseconds)
   end
-  defp apply_shifts(datetime, [{unit, 0} | rest]) when is_atom(unit),
-    do: apply_shifts(datetime, rest)
-  defp apply_shifts(datetime, [{unit, value} | rest]) when is_atom(unit) and is_integer(value) do
-    shifted = shift_by(datetime, value, unit)
-    apply_shifts(shifted, rest)
+  defp calculate_shift([{:hours, value} | rest], acc) when is_integer(value) do
+    calculate_shift(rest, acc + (value * 60 * 60 * 1_000 * 1_000))
   end
-  defp apply_shifts({:error, _} = err, _),
-    do: err
+  defp calculate_shift([{:minutes, value} | rest], acc) when is_integer(value) do
+    calculate_shift(rest, acc + (value * 60 * 1_000 * 1_000))
+  end
+  defp calculate_shift([{:seconds, value} | rest], acc) when is_integer(value) do
+    calculate_shift(rest, acc + (value * 1_000 * 1_000))
+  end
+  defp calculate_shift([{:milliseconds, value} | rest], acc) when is_integer(value) do
+    calculate_shift(rest, acc + (value * 1_000))
+  end
+  defp calculate_shift([{:microseconds, value} | rest], acc) when is_integer(value) do
+    calculate_shift(rest, acc + value)
+  end
+  defp calculate_shift([other | _], _acc),
+    do: throw({:error, {:invalid_shift, other}})
 
-  defp apply_microseconds(%DateTime{microsecond: {_, precision}} = datetime, ms) do
-    case precision do
-      0 -> %{datetime | :microsecond => Helpers.construct_microseconds(ms)}
-      _ ->
-        {new_ms, _} = Helpers.construct_microseconds(ms)
-        %{datetime | :microsecond => {new_ms, precision}}
-    end
-  end
-
-  defp shift_by(%AmbiguousDateTime{:before => before_dt, :after => after_dt}, value, unit) do
-    # Since we're presumably in the middle of a shifting operation, rather than failing because
-    # we're crossing an ambiguous time period, process both the before and after DateTime individually,
-    # and if both return AmbiguousDateTimes, choose the AmbiguousDateTime from :after to return,
-    # if one returns a valid DateTime, return that instead, since the shift has resolved the ambiguity.
-    # if one returns an error, but the other does not, return the non-errored one.
-    case {shift_by(before_dt, value, unit), shift_by(after_dt, value, unit)} do
-      # other could be an error too, but that's fine
-      {{:error, _}, other} ->
-        other
-      {other, {:error, _}} ->
-        other
-      # We'll always use :after when choosing between two ambiguous datetimes
-      {%AmbiguousDateTime{}, %AmbiguousDateTime{} = new_after} ->
-        new_after
-      # The shift resolved the ambiguity!
-      {%AmbiguousDateTime{}, %DateTime{} = resolved} ->
-        resolved
-      {%DateTime{}, %AmbiguousDateTime{} = resolved} ->
-        resolved
-    end
-  end
-  defp shift_by(%DateTime{:year => y} = datetime, value, :years) do
-    shifted = %{datetime | :year => y + value}
+  defp shift_by(%DateTime{year: y} = datetime, value, :years) do
+    shifted = %DateTime{datetime | year: y + value}
     # If a plain shift of the year fails, then it likely falls on a leap day,
     # so set the day to the last day of that month
     case :calendar.valid_date({shifted.year,shifted.month,shifted.day}) do
       false ->
         last_day = :calendar.last_day_of_the_month(shifted.year, shifted.month)
-        shifted = cond do
-          shifted.day <= last_day ->
-            shifted
-          :else ->
-            %{shifted | :day => last_day}
-        end
-        resolve_timezone_info(shifted)
+        %DateTime{shifted | day: last_day}
       true ->
-        resolve_timezone_info(shifted)
+        shifted
     end
   end
-  defp shift_by(%DateTime{:year => year, :month => month} = datetime, value, :months) do
-    m = month + value
-    shifted =
-      cond do
-        m > 0 ->
-          years = div(m - 1, 12)
-          month = rem(m - 1, 12) + 1
-          %{datetime | :year => year + years, :month => month}
-        m <= 0  ->
-          years = div(m, 12) - 1
-          month = 12 + rem(m, 12)
-          %{datetime | :year => year + years, :month => month}
+  defp shift_by(%DateTime{} = datetime, 0, :months),
+    do: datetime
+  # Positive shifts
+  defp shift_by(%DateTime{year: year, month: month, day: day} = datetime, value, :months) when value > 0 do
+    if (month + value) <= 12 do
+      ldom = :calendar.last_day_of_the_month(year, month + value)
+      if day > ldom do
+        %DateTime{datetime | month: month + value, day: ldom}
+      else
+        %DateTime{datetime | month: month + value}
       end
-
-    # setting months to remainders may result in invalid :month => 0
-    shifted =
-      case shifted.month do
-        0 -> %{shifted | :year => shifted.year - 1, :month => 12}
-        _ -> shifted
-      end
-
-    # If the shift fails, it's because it's a high day number, and the month
-    # shifted to does not have that many days. This will be handled by always
-    # shifting to the last day of the month shifted to.
-    if :calendar.valid_date({shifted.year,shifted.month,shifted.day}) do
-      shifted
     else
-      last_day = :calendar.last_day_of_the_month(shifted.year, shifted.month)
-      cond do
-        shifted.day <= last_day ->
-          shifted
-        :else ->
-          %{shifted | :day => last_day}
-      end
+      diff = (12 - month) + 1
+      shift_by(%DateTime{datetime | year: year + 1, month: 1}, value - diff, :months)
     end
-    |> resolve_timezone_info
   end
-  defp shift_by(%DateTime{microsecond: {current_usecs, _}} = datetime, value, :microseconds) do
-    usecs_from_zero = :calendar.datetime_to_gregorian_seconds({
-      {datetime.year,datetime.month,datetime.day},
-      {datetime.hour,datetime.minute,datetime.second}
-    }) * (1_000*1_000) + current_usecs + value
-
-    secs_from_zero = div(usecs_from_zero, 1_000*1_000)
-    rem_microseconds = rem(usecs_from_zero, 1_000*1_000)
-
-    {{_y,_m,_d}=date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs_from_zero)
-    Timezone.resolve(datetime.time_zone, {date, {h,mm,s}})
-    |> apply_microseconds(rem_microseconds)
-  end
-  defp shift_by(%DateTime{microsecond: {current_usecs, _}} = datetime, value, :milliseconds) do
-    usecs_from_zero = :calendar.datetime_to_gregorian_seconds({
-      {datetime.year,datetime.month,datetime.day},
-      {datetime.hour,datetime.minute,datetime.second}
-    }) * (1_000*1_000) + current_usecs + (value*1_000)
-
-    secs_from_zero = div(usecs_from_zero, 1_000*1_000)
-    rem_microseconds = rem(usecs_from_zero, 1_000*1_000)
-
-    {{_y,_m,_d}=date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs_from_zero)
-    Timezone.resolve(datetime.time_zone, {date, {h,mm,s}})
-    |> apply_microseconds(rem_microseconds)
-  end
-  defp shift_by(%DateTime{microsecond: {us, p}} = datetime, value, units) do
-    secs_from_zero = :calendar.datetime_to_gregorian_seconds({
-      {datetime.year,datetime.month,datetime.day},
-      {datetime.hour,datetime.minute,datetime.second}
-    })
-    shift_by = case units do
-      :microseconds -> div(value + us, 1_000)
-      :milliseconds -> div(value + (us*1_000), 1_000)
-      :seconds      -> value
-      :minutes      -> value * 60
-      :hours        -> value * 60 * 60
-      :days         -> value * 60 * 60 * 24
-      :weeks        -> value * 60 * 60 * 24 * 7
-      _ ->
-        {:error, {:unknown_shift_unit, units}}
-    end
-    case shift_by do
-      {:error, _} = err -> err
-      0 when units in [:microseconds] ->
-        total_us = rem(value + us, 1_000)
-        apply_microseconds(datetime, total_us)
-      0 when units in [:milliseconds] ->
-        total_ms = rem(value + (us*1_000), 1_000)
-        apply_microseconds(datetime, total_ms*1_000)
-      0 ->
-        datetime
-      _ ->
-        new_secs_from_zero = secs_from_zero + shift_by
-        cond do
-          new_secs_from_zero <= 0 ->
-            {:error, :shift_to_invalid_date}
-          :else ->
-            {{_y,_m,_d}=date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(new_secs_from_zero)
-            resolved = Timezone.resolve(datetime.time_zone, {date, {h,mm,s}})
-            case {resolved, units} do
-              {{:error, _reason} = err, _} ->
-                err
-              {%DateTime{} = dt, :microseconds} ->
-                apply_microseconds(dt, rem(value+us, 1_000))
-              {%DateTime{} = dt, :milliseconds} ->
-                apply_microseconds(dt, rem(value+(us*1_000), 1_000))
-              {%AmbiguousDateTime{before: b, after: a}, :microseconds} ->
-                bd = apply_microseconds(b, rem(value+us, 1_000))
-                ad = apply_microseconds(a, rem(value+us, 1_000))
-                %AmbiguousDateTime{before: bd, after: ad}
-              {%AmbiguousDateTime{before: b, after: a}, :milliseconds} ->
-                bd = apply_microseconds(b, rem(value+(us*1_000), 1_000))
-                ad = apply_microseconds(a, rem(value+(us*1_000), 1_000))
-                %AmbiguousDateTime{before: bd, after: ad}
-              {%DateTime{} = dt, _} ->
-                %{dt | :microsecond => {us,p}}
-              {%AmbiguousDateTime{before: b, after: a}, _} ->
-                bd = %{b | :microsecond => {us,p}}
-                ad = %{a | :microsecond => {us,p}}
-                %AmbiguousDateTime{before: bd, after: ad}
-            end
+  # Negative shifts
+  defp shift_by(%DateTime{year: year, month: month, day: day} = datetime, value, :months) do
+    cond do
+      (month + value) >= 1 ->
+        ldom = :calendar.last_day_of_the_month(year, month + value)
+        if day > ldom do
+          %DateTime{datetime | month: month + value, day: ldom}
+        else
+          %DateTime{datetime | month: month + value}
         end
+      :else ->
+        shift_by(%DateTime{datetime | year: year - 1, month: 12}, value + month, :months)
     end
   end
-
-  defp resolve_timezone_info(%DateTime{:time_zone => tzname} = datetime) do
-    Timezone.resolve(tzname, {
-      {datetime.year, datetime.month, datetime.day},
-      {datetime.hour, datetime.minute, datetime.second, datetime.microsecond}})
+  defp shift_by(datetime, value, :weeks),
+    do: shift_by(datetime, value * 7, :days)
+  defp shift_by(%DateTime{} = datetime, 0, :days),
+    do: datetime
+  # Positive shifts
+  defp shift_by(%DateTime{year: year, month: month, day: day} = datetime, value, :days) when value > 0 do
+    ldom = :calendar.last_day_of_the_month(year, month)
+    cond do
+      (day + value) <= ldom ->
+        %DateTime{datetime | day: day + value}
+      (month + 1) <= 12 ->
+        diff = (ldom - day) + 1
+        shift_by(%DateTime{datetime | month: month + 1, day: 1}, value - diff, :days)
+      :else ->
+        diff = (ldom - day) + 1
+        shift_by(%DateTime{datetime | year: year + 1, month: 1, day: 1}, value - diff, :days)
+    end
+  end
+  # Negative shifts
+  defp shift_by(%DateTime{year: year, month: month, day: day} = datetime, value, :days) do
+    cond do
+      (day + value) >= 1 ->
+        %DateTime{datetime | day: day + value}
+      (month - 1) >= 1 ->
+        ldom = :calendar.last_day_of_the_month(year, month - 1)
+        shift_by(%DateTime{datetime | month: month - 1, day: ldom}, value + day + 1, :days)
+      :else ->
+        ldom = :calendar.last_day_of_the_month(year - 1, 12)
+        shift_by(%DateTime{datetime | year: year - 1, month: 12, day: ldom}, value + day + 1, :days)
+    end
   end
 
   @spec to_seconds(DateTime.t, :epoch | :zero) :: integer | {:error, atom}
@@ -441,16 +396,11 @@ defimpl Timex.Protocol, for: DateTime do
       secs -> secs - @epoch_seconds
     end
   end
-  defp to_seconds(%DateTime{} = date, :zero) do
-    total_offset = Timezone.total_offset(date.std_offset, date.utc_offset) * -1
-    date = %{date | :time_zone => "Etc/UTC", :zone_abbr => "UTC", :std_offset => 0, :utc_offset => 0}
-    date = Timex.shift(date, seconds: total_offset)
-    utc_to_secs(date)
+  defp to_seconds(%DateTime{} = dt, :zero) do
+    total_offset = Timezone.total_offset(dt.std_offset, dt.utc_offset) * -1
+    date = {dt.year, dt.month, dt.day}
+    time = {dt.hour, dt.minute, dt.second}
+    :calendar.datetime_to_gregorian_seconds({date, time}) + total_offset
   end
   defp to_seconds(_, _), do: {:error, :badarg}
-
-  defp utc_to_secs(%DateTime{:year => y, :month => m, :day => d, :hour => h, :minute => mm, :second => s}) do
-    :calendar.datetime_to_gregorian_seconds({{y,m,d},{h,mm,s}})
-  end
-
 end

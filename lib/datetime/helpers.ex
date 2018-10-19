@@ -32,10 +32,12 @@ defmodule Timex.DateTime.Helpers do
   def construct({{y,m,d} = date, {h,mm,s,us}}, timezone) do
     seconds_from_zeroyear = :calendar.datetime_to_gregorian_seconds({date,{h,mm,s}})
     case Timezone.name_of(timezone) do
-      {:error, _} = err -> err
+      {:error, _} = err ->
+        err
       tzname ->
         case Timezone.resolve(tzname, seconds_from_zeroyear) do
-          {:error, _} = err -> err
+          {:error, _} = err ->
+            err
           %TimezoneInfo{} = tz ->
             %DateTime{:year => y, :month => m, :day => d,
                       :hour => h, :minute => mm, :second => s,
