@@ -199,30 +199,22 @@ defimpl Timex.Protocol, for: Tuple do
     do: 1 + Timex.diff(date, {y,1,1}, :days)
   def day(_), do: {:error, :invalid_date}
 
-  def ordinal_suffix({y,m,d} = date) when is_date(y,m,d) do 
+  def ordinal_suffix({y,m,d} = date) when is_date(y,m,d) do
     value = Integer.mod(date.day, 10)
     cond do
-      value == 1 && date.day != 11 ->
-        "st"
-      value == 2 && date.day != 12 ->
-        "nd"
-      value == 3 && date.day != 13 ->
-        "rd"
-      true ->
-        "th"
+      value == 1 && date.day != 11 -> "st"
+      value == 2 && date.day != 12 -> "nd"
+      value == 3 && date.day != 13 -> "rd"
+      true -> "th"
     end
   end
   def ordinal_suffix({{y,m,d} = date,_}) when is_date(y,m,d) do
     value = Integer.mod(date.day, 10)
     cond do
-      value == 1 && date.day != 11 ->
-        "st"
-      value == 2 && date.day != 12 ->
-        "nd"
-      value == 3 && date.day != 13 ->
-        "rd"
-      true ->
-        "th"
+      value == 1 && date.day != 11 -> "st"
+      value == 2 && date.day != 12 -> "nd"
+      value == 3 && date.day != 13 -> "rd"
+      true -> "th"
     end
   end
   def ordinal_suffix(_), do: {:error, :invalid_date}
