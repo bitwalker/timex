@@ -109,7 +109,7 @@ defimpl Timex.Protocol, for: Date do
     do: 1 + Timex.diff(date, %Date{:year => date.year, :month => 1, :day => 1}, :days)
 
   def ordinal_suffix(%Date{} = date) do
-    value = div(date.day, 10) + 1
+    value = Integer.mod(date.day, 10)
     cond do
       value == 1 && date.day != 11 ->
         "st"
