@@ -179,6 +179,12 @@ defprotocol Timex.Protocol do
   def day(datetime)
 
   @doc """
+  Get the English ordinal suffix (st, nd, rd, th) of the given date/time value
+  """
+  @spec ordinal_suffix(Types.valid_datetime) :: Types.daynum | {:error, term}
+  def ordinal_suffix(datetime)
+
+  @doc """
   Determine if the provided date/time value is valid.
   """
   @spec is_valid?(Types.valid_datetime) :: boolean | {:error, term}
@@ -279,6 +285,9 @@ defimpl Timex.Protocol, for: Any do
 
   def day(%{__struct__: _} = d), do: Timex.day(Map.from_struct(d))
   def day(_datetime), do: {:error, :invalid_date}
+
+  def ordinal_suffix(%{__struct__: _} = d), do: Timex.ordinal_suffix(Map.from_struct(d))
+  def ordinal_suffix(_datetime), do: {:error, :invalid_date}
 
   def is_valid?(%{__struct__: _} = d), do: Timex.is_valid?(Map.from_struct(d))
   def is_valid?(_datetime), do: false

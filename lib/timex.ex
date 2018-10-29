@@ -1211,6 +1211,17 @@ defmodule Timex do
   defdelegate day(datetime), to: Timex.Protocol
 
   @doc """
+  Returns the English ordinal suffix (st, nd, rd, th) for the day.
+
+  ## Examples
+
+      iex> Timex.ordinal_suffix(~D[2015-06-26])
+      th
+  """
+  @spec ordinal_suffix(Types.valid_datetime()) :: Types.daynum() | {:error, term}
+  defdelegate ordinal_suffix(datetime), to: Timex.Protocol
+
+  @doc """
   Return the number of days in the month which the date falls on.
 
   ## Examples

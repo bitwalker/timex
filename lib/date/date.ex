@@ -108,6 +108,20 @@ defimpl Timex.Protocol, for: Date do
   def day(%Date{} = date),
     do: 1 + Timex.diff(date, %Date{:year => date.year, :month => 1, :day => 1}, :days)
 
+  def ordinal_suffix(%Date{} = date) do
+    value = div(date.day, 10) + 1
+    cond do
+      value == 1 && date.day != 11 ->
+        "st"
+      value == 2 && date.day != 12 ->
+        "nd"
+      value == 3 && date.day != 13 ->
+        "rd"
+      true ->
+        "th"
+    end
+  end
+
   def is_valid?(%Date{:year => y, :month => m, :day => d}) do
     :calendar.valid_date({y,m,d})
   end
