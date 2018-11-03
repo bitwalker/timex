@@ -6,11 +6,11 @@ defmodule Timex.Interval do
 
       iex> use Timex
       ...> Interval.new(from: ~D[2016-03-03], until: [days: 3])
-      %#{__MODULE__}{from: ~N[2016-03-03 00:00:00], left_open: true, right_open: false, step: [days: 1], until: ~N[2016-03-06 00:00:00]}
+      %#{__MODULE__}{from: ~N[2016-03-03 00:00:00], left_open: false, right_open: true, step: [days: 1], until: ~N[2016-03-06 00:00:00]}
 
       iex> use Timex
       ...> Interval.new(from: ~D[2016-03-03], until: ~N[2016-03-10 01:23:45])
-      %Timex.Interval{from: ~N[2016-03-03 00:00:00], left_open: true, right_open: false, step: [days: 1], until: ~N[2016-03-10 01:23:45]}
+      %Timex.Interval{from: ~N[2016-03-03 00:00:00], left_open: false, right_open: true, step: [days: 1], until: ~N[2016-03-10 01:23:45]}
 
       iex> use Timex
       ...> ~N[2016-03-04 12:34:56] in Interval.new(from: ~D[2016-03-03], until: [days: 3])
@@ -36,30 +36,31 @@ defmodule Timex.Interval do
     """
     defexception message: "Unable to format interval!"
 
-    def exception([message: message]) do
+    def exception(message: message) do
       %FormatError{message: message}
     end
   end
 
   @type t :: %__MODULE__{}
-  @type valid_step_unit :: :microseconds
-                         | :milliseconds
-                         | :seconds
-                         | :minutes
-                         | :hours
-                         | :days
-                         | :weeks
-                         | :months
-                         | :years
+  @type valid_step_unit ::
+          :microseconds
+          | :milliseconds
+          | :seconds
+          | :minutes
+          | :hours
+          | :days
+          | :weeks
+          | :months
+          | :years
   @type valid_interval_step :: {valid_step_unit, integer}
   @type valid_interval_steps :: [valid_interval_step]
 
   @enforce_keys [:from, :until]
-  defstruct from:       nil,
-            until:      nil,
-            left_open:  false,
+  defstruct from: nil,
+            until: nil,
+            left_open: false,
             right_open: true,
-            step:       [days: 1]
+            step: [days: 1]
 
   @valid_step_units [
     :microseconds,
@@ -76,7 +77,7 @@ defmodule Timex.Interval do
   @doc """
   Create a new Interval struct.
 
-  **Note:** By default intervals are left open, i.e. they include the `from` date/time,
+  **Note:** By default intervals are left closed, i.e. they include the `from` date/time,
   and exclude the `until` date/time. Put another way, `from <= x < until`. This behavior
   matches that of other popular date/time libraries, such as Joda Time, as well as the SQL
   behavior of the `overlaps` keyword.
@@ -94,9 +95,9 @@ defmodule Timex.Interval do
   can see more detail on the theory [on Wikipedia](https://en.wikipedia.org/wiki/Interval_(mathematics)),
   but it can be more intuitively thought of like so:
 
-  - An "open" bound is inclusive, and a "closed" bound is exclusive
-  - So a left-open interval includes the `from` value, and a left-closed interval does not.
-  - Likewise, a right-open interval includes the `until` value, and a right-closed interval does not.
+  - An "open" bound is exclusive, and a "closed" bound is inclusive
+  - So a left-closed interval includes the `from` value, and a left-open interval does not.
+  - Likewise, a right-closed interval includes the `until` value, and a right-open interval does not.
   - An open interval is both left and right open, conversely, a closed interval is both left and right closed.
 
   **Note:** `until` shifts delegate to `Timex.shift`, so the options provided should match its valid options.
@@ -106,58 +107,70 @@ defmodule Timex.Interval do
       iex> use Timex
       ...> Interval.new(from: ~D[2014-09-22], until: ~D[2014-09-29])
       ...> |> Interval.format!("%Y-%m-%d", :strftime)
-      "(2014-09-22, 2014-09-29]"
+      "[2014-09-22, 2014-09-29)"
 
       iex> use Timex
       ...> Interval.new(from: ~D[2014-09-22], until: [days: 7])
       ...> |> Interval.format!("%Y-%m-%d", :strftime)
-      "(2014-09-22, 2014-09-29]"
-
-      iex> use Timex
-      ...> Interval.new(from: ~D[2014-09-22], until: [days: 7], left_open: false, right_open: true)
-      ...> |> Interval.format!("%Y-%m-%d", :strftime)
       "[2014-09-22, 2014-09-29)"
 
       iex> use Timex
-      ...> Interval.new(from: ~N[2014-09-22T15:30:00], until: [minutes: 20], left_open: false)
+      ...> Interval.new(from: ~D[2014-09-22], until: [days: 7], left_open: true, right_open: false)
+      ...> |> Interval.format!("%Y-%m-%d", :strftime)
+      "(2014-09-22, 2014-09-29]"
+
+      iex> use Timex
+      ...> Interval.new(from: ~N[2014-09-22T15:30:00], until: [minutes: 20], right_open: false)
       ...> |> Interval.format!("%H:%M", :strftime)
       "[15:30, 15:50]"
 
   """
-  @spec new(Keyword.t) :: t
-                        | {:error, :invalid_until}
-                        | {:error, :invalid_step}
+  @spec new(Keyword.t()) ::
+          t
+          | {:error, :invalid_until}
+          | {:error, :invalid_step}
   def new(options \\ []) do
     from =
       case Keyword.get(options, :from) do
         nil ->
           Timex.Protocol.NaiveDateTime.now()
+
         %NaiveDateTime{} = d ->
           d
+
         d ->
           Timex.to_naive_datetime(d)
       end
-    left_open = Keyword.get(options, :left_open,  true)
-    right_open = Keyword.get(options, :right_open, false)
-    step = Keyword.get(options, :step, [days: 1])
+
+    left_open = Keyword.get(options, :left_open, false)
+    right_open = Keyword.get(options, :right_open, true)
+    step = Keyword.get(options, :step, days: 1)
+
     until =
-      case Keyword.get(options, :until, [days: 1]) do
+      case Keyword.get(options, :until, days: 1) do
         {:error, _} = err ->
           err
+
         x when is_list(x) ->
           Timex.shift(from, x)
+
         %NaiveDateTime{} = d ->
           d
+
         d ->
           Timex.to_naive_datetime(d)
       end
+
     cond do
       invalid_step?(step) ->
         {:error, :invalid_step}
+
       invalid_until?(until) ->
         {:error, :invalid_until}
+
       Timex.compare(until, from) <= 0 ->
         {:error, :invalid_until}
+
       :else ->
         %__MODULE__{
           from: from,
@@ -173,9 +186,11 @@ defmodule Timex.Interval do
   defp invalid_until?(_), do: false
 
   defp invalid_step?([]), do: false
+
   defp invalid_step?([{unit, n} | rest]) when unit in @valid_step_units and is_integer(n) do
     invalid_step?(rest)
   end
+
   defp invalid_step?(_), do: true
 
   @doc """
@@ -199,8 +214,9 @@ defmodule Timex.Interval do
 
   """
   def duration(%__MODULE__{until: until, from: from}, :duration) do
-    Timex.diff(until, from, :microseconds) |> Duration.from_microseconds
+    Timex.diff(until, from, :microseconds) |> Duration.from_microseconds()
   end
+
   def duration(%__MODULE__{until: until, from: from}, unit) do
     Timex.diff(until, from, unit)
   end
@@ -213,9 +229,14 @@ defmodule Timex.Interval do
   ## Examples
 
       iex> use Timex
-      ...> Interval.new(from: ~D[2014-09-22], until: [days: 3])
+      ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: true)
       ...> |> Interval.with_step([days: 1]) |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
       ["2014-09-22", "2014-09-23", "2014-09-24"]
+
+      iex> use Timex
+      ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
+      ...> |> Interval.with_step([days: 1]) |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
+      ["2014-09-22", "2014-09-23", "2014-09-24", "2014-09-25"]
 
       iex> use Timex
       ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
@@ -223,7 +244,7 @@ defmodule Timex.Interval do
       ["2014-09-22", "2014-09-24"]
 
       iex> use Timex
-      ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: true)
+      ...> Interval.new(from: ~D[2014-09-22], until: [days: 3], right_open: false)
       ...> |> Interval.with_step([days: 3]) |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
       ["2014-09-22", "2014-09-25"]
 
@@ -245,21 +266,23 @@ defmodule Timex.Interval do
       iex> use Timex
       ...> Interval.new(from: ~D[2014-09-22], until: [days: 3])
       ...> |> Interval.format!("%Y-%m-%d %H:%M", :strftime)
-      "(2014-09-22 00:00, 2014-09-25 00:00]"
+      "[2014-09-22 00:00, 2014-09-25 00:00)"
 
       iex> use Timex
       ...> Interval.new(from: ~D[2014-09-22], until: [days: 3])
       ...> |> Interval.format!("%Y-%m-%d", :strftime)
-      "(2014-09-22, 2014-09-25]"
+      "[2014-09-22, 2014-09-25)"
   """
   def format(%__MODULE__{} = interval, format, formatter \\ nil) do
     case Timex.format(interval.from, format, formatter) do
       {:error, _} = err ->
         err
+
       {:ok, from} ->
         case Timex.format(interval.until, format, formatter) do
           {:error, _} = err ->
             err
+
           {:ok, until} ->
             lopen = if interval.left_open, do: "(", else: "["
             ropen = if interval.right_open, do: ")", else: "]"
@@ -275,8 +298,9 @@ defmodule Timex.Interval do
     case format(interval, format, formatter) do
       {:ok, str} ->
         str
+
       {:error, e} ->
-        raise FormatError, message: "#{inspect e}"
+        raise FormatError, message: "#{inspect(e)}"
     end
   end
 
@@ -310,21 +334,27 @@ defmodule Timex.Interval do
 
   ## Examples
 
-      iex> #{__MODULE__}.overlaps?(#{__MODULE__}.new(from: ~D[2016-03-04], until: [days: 1]), #{__MODULE__}.new(from: ~D[2016-03-03], until: [days: 3]))
+      iex> #{__MODULE__}.overlaps?(#{__MODULE__}.new(from: ~D[2016-03-04], until: [days: 1]), #{
+    __MODULE__
+  }.new(from: ~D[2016-03-03], until: [days: 3]))
       true
 
-      iex> #{__MODULE__}.overlaps?(#{__MODULE__}.new(from: ~D[2016-03-07], until: [days: 1]), #{__MODULE__}.new(from: ~D[2016-03-03], until: [days: 3]))
+      iex> #{__MODULE__}.overlaps?(#{__MODULE__}.new(from: ~D[2016-03-07], until: [days: 1]), #{
+    __MODULE__
+  }.new(from: ~D[2016-03-03], until: [days: 3]))
       false
   """
-  @spec overlaps?(__MODULE__.t, __MODULE__.t) :: boolean()
+  @spec overlaps?(__MODULE__.t(), __MODULE__.t()) :: boolean()
   def overlaps?(%__MODULE__{} = a, %__MODULE__{} = b) do
     cond do
       Timex.compare(max(a), min(b)) < 0 ->
         # a is completely before b
         false
+
       Timex.compare(max(b), min(a)) < 0 ->
         # b is completely before a
         false
+
       :else ->
         # a and b have overlapping elements
         true
@@ -334,11 +364,13 @@ defmodule Timex.Interval do
   @doc false
   def min(interval)
 
-  def min(%__MODULE__{from: from, left_open: true}), do: from
+  def min(%__MODULE__{from: from, left_open: false}), do: from
+
   def min(%__MODULE__{from: from, step: step}) do
     case Timex.shift(from, step) do
       {:error, {:unknown_shift_unit, unit}} ->
-        raise FormatError, message: "Invalid step unit for interval: #{inspect unit}"
+        raise FormatError, message: "Invalid step unit for interval: #{inspect(unit)}"
+
       d ->
         d
     end
@@ -347,8 +379,8 @@ defmodule Timex.Interval do
   @doc false
   def max(interval)
 
-  def max(%__MODULE__{until: until, right_open: true}), do: until
-  def max(%__MODULE__{until: until}), do: Timex.shift(until, [microseconds: -1])
+  def max(%__MODULE__{until: until, right_open: false}), do: until
+  def max(%__MODULE__{until: until}), do: Timex.shift(until, microseconds: -1)
 
   defimpl Enumerable do
     alias Timex.Interval
@@ -357,9 +389,10 @@ defmodule Timex.Interval do
       do_reduce({Interval.min(i), until, open?, step}, acc, fun)
     end
 
-    defp do_reduce(_state, {:halt,    acc}, _fun),
+    defp do_reduce(_state, {:halt, acc}, _fun),
       do: {:halted, acc}
-    defp do_reduce( state, {:suspend, acc},  fun),
+
+    defp do_reduce(state, {:suspend, acc}, fun),
       do: {:suspended, acc, &do_reduce(state, &1, fun)}
 
     defp do_reduce({current_date, end_date, right_open, step}, {:cont, acc}, fun) do
@@ -368,42 +401,51 @@ defmodule Timex.Interval do
       else
         case Timex.shift(current_date, step) do
           {:error, {:unknown_shift_unit, unit}} ->
-            raise FormatError, message: "Invalid step unit for interval: #{inspect unit}"
+            raise FormatError, message: "Invalid step unit for interval: #{inspect(unit)}"
+
           {:error, err} ->
-            raise FormatError, message: "Failed to shift to next element in interval: #{inspect err}"
+            raise FormatError,
+              message: "Failed to shift to next element in interval: #{inspect(err)}"
+
           next_date ->
             do_reduce({next_date, end_date, right_open, step}, fun.(current_date, acc), fun)
         end
       end
     end
 
-    defp has_interval_ended?(current_date, end_date, true),
-      do: Timex.compare(current_date, end_date) > 0
-    defp has_interval_ended?(current_date, end_date, false),
+    defp has_interval_ended?(current_date, end_date, _right_open = true),
       do: Timex.compare(current_date, end_date) >= 0
+
+    defp has_interval_ended?(current_date, end_date, _right_open = false),
+      do: Timex.compare(current_date, end_date) > 0
 
     def member?(%Interval{} = interval, value) do
       result =
         cond do
           before?(interval, value) ->
             false
+
           after?(interval, value) ->
             false
+
           :else ->
             true
         end
+
       {:ok, result}
     end
 
     defp before?(%Interval{from: from, left_open: true}, value),
-      do: Timex.compare(value, from) < 0
-    defp before?(%Interval{from: from, left_open: false}, value),
       do: Timex.compare(value, from) <= 0
 
+    defp before?(%Interval{from: from, left_open: false}, value),
+      do: Timex.compare(value, from) < 0
+
     defp after?(%Interval{until: until, right_open: true}, value),
-      do: Timex.compare(until, value) < 0
+      do: Timex.compare(value, until) >= 0
+
     defp after?(%Interval{until: until, right_open: false}, value),
-      do: Timex.compare(until, value) <= 0
+      do: Timex.compare(value, until) > 0
 
     def count(_interval) do
       {:error, __MODULE__}
