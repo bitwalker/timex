@@ -235,7 +235,7 @@ defimpl Timex.Protocol, for: DateTime do
       datetime
       |> Timezone.convert("Etc/UTC")
       |> logical_shift(logical_shifts)
-      us = to_gregorian_microseconds(datetime)
+    us = to_gregorian_microseconds(datetime)
     shift = calculate_shift(shifts)
     shifted_us = us + shift
     shifted_secs = div(shifted_us, 1_000*1_000)
