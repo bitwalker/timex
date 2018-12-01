@@ -382,10 +382,10 @@ defimpl Timex.Protocol, for: DateTime do
         %DateTime{datetime | day: day + value}
       (month - 1) >= 1 ->
         ldom = :calendar.last_day_of_the_month(year, month - 1)
-        shift_by(%DateTime{datetime | month: month - 1, day: ldom}, value + day + 1, :days)
+        shift_by(%DateTime{datetime | month: month - 1, day: ldom}, value + day, :days)
       :else ->
         ldom = :calendar.last_day_of_the_month(year - 1, 12)
-        shift_by(%DateTime{datetime | year: year - 1, month: 12, day: ldom}, value + day + 1, :days)
+        shift_by(%DateTime{datetime | year: year - 1, month: 12, day: ldom}, value + day, :days)
     end
   end
 

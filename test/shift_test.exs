@@ -97,6 +97,16 @@ defmodule ShiftTests do
     assert expected === date
   end
 
+  test "shift by days into the previous month" do
+    date = Timex.shift(~N[2017-12-01 12:00:00.100000], days: -1)
+    expected = ~N[2017-11-30 12:00:00.100000]
+    assert expected === date
+
+    date = Timex.shift(~N[2017-12-05 12:00:00.100000], days: -8)
+    expected = ~N[2017-11-27 12:00:00.100000]
+    assert expected === date
+  end
+
   test "shift by hours" do
     date = Timex.shift(~N[2017-10-24 12:00:00.100000], hours: 1)
     expected = ~N[2017-10-24 13:00:00.100000]
