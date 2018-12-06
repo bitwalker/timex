@@ -196,6 +196,73 @@ defmodule IntervalTests do
     end
   end
 
+  describe "overlap" do
+    test "non-overlapping intervals" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00])
+      b = Interval.new(from: ~N[2017-01-02 15:30:00], until: ~N[2017-01-02 15:45:00])
+
+      %Duration{seconds: seconds} = Interval.overlap(a, b, :duration)
+      assert seconds == 0
+      assert Interval.overlap(a, b) == 0
+    end
+
+    test "overlapping at single instant" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00])
+      b = Interval.new(from: ~N[2017-01-02 15:15:00], until: ~N[2017-01-02 15:30:00])
+
+      assert Interval.overlap(a, b) == 0
+    end
+
+    test "first subset of second" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:45:00])
+      b = Interval.new(from: ~N[2017-01-02 15:20:00], until: ~N[2017-01-02 15:30:00])
+
+      assert Interval.overlap(a, b, :minutes) == 10
+      %Duration{seconds: seconds} = Interval.overlap(a, b, :duration)
+      assert seconds == 600
+    end
+
+    test "partially overlapping" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00])
+      b = Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:30:00])
+
+      assert Interval.overlap(a, b) == 300
+      assert Interval.overlap(a, b, :minutes) == 5
+    end
+
+    test "overlapping across hours" do
+      a = Interval.new(from: ~N[2017-01-02 14:50:00], until: ~N[2017-01-02 15:15:00])
+      b = Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:30:00])
+      
+      assert Interval.overlap(a, b) == 300
+      assert Interval.overlap(a, b, :minutes) == 5
+    end
+
+    test "overlapping across days" do
+      a = Interval.new(from: ~N[2017-01-15 23:40:00], until: ~N[2017-01-16 00:10:00])
+      b = Interval.new(from: ~N[2017-01-15 23:50:00], until: ~N[2017-01-16 00:20:00])
+
+      assert Interval.overlap(a, b) == 1200
+      assert Interval.overlap(a, b, :minutes) == 20
+    end
+
+    test "overlapping across months" do
+      a = Interval.new(from: ~N[2017-06-30 23:40:00], until: ~N[2017-07-01 00:10:00])
+      b = Interval.new(from: ~N[2017-06-30 23:50:00], until: ~N[2017-07-01 00:20:00])
+
+      assert Interval.overlap(a, b) == 1200
+      assert Interval.overlap(a, b, :minutes) == 20
+    end
+
+    test "overlapping across years" do
+      a = Interval.new(from: ~N[2016-12-31 23:30:00], until: ~N[2017-01-01 00:30:00])
+      b = Interval.new(from: ~N[2016-12-31 23:45:00], until: ~N[2017-01-01 00:15:00])
+
+      assert Interval.overlap(a, b) == 1800
+      assert Interval.overlap(a, b, :minutes) == 30
+    end
+  end
+
   describe "contains?/2" do
     test "non-overlapping" do
       earlier = Interval.new(from: ~D[2018-01-01], until: ~D[2018-01-04])

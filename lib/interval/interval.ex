@@ -382,6 +382,47 @@ defmodule Timex.Interval do
   def max(%__MODULE__{until: until, right_open: false}), do: until
   def max(%__MODULE__{until: until}), do: Timex.shift(until, microseconds: -1)
 
+  @doc """
+  Returns the duration of the overlap between two intervals. defaults to seconds.
+  Like the `duration` function, if unit is :duration, returns a Timex.Duration.t(),
+  otherwise returns an integer in "unit".
+  """
+  @spec overlap(__MODULE__.t(), __MODULE__.t(), atom()) :: Duration.t() | Integer.t()
+  def overlap(%__MODULE__{} = a, %__MODULE__{} = b, unit \\ :seconds) do
+    case {overlaps?(a, b), unit} do
+      {false, :duration} ->
+        Duration.from_seconds(0)
+
+      {false, _} ->
+        0
+
+      {true, unit} ->
+        new(from: start_of_overlap(a, b), until: end_of_overlap(a, b))
+        |> duration(unit)
+    end
+  end
+
+  @doc "Take the later start time of the two overlapping intervals."
+  defp start_of_overlap(%__MODULE__{} = a, %__MODULE__{} = b) do
+    case Timex.before?(min(a), min(b)) do
+      true -> min(b)
+      false -> min(a)
+    end
+  end
+
+  @doc """
+  Take the earlier end time of the 2 overlapping intervals.
+  Force `right_open: false` because we don't want
+  the microsecond offset that results from
+  `right_open: true` when calculating overlap.
+  """
+  defp end_of_overlap(%__MODULE__{} = a, %__MODULE__{} = b) do
+    case Timex.before?(max(a), max(b)) do
+      true -> max(Map.merge(a, %{right_open: false}))
+      false -> max(Map.merge(b, %{right_open: false}))
+    end
+  end
+
   defimpl Enumerable do
     alias Timex.Interval
 
