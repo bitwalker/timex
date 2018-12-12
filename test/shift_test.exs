@@ -155,4 +155,40 @@ defmodule ShiftTests do
     expected = ~D[2000-02-29] |> Timex.to_datetime
     assert expected === date
   end
+
+  test "shift November DTS datetime by a month in America/New_York timezone" do
+    date = ~D[2018-11-01] |> Timex.to_datetime("America/New_York") |> Timex.shift(months: 1)
+    expected = ~D[2018-12-01] |> Timex.to_datetime("America/New_York")
+    assert expected === date
+  end
+
+  test "shift March DTS datetime by a month in America/New_York timezone" do
+    date = ~D[2018-03-01] |> Timex.to_datetime("America/New_York") |> Timex.shift(months: 1)
+    expected = ~D[2018-04-01] |> Timex.to_datetime("America/New_York")
+    assert expected === date
+  end
+
+  test "shift back 4 days should yield first of month" do
+    date = ~D[2018-11-05] |> Timex.to_datetime |> Timex.shift(days: -4)
+    expected = ~D[2018-11-01] |> Timex.to_datetime
+    assert expected === date
+  end
+
+  test "shift back 5 days should yield last of previous month" do
+    date = ~D[2018-11-05] |> Timex.to_datetime |> Timex.shift(days: -5)
+    expected = ~D[2018-10-31] |> Timex.to_datetime
+    assert expected === date
+  end
+
+  test "shift back 4 days should yield first of year" do
+    date = ~D[2018-01-05] |> Timex.to_datetime |> Timex.shift(days: -4)
+    expected = ~D[2018-01-01] |> Timex.to_datetime
+    assert expected === date
+  end
+
+  test "shift back 5 days should yield last of previous year" do
+    date = ~D[2018-01-05] |> Timex.to_datetime |> Timex.shift(days: -5)
+    expected = ~D[2017-12-31] |> Timex.to_datetime
+    assert expected === date
+  end
 end

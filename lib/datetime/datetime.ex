@@ -230,6 +230,7 @@ defimpl Timex.Protocol, for: DateTime do
   @spec shift(DateTime.t, list({atom(), term})) :: DateTime.t | {:error, term}
   def shift(%DateTime{time_zone: tz, microsecond: {_us, precision}} = datetime, shifts) when is_list(shifts) do
     {logical_shifts, shifts} = Keyword.split(shifts, [:years, :months, :weeks, :days])
+    incoming_tzinfo = Timex.timezone(tz, datetime)
     datetime =
       datetime
       |> Timezone.convert("Etc/UTC")
@@ -242,6 +243,16 @@ defimpl Timex.Protocol, for: DateTime do
 
     # Convert back to DateTime in UTC
     shifted = raw_convert(shifted_secs, {rem_us, precision})
+    shifted_timezone = Timex.timezone(tz, shifted)
+
+    incoming_std = Map.get(incoming_tzinfo, :offset_std, 0)
+    shifted_std = Map.get(shifted_timezone, :offset_std, 0)
+
+    shifted = if incoming_std != shifted_std do
+      raw_convert(shifted_secs + incoming_std - shifted_std, {rem_us, precision})
+    else
+      shifted
+    end
 
     # Convert to original timezone
     case Timezone.convert(shifted, tz) do
@@ -382,10 +393,10 @@ defimpl Timex.Protocol, for: DateTime do
         %DateTime{datetime | day: day + value}
       (month - 1) >= 1 ->
         ldom = :calendar.last_day_of_the_month(year, month - 1)
-        shift_by(%DateTime{datetime | month: month - 1, day: ldom}, value + day + 1, :days)
+        shift_by(%DateTime{datetime | month: month - 1, day: ldom}, value + day, :days)
       :else ->
         ldom = :calendar.last_day_of_the_month(year - 1, 12)
-        shift_by(%DateTime{datetime | year: year - 1, month: 12, day: ldom}, value + day + 1, :days)
+        shift_by(%DateTime{datetime | year: year - 1, month: 12, day: ldom}, value + day, :days)
     end
   end
 
