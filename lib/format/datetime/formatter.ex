@@ -425,14 +425,14 @@ defmodule Timex.Format.DateTime.Formatter do
   def format_token(locale, :iso_week, date, modifiers, _flags, _width) do
     # 2015-W04
     flags = [padding: :zeroes]
-    year = format_token(locale, :year4, date, modifiers, flags, width_spec(4..4))
+    year = format_token(locale, :iso_year4, date, modifiers, flags, width_spec(4..4))
     week = format_token(locale, :iso_weeknum, date, modifiers, flags, width_spec(2..2))
     "#{year}-W#{week}"
   end
   def format_token(locale, :iso_weekday, date, modifiers, _flags, _width) do
     # 2015-W04-1
     flags = [padding: :zeroes]
-    year = format_token(locale, :year4, date, modifiers, flags, width_spec(4..4))
+    year = format_token(locale, :iso_year4, date, modifiers, flags, width_spec(4..4))
     week = format_token(locale, :iso_weeknum, date, modifiers, flags, width_spec(2..2))
     day  = format_token(locale, :wday_mon, date, modifiers, flags, width_spec(1, 1))
     "#{year}-W#{week}-#{day}"
