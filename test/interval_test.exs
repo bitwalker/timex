@@ -253,4 +253,182 @@ defmodule IntervalTests do
       assert Interval.contains?(interval_d, interval_d)
     end
   end
+
+  describe "difference/2 removes the part of one interval that overlaps with another" do
+    test "returns a list with the original interval when there is no overlap" do
+      midnight_to_noon =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 00:00:00.000],
+          until: ~N[2018-01-01 12:00:00.000]
+        )
+
+      two_pm_to_four_pm =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 14:00:00.000],
+          until: ~N[2018-01-01 16:00:00.000]
+        )
+
+      assert Interval.difference(midnight_to_noon, two_pm_to_four_pm) == [midnight_to_noon]
+
+      assert Interval.difference(two_pm_to_four_pm, midnight_to_noon) == [two_pm_to_four_pm]
+    end
+
+    test "returns an empty list when removal interval completely covers the original" do
+      two_to_four =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 02:00:00.000],
+          until: ~N[2018-01-01 04:00:00.000]
+        )
+
+      one_to_five =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 01:00:00.000],
+          until: ~N[2018-01-01 05:00:00.000]
+        )
+
+      assert Interval.difference(two_to_four, one_to_five) == []
+      assert Interval.difference(two_to_four, two_to_four) == []
+      assert Interval.difference(one_to_five, one_to_five) == []
+    end
+
+    test "trims the original interval when the removal interval overlaps one end" do
+      two_to_three =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 02:00:00.000],
+          until: ~N[2018-01-01 03:00:00.000]
+        )
+
+      two_to_four =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 02:00:00.000],
+          until: ~N[2018-01-01 04:00:00.000]
+        )
+
+      three_to_four =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 03:00:00.000],
+          until: ~N[2018-01-01 04:00:00.000]
+        )
+
+      three_to_five =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 03:00:00.000],
+          until: ~N[2018-01-01 05:00:00.000]
+        )
+
+      assert Interval.difference(two_to_four, two_to_three) ==
+               [
+                 Timex.Interval.new(
+                   from: ~N[2018-01-01 03:00:00.000],
+                   until: ~N[2018-01-01 04:00:00.000]
+                 )
+               ]
+
+      assert Interval.difference(two_to_four, three_to_four) ==
+               [
+                 Timex.Interval.new(
+                   from: ~N[2018-01-01 02:00:00.000],
+                   until: ~N[2018-01-01 03:00:00.000]
+                 )
+               ]
+
+      assert Interval.difference(two_to_four, three_to_five) ==
+               [
+                 Timex.Interval.new(
+                   from: ~N[2018-01-01 02:00:00.000],
+                   until: ~N[2018-01-01 03:00:00.000]
+                 )
+               ]
+
+      assert Interval.difference(three_to_five, two_to_four) ==
+               [
+                 Timex.Interval.new(
+                   from: ~N[2018-01-01 04:00:00.000],
+                   until: ~N[2018-01-01 05:00:00.000]
+                 )
+               ]
+    end
+
+    test "splits the original interval when the removal interval falls inside it" do
+      one_to_five =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 01:00:00.000],
+          until: ~N[2018-01-01 05:00:00.000]
+        )
+
+      two_to_three =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 02:00:00.000],
+          until: ~N[2018-01-01 03:00:00.000]
+        )
+
+      assert Interval.difference(one_to_five, two_to_three) ==
+               [
+                 Timex.Interval.new(
+                   from: ~N[2018-01-01 01:00:00.000],
+                   until: ~N[2018-01-01 02:00:00.000]
+                 ),
+                 Timex.Interval.new(
+                   from: ~N[2018-01-01 03:00:00.000],
+                   until: ~N[2018-01-01 05:00:00.000]
+                 )
+               ]
+    end
+
+    test "other than 'from' and 'until', preserves the original interval's attributes" do
+      one_to_fives =
+        for left_open <- [true, false],
+            right_open <- [true, false],
+            step <- [[seconds: 1], [minutes: 2]] do
+          Timex.Interval.new(
+            from: ~N[2018-01-01 01:00:00.000],
+            until: ~N[2018-01-01 05:00:00.000],
+            left_open: left_open,
+            right_open: right_open,
+            step: step
+          )
+        end
+
+      midnight_to_two =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 00:00:00.000],
+          until: ~N[2018-01-01 02:00:00.000]
+        )
+
+      two_to_three =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 02:00:00.000],
+          until: ~N[2018-01-01 03:00:00.000]
+        )
+
+      four_to_six =
+        Timex.Interval.new(
+          from: ~N[2018-01-01 04:00:00.000],
+          until: ~N[2018-01-01 06:00:00.000]
+        )
+
+      Enum.each(one_to_fives, fn one_to_five ->
+        assert [split_1, split_2] = Interval.difference(one_to_five, two_to_three)
+
+        assert split_1.left_open == one_to_five.left_open
+        assert split_1.right_open == one_to_five.right_open
+        assert split_1.step == one_to_five.step
+
+        assert split_2.left_open == one_to_five.left_open
+        assert split_2.right_open == one_to_five.right_open
+        assert split_2.step == one_to_five.step
+
+        assert [left_trimmed] = Interval.difference(one_to_five, midnight_to_two)
+
+        assert left_trimmed.left_open == one_to_five.left_open
+        assert left_trimmed.right_open == one_to_five.right_open
+        assert left_trimmed.step == one_to_five.step
+
+        assert [right_trimmed] = Interval.difference(one_to_five, four_to_six)
+        assert right_trimmed.right_open == one_to_five.right_open
+        assert right_trimmed.left_open == one_to_five.left_open
+        assert right_trimmed.step == one_to_five.step
+      end)
+    end
+  end
 end

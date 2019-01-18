@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - `Timex.set/2` now also accepts setting the `:date` from a `%Date{}` struct.
+- `Interval.difference/2` removes one interval from another
 
 ## 3.4.1
 

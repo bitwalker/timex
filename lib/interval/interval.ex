@@ -361,6 +361,100 @@ defmodule Timex.Interval do
     end
   end
 
+  @doc """
+  Removes one interval from another, which may reduce, split, or
+  eliminate the original interval. Returns a (possibly empty) list
+  of intervals representing the remaining time.
+
+  ## Graphs
+
+  The following textual graphs show all the ways that the original interval and
+  the removal can relate to each other, and the action that `difference/2` will
+  take in each case.
+  The original interval is drawn with `O`s and the removal interval with `X`s.
+
+      # return original
+      OO
+          XX
+
+      # trim end
+      OOO
+        XXX
+
+      # trim end
+      OOOOO
+        XXX
+
+      # split
+      OOOOOOO
+        XXX
+
+      # eliminate
+      OO
+      XX
+
+      # eliminate
+      OO
+      XXXX
+
+      # trim beginning
+      OOOO
+      XX
+
+      # eliminate
+        OO
+      XXXXXX
+
+      # eliminate
+          OO
+      XXXXXX
+
+      # trim beginning
+        OOO
+      XXX
+
+      # return original
+           OO
+      XX
+
+  ## Examples
+
+      iex> #{__MODULE__}.difference(#{__MODULE__}.new(from: ~N[2018-01-01 02:00:00.000], until: ~N[2018-01-01 04:00:00.000]), #{__MODULE__}.new(from: ~N[2018-01-01 03:00:00.000], until: ~N[2018-01-01 05:00:00.000]))
+      [%#{__MODULE__}{from: ~N[2018-01-01 02:00:00.000], left_open: true, right_open: false, step: [days: 1], until: ~N[2018-01-01 03:00:00.000]}]
+
+      iex> #{__MODULE__}.difference(#{__MODULE__}.new(from: ~N[2018-01-01 01:00:00.000], until: ~N[2018-01-01 05:00:00.000]), #{__MODULE__}.new(from: ~N[2018-01-01 02:00:00.000], until: ~N[2018-01-01 03:00:00.000]))
+      [%#{__MODULE__}{from: ~N[2018-01-01 01:00:00.000], left_open: true, right_open: false, step: [days: 1], until: ~N[2018-01-01 02:00:00.000]}, %#{__MODULE__}{from: ~N[2018-01-01 03:00:00.000], left_open: true, right_open: false, step: [days: 1], until: ~N[2018-01-01 05:00:00.000]}]
+
+      iex> #{__MODULE__}.difference(#{__MODULE__}.new(from: ~N[2018-01-01 02:00:00.000], until: ~N[2018-01-01 04:00:00.000]), #{__MODULE__}.new(from: ~N[2018-01-01 01:00:00.000], until: ~N[2018-01-01 05:00:00.000]))
+      []
+  """
+  @spec difference(__MODULE__.t(), __MODULE__.t()) :: [__MODULE__.t()]
+  def difference(%__MODULE__{} = original, %__MODULE__{} = removal) do
+    cond do
+      contains?(removal, original) ->
+        # eliminate
+        []
+
+      !overlaps?(removal, original) ->
+        # return original
+        [original]
+
+      Timex.compare(min(removal), min(original)) <= 0 ->
+        # trim start
+        [Map.put(original, :from, Map.get(removal, :until))]
+
+      Timex.compare(max(original), max(removal)) <= 0 ->
+        # trim end
+        [Map.put(original, :until, Map.get(removal, :from))]
+
+      true ->
+        # split
+        part_before = Map.put(original, :until, Map.get(removal, :from))
+        part_after = Map.put(original, :from, Map.get(removal, :until))
+        [part_before, part_after]
+    end
+  end
+
   @doc false
   def min(interval)
 
