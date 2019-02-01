@@ -29,6 +29,7 @@ defmodule Timex.Types do
   @type weekday_name :: :monday | :tuesday | :wednesday | :thursday | :friday | :saturday | :sunday
   @type shift_units :: :milliseconds | :seconds | :minutes | :hours | :days | :weeks | :years
   @type time_units :: :microseconds | :milliseconds | :seconds | :minutes | :hours | :days | :weeks | :years
+  @type second_time_units :: :second | :millisecond | :microsecond | :nanosecond | :seconds | :milliseconds | :microseconds | :nanoseconds
   @type time :: { hour, minute, second }
   @type microsecond_time :: { hour, minute, second, microsecond | microseconds}
   @type date :: { year, month, day }
