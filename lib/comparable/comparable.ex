@@ -4,8 +4,8 @@ defprotocol Timex.Comparable do
   """
   alias Timex.Types
 
-  @type granularity :: :years | :months | :weeks | :calendar_weeks | :days |
-                       :hours | :minutes | :seconds | :milliseconds | :microseconds |
+  @type granularity :: :year | :years | :month | :months | :week | :weeks | :calendar_week | :calendar_weeks | :day | :days |
+                       :hour | :hours | :minute | :minutes | :second | :seconds | :millisecond | :milliseconds | :microsecond | :microseconds |
                        :duration
   @type constants :: :epoch | :zero | :distant_past | :distant_future
   @type comparable :: Date.t | DateTime.t | NaiveDateTime.t | Types.date | Types.datetime
@@ -17,20 +17,30 @@ defprotocol Timex.Comparable do
 
   You can optionally specify a comparison granularity, any of the following:
 
+  - :year
   - :years
+  - :month
   - :months
+  - :week
   - :weeks
-  - :calendar_weeks (weeks of the calendar as opposed to actual weeks in terms of days)
+  - :calendar_week (weeks of the calendar as opposed to actual weeks in terms of days)
+  - :calendar_weeks
+  - :day
   - :days
+  - :hour
   - :hours
+  - :minute
   - :minutes
+  - :second
   - :seconds
+  - :millisecond
   - :milliseconds
-  - :microseconds (default)
+  - :microsecond (default)
+  - :microseconds
   - :duration
 
   and the dates will be compared with the cooresponding accuracy.
-  The default granularity is :microseconds.
+  The default granularity is `:microsecond`.
 
     - 0:  when equal
     - -1: when the first date/time comes before the second
@@ -43,31 +53,41 @@ defprotocol Timex.Comparable do
       iex> use Timex
       iex> date1 = ~D[2014-03-04]
       iex> date2 = ~D[2015-03-04]
-      iex> Timex.compare(date1, date2, :years)
+      iex> Timex.compare(date1, date2, :year)
       -1
-      iex> Timex.compare(date2, date1, :years)
+      iex> Timex.compare(date2, date1, :year)
       1
       iex> Timex.compare(date1, date1)
       0
   """
   @spec compare(comparable, comparable, granularity) :: compare_result
-  def compare(a, b, granularity \\ :microseconds)
+  def compare(a, b, granularity \\ :microsecond)
 
   @doc """
   Get the difference between two date or datetime types.
 
   You can optionally specify a diff granularity, any of the following:
 
+  - :year
   - :years
+  - :month
   - :months
-  - :calendar_weeks (weeks of the calendar as opposed to actual weeks in terms of days)
+  - :week
   - :weeks
+  - :calendar_week (weeks of the calendar as opposed to actual weeks in terms of days)
+  - :calendar_weeks
+  - :day
   - :days
+  - :hour
   - :hours
+  - :minute
   - :minutes
+  - :second
   - :seconds
+  - :millisecond
   - :milliseconds
-  - :microseconds (default)
+  - :microsecond (default)
+  - :microseconds
   - :duration
 
   and the result will be an integer value of those units or a Duration struct.
@@ -82,19 +102,19 @@ defprotocol Timex.Comparable do
       iex> use Timex
       iex> date1 = ~D[2015-01-28]
       iex> date2 = ~D[2015-02-28]
-      iex> Timex.diff(date1, date2, :months)
+      iex> Timex.diff(date1, date2, :month)
       -1
-      iex> Timex.diff(date2, date1, :months)
+      iex> Timex.diff(date2, date1, :month)
       1
 
       iex> use Timex
       iex> date1 = ~D[2015-01-31]
       iex> date2 = ~D[2015-02-28]
-      iex> Timex.diff(date1, date2, :months)
+      iex> Timex.diff(date1, date2, :month)
       -1
-      iex> Timex.diff(date2, date1, :months)
+      iex> Timex.diff(date2, date1, :month)
       0
   """
   @spec diff(comparable, comparable, granularity) :: diff_result
-  def diff(a, b, granularity \\ :microseconds)
+  def diff(a, b, granularity \\ :microsecond)
 end

@@ -19,14 +19,22 @@ defmodule Timex.Comparable.Diff do
   end
 
   defp do_diff(a, b, :duration), do: Duration.from_seconds(do_diff(a,b,:seconds))
-  defp do_diff(a, b, :microseconds), do: a - b
-  defp do_diff(a, b, :milliseconds), do: div(a - b, 1_000)
-  defp do_diff(a, b, :seconds),      do: div(a - b, 1_000*1_000)
-  defp do_diff(a, b, :minutes),      do: div(a - b, 1_000*1_000*60)
-  defp do_diff(a, b, :hours),        do: div(a - b, 1_000*1_000*60*60)
-  defp do_diff(a, b, :days),         do: div(a - b, 1_000*1_000*60*60*24)
-  defp do_diff(a, b, :weeks),        do: div(a - b, 1_000*1_000*60*60*24*7)
-  defp do_diff(a, b, :calendar_weeks) do
+  defp do_diff(a, b, :microseconds), do: do_diff(a, b, :microsecond)
+  defp do_diff(a, b, :microsecond),  do: a - b
+  defp do_diff(a, b, :milliseconds), do: do_diff(a, b, :millisecond)
+  defp do_diff(a, b, :millisecond),  do: div(a - b, 1_000)
+  defp do_diff(a, b, :seconds),      do: do_diff(a, b, :second)
+  defp do_diff(a, b, :second),       do: div(a - b, 1_000*1_000)
+  defp do_diff(a, b, :minutes),      do:  do_diff(a, b, :minute)
+  defp do_diff(a, b, :minute),       do: div(a - b, 1_000*1_000*60)
+  defp do_diff(a, b, :hours),        do: do_diff(a, b, :hour)
+  defp do_diff(a, b, :hour),         do: div(a - b, 1_000*1_000*60*60)
+  defp do_diff(a, b, :days),         do: do_diff(a, b, :day)
+  defp do_diff(a, b, :day),          do: div(a - b, 1_000*1_000*60*60*24)
+  defp do_diff(a, b, :weeks),        do: do_diff(a, b, :week)
+  defp do_diff(a, b, :week),         do: div(a - b, 1_000*1_000*60*60*24*7)
+  defp do_diff(a, b, :calendar_weeks), do: do_diff(a, b, :calendar_week)
+  defp do_diff(a, b, :calendar_week) do
     adate      = :calendar.gregorian_seconds_to_datetime(div(a, 1_000*1_000))
     bdate      = :calendar.gregorian_seconds_to_datetime(div(b, 1_000*1_000))
     days = cond do
@@ -49,10 +57,12 @@ defmodule Timex.Comparable.Diff do
       :else -> div(days, 7)
     end
   end
-  defp do_diff(a, b, :months) do
+  defp do_diff(a, b, :months), do: do_diff(a, b, :month)
+  defp do_diff(a, b, :month) do
     diff_months(a, b)
   end
-  defp do_diff(a, b, :years) do
+  defp do_diff(a, b, :years), do: do_diff(a, b, :year)
+  defp do_diff(a, b, :year) do
     diff_years(a, b)
   end
   defp do_diff(_, _, granularity), do: {:error, {:invalid_granularity, granularity}}
