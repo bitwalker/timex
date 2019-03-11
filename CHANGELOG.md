@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - `Timex.Timezone.convert/2` when using custom time zones
+- Letter encoding on PT translation (#516)
 
 ## 3.5.0
 
