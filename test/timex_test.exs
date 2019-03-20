@@ -104,6 +104,37 @@ defmodule TimexTests do
     end
   end
 
+  describe "from_unix" do
+    test "defaults to unit :second" do
+      assert Timex.from_unix(1_549_021_655) == Timex.to_datetime({{2019, 2, 1}, {11, 47, 35}})
+    end
+
+    test "has seconds as unit" do
+      assert Timex.from_unix(1_549_021_655, :seconds) ==
+               Timex.to_datetime({{2019, 2, 1}, {11, 47, 35}})
+    end
+
+    test "has milliseconds as unit" do
+      assert Timex.from_unix(1_549_021_655_901, :milliseconds) ==
+               Timex.to_datetime({{2019, 2, 1}, {11, 47, 35, 901_000}})
+    end
+
+    test "has microseconds as unit" do
+      assert Timex.from_unix(1_549_021_655_900_123, :microseconds) ==
+               Timex.to_datetime({{2019, 2, 1}, {11, 47, 35, 900_123}})
+    end
+
+    test "has nanoseconds as unit" do
+      assert Timex.from_unix(1_549_021_655_900_123_456, :nanoseconds) ==
+               Timex.to_datetime({{2019, 2, 1}, {11, 47, 35, 900_123}})
+    end
+
+    test "has System.convert_time_unit/3 units" do
+      assert Timex.from_unix(1_549_021_655_900_123, :microsecond) ==
+               Timex.to_datetime({{2019, 2, 1}, {11, 47, 35, 900_123}})
+    end
+  end
+
   test "days_in_month" do
     localdate = {{2013,2,17},{11,59,10}}
     assert Timex.days_in_month(Timex.to_datetime(localdate)) === 28

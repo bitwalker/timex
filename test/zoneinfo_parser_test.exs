@@ -7,24 +7,24 @@ defmodule ZoneInfoParserTest do
 
   test "parse_tzfile with TZIF v1" do
     # TZIF Version 1
-    chicago = System.cwd |> Path.join("test/include/tzif/America/Chicago")
+    chicago = File.cwd! |> Path.join("test/include/tzif/America/Chicago")
     assert {:ok, "CDT"} = chicago |> File.read! |> Local.parse_tzfile(@seconds1)
     assert {:ok, "CST"} = chicago |> File.read! |> Local.parse_tzfile(@seconds2)
 
     # TZIF Version 1
-    new_york = System.cwd |> Path.join("test/include/tzif/America/New_York")
+    new_york = File.cwd! |> Path.join("test/include/tzif/America/New_York")
     assert {:ok, "EDT"} = new_york |> File.read! |> Local.parse_tzfile(@seconds1)
     assert {:ok, "EST"} = new_york |> File.read! |> Local.parse_tzfile(@seconds2)
   end
 
   test "parse_tzfile with TZIF v2" do
     # TZIF Version 2
-    chicago = System.cwd |> Path.join("test/include/tzif2/America/Chicago")
+    chicago = File.cwd! |> Path.join("test/include/tzif2/America/Chicago")
     assert {:ok, "CDT"} = chicago |> File.read! |> Local.parse_tzfile(@seconds1)
     assert {:ok, "CST"} = chicago |> File.read! |> Local.parse_tzfile(@seconds2)
 
     # TZIF Version 2
-    new_york = System.cwd |> Path.join("test/include/tzif2/America/New_York")
+    new_york = File.cwd! |> Path.join("test/include/tzif2/America/New_York")
     assert {:ok, "EDT"} = new_york |> File.read! |> Local.parse_tzfile(@seconds1)
     assert {:ok, "EST"} = new_york |> File.read! |> Local.parse_tzfile(@seconds2)
   end
