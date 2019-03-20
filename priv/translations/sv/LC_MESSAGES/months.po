@@ -39,7 +39,7 @@ msgid "June"
 msgstr "juni"
 
 #: lib/l10n/translator.ex:219
-msgid "Mars"
+msgid "March"
 msgstr "mars"
 
 #: lib/l10n/translator.ex:221
