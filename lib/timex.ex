@@ -965,9 +965,8 @@ defmodule Timex do
   @doc """
   See docs for `diff/3`
   """
-  @spec diff(Time, Time) :: Types.timestamp() | {:error, term}
-  @spec diff(Comparable.comparable(), Comparable.comparable()) ::
-          Types.timestamp() | {:error, term}
+  @spec diff(Time, Time) :: Duration.t() | integer | {:error, term}
+  @spec diff(Comparable.comparable(), Comparable.comparable()) :: Duration.t() | integer | {:error, term}
   def diff(%Time{} = a, %Time{} = b), do: diff(a, b, :microseconds)
   defdelegate diff(a, b), to: Timex.Comparable
 
