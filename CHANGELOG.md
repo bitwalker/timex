@@ -5,6 +5,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## 3.5.1
+
+### Fixed
+
+- `Timex.Timezone.convert/2` when using custom time zones
+- Letter encoding on PT translation (#516)
+
+## 3.5.0
+
 ### Added
 
 - `Timex.set/2` now also accepts setting the `:date` from a `%Date{}` struct.
