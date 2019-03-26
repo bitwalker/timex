@@ -9,8 +9,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Elixir 1.8 deprications
+- `Timex.diff/2` spec
 - `Timex.Timezone.convert/2` when using custom time zones
-- Letter encoding on PT translation (#516)
+- Letter encoding on PT translation
+- Swedish translation id for March
 
 ## 3.5.0
 
