@@ -7,7 +7,7 @@ defmodule Timex.Mixfile do
     [
       app: :timex,
       version: @version,
-      elixir: "~> 1.4",
+      elixir: "~> 1.8",
       description: description(),
       package: package(),
       deps: deps(),
@@ -43,14 +43,14 @@ defmodule Timex.Mixfile do
     [ files: ["lib", "priv", "mix.exs", "README.md", "LICENSE.md"],
       maintainers: ["Paul Schoenfelder", "Chris Hildebrand"],
       licenses: ["MIT"],
-      links: %{ 
-        "Changelog": "https://github.com/bitwalker/timex/blob/master/CHANGELOG.md", 
+      links: %{
+        "Changelog": "https://github.com/bitwalker/timex/blob/master/CHANGELOG.md",
         "GitHub": "https://github.com/bitwalker/timex"
     }]
   end
 
   def deps do
-    [{:tzdata, "~> 0.1.8 or ~> 0.5"},
+    [{:tzdata, "~> 1.0.0-rc.1"},
      {:combine, "~> 0.10"},
      {:gettext, "~> 0.10"},
      {:ex_doc, "~> 0.13", only: [:docs]},
