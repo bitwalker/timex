@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Elixir 1.8 deprications
+- Elixir 1.8 deprecations
 - `Timex.diff/2` spec
 - `Timex.Timezone.convert/2` when using custom time zones
 - Letter encoding on PT translation
