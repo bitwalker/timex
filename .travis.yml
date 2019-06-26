@@ -23,5 +23,5 @@ script:
   - if [[ "$TRAVIS_OS_NAME" = 'windows' ]]; then ./bin/build_win32; else ./bin/build; fi
 notifications:
   recipients:
-    - paulschoenfelder@gmail.com
+    - paulschoenfelder@fastmail.com
     - chris@chrishildebrand.net
