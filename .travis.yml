@@ -5,20 +5,12 @@ os:
   - macos
   - linux
 elixir:
-  - 1.4
-  - 1.5
   - 1.6
   - 1.7
 otp_release:
   - 19.3
   - 20.3
   - 21.0
-matrix:
-  exclude:
-    - elixir: 1.4
-      otp_release: 21.0
-    - elixir: 1.5
-      otp_release: 21.0
 script:
   - if [[ "$TRAVIS_OS_NAME" = 'windows' ]]; then ./bin/build_win32; else ./bin/build; fi
 notifications:
