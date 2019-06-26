@@ -55,7 +55,7 @@ defmodule Timex.Mixfile do
      {:gettext, "~> 0.10"},
      {:ex_doc, "~> 0.13", only: [:docs]},
      {:benchfella, "~> 0.3", only: [:bench]},
-     {:dialyze, "~> 0.2", only: [:dev]},
+     {:dialyxir, "~> 0.5", only: [:dev]},
      {:excoveralls, "~> 0.4", only: [:test]}]
   end
 
