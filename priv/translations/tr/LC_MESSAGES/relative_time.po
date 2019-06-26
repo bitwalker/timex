@@ -1,0 +1,241 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: tr\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.1\n"
+
+#: lib/l10n/translator.ex:237
+msgid "last month"
+msgstr "geçen ay"
+
+#: lib/l10n/translator.ex:243
+msgid "last week"
+msgstr "geçen hafta"
+
+#: lib/l10n/translator.ex:231
+msgid "last year"
+msgstr "geçen yıl"
+
+#: lib/l10n/translator.ex:239
+msgid "next month"
+msgstr "gelecek ay"
+
+#: lib/l10n/translator.ex:245
+msgid "next week"
+msgstr "gelecek hafta"
+
+#: lib/l10n/translator.ex:233
+msgid "next year"
+msgstr "gelecek yıl"
+
+#: lib/l10n/translator.ex:238
+msgid "this month"
+msgstr "bu ay"
+
+#: lib/l10n/translator.ex:244
+msgid "this week"
+msgstr "bu hafta"
+
+#: lib/l10n/translator.ex:232
+msgid "this year"
+msgstr "bu yıl"
+
+#: lib/l10n/translator.ex:250
+msgid "today"
+msgstr "bugün"
+
+#: lib/l10n/translator.ex:251
+msgid "tomorrow"
+msgstr "yarın"
+
+#: lib/l10n/translator.ex:249
+msgid "yesterday"
+msgstr "dün"
+
+#: lib/l10n/translator.ex:253
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "%{count} gün önce"
+msgstr[1] "%{count} gün önce"
+
+#: lib/l10n/translator.ex:278
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "%{count} saat önce"
+msgstr[1] "%{count} saat önce"
+
+#: lib/l10n/translator.ex:281
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "%{count} dakika önce"
+msgstr[1] "%{count} dakika önce"
+
+#: lib/l10n/translator.ex:241
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "%{count} ay önce"
+msgstr[1] "%{count} ay önce"
+
+#: lib/l10n/translator.ex:284
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "%{count} saniye önce"
+msgstr[1] "%{count} saniye önce"
+
+#: lib/l10n/translator.ex:247
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "%{count} hafta önce"
+msgstr[1] "%{count} hafta önce"
+
+#: lib/l10n/translator.ex:235
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "%{count} yıl önce"
+msgstr[1] "%{count} yıl önce"
+
+#: lib/l10n/translator.ex:252
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "%{count} gün içinde"
+msgstr[1] "%{count} gün içinde"
+
+#: lib/l10n/translator.ex:277
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "%{count} saat içinde"
+msgstr[1] "%{count} saat içinde"
+
+#: lib/l10n/translator.ex:280
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "%{count} dakika içinde"
+msgstr[1] "%{count} dakika içinde"
+
+#: lib/l10n/translator.ex:240
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "%{count} ay içinde"
+msgstr[1] "%{count} ay içinde"
+
+#: lib/l10n/translator.ex:283
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "%{count} saniye içinde"
+msgstr[1] "%{count} saniye içinde"
+
+#: lib/l10n/translator.ex:246
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "%{count} hafta içinde"
+msgstr[1] "%{count} hafta içinde"
+
+#: lib/l10n/translator.ex:234
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "%{count} yıl içinde"
+msgstr[1] "%{count} yıl içinde"
+
+#: lib/l10n/translator.ex:267
+msgid "last friday"
+msgstr "geçen cuma"
+
+#: lib/l10n/translator.ex:255
+msgid "last monday"
+msgstr "geçen pazartesi"
+
+#: lib/l10n/translator.ex:270
+msgid "last saturday"
+msgstr "geçen cumartesi"
+
+#: lib/l10n/translator.ex:273
+msgid "last sunday"
+msgstr "geçen pazar"
+
+#: lib/l10n/translator.ex:264
+msgid "last thursday"
+msgstr "geçen perşembe"
+
+#: lib/l10n/translator.ex:258
+msgid "last tuesday"
+msgstr "geçen salı"
+
+#: lib/l10n/translator.ex:261
+msgid "last wednesday"
+msgstr "geçen çarşamba"
+
+#: lib/l10n/translator.ex:269
+msgid "next friday"
+msgstr "gelecek cuma"
+
+#: lib/l10n/translator.ex:257
+msgid "next monday"
+msgstr "gelecek pazartesi"
+
+#: lib/l10n/translator.ex:272
+msgid "next saturday"
+msgstr "gelecek cumartesi"
+
+#: lib/l10n/translator.ex:275
+msgid "next sunday"
+msgstr "gelecek pazar"
+
+#: lib/l10n/translator.ex:266
+msgid "next thursday"
+msgstr "gelecek perşembe"
+
+#: lib/l10n/translator.ex:260
+msgid "next tuesday"
+msgstr "gelecek salı"
+
+#: lib/l10n/translator.ex:263
+msgid "next wednesday"
+msgstr "gelecek çarşamba"
+
+#: lib/l10n/translator.ex:268
+msgid "this friday"
+msgstr "bu cuma"
+
+#: lib/l10n/translator.ex:256
+msgid "this monday"
+msgstr "bu pazartesi"
+
+#: lib/l10n/translator.ex:271
+msgid "this saturday"
+msgstr "bu cumartesi"
+
+#: lib/l10n/translator.ex:274
+msgid "this sunday"
+msgstr "bu pazar"
+
+#: lib/l10n/translator.ex:265
+msgid "this thursday"
+msgstr "bu perşembe"
+
+#: lib/l10n/translator.ex:259
+msgid "this tuesday"
+msgstr "bu salı"
+
+#: lib/l10n/translator.ex:262
+msgid "this wednesday"
+msgstr "bu çarşamba"
+
+#: lib/l10n/translator.ex:286
+msgid "now"
+msgstr ""
