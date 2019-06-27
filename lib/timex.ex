@@ -1641,7 +1641,7 @@ defmodule Timex do
       ...> %DateTime{hour: 3} = Timex.shift(datetime, hours: 1)
       ...> shifted = Timex.shift(datetime, hours: 2)
       ...> {datetime.zone_abbr, shifted.zone_abbr, shifted.hour}
-      {"CST", "CDT", 4}
+      {"CST", "CDT", 3}
 
   ### Shifting and leap days
 

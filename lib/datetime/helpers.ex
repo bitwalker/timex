@@ -35,13 +35,16 @@ defmodule Timex.DateTime.Helpers do
   def construct({{_,_,_} = date, {_,_,_,_} = time}, timezone) do
     construct({date,time}, -1, timezone)
   end
-  def construct({{y,m,d} = date, {h,mm,s,us}}, precision, timezone) do
+  def construct({{_,_,_} = date, {_,_,_,_} = time}, precision, timezone) do
+    construct({date, time}, precision, timezone, :wall)
+  end
+  def construct({{y,m,d} = date, {h,mm,s,us}}, precision, timezone, utc_or_wall) do
     seconds_from_zeroyear = :calendar.datetime_to_gregorian_seconds({date,{h,mm,s}})
     case Timezone.name_of(timezone) do
       {:error, _} = err ->
         err
       tzname ->
-        case Timezone.resolve(tzname, seconds_from_zeroyear) do
+        case Timezone.resolve(tzname, seconds_from_zeroyear, utc_or_wall) do
           {:error, _} = err ->
             err
           %TimezoneInfo{} = tz ->

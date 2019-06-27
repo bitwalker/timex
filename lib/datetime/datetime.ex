@@ -236,35 +236,23 @@ defimpl Timex.Protocol, for: DateTime do
   @spec shift(DateTime.t, list({atom(), term})) :: DateTime.t | {:error, term}
   def shift(%DateTime{time_zone: tz, microsecond: {_us, precision}} = datetime, shifts) when is_list(shifts) do
     {logical_shifts, shifts} = Keyword.split(shifts, [:years, :months, :weeks, :days])
-    incoming_tzinfo = Timex.timezone(tz, datetime)
+    # applied_offset is applied when converting to gregorian microseconds, 
+    # we want to reverse that when converting back to the origin timezone
+    applied_offset_ms = Timezone.total_offset(datetime.std_offset, datetime.utc_offset) * -1
     datetime = logical_shift(datetime, logical_shifts)
     us = to_gregorian_microseconds(datetime)
     shift = calculate_shift(shifts)
     shifted_us = us + shift
-    shifted_secs = div(shifted_us, 1_000*1_000)
+    shifted_secs = div(shifted_us, 1_000*1_000) + (applied_offset_ms * -1)
     rem_us = rem(shifted_us, 1_000*1_000)
 
-    # Convert back to DateTime in UTC
-    shifted = raw_convert(shifted_secs, {rem_us, precision})
-    shifted_timezone = Timex.timezone(tz, shifted)
-
-    incoming_std = Map.get(incoming_tzinfo, :offset_std, 0)
-    shifted_std = Map.get(shifted_timezone, :offset_std, 0)
-
-    shifted = if incoming_std != shifted_std do
-      raw_convert(shifted_secs + incoming_std - shifted_std, {rem_us, precision})
-    else
-      shifted
-    end
-
-    # Convert to original timezone
-    case Timezone.convert(shifted, tz) do
+    # Convert back to original timezone
+    case raw_convert(shifted_secs, {rem_us, precision}, tz, :wall) do
       {:error, {:could_not_resolve_timezone, _, _, _}} ->
         # This occurs when the shifted date/time doesn't exist because of a leap forward
         # This doesn't mean the shift is invalid, simply that we need to ask for the right wall time
         # Which in these cases means asking for the time + 1h
-        shifted = raw_convert(shifted_secs + 60, {rem_us, precision})
-        Timezone.convert(shifted, tz)
+        raw_convert(shifted_secs + 3600, {rem_us, precision}, tz, :wall)
       result ->
         result
     end
@@ -275,7 +263,11 @@ defimpl Timex.Protocol, for: DateTime do
 
   defp raw_convert(secs, {us, precision}) do
     {date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs)
-    Timex.DateTime.Helpers.construct({date, {h,mm,s,us}}, precision, "Etc/UTC")
+    Timex.DateTime.Helpers.construct({date, {h,mm,s,us}}, precision, "Etc/UTC", :wall)
+  end
+  defp raw_convert(secs, {us, precision}, tz, utc_or_wall) do
+    {date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs)
+    Timex.DateTime.Helpers.construct({date, {h,mm,s,us}}, precision, tz, utc_or_wall)
   end
 
   defp logical_shift(datetime, []), do: datetime
