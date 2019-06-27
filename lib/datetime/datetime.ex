@@ -237,10 +237,7 @@ defimpl Timex.Protocol, for: DateTime do
   def shift(%DateTime{time_zone: tz, microsecond: {_us, precision}} = datetime, shifts) when is_list(shifts) do
     {logical_shifts, shifts} = Keyword.split(shifts, [:years, :months, :weeks, :days])
     incoming_tzinfo = Timex.timezone(tz, datetime)
-    datetime =
-      datetime
-      |> Timezone.convert("Etc/UTC")
-      |> logical_shift(logical_shifts)
+    datetime = logical_shift(datetime, logical_shifts)
     us = to_gregorian_microseconds(datetime)
     shift = calculate_shift(shifts)
     shifted_us = us + shift
