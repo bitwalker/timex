@@ -293,14 +293,15 @@ defimpl Timex.Protocol, for: DateTime do
   end
 
   # Consider compare_unit/2 an analog of Kernel.<=/2
-  defp compare_unit(:years, _), do: false
-  defp compare_unit(_, :years), do: true
-  defp compare_unit(:months, _), do: false
-  defp compare_unit(_, :months), do: true
-  defp compare_unit(:weeks, _), do: false
-  defp compare_unit(_, :weeks), do: true
-  defp compare_unit(:days, _), do: false
-  defp compare_unit(_, :days), do: true
+  # We want the largest units first
+  defp compare_unit(:years, _), do: true
+  defp compare_unit(_, :years), do: false
+  defp compare_unit(:months, _), do: true
+  defp compare_unit(_, :months), do: false
+  defp compare_unit(:weeks, _), do: true
+  defp compare_unit(_, :weeks), do: false
+  defp compare_unit(:days, _), do: true
+  defp compare_unit(_, :days), do: false
 
   defp calculate_shift(shifts), do: calculate_shift(shifts, 0)
 
