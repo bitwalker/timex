@@ -1,6 +1,38 @@
 defmodule ShiftTests do
+  use ExUnitProperties
   use ExUnit.Case, async: true
   use Timex
+
+  @units [:years, :months, :weeks, :days, :hours, :minutes, :seconds, :microseconds]
+
+  property "is always greater than input date for positive shift values" do
+    check all input_date <- PropertyHelpers.date_time_generator(:struct),
+              shift <- StreamData.integer(1..1000),
+              unit <- StreamData.member_of(@units) do
+
+      date = Timex.shift(input_date, [{unit, shift}])
+      assert Timex.after?(date, input_date)
+    end
+  end
+
+  property "is always lower than input date for negative shift values" do
+    check all input_date <- PropertyHelpers.date_time_generator(:struct),
+              shift <- StreamData.integer(-1..-1000),
+              unit <- StreamData.member_of(@units) do
+
+      date = Timex.shift(input_date, [{unit, shift}])
+      assert Timex.before?(date, input_date)
+    end
+  end
+
+  property "does not change for 0 shift values" do
+    check all input_date <- PropertyHelpers.date_time_generator(:struct),
+              unit <- StreamData.member_of(@units) do
+
+    date = Timex.shift(input_date, [{unit, 0}])
+    assert Timex.equal?(date, input_date)
+    end
+  end
 
   test "shift by months in a nonexistent day" do
     date = Timex.shift(~N[2015-06-29T12:00:00], months: -4)

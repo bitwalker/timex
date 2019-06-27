@@ -1,5 +1,6 @@
 defmodule TimezoneTests do
   use ExUnit.Case, async: true
+  use ExUnitProperties
   use Timex
   doctest Timex.Timezone
   doctest Timex.Timezone.Local
@@ -65,6 +66,14 @@ defmodule TimezoneTests do
     # And vice versa
     assert Timex.to_datetime({{2014, 2, 24}, {0, 0, 0}}, gmt_minus_three)
            |> Timezone.diff(gmt_plus_two) === 18000
+  end
+
+  property "convert always returns DateTime or AmbiguousDateTime" do
+    check all input_date <- PropertyHelpers.date_time_generator(:tupple),
+              timezone <- PropertyHelpers.timezone_generator() do
+      result = Timezone.convert(input_date, timezone)
+      assert match?(%DateTime{}, result) || match?(%Timex.AmbiguousDateTime{}, result)
+    end
   end
 
   test "convert" do
