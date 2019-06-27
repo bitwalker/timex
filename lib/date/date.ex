@@ -28,7 +28,15 @@ defimpl Timex.Protocol, for: Date do
 
   @spec to_datetime(Date.t, timezone :: Types.valid_timezone) :: DateTime.t | {:error, term}
   def to_datetime(%Date{:year => y, :month => m, :day => d}, timezone) do
-    Timex.DateTime.Helpers.construct({y,m,d}, timezone)
+    case Timex.DateTime.Helpers.construct({{y,m,d}, {0,0,0,0}}, 0, timezone, :wall) do
+      {:error, _} ->
+        # This happens for date/times that fall on a timezone boundary and don't exist,
+        # advance forward an hour and try again
+        Timex.DateTime.Helpers.construct({{y,m,d}, {1,0,0,0}}, 0, timezone, :wall)
+
+      datetime ->
+        datetime
+    end
   end
 
   @spec to_naive_datetime(Date.t) :: NaiveDateTime.t
