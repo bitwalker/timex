@@ -571,11 +571,11 @@ defmodule Timex.Timezone do
   Shifts the provided DateTime to the beginning of the day in it's timezone
   """
   @spec beginning_of_day(DateTime.t()) :: DateTime.t()
-  def beginning_of_day(%DateTime{time_zone: tz} = dt) do
-    do_beginning_of_day(dt, tz, {{dt.year, dt.month, dt.day}, {0, 0, 0}})
+  def beginning_of_day(%DateTime{time_zone: tz, microsecond: {_, precision}} = dt) do
+    do_beginning_of_day(dt, tz, {{dt.year, dt.month, dt.day}, {0, 0, 0}}, precision)
   end
 
-  defp do_beginning_of_day(%DateTime{} = dt, tz, {date, {h, _, _}} = day_start) do
+  defp do_beginning_of_day(%DateTime{} = dt, tz, {date, {h, _, _}} = day_start, precision) do
     abs_start = :calendar.datetime_to_gregorian_seconds(day_start)
 
     case Tzdata.zone_exists?(tz) do
@@ -583,7 +583,7 @@ defmodule Timex.Timezone do
         case Tzdata.periods_for_time(tz, abs_start, :wall) do
           # This hour does not exist, so move ahead one and try again
           [] ->
-            do_beginning_of_day(dt, tz, {date, {h + 1, 0, 0}})
+            do_beginning_of_day(dt, tz, {date, {h + 1, 0, 0}}, precision)
 
           # Only one period applies
           [%{utc_off: utc_offset, std_off: std_offset, zone_abbr: abbr}] ->
@@ -592,7 +592,7 @@ defmodule Timex.Timezone do
               | :hour => h,
                 :minute => 0,
                 :second => 0,
-                :microsecond => {0, 0},
+                :microsecond => {0, precision},
                 :utc_offset => utc_offset,
                 :std_offset => std_offset,
                 :zone_abbr => abbr
@@ -600,11 +600,11 @@ defmodule Timex.Timezone do
 
           # Ambiguous, choose the earliest one in the same day which is unambiguous
           [_, _] ->
-            do_beginning_of_day(dt, tz, {date, {h + 1, 0, 0}})
+            do_beginning_of_day(dt, tz, {date, {h + 1, 0, 0}}, precision)
         end
 
       false ->
-        %{dt | :hour => 0, :minute => 0, :second => 0, :microsecond => {0, 0}}
+        %{dt | :hour => 0, :minute => 0, :second => 0, :microsecond => {0, precision}}
     end
   end
 
@@ -612,11 +612,11 @@ defmodule Timex.Timezone do
   Shifts the provided DateTime to the end of the day in it's timezone
   """
   @spec end_of_day(DateTime.t()) :: DateTime.t()
-  def end_of_day(%DateTime{time_zone: tz} = dt) do
-    do_end_of_day(dt, tz, {{dt.year, dt.month, dt.day}, {23, 59, 59}})
+  def end_of_day(%DateTime{time_zone: tz, microsecond: {_, precision}} = dt) do
+    do_end_of_day(dt, tz, {{dt.year, dt.month, dt.day}, {23, 59, 59}}, precision)
   end
 
-  defp do_end_of_day(%DateTime{} = dt, tz, {date, {h, _, _}} = day_end) do
+  defp do_end_of_day(%DateTime{} = dt, tz, {date, {h, _, _}} = day_end, precision) do
     abs_end = :calendar.datetime_to_gregorian_seconds(day_end)
 
     case Tzdata.zone_exists?(tz) do
@@ -624,7 +624,7 @@ defmodule Timex.Timezone do
         case Tzdata.periods_for_time(tz, abs_end, :wall) do
           # This hour does not exist, so move back one and try again
           [] ->
-            do_end_of_day(dt, tz, {date, {h - 1, 59, 59}})
+            do_end_of_day(dt, tz, {date, {h - 1, 59, 59}}, precision)
 
           # Only one period applies
           [%{utc_off: utc_offset, std_off: std_offset, zone_abbr: abbr}] ->
@@ -633,7 +633,7 @@ defmodule Timex.Timezone do
               | :hour => h,
                 :minute => 59,
                 :second => 59,
-                :microsecond => {999_999, 6},
+                :microsecond => Timex.DateTime.Helpers.construct_microseconds(999_999, precision),
                 :utc_offset => utc_offset,
                 :std_offset => std_offset,
                 :zone_abbr => abbr
@@ -641,11 +641,12 @@ defmodule Timex.Timezone do
 
           # Ambiguous, choose the earliest one in the same day which is unambiguous
           [_, _] ->
-            do_beginning_of_day(dt, tz, {date, {h - 1, 59, 59}})
+            do_beginning_of_day(dt, tz, {date, {h - 1, 59, 59}}, precision)
         end
 
       false ->
-        %{dt | :hour => 23, :minute => 59, :second => 59, :microsecond => {999_999, 6}}
+        us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+        %{dt | :hour => 23, :minute => 59, :second => 59, :microsecond => us}
     end
   end
 

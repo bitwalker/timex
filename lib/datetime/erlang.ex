@@ -49,7 +49,7 @@ defimpl Timex.Protocol, for: Tuple do
 
   @spec to_naive_datetime(Types.date | Types.datetime | Types.microsecond_datetime) :: NaiveDateTime.t
   def to_naive_datetime({{y,m,d},{h,mm,s,us}}) when is_datetime(y,m,d,h,mm,s) do
-    us = Timex.DateTime.Helpers.construct_microseconds(us)
+    us = Timex.DateTime.Helpers.construct_microseconds(us, -1)
     %NaiveDateTime{year: y, month: m, day: d, hour: h, minute: mm, second: s, microsecond: us}
   end
   def to_naive_datetime(date) do

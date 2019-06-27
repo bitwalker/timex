@@ -21,7 +21,6 @@ defmodule DiffTests do
   end
 
   test "supports singular timeunits" do
-    epoch = Timex.epoch()
     date1 = Timex.to_datetime({1971,1,1})
     date2 = Timex.to_datetime({1973,1,1})
 

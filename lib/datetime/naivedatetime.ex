@@ -33,9 +33,9 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   def to_date(date), do: NaiveDateTime.to_date(date)
 
   @spec to_datetime(NaiveDateTime.t, timezone :: Types.valid_timezone) :: DateTime.t | {:error, term}
-  def to_datetime(%NaiveDateTime{:microsecond => {us,_}} = d, timezone) do
+  def to_datetime(%NaiveDateTime{:microsecond => {us,precision}} = d, timezone) do
     {date,{h,mm,s}} = NaiveDateTime.to_erl(d)
-    Timex.DateTime.Helpers.construct({date,{h,mm,s,us}}, timezone)
+    Timex.DateTime.Helpers.construct({date,{h,mm,s,us}}, precision, timezone)
   end
 
   @spec to_naive_datetime(NaiveDateTime.t) :: NaiveDateTime.t
@@ -51,13 +51,18 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   def is_leap?(%NaiveDateTime{year: year}), do: :calendar.is_leap_year(year)
 
   @spec beginning_of_day(NaiveDateTime.t) :: NaiveDateTime.t
-  def beginning_of_day(%NaiveDateTime{:microsecond => {_, _precision}} = datetime) do
-    %{datetime | :hour => 0, :minute => 0, :second => 0, :microsecond => {0, 0}}
+  def beginning_of_day(%NaiveDateTime{:microsecond => {_, precision}} = datetime) do
+    %{datetime | :hour => 0, :minute => 0, :second => 0, :microsecond => {0, precision}}
   end
 
   @spec end_of_day(NaiveDateTime.t) :: NaiveDateTime.t
-  def end_of_day(%NaiveDateTime{microsecond: {_, _precision}} = datetime) do
-    %{datetime | :hour => 23, :minute => 59, :second => 59, :microsecond => {999_999, 6}}
+  def end_of_day(%NaiveDateTime{microsecond: {_, precision}} = datetime) do
+    if precision > 0 do
+      us = Timex.DateTime.Helpers.to_precision(999_999, precision)
+      %{datetime | :hour => 23, :minute => 59, :second => 59, :microsecond => {us, precision}}
+    else
+      %{datetime | :hour => 23, :minute => 59, :second => 59, :microsecond => {0, 0}}
+    end
   end
 
   @spec beginning_of_week(NaiveDateTime.t, Types.weekstart) :: NaiveDateTime.t
@@ -85,8 +90,14 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   end
 
   @spec end_of_year(NaiveDateTime.t) :: NaiveDateTime.t
-  def end_of_year(%NaiveDateTime{} = date),
-    do: %{date | :month => 12, :day => 31, :hour => 23, :minute => 59, :second => 59, :microsecond => {999_999, 6}}
+  def end_of_year(%NaiveDateTime{microsecond: {_, precision}} = date) do
+    if precision > 0 do
+      us = Timex.DateTime.Helpers.to_precision(999_999, precision)
+      %{date | :month => 12, :day => 31, :hour => 23, :minute => 59, :second => 59, :microsecond => {us, precision}}
+    else
+      %{date | :month => 12, :day => 31, :hour => 23, :minute => 59, :second => 59, :microsecond => {0,0}}
+    end
+  end
 
   @spec beginning_of_quarter(NaiveDateTime.t) :: NaiveDateTime.t
   def beginning_of_quarter(%NaiveDateTime{month: month} = date) do
@@ -101,12 +112,18 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   end
 
   @spec beginning_of_month(NaiveDateTime.t) :: NaiveDateTime.t
-  def beginning_of_month(%NaiveDateTime{} = datetime),
-    do: %{datetime | :day => 1, :hour => 0, :minute => 0, :second => 0, :microsecond => {0,0}}
+  def beginning_of_month(%NaiveDateTime{microsecond: {_, precision}} = datetime),
+    do: %{datetime | :day => 1, :hour => 0, :minute => 0, :second => 0, :microsecond => {0,precision}}
 
   @spec end_of_month(NaiveDateTime.t) :: NaiveDateTime.t
-  def end_of_month(%NaiveDateTime{} = date),
-    do: %{date | :day => days_in_month(date), :hour => 23, :minute => 59, :second => 59, :microsecond => {999_999, 6}}
+  def end_of_month(%NaiveDateTime{microsecond: {_, precision}} = date) do
+    if precision > 0 do
+      us = Timex.DateTime.Helpers.to_precision(999_999, precision)
+      %{date | :day => days_in_month(date), :hour => 23, :minute => 59, :second => 59, :microsecond => {us, precision}}
+    else
+      %{date | :day => days_in_month(date), :hour => 23, :minute => 59, :second => 59, :microsecond => {0,0}}
+    end
+  end
 
   @spec quarter(NaiveDateTime.t) :: 1..4
   def quarter(%NaiveDateTime{month: month}), do: Timex.quarter(month)
@@ -283,11 +300,12 @@ defimpl Timex.Protocol, for: NaiveDateTime do
     else
       seconds_from_zero = div(microseconds_from_zero, 1_000_000)
       rem_microseconds = rem(microseconds_from_zero, 1_000_000)
+      us = Timex.DateTime.Helpers.to_precision(rem_microseconds, current_precision)
 
       seconds_from_zero
       |> :calendar.gregorian_seconds_to_datetime
       |> Timex.to_naive_datetime
-      |> Map.put(:microsecond, {rem_microseconds, current_precision})
+      |> Map.put(:microsecond, {us, current_precision})
     end
   end
   defp shift_by(_datetime, _value, units),

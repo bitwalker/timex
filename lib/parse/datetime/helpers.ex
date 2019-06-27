@@ -58,7 +58,7 @@ defmodule Timex.Parse.DateTime.Helpers do
     n = ms |> String.trim_leading("0")
     n = if n == "", do: 0, else: String.to_integer(n)
     n = n * 1_000
-    [sec_fractional: Timex.DateTime.Helpers.construct_microseconds(n)]
+    [sec_fractional: Timex.DateTime.Helpers.construct_microseconds(n, -1)]
   end
   def parse_microseconds(us) do
     n_width = byte_size(us)

@@ -539,7 +539,8 @@ defmodule TimexTests do
   test "end_of_month" do
     assert Timex.end_of_month({2016,2,15}) == {2016,2,29}
     refute Timex.end_of_month(~D[2016-02-15]) == ~D[2016-02-28]
-    assert Timex.end_of_month(~N[2014-02-15T14:14:14]) == ~N[2014-02-28T23:59:59.999999]
+    assert Timex.end_of_month(~N[2014-02-15T14:14:14]) == ~N[2014-02-28T23:59:59]
+    assert Timex.end_of_month(~N[2014-02-15T14:14:14.012]) == ~N[2014-02-28T23:59:59.999]
     assert Timex.end_of_month(2015, 11) == ~D[2015-11-30]
 
     assert {:error, _} = Timex.end_of_month(2015, 13)
@@ -563,7 +564,7 @@ defmodule TimexTests do
 
   test "end_of_quarter" do
     assert Timex.end_of_quarter({2016,2,15}) == {2016,3,31}
-    expected = %{Timex.to_datetime({{2014,3,31},{23,59,59}}) | :microsecond => {999_999,6}}
+    expected = Timex.to_datetime({{2014,3,31},{23,59,59}})
     assert Timex.end_of_quarter(Timex.to_datetime({{2014,2,15},{14,14,14}})) == expected
     assert Timex.end_of_quarter(2015, 1) == Timex.to_date({2015, 3, 31})
 
@@ -665,7 +666,6 @@ defmodule TimexTests do
 
     # Monday..Sunday
     sunday = Timex.to_datetime({{2015, 12, 6}, {23, 59, 59}})
-    sunday = %{sunday | :microsecond => {999_999,6}}
     assert Timex.days_to_end_of_week(date) == 6
     assert Timex.days_to_end_of_week(date, 1) == 6
     assert Timex.days_to_end_of_week(date, :mon) == 6
@@ -677,7 +677,6 @@ defmodule TimexTests do
 
     # Monday..Monday
     monday = Timex.to_datetime({{2015, 11, 30}, {23, 59, 59}})
-    monday = %{monday | :microsecond => {999_999,6}}
     assert Timex.days_to_end_of_week(date, 2) == 0
     assert Timex.days_to_end_of_week(date, :tue) == 0
     assert Timex.days_to_end_of_week(date, "Tuesday") == 0
@@ -687,7 +686,6 @@ defmodule TimexTests do
 
     # Monday..Tuesday
     tuesday = Timex.to_datetime({{2015, 12, 1}, {23, 59, 59}})
-    tuesday = %{tuesday | :microsecond => {999_999,6}}
     assert Timex.days_to_end_of_week(date, 3) == 1
     assert Timex.days_to_end_of_week(date, :wed) == 1
     assert Timex.days_to_end_of_week(date, "Wednesday") == 1
@@ -697,7 +695,6 @@ defmodule TimexTests do
 
     # Monday..Wednesday
     wednesday = Timex.to_datetime({{2015, 12, 2}, {23, 59, 59}})
-    wednesday = %{wednesday | :microsecond => {999_999,6}}
     assert Timex.days_to_end_of_week(date, 4) == 2
     assert Timex.days_to_end_of_week(date, :thu) == 2
     assert Timex.days_to_end_of_week(date, "Thursday") == 2
@@ -707,7 +704,6 @@ defmodule TimexTests do
 
     # Monday..Thursday
     thursday = Timex.to_datetime({{2015, 12, 3}, {23, 59, 59}})
-    thursday = %{thursday | :microsecond => {999_999,6}}
     assert Timex.days_to_end_of_week(date, 5) == 3
     assert Timex.days_to_end_of_week(date, :fri) == 3
     assert Timex.days_to_end_of_week(date, "Friday") == 3
@@ -717,7 +713,6 @@ defmodule TimexTests do
 
     # Monday..Friday
     friday = Timex.to_datetime({{2015, 12, 4}, {23, 59, 59}})
-    friday = %{friday | :microsecond => {999_999,6}}
     assert Timex.days_to_end_of_week(date, 6) == 4
     assert Timex.days_to_end_of_week(date, :sat) == 4
     assert Timex.days_to_end_of_week(date, "Saturday") == 4
@@ -727,7 +722,6 @@ defmodule TimexTests do
 
     # Monday..Saturday
     saturday = Timex.to_datetime({{2015, 12, 5}, {23, 59, 59}})
-    saturday = %{saturday | :microsecond => {999_999,6}}
     assert Timex.days_to_end_of_week(date, 7) == 5
     assert Timex.days_to_end_of_week(date, :sun) == 5
     assert Timex.days_to_end_of_week(date, "Sunday") == 5
@@ -761,7 +755,7 @@ defmodule TimexTests do
 
   test "end_of_day" do
     date = Timex.to_datetime({{2015,1,1},{13,14,15}})
-    expected = %{Timex.to_datetime({{2015,1,1},{23,59,59}}) | :microsecond => {999_999,6}}
+    expected = Timex.to_datetime({{2015,1,1},{23,59,59}})
     assert Timex.end_of_day(date) == expected
 
     assert {:error, :invalid_date} == Timex.end_of_day({"Made up date"})

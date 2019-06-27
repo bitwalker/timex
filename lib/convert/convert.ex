@@ -27,11 +27,19 @@ defmodule Timex.Convert do
                 second = Map.get(datetime_map, :second, 0)
                 us     = Map.get(datetime_map, :microsecond, {0, 0})
                 tz     = Map.get(datetime_map, :time_zone, nil)
+                {us, precision} =
+                  case us do
+                    {_us, _precision} = val -> 
+                      val
+
+                    us when is_integer(us) ->
+                      Timex.DateTime.Helpers.construct_microseconds(us, -1)
+                  end
                 case tz do
                   s when is_binary(s) ->
-                    Timex.DateTime.Helpers.construct({{year,month,day},{hour,minute,second,us}}, tz)
+                    Timex.DateTime.Helpers.construct({{year,month,day},{hour,minute,second,us}}, precision, tz)
                   nil ->
-                    {:ok, nd} = NaiveDateTime.new(year, month, day, hour, minute, second, us)
+                    {:ok, nd} = NaiveDateTime.new(year, month, day, hour, minute, second, {us, precision})
                     nd
                 end
             end
@@ -76,7 +84,7 @@ defmodule Timex.Convert do
       {k, v}, acc when k in [:milliseconds, "milliseconds", :ms, "ms", :millisecond, "millisecond"] ->
         case v do
           n when is_integer(n) ->
-            us = Timex.DateTime.Helpers.construct_microseconds(n*1_000)
+            us = Timex.DateTime.Helpers.construct_microseconds(n*1_000, -1)
             Map.put(acc, :microsecond, us)
           :error ->
             {:error, {:expected_integer, for: k, got: v}}

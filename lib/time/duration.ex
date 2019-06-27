@@ -66,7 +66,7 @@ defmodule Timex.Duration do
   @spec to_time(__MODULE__.t) :: {:ok, Time.t} | {:error, atom}
   def to_time(%__MODULE__{} = d) do
     {h,m,s,us} = to_clock(d)
-    Time.from_erl({h,m,s}, Timex.DateTime.Helpers.construct_microseconds(us))
+    Time.from_erl({h,m,s}, Timex.DateTime.Helpers.construct_microseconds(us, -1))
   end
 
   @doc """
@@ -86,7 +86,7 @@ defmodule Timex.Duration do
   @spec to_time!(__MODULE__.t) :: Time.t | no_return
   def to_time!(%__MODULE__{} = d) do
     {h,m,s,us} = to_clock(d)
-    Time.from_erl!({h,m,s}, Timex.DateTime.Helpers.construct_microseconds(us))
+    Time.from_erl!({h,m,s}, Timex.DateTime.Helpers.construct_microseconds(us, -1))
   end
 
   @doc """

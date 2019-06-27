@@ -323,12 +323,12 @@ defmodule Timex.Parse.DateTime.Parser do
         case value do
           "" -> date
           n when is_number(n) ->
-            %{date | :microsecond => Timex.DateTime.Helpers.construct_microseconds(n)}
+            %{date | :microsecond => Timex.DateTime.Helpers.construct_microseconds(n, -1)}
           {_n, _precision} = us ->
             %{date | :microsecond => us}
         end
-      :us -> %{date | :microsecond => Timex.DateTime.Helpers.construct_microseconds(value)}
-      :ms -> %{date | :microsecond => Timex.DateTime.Helpers.construct_microseconds(value*1_000)}
+      :us -> %{date | :microsecond => Timex.DateTime.Helpers.construct_microseconds(value, -1)}
+      :ms -> %{date | :microsecond => Timex.DateTime.Helpers.construct_microseconds(value*1_000, -1)}
       :sec_epoch ->
         DateTime.from_unix!(value)
       am_pm when am_pm in [:am, :AM] ->

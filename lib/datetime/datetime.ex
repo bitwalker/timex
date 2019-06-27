@@ -102,19 +102,23 @@ defimpl Timex.Protocol, for: DateTime do
   end
 
   @spec end_of_year(DateTime.t) :: DateTime.t
-  def end_of_year(%DateTime{year: year, time_zone: tz}),
-    do: %{Timex.to_datetime({{year, 12, 31}, {23, 59, 59}}, tz) | :microsecond => {999_999, 6}}
+  def end_of_year(%DateTime{year: year, time_zone: tz, microsecond: {_, precision}}) do
+    us = Timex.DateTime.Helpers.to_precision(999_999, precision)
+    %{Timex.to_datetime({{year, 12, 31}, {23, 59, 59}}, tz) | :microsecond => {us, precision}}
+  end
 
   @spec beginning_of_quarter(DateTime.t) :: DateTime.t
-  def beginning_of_quarter(%DateTime{year: year, month: month, time_zone: tz}) do
+  def beginning_of_quarter(%DateTime{year: year, month: month, time_zone: tz} = date) do
     month = 1 + (3 * (Timex.quarter(month) - 1))
-    Timex.DateTime.Helpers.construct({year, month, 1}, tz)
+    {_, precision} = date.microsecond
+    Timex.DateTime.Helpers.construct({{year, month, 1}, {0,0,0,0}}, precision, tz)
   end
 
   @spec end_of_quarter(DateTime.t) :: DateTime.t | AmbiguousDateTime.t
-  def end_of_quarter(%DateTime{year: year, month: month, time_zone: tz}) do
+  def end_of_quarter(%DateTime{year: year, month: month, time_zone: tz} = date) do
     month = 3 * Timex.quarter(month)
-    case Timex.DateTime.Helpers.construct({year,month,1}, tz) do
+    {_, precision} = date.microsecond
+    case Timex.DateTime.Helpers.construct({{year,month,1}, {23,59,59,999_999}}, precision, tz) do
       {:error, _} = err -> err
       %DateTime{} = d -> end_of_month(d)
       %AmbiguousDateTime{:before => b, :after => a} ->
@@ -124,12 +128,14 @@ defimpl Timex.Protocol, for: DateTime do
   end
 
   @spec beginning_of_month(DateTime.t) :: DateTime.t
-  def beginning_of_month(%DateTime{year: year, month: month, time_zone: tz}),
-    do: Timex.DateTime.Helpers.construct({{year, month, 1}, {0, 0, 0, 0}}, tz)
+  def beginning_of_month(%DateTime{year: year, month: month, time_zone: tz, microsecond: {_, precision}}) do
+    Timex.DateTime.Helpers.construct({{year, month, 1}, {0, 0, 0, 0}}, precision, tz)
+  end
 
   @spec end_of_month(DateTime.t) :: DateTime.t
-  def end_of_month(%DateTime{year: year, month: month, time_zone: tz} = date),
-    do: Timex.DateTime.Helpers.construct({{year, month, days_in_month(date)},{23,59,59,999_999}}, tz)
+  def end_of_month(%DateTime{year: year, month: month, time_zone: tz, microsecond: {_, precision}} = date) do
+    Timex.DateTime.Helpers.construct({{year, month, days_in_month(date)},{23,59,59,999_999}}, precision, tz)
+  end
 
   @spec quarter(DateTime.t) :: 1..4
   def quarter(%DateTime{month: month}), do: Timex.quarter(month)
@@ -138,7 +144,7 @@ defimpl Timex.Protocol, for: DateTime do
 
   def week_of_month(%DateTime{:year => y, :month => m, :day => d}), do: Timex.week_of_month(y,m,d)
 
-  def weekday(%DateTime{:year => y, :month => m, :day => d}),      do: :calendar.day_of_the_week({y, m, d})
+  def weekday(%DateTime{:year => y, :month => m, :day => d}), do: :calendar.day_of_the_week({y, m, d})
 
   def day(%DateTime{} = date) do
     ref = beginning_of_year(date)
@@ -272,12 +278,7 @@ defimpl Timex.Protocol, for: DateTime do
 
   defp raw_convert(secs, {us, precision}) do
     {date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs)
-    if precision == 0 do
-      Timex.DateTime.Helpers.construct({date, {h,mm,s,us}}, "Etc/UTC")
-    else
-      %DateTime{microsecond: {us, _}} = dt = Timex.DateTime.Helpers.construct({date, {h,mm,s,us}}, "Etc/UTC")
-      %DateTime{dt | microsecond: {us, precision}}
-    end
+    Timex.DateTime.Helpers.construct({date, {h,mm,s,us}}, precision, "Etc/UTC")
   end
 
   defp logical_shift(datetime, []), do: datetime

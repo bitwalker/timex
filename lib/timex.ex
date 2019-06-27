@@ -1324,7 +1324,7 @@ defmodule Timex do
 
       iex> date = ~N[2015-06-15T12:30:00Z]
       iex> Timex.end_of_month(date)
-      ~N[2015-06-30T23:59:59.999999Z]
+      ~N[2015-06-30T23:59:59Z]
 
   """
   @spec end_of_month(Types.valid_datetime()) :: Types.valid_datetime() | {:error, term}
@@ -1382,7 +1382,7 @@ defmodule Timex do
 
       iex> date = ~N[2015-06-15T12:30:00]
       ...> Timex.end_of_quarter(date)
-      ~N[2015-06-30T23:59:59.999999]
+      ~N[2015-06-30T23:59:59]
 
       iex> Timex.end_of_quarter(2015, 4)
       ~D[2015-06-30]
@@ -1427,7 +1427,7 @@ defmodule Timex do
 
       iex> date = ~N[2015-06-15T00:00:00]
       iex> Timex.end_of_year(date)
-      ~N[2015-12-31T23:59:59.999999]
+      ~N[2015-12-31T23:59:59]
 
       iex> Timex.end_of_year(2015)
       ~D[2015-12-31]
@@ -1542,7 +1542,7 @@ defmodule Timex do
 
       iex> date = ~N[2015-11-30T13:30:30] # Monday 30th November
       ...> Timex.end_of_week(date)
-      ~N[2015-12-06T23:59:59.999999]
+      ~N[2015-12-06T23:59:59]
 
       iex> date = ~D[2015-11-30] # Monday 30th November
       ...> Timex.end_of_week(date, :sun)
@@ -1577,7 +1577,7 @@ defmodule Timex do
 
       iex> date = ~N[2015-01-01T13:14:15]
       ...> Timex.end_of_day(date)
-      ~N[2015-01-01T23:59:59.999999]
+      ~N[2015-01-01T23:59:59]
 
   """
   @spec end_of_day(Types.valid_datetime()) :: Types.valid_datetime() | {:error, term}
