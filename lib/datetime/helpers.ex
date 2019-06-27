@@ -92,8 +92,8 @@ defmodule Timex.DateTime.Helpers do
     end
   end
 
-  defp precision(0), do: 0
-  defp precision(n) when is_integer(n) do
+  def precision(0), do: 0
+  def precision(n) when is_integer(n) do
     ns = Integer.to_string(n)
     n_width = byte_size(ns)
     trimmed = byte_size(String.trim_trailing(ns, "0"))

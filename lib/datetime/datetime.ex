@@ -245,14 +245,22 @@ defimpl Timex.Protocol, for: DateTime do
     shifted_us = us + shift
     shifted_secs = div(shifted_us, 1_000*1_000) + (applied_offset_ms * -1)
     rem_us = rem(shifted_us, 1_000*1_000)
+    new_precision = 
+      case Timex.DateTime.Helpers.precision(rem_us) do
+        np when np < precision ->
+          precision
+
+        np ->
+          np
+      end
 
     # Convert back to original timezone
-    case raw_convert(shifted_secs, {rem_us, precision}, tz, :wall) do
+    case raw_convert(shifted_secs, {rem_us, new_precision}, tz, :wall) do
       {:error, {:could_not_resolve_timezone, _, _, _}} ->
         # This occurs when the shifted date/time doesn't exist because of a leap forward
         # This doesn't mean the shift is invalid, simply that we need to ask for the right wall time
         # Which in these cases means asking for the time + 1h
-        raw_convert(shifted_secs + 3600, {rem_us, precision}, tz, :wall)
+        raw_convert(shifted_secs + 3600, {rem_us, new_precision}, tz, :wall)
       result ->
         result
     end

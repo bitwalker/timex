@@ -5,16 +5,16 @@ defmodule SetTests do
 
   property "setting all the properties from the target date should become a target date for a DateTime" do
     check all input_date <- PropertyHelpers.date_time_generator(:struct),
-              {{year, month, day}, {hour, minute, second}} = target_date <- PropertyHelpers.date_time_generator(:tupple) do
+              {{year, month, day}, {hour, minute, second}} = target_date <- PropertyHelpers.date_time_generator(:tuple) do
 
       date = Timex.set(input_date, [year: year, month: month, day: day, hour: hour, minute: minute, second: second])
       assert Timex.to_erl(date) == target_date
     end
   end
 
-  property "setting all the properties from the target date should become a target date for a tupple" do
-    check all input_date <- PropertyHelpers.date_time_generator(:tupple),
-              {{year, month, day}, {hour, minute, second}} = target_date <- PropertyHelpers.date_time_generator(:tupple) do
+  property "setting all the properties from the target date should become a target date for a tuple" do
+    check all input_date <- PropertyHelpers.date_time_generator(:tuple),
+              {{year, month, day}, {hour, minute, second}} = target_date <- PropertyHelpers.date_time_generator(:tuple) do
 
       date = Timex.set(input_date, [year: year, month: month, day: day, hour: hour, minute: minute, second: second])
       assert Timex.to_erl(date) == target_date

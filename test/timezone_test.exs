@@ -69,7 +69,7 @@ defmodule TimezoneTests do
   end
 
   property "convert always returns DateTime or AmbiguousDateTime" do
-    check all input_date <- PropertyHelpers.date_time_generator(:tupple),
+    check all input_date <- PropertyHelpers.date_time_generator(:tuple),
               timezone <- PropertyHelpers.timezone_generator() do
       result = Timezone.convert(input_date, timezone)
       assert match?(%DateTime{}, result) || match?(%Timex.AmbiguousDateTime{}, result)
