@@ -379,16 +379,24 @@ defmodule Timex.Timezone do
           [period] ->
             tzdata_to_timezone(period, name)
 
-          # Ambiguous
-          # TODO:
-          # The pattern here was added because there are apparently some
-          # cases in which more than two periods are known for a given point in time,
-          # case in point ~N[2011-08-11T13:30:31] in Asia/Gaza. We do not have support
-          # at this time for more than two alternates, but this will need to be dealt with
-          [before_period, after_period | _others] ->
-            before_tz = tzdata_to_timezone(before_period, name)
-            after_tz = tzdata_to_timezone(after_period, name)
-            AmbiguousTimezoneInfo.new(before_tz, after_tz)
+          # This case happens when using wall clock time, we resolve it by using UTC clock time instead
+          [before_period, after_period | _] ->
+            case Tzdata.periods_for_time(name, seconds_from_zeroyear, :utc) do
+              [] ->
+                # We can't resolve it this way, I don't expect this to be possible, but we handle it
+                before_tz = tzdata_to_timezone(before_period, name)
+                after_tz = tzdata_to_timezone(after_period, name)
+                AmbiguousTimezoneInfo.new(before_tz, after_tz)
+
+              [period] ->
+                tzdata_to_timezone(period, name)
+
+              _ ->
+                # Still ambiguous, use wall clock time for info passed back to caller
+                before_tz = tzdata_to_timezone(before_period, name)
+                after_tz = tzdata_to_timezone(after_period, name)
+                AmbiguousTimezoneInfo.new(before_tz, after_tz)
+            end
         end
     end
   end

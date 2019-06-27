@@ -1,6 +1,7 @@
 defmodule ComparableTests do
   use ExUnit.Case, async: true
   alias Timex.Comparable
+  alias Timex.AmbiguousDateTime
 
   test "compare tuple" do
     assert 0 = Comparable.compare({2016,1,1}, {2016,1,1})
@@ -31,8 +32,9 @@ defmodule ComparableTests do
 
   test "diff ambiguous_datetime" do
     lmt_jwst = Timex.to_datetime({{1895,12,31},{23,55,0}}, "Asia/Taipei")
-    assert 0 = Comparable.compare(lmt_jwst, lmt_jwst)
-    assert {:error, {:ambiguous_comparison, _}} = Comparable.compare(lmt_jwst, Timex.to_naive_datetime({2015, 1, 1}))
+    amb = %AmbiguousDateTime{before: lmt_jwst, after: lmt_jwst}
+    assert 0 = Comparable.compare(amb, amb)
+    assert {:error, {:ambiguous_comparison, _}} = Comparable.compare(amb, Timex.to_naive_datetime({2015, 1, 1}))
   end
 
   test "compare naive_datetime" do
