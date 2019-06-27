@@ -18,7 +18,7 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
   | 36 hours to 25 days	       | 2 days ago ... 25 days ago
   | 25 to 45 days	             | a month ago
   | 45 to 345 days	           | 2 months ago ... 11 months ago
-  | 345 to 545 days (1.5 years)| a year ago
+  | 345 to 545 days (1.5 years)  | a year ago
   | 546 days+	                 | 2 years ago ... 20 years ago
   """
   use Timex.Format.DateTime.Formatter
