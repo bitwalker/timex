@@ -166,9 +166,8 @@ defmodule Timex do
 
   Converts the given Unix time to DateTime.
 
-  The integer can be given in different units(:seconds, :milliseconds, :microseconds, :nanoseconds
-  and also units described in `System.convert_time_unit/3`) and it will be converted to
-  microseconds internally. Defaults to `:second`.
+  The integer can be given in different units according to `System.convert_time_unit/3`
+  and it will be converted to microseconds internally. Defaults to `:second`.
 
   Unix times are always in UTC and therefore the DateTime will be returned in UTC.
   """
@@ -948,28 +947,38 @@ defmodule Timex do
 
   You can optionally specify a comparison granularity, any of the following:
 
+  - :year
   - :years
+  - :month
   - :months
+  - :week
   - :weeks
-  - :calendar_weeks (weeks of the calendar as opposed to actual weeks in terms of days)
+  - :calendar_week (weeks of the calendar as opposed to actual weeks in terms of days)
+  - :calendar_weeks
+  - :day
   - :days
+  - :hour
   - :hours
+  - :minute
   - :minutes
+  - :second
   - :seconds
+  - :millisecond
   - :milliseconds
-  - :microseconds (default)
+  - :microsecond (default)
+  - :microseconds
   - :duration
 
   and the dates will be compared with the cooresponding accuracy.
-  The default granularity is :microseconds.
+  The default granularity is `:microsecond`.
 
   ## Examples
 
       iex> date1 = ~D[2014-03-04]
       iex> date2 = ~D[2015-03-04]
-      iex> Timex.compare(date1, date2, :years)
+      iex> Timex.compare(date1, date2, :year)
       -1
-      iex> Timex.compare(date2, date1, :years)
+      iex> Timex.compare(date2, date1, :year)
       1
       iex> Timex.compare(date1, date1)
       0
@@ -998,16 +1007,26 @@ defmodule Timex do
 
   You must specify one of the following units:
 
+  - :year
   - :years
+  - :month
   - :months
-  - :calendar_weeks (weeks of the calendar as opposed to actual weeks in terms of days)
+  - :week
   - :weeks
+  - :calendar_week (weeks of the calendar as opposed to actual weeks in terms of days)
+  - :calendar_weeks
+  - :day
   - :days
+  - :hour
   - :hours
+  - :minute
   - :minutes
+  - :second
   - :seconds
+  - :millisecond
   - :milliseconds
-  - :microseconds (default)
+  - :microsecond (default)
+  - :microseconds
   - :duration
 
   and the result will be an integer value of those units or a Duration.
@@ -1016,7 +1035,7 @@ defmodule Timex do
   @spec diff(Comparable.comparable(), Comparable.comparable(), Comparable.granularity()) ::
           Duration.t() | integer | {:error, term}
   def diff(%Time{}, %Time{}, granularity)
-      when granularity in [:days, :weeks, :calendar_weeks, :months, :years] do
+      when granularity in [:day, :days, :week, :weeks, :calendar_week, :calendar_weeks, :month, :months, :year, :years] do
     0
   end
 
@@ -1026,11 +1045,11 @@ defmodule Timex do
 
     case granularity do
       :duration -> Duration.from_seconds(div(a - b, 1_000 * 1_000))
-      :microseconds -> a - b
-      :milliseconds -> div(a - b, 1_000)
-      :seconds -> div(a - b, 1_000 * 1_000)
-      :minutes -> div(a - b, 1_000 * 1_000 * 60)
-      :hours -> div(a - b, 1_000 * 1_000 * 60 * 60)
+      us when us in [:microseconds, :microsecond] -> a - b
+      ms when ms in [:milliseconds, :millisecond] -> div(a - b, 1_000)
+      s when s in [:seconds, :second] -> div(a - b, 1_000 * 1_000)
+      min when min in [:minutes, :minute] -> div(a - b, 1_000 * 1_000 * 60)
+      h when h in [:hours, :hour] -> div(a - b, 1_000 * 1_000 * 60 * 60)
       _ -> {:error, {:invalid_granularity, granularity}}
     end
   end

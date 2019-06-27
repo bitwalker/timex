@@ -42,4 +42,18 @@ defmodule ComparableTests do
     assert 0 == Comparable.compare(naive_dt, :epoch)
     assert +1 == Comparable.compare(naive_dt, :zero)
   end
+
+  test "supports singular timeunits" do
+    epoch = Timex.epoch()
+    date1 = Timex.to_datetime({1971,1,1})
+    date2 = Timex.to_datetime({1973,1,1})
+
+    assert Timex.compare(date1, date2, :seconds) == Timex.compare(date1, date2, :second)
+    assert Timex.compare(date1, date2, :minutes) == Timex.compare(date1, date2, :minute)
+    assert Timex.compare(date1, date2, :hours)   == Timex.compare(date1, date2, :hour)
+    assert Timex.compare(date1, date2, :days)    == Timex.compare(date1, date2, :day)
+    assert Timex.compare(date1, date2, :weeks)   == Timex.compare(date1, date2, :week)
+    assert Timex.compare(date1, date2, :months)  == Timex.compare(date1, date2, :month)
+    assert Timex.compare(date1, date2, :years)   == Timex.compare(date1, date2, :year)
+  end
 end
