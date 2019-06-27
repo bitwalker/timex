@@ -261,10 +261,6 @@ defimpl Timex.Protocol, for: DateTime do
       err
   end
 
-  defp raw_convert(secs, {us, precision}) do
-    {date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs)
-    Timex.DateTime.Helpers.construct({date, {h,mm,s,us}}, precision, "Etc/UTC", :wall)
-  end
   defp raw_convert(secs, {us, precision}, tz, utc_or_wall) do
     {date,{h,mm,s}} = :calendar.gregorian_seconds_to_datetime(secs)
     Timex.DateTime.Helpers.construct({date, {h,mm,s,us}}, precision, tz, utc_or_wall)

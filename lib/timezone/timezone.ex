@@ -407,6 +407,10 @@ defmodule Timex.Timezone do
     %AmbiguousDateTime{:before => before_date, :after => after_date}
   end
 
+  def convert(%DateTime{time_zone: name} = date, %TimezoneInfo{full_name: name}) do
+    # Do not convert date when already in destination time zone
+    date
+  end
   def convert(%DateTime{} = date, %TimezoneInfo{full_name: name} = tz) do
     # Calculate the difference between `date`'s timezone, and the target timezone
     delta = diff(date, tz)
@@ -414,9 +418,17 @@ defmodule Timex.Timezone do
 
     # if the zone does not exist, use the provided zoneinfo
     timezone =
-      case Tzdata.zone_exists?(name) do
-        true -> resolve(name, secs, :wall)
-        false -> tz
+      if Tzdata.zone_exists?(name) do
+        case resolve(name, secs, :wall) do
+          {:error, _} ->
+            # This wall clock time doesn't exist in that timezone, advance an hour and try again
+            resolve(name, secs + 3600, :wall)
+
+          tz ->
+            tz
+        end
+      else
+        tz
       end
 
     # Offset the provided date's time by the difference
