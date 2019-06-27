@@ -1045,7 +1045,7 @@ defmodule Timex do
 
     case granularity do
       :duration -> Duration.from_seconds(div(a - b, 1_000 * 1_000))
-      µs when µs in [:microseconds, :microsecond] -> a - b
+      us when us in [:microseconds, :microsecond] -> a - b
       ms when ms in [:milliseconds, :millisecond] -> div(a - b, 1_000)
       s when s in [:seconds, :second] -> div(a - b, 1_000 * 1_000)
       min when min in [:minutes, :minute] -> div(a - b, 1_000 * 1_000 * 60)
