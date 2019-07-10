@@ -211,12 +211,12 @@ defmodule Timex do
   ## Examples
 
       iex> date = ~D[2016-02-29]
-      ...> Timex.format!(date, "{YYYY}-{0M}-{D}")
-      "2016-02-29"
+      ...> Timex.format(date, "{YYYY}-{0M}-{D}")
+      {:ok, "2016-02-29"}
 
       iex> datetime = Timex.to_datetime({{2016,2,29},{22,25,0}}, "Etc/UTC")
-      ...> Timex.format!(datetime, "{ISO:Extended}")
-      "2016-02-29T22:25:00+00:00"
+      ...> Timex.format(datetime, "{ISO:Extended}")
+      {:ok, "2016-02-29T22:25:00+00:00"}
   """
   @spec format(Types.valid_datetime(), format :: String.t()) :: {:ok, String.t()} | {:error, term}
   defdelegate format(datetime, format_string), to: Timex.Format.DateTime.Formatter
@@ -228,8 +228,8 @@ defmodule Timex do
 
       iex> use Timex
       ...> datetime = Timex.to_datetime({{2016,2,29},{22,25,0}}, "America/Chicago")
-      iex> Timex.format!(datetime, "%FT%T%:z", :strftime)
-      "2016-02-29T22:25:00-06:00"
+      iex> Timex.format(datetime, "%FT%T%:z", :strftime)
+      {:ok, "2016-02-29T22:25:00-06:00"}
   """
   @spec format(Types.valid_datetime(), format :: String.t(), formatter :: atom) ::
           {:ok, String.t()} | {:error, term}
@@ -261,17 +261,26 @@ defmodule Timex do
     to: Timex.Format.DateTime.Formatter
 
   @doc """
-  Same as format/2, except format! raises on error.
+  Same as format/2, except it returns only the value (not a tuple) and raises on error.
 
-  See format/2 docs for usage examples.
+  ## Examples
+
+      iex> date = ~D[2016-02-29]
+      ...> Timex.format!(date, "{YYYY}-{0M}-{D}")
+      "2016-02-29"
   """
   @spec format!(Types.valid_datetime(), format :: String.t()) :: String.t() | no_return
   defdelegate format!(datetime, format_string), to: Timex.Format.DateTime.Formatter
 
   @doc """
-  Same as format/3, except format! raises on error.
+  Same as format/3, except it returns only the value (not a tuple) and raises on error.
 
-  See format/3 docs for usage examples
+  ## Examples
+
+      iex> use Timex
+      ...> datetime = Timex.to_datetime({{2016,2,29},{22,25,0}}, "America/Chicago")
+      iex> Timex.format!(datetime, "%FT%T%:z", :strftime)
+      "2016-02-29T22:25:00-06:00"
   """
   @spec format!(Types.valid_datetime(), format :: String.t(), formatter :: atom) ::
           String.t() | no_return
