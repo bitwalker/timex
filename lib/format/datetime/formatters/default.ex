@@ -7,10 +7,10 @@ defmodule Timex.Format.DateTime.Formatters.Default do
 
   ## Directive format
 
-  A directive is an optional _padding specifier_ followed by a _mnemonic_, both
-  enclosed in braces (`{` and `}`):
+  A directive is an optional _padding specifier_ followed by a _mnemonic_ enclosed
+  in braces (`{` and `}`):
 
-      {<padding><mnemonic>}
+      <padding>{<mnemonic>}
 
   Supported padding specifiers:
 
