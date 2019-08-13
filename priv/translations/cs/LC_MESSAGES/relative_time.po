@@ -1,0 +1,258 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: cs\n"
+"Plural-Forms: nplurals=3; "
+"plural=(n==1 ? 0 : n>=2 && "
+"n<=4 ? 1 : 2);\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; "
+"charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.3\n"
+
+#: lib/l10n/translator.ex:237
+msgid "last month"
+msgstr "minulý měsíc"
+
+#: lib/l10n/translator.ex:243
+msgid "last week"
+msgstr "minulý týden"
+
+#: lib/l10n/translator.ex:231
+msgid "last year"
+msgstr "minulý rok"
+
+#: lib/l10n/translator.ex:239
+msgid "next month"
+msgstr "budoucí měsíc"
+
+#: lib/l10n/translator.ex:245
+msgid "next week"
+msgstr "budoucí týden"
+
+#: lib/l10n/translator.ex:233
+msgid "next year"
+msgstr "budoucí rok"
+
+#: lib/l10n/translator.ex:238
+msgid "this month"
+msgstr "tento měsíc"
+
+#: lib/l10n/translator.ex:244
+msgid "this week"
+msgstr "tento týden"
+
+#: lib/l10n/translator.ex:232
+msgid "this year"
+msgstr "tento rok"
+
+#: lib/l10n/translator.ex:250
+msgid "today"
+msgstr "dnes"
+
+#: lib/l10n/translator.ex:251
+msgid "tomorrow"
+msgstr "zítra"
+
+#: lib/l10n/translator.ex:249
+msgid "yesterday"
+msgstr "včera"
+
+#: lib/l10n/translator.ex:253
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "před %{count} dnem"
+msgstr[1] "před %{count} dny"
+msgstr[2] "před %{count} dny"
+
+#: lib/l10n/translator.ex:278
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "před %{count} hodinou"
+msgstr[1] "před %{count} hodinami"
+msgstr[2] "před %{count} hodinami"
+
+#: lib/l10n/translator.ex:281
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "před %{count} minutou"
+msgstr[1] "před %{count} minutami"
+msgstr[2] "před %{count} minutami"
+
+#: lib/l10n/translator.ex:241
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "před %{count} měsícem"
+msgstr[1] "před %{count} měsíci"
+msgstr[2] "před %{count} měsíci"
+
+#: lib/l10n/translator.ex:284
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "před %{count} sekundou"
+msgstr[1] "před %{count} sekundami"
+msgstr[2] "před %{count} sekundami"
+
+#: lib/l10n/translator.ex:247
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "před %{count} týdnem"
+msgstr[1] "před %{count} týdny"
+msgstr[2] "před %{count} týdny"
+
+#: lib/l10n/translator.ex:235
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "před %{count} rokem"
+msgstr[1] "před %{count} léty"
+msgstr[2] "před %{count} léty"
+
+#: lib/l10n/translator.ex:252
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "za %{count} den"
+msgstr[1] "za %{count} dny"
+msgstr[2] "za %{count} dní"
+
+#: lib/l10n/translator.ex:277
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "za %{count} hodinu"
+msgstr[1] "za %{count} hodiny"
+msgstr[2] "za %{count} hodin"
+
+#: lib/l10n/translator.ex:280
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "za %{count} minutu"
+msgstr[1] "za %{count} minuty"
+msgstr[2] "za %{count} minut"
+
+#: lib/l10n/translator.ex:240
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "za %{count} měsíc"
+msgstr[1] "za %{count} měsíce"
+msgstr[2] "za %{count} měsíců"
+
+#: lib/l10n/translator.ex:283
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "za %{count} sekundu"
+msgstr[1] "za %{count} sekundy"
+msgstr[2] "za %{count} sekund"
+
+#: lib/l10n/translator.ex:246
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "za %{count} týden"
+msgstr[1] "za %{count} týdny"
+msgstr[2] "za %{count} týdnů"
+
+#: lib/l10n/translator.ex:234
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "za %{count} rok"
+msgstr[1] "za %{count} roky"
+msgstr[2] "za %{count} let"
+
+#: lib/l10n/translator.ex:267
+msgid "last friday"
+msgstr "minulý pátek"
+
+#: lib/l10n/translator.ex:255
+msgid "last monday"
+msgstr "minulé pondelí"
+
+#: lib/l10n/translator.ex:270
+msgid "last saturday"
+msgstr "minulou sobotu"
+
+#: lib/l10n/translator.ex:273
+msgid "last sunday"
+msgstr "minulou neděli"
+
+#: lib/l10n/translator.ex:264
+msgid "last thursday"
+msgstr "minulý čtvrtek"
+
+#: lib/l10n/translator.ex:258
+msgid "last tuesday"
+msgstr "minulé úterý"
+
+#: lib/l10n/translator.ex:261
+msgid "last wednesday"
+msgstr "minulou stredu"
+
+#: lib/l10n/translator.ex:269
+msgid "next friday"
+msgstr "minulý pátek"
+
+#: lib/l10n/translator.ex:257
+msgid "next monday"
+msgstr "minulé pondělí"
+
+#: lib/l10n/translator.ex:272
+msgid "next saturday"
+msgstr "minulou sobotu"
+
+#: lib/l10n/translator.ex:275
+msgid "next sunday"
+msgstr "minulou neděli"
+
+#: lib/l10n/translator.ex:266
+msgid "next thursday"
+msgstr "minulý čtvrtek"
+
+#: lib/l10n/translator.ex:260
+msgid "next tuesday"
+msgstr "minulé úterý"
+
+#: lib/l10n/translator.ex:263
+msgid "next wednesday"
+msgstr "minulou neděli"
+
+#: lib/l10n/translator.ex:268
+msgid "this friday"
+msgstr "tento pátek"
+
+#: lib/l10n/translator.ex:256
+msgid "this monday"
+msgstr "toto pondělí"
+
+#: lib/l10n/translator.ex:271
+msgid "this saturday"
+msgstr "tuto sobotu"
+
+#: lib/l10n/translator.ex:274
+msgid "this sunday"
+msgstr "tuto neděli"
+
+#: lib/l10n/translator.ex:265
+msgid "this thursday"
+msgstr "tento čtvrtek"
+
+#: lib/l10n/translator.ex:259
+msgid "this tuesday"
+msgstr "toto úterý"
+
+#: lib/l10n/translator.ex:262
+msgid "this wednesday"
+msgstr "tuto středu"
+
+#: lib/l10n/translator.ex:286
+msgid "now"
+msgstr "teď"
