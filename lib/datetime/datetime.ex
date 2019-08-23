@@ -146,8 +146,10 @@ defimpl Timex.Protocol, for: DateTime do
 
   def weekday(%DateTime{:year => y, :month => m, :day => d}), do: :calendar.day_of_the_week({y, m, d})
 
-  def day(%DateTime{} = date) do
-    ref = beginning_of_year(date)
+  @spec day(DateTime.t) :: 1..366
+  def day(%DateTime{} = dt) do
+    ref = beginning_of_year(dt)
+    date = Timex.to_date(dt) # lock in Date to avoid DateTime ambiguity wrt TZ 
     1 + Timex.diff(date, ref, :days)
   end
 

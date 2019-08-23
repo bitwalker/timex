@@ -56,6 +56,13 @@ defmodule TimexTests do
     assert  {:error, :invalid_date} = Timex.day(nil)
   end
 
+  test "incorrect ordinal day (issue #527)" do
+    t1 = "2019-04-03T21:07:45Z" |> Timex.parse!("{ISO:Extended:Z}") |> Timex.to_datetime("Europe/Berlin")
+    t2 = "2019-04-03T22:07:45Z" |> Timex.parse!("{ISO:Extended:Z}") |> Timex.to_datetime("Europe/Berlin")
+    assert Timex.day(t1) === 93 
+    assert Timex.day(t2) === 94
+  end
+  
   test "week" do
     localdate = {{2013,3,17},{11,59,10}}
     assert Timex.iso_week(localdate) === {2013,11}

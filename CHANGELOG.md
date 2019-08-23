@@ -5,14 +5,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
-- TBD
+- `Timex.day/1` works better for DateTime that could fall on diff Dates (#527)
 
 ## 3.6.1
 
 ### Potentially Breaking
 
 - Require Elixir v1.6+
- 
+
 ### Added
 
 - Setup property based test framework and add sample tests (#480)
