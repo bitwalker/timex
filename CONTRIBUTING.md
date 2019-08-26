@@ -204,7 +204,7 @@ in order to craft an excellent pull request:
 4. Commit your changes in logical chunks. Keep your commit messages organized,
    with a short description in the first line and more detailed information on
    the following lines. Feel free to use Git's
-   [interactive rebase](https://help.github.com/articles/interactive-rebase)
+   [interactive rebase](https://help.github.com/en/articles/using-git-rebase-on-the-command-line)
    feature to tidy up your commits before making them public.
 
 5. Make sure all the tests are still passing.
