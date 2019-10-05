@@ -181,7 +181,7 @@ defmodule Timex.Parse.DateTime.Parsers do
 
   def second(opts \\ []) do
     Helpers.integer(opts)
-    |> satisfy(fn sec -> sec >= 0 && sec <= 59 end)
+    |> satisfy(fn sec -> sec >= 0 && sec <= 60 end)
     |> map(fn sec -> [sec: sec] end)
     |> label("second")
   end
