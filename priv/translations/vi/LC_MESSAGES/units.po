@@ -1,0 +1,72 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: vi\n"
+
+#: lib/l10n/translator.ex:178
+msgid "%{count} day"
+msgid_plural "%{count} days"
+msgstr[0] "${count} ngày"
+msgstr[1] "${count} ngày"
+
+#: lib/l10n/translator.ex:177
+msgid "%{count} hour"
+msgid_plural "%{count} hours"
+msgstr[0] "%{count} giờ"
+msgstr[1] "%{count} giờ"
+
+#: lib/l10n/translator.ex:173
+msgid "%{count} microsecond"
+msgid_plural "%{count} microseconds"
+msgstr[0] "%{count} micro giây"
+msgstr[1] "%{count} micro giây"
+
+#: lib/l10n/translator.ex:174
+msgid "%{count} millisecond"
+msgid_plural "%{count} milliseconds"
+msgstr[0] "%{count} mili giây"
+msgstr[1] "%{count} mili giây"
+
+#: lib/l10n/translator.ex:176
+msgid "%{count} minute"
+msgid_plural "%{count} minutes"
+msgstr[0] "%{count} phút"
+msgstr[1] "%{count} phút"
+
+#: lib/l10n/translator.ex:180
+msgid "%{count} month"
+msgid_plural "%{count} months"
+msgstr[0] "%{count} tháng"
+msgstr[1] "%{count} tháng"
+
+#: lib/l10n/translator.ex:172
+msgid "%{count} nanosecond"
+msgid_plural "%{count} nanoseconds"
+msgstr[0] "%{count} nano giây"
+msgstr[1] "%{count} nano giây"
+
+#: lib/l10n/translator.ex:175
+msgid "%{count} second"
+msgid_plural "%{count} seconds"
+msgstr[0] "%{count} giây"
+msgstr[1] "%{count} giây"
+
+#: lib/l10n/translator.ex:179
+msgid "%{count} week"
+msgid_plural "%{count} weeks"
+msgstr[0] "%{count} tuần"
+msgstr[1] "%{count} tuần"
+
+#: lib/l10n/translator.ex:181
+msgid "%{count} year"
+msgid_plural "%{count} years"
+msgstr[0] "%{count} năm"
+msgstr[1] "%{count} năm"

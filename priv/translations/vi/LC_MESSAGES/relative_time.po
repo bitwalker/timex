@@ -1,0 +1,232 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: vi\n"
+
+#: lib/l10n/translator.ex:237
+msgid "last month"
+msgstr "tháng trước"
+
+#: lib/l10n/translator.ex:243
+msgid "last week"
+msgstr "tuần trước"
+
+#: lib/l10n/translator.ex:231
+msgid "last year"
+msgstr "năm trước"
+
+#: lib/l10n/translator.ex:239
+msgid "next month"
+msgstr "tháng sau"
+
+#: lib/l10n/translator.ex:245
+msgid "next week"
+msgstr "tuần sau"
+
+#: lib/l10n/translator.ex:233
+msgid "next year"
+msgstr "năm sau"
+
+#: lib/l10n/translator.ex:238
+msgid "this month"
+msgstr "tháng này"
+
+#: lib/l10n/translator.ex:244
+msgid "this week"
+msgstr "tuần này"
+
+#: lib/l10n/translator.ex:232
+msgid "this year"
+msgstr "năm nay"
+
+#: lib/l10n/translator.ex:250
+msgid "today"
+msgstr "hôm nay"
+
+#: lib/l10n/translator.ex:251
+msgid "tomorrow"
+msgstr "ngày mai"
+
+#: lib/l10n/translator.ex:249
+msgid "yesterday"
+msgstr "hôm qua"
+
+#: lib/l10n/translator.ex:253
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "%{count} ngày trước"
+msgstr[1] "%{count} ngày trước"
+
+#: lib/l10n/translator.ex:278
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "%{count} giờ trước"
+msgstr[1] "%{count} giờ trước"
+
+#: lib/l10n/translator.ex:281
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "%{count} phút trước"
+msgstr[1] "%{count} phút trước"
+
+#: lib/l10n/translator.ex:241
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "%{count} tháng trước"
+msgstr[1] "%{count} tháng trước"
+
+#: lib/l10n/translator.ex:284
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "%{count} giây trước"
+msgstr[1] "%{count} giây trước"
+
+#: lib/l10n/translator.ex:247
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "%{count} tuần trước"
+msgstr[1] "%{count} tuần trước"
+
+#: lib/l10n/translator.ex:235
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "%{count} năm trước"
+msgstr[1] "%{count} năm trước"
+
+#: lib/l10n/translator.ex:252
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "trong %{count} ngày"
+msgstr[1] "trong %{count} ngày"
+
+#: lib/l10n/translator.ex:277
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "trong %{count} giờ"
+msgstr[1] "trong %{count} giờ"
+
+#: lib/l10n/translator.ex:280
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "trong %{count} phút"
+msgstr[1] "trong %{count} phút"
+
+#: lib/l10n/translator.ex:240
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "trong %{count} tháng"
+msgstr[1] "trong %{count} tháng"
+
+#: lib/l10n/translator.ex:283
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "trong %{count} giây"
+msgstr[1] "trong %{count} giây"
+
+#: lib/l10n/translator.ex:246
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "trong %{count} tuần"
+msgstr[1] "trong %{count} tuần"
+
+#: lib/l10n/translator.ex:234
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "trong %{count} năm"
+msgstr[1] "trong %{count} năm"
+
+#: lib/l10n/translator.ex:267
+msgid "last friday"
+msgstr "thứ 6 trước"
+
+#: lib/l10n/translator.ex:255
+msgid "last monday"
+msgstr "thứ 2 trước"
+
+#: lib/l10n/translator.ex:270
+msgid "last saturday"
+msgstr "thứ 7 trước"
+
+#: lib/l10n/translator.ex:273
+msgid "last sunday"
+msgstr "chủ nhật trước"
+
+#: lib/l10n/translator.ex:264
+msgid "last thursday"
+msgstr "thứ 5 trước"
+
+#: lib/l10n/translator.ex:258
+msgid "last tuesday"
+msgstr "thứ 3 trước"
+
+#: lib/l10n/translator.ex:261
+msgid "last wednesday"
+msgstr "thứ 4 trước"
+
+#: lib/l10n/translator.ex:269
+msgid "next friday"
+msgstr "thứ 6 tới"
+
+#: lib/l10n/translator.ex:257
+msgid "next monday"
+msgstr "thứ 2 tới"
+
+#: lib/l10n/translator.ex:272
+msgid "next saturday"
+msgstr "thứ 7 tới"
+
+#: lib/l10n/translator.ex:275
+msgid "next sunday"
+msgstr "chủ nhật tới"
+
+#: lib/l10n/translator.ex:266
+msgid "next thursday"
+msgstr "thứ 5 tới"
+
+#: lib/l10n/translator.ex:260
+msgid "next tuesday"
+msgstr "thứ 3 tới"
+
+#: lib/l10n/translator.ex:263
+msgid "next wednesday"
+msgstr "thứ 4 tới"
+
+#: lib/l10n/translator.ex:268
+msgid "this friday"
+msgstr "thứ 6 này"
+
+#: lib/l10n/translator.ex:256
+msgid "this monday"
+msgstr "thứ 2 này"
+
+#: lib/l10n/translator.ex:271
+msgid "this saturday"
+msgstr "thứ 7 này"
+
+#: lib/l10n/translator.ex:274
+msgid "this sunday"
+msgstr "chủ nhật này"
+
+#: lib/l10n/translator.ex:265
+msgid "this thursday"
+msgstr "thứ 5 này"
+
+#: lib/l10n/translator.ex:259
+msgid "this tuesday"
+msgstr "thứ 3 này"
+
+#: lib/l10n/translator.ex:262
+msgid "this wednesday"
+msgstr "thứ 4 này"
+
+#: lib/l10n/translator.ex:286
+msgid "now"
+msgstr "bây giờ"
