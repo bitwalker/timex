@@ -978,8 +978,8 @@ defmodule Timex do
   - :microseconds
   - :duration
 
-  and the dates will be compared with the cooresponding accuracy.
-  The default granularity is `:microsecond`.
+  and the dates will be compared with the cooresponding accuracy. There is no difference 
+  between singular and plural versions of the accuracy options. The default granularity is `:microsecond`.
 
   ## Examples
 
@@ -1038,7 +1038,8 @@ defmodule Timex do
   - :microseconds
   - :duration
 
-  and the result will be an integer value of those units or a Duration.
+  and the result will be an integer value of those units or a Duration. There is no difference 
+  between singular and plural versions of the accuracy options.
   """
   @spec diff(Time, Time, Comparable.granularity()) :: Duration.t() | integer | {:error, term}
   @spec diff(Comparable.comparable(), Comparable.comparable(), Comparable.granularity()) ::
