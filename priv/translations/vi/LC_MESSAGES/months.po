@@ -1,0 +1,60 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: vi\n"
+
+#: lib/l10n/translator.ex:220
+msgid "April"
+msgstr "Tháng 4"
+
+#: lib/l10n/translator.ex:224
+msgid "August"
+msgstr "Tháng 8"
+
+#: lib/l10n/translator.ex:228
+msgid "December"
+msgstr "Tháng 12"
+
+#: lib/l10n/translator.ex:218
+msgid "February"
+msgstr "Tháng 2"
+
+#: lib/l10n/translator.ex:217
+msgid "January"
+msgstr "Tháng 1"
+
+#: lib/l10n/translator.ex:223
+msgid "July"
+msgstr "Tháng 7"
+
+#: lib/l10n/translator.ex:222
+msgid "June"
+msgstr "Tháng 6"
+
+#: lib/l10n/translator.ex:219
+msgid "March"
+msgstr "Tháng 3"
+
+#: lib/l10n/translator.ex:221
+msgid "May"
+msgstr "Tháng 5"
+
+#: lib/l10n/translator.ex:227
+msgid "November"
+msgstr "Tháng 11"
+
+#: lib/l10n/translator.ex:226
+msgid "October"
+msgstr "Tháng 10"
+
+#: lib/l10n/translator.ex:225
+msgid "September"
+msgstr "Tháng 9"
