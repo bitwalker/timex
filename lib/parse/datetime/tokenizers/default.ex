@@ -41,7 +41,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
         # Months
         "Mshort", "Mfull", "M",
         # Days
-        "Dord", "D",
+        "Dord", "D", "S",
         # Weeks
         "Wiso", "Wmon", "Wsun", "WDmon", "WDsun", "WDshort", "WDfull",
         # Time
@@ -98,6 +98,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Default do
       # Days
       "D"    -> set_width(1, 2, :day, directive, opts)
       "Dord" -> set_width(1, 3, :oday, directive, opts)
+      "S"    -> force_width(2, :suffix, directive, opts)
       # Weeks
       "Wiso"    -> force_width(2, :iso_weeknum, directive, opts)
       "Wmon"    -> set_width(1, 2, :week_mon, directive, opts)
