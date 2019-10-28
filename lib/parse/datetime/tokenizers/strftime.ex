@@ -51,6 +51,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
         # Compound
         "D", "F", "R", "r", "T", "v"
       ]),
+      string(":d"),
       string(":z"),
       string("::z")
     ])
@@ -88,6 +89,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Strftime do
       "d" -> force_width(2, :day, directive, opts)
       "e" -> force_width(2, :day, directive, Keyword.merge(opts, flags: Keyword.merge([padding: :spaces], get_in(opts, [:flags]))))
       "j" -> force_width(3, :oday, directive, opts)
+      ":d" -> Directive.get(:dsuff, directive, opts)
       # Weeks
       "V" -> force_width(2, :iso_weeknum, directive, opts)
       "W" -> force_width(2, :week_mon, directive, opts)

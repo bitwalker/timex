@@ -22,8 +22,8 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
   * `-`       - don't pad numerical results (overrides default padding if any)
   * `0`       - use zeros for padding
   * `_`       - use spaces for padding
-  * `:`, `::` - used only in combination with `%z`; see description of `%:z`
-                and `%::z` below
+  * `:`, `::` - used only in combination with `%z` and `%d`; see description of `%:d`,
+                `%:z` and `%::z` below
 
   `<width>` is a non-negative decimal number specifying the minimum field
   width.
@@ -59,6 +59,7 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
   * `%w` - weekday, Sunday first (0..6)
   * `%a` - abbreviated weekday name (Mon..Sun, no padding)
   * `%A` - full weekday name (Monday..Sunday, no padding)
+  * `%:d` - combined day number with english ordinal suffix for the day of the month (1st, 2nd, 3rd, 4th..30th)
 
   ### Weeks
 

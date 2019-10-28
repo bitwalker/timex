@@ -76,6 +76,12 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("month abbreviation")
   end
 
+  def day_suffix(opts \\ []) do
+    Helpers.integer(opts)
+    |> satisfy(fn day -> day >= 1 && day <= 31 end)
+    |> map(fn n -> [day_suffix: n] end)
+    |> label("english ordinal suffix for the day of the month, 2 characters")
+  end
   def day_of_month(opts \\ []) do
     Helpers.integer(opts)
     |> satisfy(fn day -> day >= 1 && day <= 31 end)

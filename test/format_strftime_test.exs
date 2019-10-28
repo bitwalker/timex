@@ -110,6 +110,14 @@ defmodule DateFormatTest.FormatStrftime do
     assert { :ok, " 1" } = format(@jan12015, "%_d")
   end
 
+  test "format %:d" do
+    assert { :ok, "1st" } = format(@jan12015, "%:d")
+    assert { :ok, "2nd" } = format(Timex.to_datetime({{2015,1,2}, {0,0,0}}), "%:d")
+    assert { :ok, "3rd" } = format(Timex.to_datetime({{2015,1,3}, {0,0,0}}), "%:d")
+    assert { :ok, "4th" } = format(Timex.to_datetime({{2015,1,4}, {0,0,0}}), "%:d")
+    assert { :ok, "5th" } = format(Timex.to_datetime({{2015,1,5}, {0,0,0}}), "%:d")
+  end
+
   test "format %e" do
     assert { :ok, " 1" } = format(@jan12015, "%e")
     assert { :ok, "1" }  = format(@jan12015, "%-e")
