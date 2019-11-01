@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
-- TBD
+- all formats for week of year must return values between 1..53.
 
 ## 3.6.1
 

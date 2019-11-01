@@ -143,28 +143,28 @@ defmodule DateFormatTest.FormatDefault do
 
   test "format week number" do
     date = Timex.to_datetime({2013,1,1})
-    assert { :ok, "0" } = format(date, "{Wmon}")
-    assert { :ok, "0" } = format(date, "{Wsun}")
-
-    date = Timex.to_datetime({2013,1,6})
-    assert { :ok, "00" } = format(date, "{0Wmon}")
-    assert { :ok, "01" } = format(date, "{0Wsun}")
-
-    date = Timex.to_datetime({2013,1,7})
-    assert { :ok, " 1" } = format(date, "{_Wmon}")
-    assert { :ok, " 1" } = format(date, "{_Wsun}")
-
-    date = Timex.to_datetime({2012,1,1})
-    assert { :ok, "0" } = format(date, "{Wmon}") # Is actually part of previous year
-    assert { :ok, "1" } = format(date, "{Wsun}")
-
-    date = Timex.to_datetime({2012,1,2})
     assert { :ok, "1" } = format(date, "{Wmon}")
     assert { :ok, "1" } = format(date, "{Wsun}")
 
+    date = Timex.to_datetime({2013,1,6})
+    assert { :ok, "01" } = format(date, "{0Wmon}")
+    assert { :ok, "02" } = format(date, "{0Wsun}")
+
+    date = Timex.to_datetime({2013,1,7})
+    assert { :ok, " 2" } = format(date, "{_Wmon}")
+    assert { :ok, " 2" } = format(date, "{_Wsun}")
+
+    date = Timex.to_datetime({2012,1,1})
+    assert { :ok, "1" } = format(date, "{Wmon}") # Is actually part of previous year
+    assert { :ok, "2" } = format(date, "{Wsun}")
+
+    date = Timex.to_datetime({2012,1,2})
+    assert { :ok, "2" } = format(date, "{Wmon}")
+    assert { :ok, "2" } = format(date, "{Wsun}")
+
     date = Timex.to_datetime({2012,12,30})
-    assert { :ok, "52" } = format(date, "{Wmon}")
-    assert { :ok, "53" } = format(date, "{Wsun}")
+    assert { :ok, "53" } = format(date, "{Wmon}")
+    assert { :ok, "1" } = format(date, "{Wsun}")
   end
 
   test "format simple compound date formats" do

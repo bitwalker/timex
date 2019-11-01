@@ -484,9 +484,9 @@ defmodule Timex.Format.DateTime.Formatter do
   def format_token(_locale, :week_mon, %{:year => year} = date, _modifiers, flags, width) do
     {:ok, jan1} = Date.new(year,1,1)
     Timex.Interval.new(from: jan1, until: Timex.shift(date, days: 1))
-    |> Enum.reduce(0, fn d, acc ->
+    |> Enum.reduce(1, fn d, acc ->
       case Timex.weekday(d) do
-        1 -> acc+1
+        1 -> (if acc == 53 do 0 else acc end) + 1
         _ -> acc
       end
     end)
@@ -495,9 +495,9 @@ defmodule Timex.Format.DateTime.Formatter do
   def format_token(_locale, :week_sun, %{:year => year} = date, _modifiers, flags, width) do
     {:ok, jan1} = Date.new(year,1,1)
     Timex.Interval.new(from: jan1, until: Timex.shift(date, days: 1))
-    |> Enum.reduce(0, fn d, acc ->
+    |> Enum.reduce(1, fn d, acc ->
       case Timex.weekday(d) do
-        7 -> acc+1
+        7 -> (if acc == 53 do 0 else acc end) + 1
         _ -> acc
       end
     end)
@@ -712,4 +712,5 @@ defmodule Timex.Format.DateTime.Formatter do
 
   defp width_spec(min..max), do: [min: min, max: max]
   defp width_spec(min, max), do: [min: min, max: max]
+
 end

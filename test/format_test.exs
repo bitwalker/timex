@@ -50,4 +50,8 @@ defmodule DateFormatTest.GeneralFormatting do
     end
     assert Timex.format("", "{M}") == {:error, "invalid_date"}
   end
+
+  test "issue #494 - week of year must be a value from 1..53." do
+    assert Timex.format!(~D[2018-01-01], "%U", :strftime) == "01"
+  end
 end
