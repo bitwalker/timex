@@ -76,6 +76,29 @@ defimpl Timex.Protocol, for: Date do
     end
   end
 
+  @spec beginning_of_iso_week(Date.t, Types.weeknum) :: Date.t() | {:error, term}
+  def beginning_of_iso_week(%Date{year: year} = _date, weeknum) do
+    beginning_of_target_iso_week =
+      year
+      |> Timex.beginning_of_year()
+      |> Timex.weekday()
+      |> case do
+        weekday when weekday <= 4 ->
+          %Date{year: year, month: 1, day: 1} |> Timex.beginning_of_week()
+
+        _weekday ->
+          %Date{year: year, month: 1, day: 1}
+          |> Timex.beginning_of_week()
+          |> Timex.shift(weeks: 1)
+      end
+      |> Timex.shift(weeks: weeknum - 1)
+
+    case Timex.iso_week(beginning_of_target_iso_week) do
+      {^year, _week} -> beginning_of_target_iso_week
+      {_following_year, _week} -> {:error, :invalid_weeknum}
+    end
+  end
+
   @spec beginning_of_year(Date.t) :: Date.t
   def beginning_of_year(%Date{} = date),
     do: %{date | :month => 1, :day => 1}

@@ -1563,6 +1563,27 @@ defmodule Timex do
   defdelegate end_of_week(datetime, weekstart \\ 1), to: Timex.Protocol
 
   @doc """
+  Returns the date of the first Monday of a given week according to ISO 8601
+
+  ## Examples
+
+      iex> Timex.beginning_of_iso_week(2013, 1)
+      ~D[2012-12-31]
+
+      iex> Timex.beginning_of_iso_week(2017, 1)
+      ~D[2017-01-02]
+
+  """
+  @spec end_of_year(Types.year() | Types.valid_datetime()) ::
+          Types.valid_datetime() | {:error, term}
+  def beginning_of_iso_week(year, weeknum) when is_year(year) and is_week_of_year(weeknum),
+    do: Timex.Protocol.beginning_of_iso_week(%Date{year: year, month: 12, day: 31}, weeknum)
+
+  def beginning_of_iso_week(datetime, weeknum) when is_week_of_year(weeknum), do: Timex.Protocol.beginning_of_iso_week(datetime, weeknum)
+
+  def beginning_of_iso_week(_, _), do: {:error, :invalid_year_or_weeknum}
+
+  @doc """
   Returns a DateTime representing the beginning of the day
 
   ## Examples

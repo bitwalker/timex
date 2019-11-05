@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
-- TBD
+- Added `Timex.beginning_of_iso_week/2` which returns the beginning of a week (1-53) of a given year
 
 ## 3.6.1
 

@@ -746,6 +746,25 @@ defmodule TimexTests do
     assert {:error, :invalid_date} = Timex.beginning_of_week(nil, nil)
   end
 
+  test "beginning_of_iso_week" do
+    assert Timex.beginning_of_iso_week(2019, 1) === ~D[2018-12-31]
+    assert Timex.beginning_of_iso_week(2017, 1) === ~D[2017-01-02]
+    assert Timex.beginning_of_iso_week(2016, 1) === ~D[2016-01-04]
+    assert Timex.beginning_of_iso_week(2013, 1) === ~D[2012-12-31]
+    assert Timex.beginning_of_iso_week(2020, 53) === ~D[2020-12-28]
+
+    # Invalid beginning of iso week - out of range
+    assert {:error, _} = Timex.beginning_of_iso_week(2020, 54)
+    assert {:error, _} = Timex.beginning_of_iso_week(2019, 53)
+
+    # Invalid beginning of iso week string
+    assert {:error, _} = Timex.beginning_of_iso_week("Made up year", 1)
+    assert {:error, _} = Timex.beginning_of_iso_week(2019, "Made up week number")
+
+    # Invalid beginning of iso week - invalid date
+    assert {:error, :invalid_year_or_weeknum} = Timex.beginning_of_iso_week(nil, nil)
+  end
+
   test "beginning_of_day" do
     date = Timex.to_datetime({{2015,1,1},{13,14,15}})
     assert Timex.beginning_of_day(date) == Timex.to_datetime({{2015,1,1},{0,0,0}})

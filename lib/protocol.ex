@@ -113,6 +113,13 @@ defprotocol Timex.Protocol do
   def end_of_week(datetime, weekstart)
 
   @doc """
+  Get a new version of the date/time value representing the beginning of it's
+  ISO week, providing a year and the week number.
+  """
+  @spec beginning_of_iso_week(Types.year(), Types.weeknum()) :: Types.valid_datetime | {:error, term}
+  def beginning_of_iso_week(year, weeknum)
+
+  @doc """
   Get a new version of the date/time value representing the beginning of it's year
   """
   @spec beginning_of_year(Types.year | Types.valid_datetime) :: Types.valid_datetime | {:error, term}
@@ -246,6 +253,9 @@ defimpl Timex.Protocol, for: Any do
 
   def end_of_week(%{__struct__: _} = d, weekstart), do: Timex.end_of_week(Map.from_struct(d), weekstart)
   def end_of_week(_datetime, _weekstart), do: {:error, :invalid_date}
+
+  def beginning_of_iso_week(%{__struct__: _} = d, weeknum), do: Timex.beginning_of_iso_week(Map.from_struct(d), weeknum)
+  def beginning_of_iso_week(_datetime, _weeknum), do: {:error, :invalid_date}
 
   def beginning_of_year(%{__struct__: _} = d), do: Timex.beginning_of_year(Map.from_struct(d))
   def beginning_of_year(_datetime), do: {:error, :invalid_date}
