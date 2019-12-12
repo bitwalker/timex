@@ -249,7 +249,7 @@ defmodule Timex.Interval do
       ["2014-09-22", "2014-09-25"]
 
   """
-  @spec with_step(t, valid_interval_step) :: t | {:error, :invalid_step}
+  @spec with_step(t, valid_interval_steps) :: t | {:error, :invalid_step}
   def with_step(%__MODULE__{} = interval, step) do
     if invalid_step?(step) do
       {:error, :invalid_step}
