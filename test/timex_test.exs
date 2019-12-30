@@ -796,4 +796,10 @@ defmodule TimexTests do
           "#{modifier_fn} for #{type_fn}:\n#{inspect(expected_result)} should equal #{inspect(result)}"
     end
   end
+
+  test "week_of_month/3 works correctly for end-of-year dates" do
+    datetime = Timex.to_datetime({2019, 12, 30})
+
+    assert Timex.week_of_month(datetime) == 6
+  end
 end

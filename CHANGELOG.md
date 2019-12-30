@@ -6,13 +6,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 - TBD
+- fix end-of-year edge cases for `Timex.week_of_month/3`
 
 ## 3.6.1
 
 ### Potentially Breaking
 
 - Require Elixir v1.6+
- 
+
 ### Added
 
 - Setup property based test framework and add sample tests (#480)

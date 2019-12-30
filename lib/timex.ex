@@ -1300,7 +1300,18 @@ defmodule Timex do
   """
   @spec week_of_month(Types.year(), Types.month(), Types.day()) :: Types.week_of_month()
   def week_of_month(year, month, day) when is_date(year, month, day) do
-    {_, week_index_of_given_date} = iso_week(year, month, day)
+    # We have to handle a special case when iso_week for a date
+    # returns the first week of a following year.
+    # For example: `iso_week(2019, 12, 30)` is `{2020, 1}`, which results in
+    # this function returning -46 for this date.
+    # More details here: https://en.wikipedia.org/wiki/ISO_week_date
+
+    week_index_of_given_date =
+      case iso_week(year, month, day) do
+        {^year, week_index} -> week_index
+        {_next_year, 1} -> 53
+      end
+
     {_, week_index_of_first_day_of_given_month} = iso_week(year, month, 1)
     week_index_of_given_date - week_index_of_first_day_of_given_month + 1
   end
