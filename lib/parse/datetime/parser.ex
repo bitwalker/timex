@@ -406,7 +406,7 @@ defmodule Timex.Parse.DateTime.Parser do
           60 ->
             date
             |> Timex.to_naive_datetime()
-            |> (&%{&1 | second: 0}).()
+            |> Timex.set(second: 0)
             |> Timex.shift([minutes: 1])
           value ->
             %{date | :second => value}
