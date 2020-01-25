@@ -338,7 +338,7 @@ defmodule Timex.Parse.DateTime.Parser do
           hh == 12 and (String.downcase(value) == "am") ->
             %{date | :hour => 0}
           hh in (1..11) and String.downcase(value) == "pm" ->
-            %{date | :hour => hh + 12} 
+            %{date | :hour => hh + 12}
           true ->
             date
         end
@@ -553,7 +553,7 @@ defmodule Timex.Parse.DateTime.Parser do
         n when n < 5 -> # Week 1, seek backwards to beginning of week
           [days: -(7-(7-(n-1)))]
         n -> # Part of last year's week, seek forwards to beginning of week
-          [days: (7-(7-(n-1))) - 1]
+          [days: 7-(n-1)]
       end
     datetime = Timex.to_naive_datetime(datetime)
     do_shift_to_week_of_year(Timex.shift(%{datetime | month: 1, day: 1}, shift), value)
