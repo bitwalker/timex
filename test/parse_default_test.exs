@@ -80,9 +80,13 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "parse ISO week" do
-    assert ~N[2016-11-28 00:00:00] = Timex.parse!("2016-W48", "{ISOweek}")
-    assert ~N[2009-12-28 00:00:00] = Timex.parse!("2009-W53", "{ISOweek}")
-    assert ~N[2007-11-19 00:00:00] = Timex.parse!("2007-W47", "{ISOweek}")
+    assert ~N[2007-11-19 00:00:00] = Timex.parse!("2007-W47", "{ISOweek}") # monday
+    assert ~N[2018-12-31 00:00:00] = Timex.parse!("2019-W01", "{ISOweek}") # monday
+    assert ~N[2009-12-28 00:00:00] = Timex.parse!("2009-W53", "{ISOweek}") # thursday
+    assert ~N[2024-12-30 00:00:00] = Timex.parse!("2025-W01", "{ISOweek}") # wednesday
+    assert ~N[2016-11-28 00:00:00] = Timex.parse!("2016-W48", "{ISOweek}") # friday
+    assert ~N[2022-01-03 00:00:00] = Timex.parse!("2022-W01", "{ISOweek}") # saturday
+    assert ~N[2023-01-02 00:00:00] = Timex.parse!("2023-W01", "{ISOweek}") # sunday
   end
 
   test "parse ISO week with day" do
