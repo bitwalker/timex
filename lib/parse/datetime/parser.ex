@@ -402,7 +402,15 @@ defmodule Timex.Parse.DateTime.Parser do
         %{date | :minute => value}
 
       :sec ->
-        %{date | :second => value}
+        case value do
+          60 ->
+            date
+            |> Timex.to_naive_datetime()
+            |> Timex.set(second: 0)
+            |> Timex.shift([minutes: 1])
+          value ->
+            %{date | :second => value}
+        end
 
       :sec_fractional ->
         case value do
