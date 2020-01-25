@@ -8,14 +8,15 @@ defmodule DurationFormatHumanizedTest do
 
   defp format(megaseconds, seconds, microseconds) do
     Duration.from_erl({megaseconds, seconds, microseconds})
-      |> Formatters.Humanized.format
+    |> Formatters.Humanized.format()
   end
 
   test "format negative duration" do
     assert "900.0 milliseconds" = format(0, -2, 1_100_000)
     assert "2 seconds, 100 microseconds" = format(0, -1, -1_000_100)
+
     assert "45 years, 6 months, 5 days, 21 hours, 12 minutes, 34 seconds, 590.264 milliseconds" =
-        format(-1435, -180354, -590264)
+             format(-1435, -180_354, -590_264)
   end
 
   test "format zero duration" do

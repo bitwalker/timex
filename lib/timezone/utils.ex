@@ -1,9 +1,8 @@
 defmodule Timex.Timezone.Utils do
   @moduledoc false
 
-  {olson_mappings, _}   = Path.join("priv", "standard_to_olson.exs") |> Code.eval_file
-  {windows_mappings, _} = Path.join("priv", "olson_to_win.exs") |> Code.eval_file
-
+  {olson_mappings, _} = Path.join("priv", "standard_to_olson.exs") |> Code.eval_file()
+  {windows_mappings, _} = Path.join("priv", "olson_to_win.exs") |> Code.eval_file()
 
   @doc """
   Lookup the Olson time zone given its standard name
@@ -15,11 +14,14 @@ defmodule Timex.Timezone.Utils do
 
   """
   Enum.each(olson_mappings, fn {key, value} ->
-    quoted = quote do
-      def to_olson(unquote(key)), do: unquote(value)
-    end
-    Module.eval_quoted __MODULE__, quoted, [], __ENV__
+    quoted =
+      quote do
+        def to_olson(unquote(key)), do: unquote(value)
+      end
+
+    Module.eval_quoted(__MODULE__, quoted, [], __ENV__)
   end)
+
   def to_olson(_tz), do: nil
 
   @doc """
@@ -32,10 +34,13 @@ defmodule Timex.Timezone.Utils do
 
   """
   Enum.each(windows_mappings, fn {key, value} ->
-    quoted = quote do
-      def olson_to_win(unquote(key)), do: unquote(value)
-    end
-    Module.eval_quoted __MODULE__, quoted, [], __ENV__
+    quoted =
+      quote do
+        def olson_to_win(unquote(key)), do: unquote(value)
+      end
+
+    Module.eval_quoted(__MODULE__, quoted, [], __ENV__)
   end)
+
   def olson_to_win(_tz), do: nil
 end

@@ -19,63 +19,78 @@ defmodule Timex.Calendar.Julian do
   due to the fact that their algorithm assumes there is no Gregorian calendar before that
   date.
   """
-  @spec julian_date(Types.date) :: float
+  @spec julian_date(Types.date()) :: float
   def julian_date({year, month, day}),
     do: julian_date(year, month, day)
 
   # Same as julian_date/1, except takes an Erlang datetime, and returns a more precise Julian date number
-  @spec julian_date(Types.datetime) :: float
+  @spec julian_date(Types.datetime()) :: float
   def julian_date({{year, month, day}, {hour, minute, second}}) do
     julian_date(year, month, day, hour, minute, second)
   end
+
   def julian_date(_), do: {:error, :invalid_date}
 
   @doc """
   Same as julian_date/1, except takes year/month/day as distinct arguments
   """
-  @spec julian_date(Types.year, Types.month, Types.day) :: float
+  @spec julian_date(Types.year(), Types.month(), Types.day()) :: float
   def julian_date(year, month, day) when is_date(year, month, day) do
     a = div(14 - month, 12)
     y = year + 4800 - a
-    m = month + (12 * a) - 3
+    m = month + 12 * a - 3
 
-    jdn = day + trunc(((153 * m) + 2) / 5) +
-                (365*y) +
-                div(y, 4) - div(y, 100) + div(y, 400) -
-                32045
+    jdn =
+      day + trunc((153 * m + 2) / 5) +
+        365 * y +
+        div(y, 4) - div(y, 100) + div(y, 400) -
+        32045
+
     jdn
   end
-  def julian_date(_,_,_), do: {:error, :invalid_date}
+
+  def julian_date(_, _, _), do: {:error, :invalid_date}
 
   @doc """
   Same as julian_date/1, except takes year/month/day/hour/minute/second as distinct arguments
   """
-  @spec julian_date(Types.year, Types.month, Types.day, Types.hour, Types.minute, Types.second) :: float
+  @spec julian_date(
+          Types.year(),
+          Types.month(),
+          Types.day(),
+          Types.hour(),
+          Types.minute(),
+          Types.second()
+        ) :: float
   def julian_date(year, month, day, hour, minute, second)
-    when is_datetime(year, month, day, hour, minute, second) do
-      jdn = julian_date(year, month, day)
-      jdn + ((hour - 12) / 24) + (minute / 1440) + (second / 86400)
+      when is_datetime(year, month, day, hour, minute, second) do
+    jdn = julian_date(year, month, day)
+    jdn + (hour - 12) / 24 + minute / 1440 + second / 86400
   end
-  def julian_date(_,_,_,_,_,_), do: {:error, :invalid_datetime}
+
+  def julian_date(_, _, _, _, _, _), do: {:error, :invalid_datetime}
 
   @doc """
   Returns the day of the week, starting with 0 for Sunday, or 1 for Monday
   """
-  @spec day_of_week(Types.date, :sun | :mon) :: Types.weekday
+  @spec day_of_week(Types.date(), :sun | :mon) :: Types.weekday()
   def day_of_week({year, month, day}, weekstart),
     do: day_of_week(year, month, day, weekstart)
 
   @doc """
   Same as day_of_week/1, except takes year/month/day as distinct arguments
   """
-  @spec day_of_week(Types.year, Types.month, Types.day, :sun | :mon) :: Types.weekday
-  def day_of_week(year, month, day, weekstart) when is_date(year, month, day) and weekstart in [:sun, :mon] do
-    cardinal = mod((trunc(julian_date(year, month, day)) + 1), 7)
+  @spec day_of_week(Types.year(), Types.month(), Types.day(), :sun | :mon) :: Types.weekday()
+  def day_of_week(year, month, day, weekstart)
+      when is_date(year, month, day) and weekstart in [:sun, :mon] do
+    cardinal = mod(trunc(julian_date(year, month, day)) + 1, 7)
+
     case weekstart do
       :sun -> cardinal
       :mon -> mod(cardinal + 6, 7) + 1
     end
   end
+
   def day_of_week(_, _, _, weekstart) do
     case weekstart in [:sun, :mon] do
       true -> {:error, :invalid_date}

@@ -1005,7 +1005,8 @@ defmodule Timex do
   See docs for `diff/3`
   """
   @spec diff(Time, Time) :: Duration.t() | integer | {:error, term}
-  @spec diff(Comparable.comparable(), Comparable.comparable()) :: Duration.t() | integer | {:error, term}
+  @spec diff(Comparable.comparable(), Comparable.comparable()) ::
+          Duration.t() | integer | {:error, term}
   def diff(%Time{} = a, %Time{} = b), do: diff(a, b, :microseconds)
   defdelegate diff(a, b), to: Timex.Comparable
 
@@ -1044,7 +1045,18 @@ defmodule Timex do
   @spec diff(Comparable.comparable(), Comparable.comparable(), Comparable.granularity()) ::
           Duration.t() | integer | {:error, term}
   def diff(%Time{}, %Time{}, granularity)
-      when granularity in [:day, :days, :week, :weeks, :calendar_week, :calendar_weeks, :month, :months, :year, :years] do
+      when granularity in [
+             :day,
+             :days,
+             :week,
+             :weeks,
+             :calendar_week,
+             :calendar_weeks,
+             :month,
+             :months,
+             :year,
+             :years
+           ] do
     0
   end
 

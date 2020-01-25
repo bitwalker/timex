@@ -6,7 +6,7 @@ defmodule Timex.Parse.ParseError do
 
   defexception message: "Invalid input!"
 
-  def exception([message: message]) do
+  def exception(message: message) do
     %ParseError{message: message}
   end
 end

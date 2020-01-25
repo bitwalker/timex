@@ -34,33 +34,44 @@ defmodule Timex.Helpers do
       iex> Timex.Helpers.iso_day_to_date_tuple(2027, 366)
       {:error, :invalid_day}
   """
-  @spec iso_day_to_date_tuple(Types.year, Types.day) :: Types.valid_datetime | {:error, term}
+  @spec iso_day_to_date_tuple(Types.year(), Types.day()) ::
+          Types.valid_datetime() | {:error, term}
   def iso_day_to_date_tuple(year, day) when is_year(year) and is_iso_day_of_year(year, day) do
-    {month, first_of_month} = cond do
-      :calendar.is_leap_year(year) ->
-        List.last(Enum.take_while(@ordinals_leap, fn {_m, odom} -> odom <= day end))
-      :else ->
-        List.last(Enum.take_while(@ordinals, fn {_m, odom} -> odom <= day end))
-    end
-    {year, month, day - (first_of_month-1)}
+    {month, first_of_month} =
+      cond do
+        :calendar.is_leap_year(year) ->
+          List.last(Enum.take_while(@ordinals_leap, fn {_m, odom} -> odom <= day end))
+
+        :else ->
+          List.last(Enum.take_while(@ordinals, fn {_m, odom} -> odom <= day end))
+      end
+
+    {year, month, day - (first_of_month - 1)}
   end
+
   def iso_day_to_date_tuple(year, _) when is_year(year), do: {:error, :invalid_day}
-  def iso_day_to_date_tuple(year, day) when is_iso_day_of_year(year, day) do 
+
+  def iso_day_to_date_tuple(year, day) when is_iso_day_of_year(year, day) do
     {:error, :invalid_year}
   end
+
   def iso_day_to_date_tuple(_, _), do: {:error, :invalid_year_and_day}
 
   def days_in_month(year, month) when is_year(year) and is_month(month) do
     :calendar.last_day_of_the_month(year, month)
   end
+
   def days_in_month(year, month) do
-    valid_year?  = year > 0
+    valid_year? = year > 0
     valid_month? = month in @valid_months
+
     cond do
       !valid_year? && valid_month? ->
         {:error, :invalid_year}
+
       valid_year? && !valid_month? ->
         {:error, :invalid_month}
+
       true ->
         {:error, :invalid_year_and_month}
     end
@@ -78,7 +89,7 @@ defmodule Timex.Helpers do
 
   def round_month(m) do
     case mod(m, 12) do
-      0     -> 12
+      0 -> 12
       other -> other
     end
   end

@@ -30,8 +30,9 @@ defmodule Timex.Parser.Test do
     assert [[month: 11]] = Combine.parse("Nov", month_short([]))
     assert [[month: 12]] = Combine.parse("December", month_full([]))
     assert [[month: 12]] = Combine.parse("Dec", month_short([]))
-    assert {:error, "Expected `full month name` at line 1, column 10."} = Combine.parse("Something", month_full([]))
 
+    assert {:error, "Expected `full month name` at line 1, column 10."} =
+             Combine.parse("Something", month_full([]))
   end
 
   test "helpers: is_weekday" do
@@ -46,13 +47,13 @@ defmodule Timex.Parser.Test do
   end
 
   test "helpers: integer" do
-    assert [10000] = Combine.parse(" 10000", Helpers.integer([min: -1, padding: :spaces]))
-    assert [1000] = Combine.parse(" 1000", Helpers.integer([min: 4, padding: :spaces]))
-    assert {:error, _} = Combine.parse(" 10", Helpers.integer([min: 4, padding: :spaces]))
+    assert [10000] = Combine.parse(" 10000", Helpers.integer(min: -1, padding: :spaces))
+    assert [1000] = Combine.parse(" 1000", Helpers.integer(min: 4, padding: :spaces))
+    assert {:error, _} = Combine.parse(" 10", Helpers.integer(min: 4, padding: :spaces))
 
-    assert {:error, _} = Combine.parse(" 10", Helpers.integer([min: -1]))
-    assert [10] = Combine.parse("10", Helpers.integer([min: -1]))
-    assert [30] = Combine.parse("30", Helpers.integer([min: -1]))
+    assert {:error, _} = Combine.parse(" 10", Helpers.integer(min: -1))
+    assert [10] = Combine.parse("10", Helpers.integer(min: -1))
+    assert [30] = Combine.parse("30", Helpers.integer(min: -1))
   end
 
   test "parsers: day_of_year" do

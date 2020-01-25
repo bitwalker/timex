@@ -41,7 +41,7 @@ defmodule Timex.AmbiguousDateTime do
             after: nil
 
   @type t :: %__MODULE__{
-    :before => DateTime.t,
-    :after => DateTime.t
-  }
+          :before => DateTime.t(),
+          :after => DateTime.t()
+        }
 end

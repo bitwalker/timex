@@ -419,6 +419,7 @@ defmodule Timex.Timezone do
     # Do not convert date when already in destination time zone
     date
   end
+
   def convert(%DateTime{} = date, %TimezoneInfo{full_name: name} = tz) do
     # Calculate the difference between `date`'s timezone, and the target timezone
     delta = diff(date, tz)

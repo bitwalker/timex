@@ -6,31 +6,34 @@ defmodule ShiftTests do
   @units [:years, :months, :weeks, :days, :hours, :minutes, :seconds, :microseconds]
 
   property "is always greater than input date for positive shift values" do
-    check all input_date <- PropertyHelpers.date_time_generator(:struct),
-              shift <- StreamData.integer(1..1000),
-              unit <- StreamData.member_of(@units) do
-
+    check all(
+            input_date <- PropertyHelpers.date_time_generator(:struct),
+            shift <- StreamData.integer(1..1000),
+            unit <- StreamData.member_of(@units)
+          ) do
       date = Timex.shift(input_date, [{unit, shift}])
       assert Timex.after?(date, input_date)
     end
   end
 
   property "is always lower than input date for negative shift values" do
-    check all input_date <- PropertyHelpers.date_time_generator(:struct),
-              shift <- StreamData.integer(-1..-1000),
-              unit <- StreamData.member_of(@units) do
-
+    check all(
+            input_date <- PropertyHelpers.date_time_generator(:struct),
+            shift <- StreamData.integer(-1..-1000),
+            unit <- StreamData.member_of(@units)
+          ) do
       date = Timex.shift(input_date, [{unit, shift}])
       assert Timex.before?(date, input_date)
     end
   end
 
   property "does not change for 0 shift values" do
-    check all input_date <- PropertyHelpers.date_time_generator(:struct),
-              unit <- StreamData.member_of(@units) do
-
-    date = Timex.shift(input_date, [{unit, 0}])
-    assert Timex.equal?(date, input_date)
+    check all(
+            input_date <- PropertyHelpers.date_time_generator(:struct),
+            unit <- StreamData.member_of(@units)
+          ) do
+      date = Timex.shift(input_date, [{unit, 0}])
+      assert Timex.equal?(date, input_date)
     end
   end
 
@@ -40,7 +43,7 @@ defmodule ShiftTests do
   end
 
   test "shift by year" do
-    date = Timex.shift(Timex.epoch, years: 3)
+    date = Timex.shift(Timex.epoch(), years: 3)
     expected = ~D[1973-01-01]
     assert expected === date
   end
@@ -100,13 +103,13 @@ defmodule ShiftTests do
   end
 
   test "shift by -24 month into past" do
-    date = Timex.shift(Timex.epoch, months: -24)
+    date = Timex.shift(Timex.epoch(), months: -24)
     expected = ~D[1968-01-01]
     assert expected === date
   end
 
   test "issue 230 - shifting epoch by -13 months takes you to 1969" do
-    date = Timex.shift(Timex.epoch, months: -13)
+    date = Timex.shift(Timex.epoch(), months: -13)
     expected = ~D[1968-12-01]
     assert expected === date
   end
@@ -160,8 +163,11 @@ defmodule ShiftTests do
   end
 
   test "shift by duration" do
-    date = Timex.shift(~N[2017-10-24 12:00:00.100000],
-      duration: Timex.Duration.from_microseconds(100))
+    date =
+      Timex.shift(~N[2017-10-24 12:00:00.100000],
+        duration: Timex.Duration.from_microseconds(100)
+      )
+
     expected = ~N[2017-10-24 12:00:00.100100]
     assert expected === date
   end
@@ -183,8 +189,8 @@ defmodule ShiftTests do
   end
 
   test "shift datetime by a month from the end of January" do
-    date = ~D[2000-01-31] |> Timex.to_datetime |> Timex.shift(months: 1)
-    expected = ~D[2000-02-29] |> Timex.to_datetime
+    date = ~D[2000-01-31] |> Timex.to_datetime() |> Timex.shift(months: 1)
+    expected = ~D[2000-02-29] |> Timex.to_datetime()
     assert expected === date
   end
 
@@ -201,26 +207,26 @@ defmodule ShiftTests do
   end
 
   test "shift back 4 days should yield first of month" do
-    date = ~D[2018-11-05] |> Timex.to_datetime |> Timex.shift(days: -4)
-    expected = ~D[2018-11-01] |> Timex.to_datetime
+    date = ~D[2018-11-05] |> Timex.to_datetime() |> Timex.shift(days: -4)
+    expected = ~D[2018-11-01] |> Timex.to_datetime()
     assert expected === date
   end
 
   test "shift back 5 days should yield last of previous month" do
-    date = ~D[2018-11-05] |> Timex.to_datetime |> Timex.shift(days: -5)
-    expected = ~D[2018-10-31] |> Timex.to_datetime
+    date = ~D[2018-11-05] |> Timex.to_datetime() |> Timex.shift(days: -5)
+    expected = ~D[2018-10-31] |> Timex.to_datetime()
     assert expected === date
   end
 
   test "shift back 4 days should yield first of year" do
-    date = ~D[2018-01-05] |> Timex.to_datetime |> Timex.shift(days: -4)
-    expected = ~D[2018-01-01] |> Timex.to_datetime
+    date = ~D[2018-01-05] |> Timex.to_datetime() |> Timex.shift(days: -4)
+    expected = ~D[2018-01-01] |> Timex.to_datetime()
     assert expected === date
   end
 
   test "shift back 5 days should yield last of previous year" do
-    date = ~D[2018-01-05] |> Timex.to_datetime |> Timex.shift(days: -5)
-    expected = ~D[2017-12-31] |> Timex.to_datetime
+    date = ~D[2018-01-05] |> Timex.to_datetime() |> Timex.shift(days: -5)
+    expected = ~D[2017-12-31] |> Timex.to_datetime()
     assert expected === date
   end
 end

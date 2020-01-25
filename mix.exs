@@ -12,7 +12,7 @@ defmodule Timex.Mixfile do
       package: package(),
       deps: deps(),
       docs: docs(),
-      compilers: [:gettext] ++ Mix.compilers,
+      compilers: [:gettext] ++ Mix.compilers(),
       test_coverage: [tool: ExCoveralls],
       elixirc_paths: elixirc_paths(Mix.env()),
       preferred_cli_env: [
@@ -22,15 +22,17 @@ defmodule Timex.Mixfile do
         "coveralls.html": :test,
         "coveralls.detail": :test,
         "coveralls.json": :test,
-        "coveralls.post": :test,
+        "coveralls.post": :test
       ]
     ]
   end
 
   def application do
-    [applications: [:logger, :tzdata, :gettext, :combine],
-     env: [local_timezone: nil, default_locale: "en"],
-     mod: {Timex, []}]
+    [
+      applications: [:logger, :tzdata, :gettext, :combine],
+      env: [local_timezone: nil, default_locale: "en"],
+      mod: {Timex, []}
+    ]
   end
 
   defp description do
@@ -41,47 +43,52 @@ defmodule Timex.Mixfile do
   end
 
   defp package do
-    [ files: ["lib", "priv", "mix.exs", "README.md", "LICENSE.md"],
+    [
+      files: ["lib", "priv", "mix.exs", "README.md", "LICENSE.md"],
       maintainers: ["Paul Schoenfelder", "Chris Hildebrand"],
       licenses: ["MIT"],
       links: %{
-        "Changelog": "https://github.com/bitwalker/timex/blob/master/CHANGELOG.md",
-        "GitHub": "https://github.com/bitwalker/timex"
-    }]
+        Changelog: "https://github.com/bitwalker/timex/blob/master/CHANGELOG.md",
+        GitHub: "https://github.com/bitwalker/timex"
+      }
+    ]
   end
 
   def deps do
-    [{:tzdata, "~> 0.1.8 or ~> 0.5 or ~> 1.0.0"},
-     {:combine, "~> 0.10"},
-     {:gettext, "~> 0.10"},
-     {:ex_doc, "~> 0.13", only: [:docs]},
-     {:benchfella, "~> 0.3", only: [:bench]},
-     {:dialyxir, "~> 0.5", only: [:dev]},
-     {:excoveralls, "~> 0.4", only: [:test]},
-     {:stream_data, "~> 0.4", only: [:test]}]
+    [
+      {:tzdata, "~> 0.1.8 or ~> 0.5 or ~> 1.0.0"},
+      {:combine, "~> 0.10"},
+      {:gettext, "~> 0.10"},
+      {:ex_doc, "~> 0.13", only: [:docs]},
+      {:benchfella, "~> 0.3", only: [:bench]},
+      {:dialyxir, "~> 0.5", only: [:dev]},
+      {:excoveralls, "~> 0.4", only: [:test]},
+      {:stream_data, "~> 0.4", only: [:test]}
+    ]
   end
 
   defp docs do
-    [main: "getting-started",
-     formatter_opts: [gfm: true],
-     source_ref: @version,
-     source_url: "https://github.com/bitwalker/timex",
-     extras: [
-       "docs/Getting Started.md",
-       "CHANGELOG.md",
-       "docs/Basic Usage.md",
-       "docs/Erlang Interop.md",
-       "docs/Formatting.md",
-       "docs/Parsing.md",
-       "docs/FAQ.md",
-       "docs/Using with Ecto.md",
-       "docs/Custom Parsers.md",
-       "docs/Custom Formatters.md"
-    ]]
+    [
+      main: "getting-started",
+      formatter_opts: [gfm: true],
+      source_ref: @version,
+      source_url: "https://github.com/bitwalker/timex",
+      extras: [
+        "docs/Getting Started.md",
+        "CHANGELOG.md",
+        "docs/Basic Usage.md",
+        "docs/Erlang Interop.md",
+        "docs/Formatting.md",
+        "docs/Parsing.md",
+        "docs/FAQ.md",
+        "docs/Using with Ecto.md",
+        "docs/Custom Parsers.md",
+        "docs/Custom Formatters.md"
+      ]
+    ]
   end
 
   # Specifies which paths to compile per environment
   defp elixirc_paths(:test), do: ["lib", "test/helpers"]
   defp elixirc_paths(_), do: ["lib"]
-
 end

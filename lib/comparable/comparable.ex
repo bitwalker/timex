@@ -4,13 +4,33 @@ defprotocol Timex.Comparable do
   """
   alias Timex.Types
 
-  @type granularity :: :year | :years | :month | :months | :week | :weeks | :calendar_week | :calendar_weeks | :day | :days |
-                       :hour | :hours | :minute | :minutes | :second | :seconds | :millisecond | :milliseconds | :microsecond | :microseconds |
-                       :duration
+  @type granularity ::
+          :year
+          | :years
+          | :month
+          | :months
+          | :week
+          | :weeks
+          | :calendar_week
+          | :calendar_weeks
+          | :day
+          | :days
+          | :hour
+          | :hours
+          | :minute
+          | :minutes
+          | :second
+          | :seconds
+          | :millisecond
+          | :milliseconds
+          | :microsecond
+          | :microseconds
+          | :duration
   @type constants :: :epoch | :zero | :distant_past | :distant_future
-  @type comparable :: Date.t | DateTime.t | NaiveDateTime.t | Types.date | Types.datetime
+  @type comparable ::
+          Date.t() | DateTime.t() | NaiveDateTime.t() | Types.date() | Types.datetime()
   @type compare_result :: -1 | 0 | 1 | {:error, term}
-  @type diff_result :: Timex.Duration.t | integer | {:error, term}
+  @type diff_result :: Timex.Duration.t() | integer | {:error, term}
 
   @doc """
   Compare two date or datetime types.

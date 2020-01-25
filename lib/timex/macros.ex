@@ -7,13 +7,22 @@ defmodule Timex.Macros do
   """
   defmacro defdeprecated({name, _env, args} = head, message, do: body) do
     caller = Enum.join(Module.split(__CALLER__.module), ".")
-    {name, len} = case {name, args} do
-      {:when, [{name, _, args} | _]} -> {name, Enum.count(args)}
-      _ -> {name, Enum.count(args)}
-    end
+
+    {name, len} =
+      case {name, args} do
+        {:when, [{name, _, args} | _]} -> {name, Enum.count(args)}
+        _ -> {name, Enum.count(args)}
+      end
+
     quote do
       def unquote(head) do
-        IO.write :stderr, "warning: #{unquote(caller)}.#{unquote(name)}/#{unquote(len)} is deprecated, #{unquote(message)}\n"
+        IO.write(
+          :stderr,
+          "warning: #{unquote(caller)}.#{unquote(name)}/#{unquote(len)} is deprecated, #{
+            unquote(message)
+          }\n"
+        )
+
         unquote(body)
       end
     end
@@ -24,7 +33,7 @@ defmodule Timex.Macros do
   """
   defmacro is_positive_integer(n) do
     quote do
-      (is_integer(unquote(n)) and unquote(n) >= 0)
+      is_integer(unquote(n)) and unquote(n) >= 0
     end
   end
 
@@ -33,7 +42,7 @@ defmodule Timex.Macros do
   """
   defmacro is_positive_number(n) do
     quote do
-      (is_number(unquote(n))) and unquote(n) >= 0
+      is_number(unquote(n)) and unquote(n) >= 0
     end
   end
 
@@ -42,7 +51,7 @@ defmodule Timex.Macros do
   """
   defmacro is_integer_in_range(n, min, max) do
     quote do
-      (is_integer(unquote(n)) and unquote(n) >= unquote(min) and unquote(n) <= unquote(max))
+      is_integer(unquote(n)) and unquote(n) >= unquote(min) and unquote(n) <= unquote(max)
     end
   end
 
@@ -52,7 +61,7 @@ defmodule Timex.Macros do
   """
   defmacro is_float_in_range(n, min, max) do
     quote do
-      (is_float(unquote(n)) and unquote(n) >= unquote(min) and unquote(n) < unquote(max))
+      is_float(unquote(n)) and unquote(n) >= unquote(min) and unquote(n) < unquote(max)
     end
   end
 
@@ -61,7 +70,7 @@ defmodule Timex.Macros do
   """
   defmacro is_millisecond(ms) do
     quote do
-      (is_integer_in_range(unquote(ms), 0, 999) or is_float_in_range(unquote(ms), 0, 1000))
+      is_integer_in_range(unquote(ms), 0, 999) or is_float_in_range(unquote(ms), 0, 1000)
     end
   end
 
@@ -91,6 +100,7 @@ defmodule Timex.Macros do
       is_integer_in_range(unquote(h), 0, 23)
     end
   end
+
   defmacro is_hour(h, :inclusive) do
     quote do
       is_integer_in_range(unquote(h), 0, 23)
@@ -100,11 +110,11 @@ defmodule Timex.Macros do
   @doc """
   A guard macro which asserts that the given values forms a valid Erlang timestamp
   """
-  defmacro is_timestamp(mega,sec,micro) do
+  defmacro is_timestamp(mega, sec, micro) do
     quote do
-      (is_integer(unquote(mega)) and
-       is_integer(unquote(sec)) and
-       is_integer(unquote(micro)))
+      is_integer(unquote(mega)) and
+        is_integer(unquote(sec)) and
+        is_integer(unquote(micro))
     end
   end
 
@@ -183,7 +193,7 @@ defmodule Timex.Macros do
   defmacro is_iso_day_of_year(y, d) do
     quote do
       is_integer_in_range(unquote(d), 1, 365) or
-      (unquote(d) == 366 and is_leap_year(unquote(y)))
+        (unquote(d) == 366 and is_leap_year(unquote(y)))
     end
   end
 
@@ -226,18 +236,19 @@ defmodule Timex.Macros do
   @doc """
   A guard macro which asserts that the given values are a valid year, month, and day of month
   """
-  defmacro is_date(y,m,d) do
+  defmacro is_date(y, m, d) do
     quote do
-      (is_year(unquote(y)) and is_month(unquote(m)) and is_day_of_month(unquote(d)))
+      is_year(unquote(y)) and is_month(unquote(m)) and is_day_of_month(unquote(d))
     end
   end
 
   @doc """
   A guard macro which asserts that the given values are a valid hour, minute, second, and optional millisecond
   """
-  defmacro is_time(h,m,s,ms\\0) do
+  defmacro is_time(h, m, s, ms \\ 0) do
     quote do
-      (is_hour(unquote(h), :exclusive) and is_minute(unquote(m)) and is_second(unquote(s)) and is_millisecond(unquote(ms)))
+      is_hour(unquote(h), :exclusive) and is_minute(unquote(m)) and is_second(unquote(s)) and
+        is_millisecond(unquote(ms))
     end
   end
 
@@ -245,9 +256,10 @@ defmodule Timex.Macros do
   A guard macro which asserts that the given values are a valid year, month, day, hour,
   minute, second, and optional millisecond
   """
-  defmacro is_datetime(y,m,d,h,mm,s,ms\\0) do
+  defmacro is_datetime(y, m, d, h, mm, s, ms \\ 0) do
     quote do
-      (is_date(unquote(y),unquote(m),unquote(d)) and is_time(unquote(h),unquote(mm),unquote(s),unquote(ms)))
+      is_date(unquote(y), unquote(m), unquote(d)) and
+        is_time(unquote(h), unquote(mm), unquote(s), unquote(ms))
     end
   end
 
@@ -255,12 +267,11 @@ defmodule Timex.Macros do
   A guard macro which asserts that the given values compose a timestamp which is representable
   by a Date or DateTime, relative to year zero
   """
-  defmacro is_date_timestamp(mega,secs,micro) do
+  defmacro is_date_timestamp(mega, secs, micro) do
     quote do
-      (is_positive_integer(unquote(mega)) and
-       is_positive_integer(unquote(secs)) and
-       is_positive_integer(unquote(micro)))
+      is_positive_integer(unquote(mega)) and
+        is_positive_integer(unquote(secs)) and
+        is_positive_integer(unquote(micro))
     end
   end
-
 end
