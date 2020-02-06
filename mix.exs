@@ -30,7 +30,7 @@ defmodule Timex.Mixfile do
   def application do
     [
       applications: [:logger, :tzdata, :gettext, :combine],
-      env: [local_timezone: nil, default_locale: "en"],
+      env: [local_timezone: nil],
       mod: {Timex, []}
     ]
   end

@@ -57,7 +57,7 @@ defmodule Timex.Format.Duration.Formatters.Default do
 
   """
   @spec format(Duration.t()) :: String.t() | {:error, term}
-  def format(%Duration{} = duration), do: lformat(duration, Translator.default_locale())
+  def format(%Duration{} = duration), do: lformat(duration, Translator.current_locale())
   def format(_), do: {:error, :invalid_timestamp}
 
   def lformat(%Duration{} = duration, _locale) do

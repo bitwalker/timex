@@ -5,14 +5,31 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
-- TBD
+**NOTE:** The config of the Timex default locale is changed to:
+```ex
+config :timex, Timex.Gettext, default_locale: "en"
+```
+This follows the standard set by Gettext, see: [the Gettext docs](https://hexdocs.pm/gettext/Gettext.html#module-default-locale)
+
+Now when the Gettext locale is being changed on runtime with:
+```ex
+Gettext.put_locale("nl")
+```
+The Gettext backend for Timex will follow suit. If for some reason you want Timex, and just Timex, to change its locale to something else you should target the Timex.Gettext backend with:
+```ex
+Timex.Gettext.put_locale("de")
+```
+
+### Fixed
+
+- Let Timex follow the locale set by the global Gettext. See #501
 
 ## 3.6.1
 
 ### Potentially Breaking
 
 - Require Elixir v1.6+
- 
+
 ### Added
 
 - Setup property based test framework and add sample tests (#480)
