@@ -1,0 +1,72 @@
+## "msgid"s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove "msgid"s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use "mix gettext.extract --merge" or "mix gettext.merge"
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: he\n"
+"Plural-Forms: nplurals=2\n"
+
+#: lib/l10n/translator.ex:200
+msgid "%{count} day"
+msgid_plural "%{count} days"
+msgstr[0] "יום"
+msgstr[1] "%{count} ימים"
+
+#: lib/l10n/translator.ex:199
+msgid "%{count} hour"
+msgid_plural "%{count} hours"
+msgstr[0] "שעה"
+msgstr[1] "%{count} שעות"
+
+#: lib/l10n/translator.ex:195
+msgid "%{count} microsecond"
+msgid_plural "%{count} microseconds"
+msgstr[0] "מיקרו-שניה"
+msgstr[1] "%{count} מקרו-שניות"
+
+#: lib/l10n/translator.ex:196
+msgid "%{count} millisecond"
+msgid_plural "%{count} milliseconds"
+msgstr[0] "מילי-שניה"
+msgstr[1] "%{count} מילי-שניות"
+
+#: lib/l10n/translator.ex:198
+msgid "%{count} minute"
+msgid_plural "%{count} minutes"
+msgstr[0] "דקה"
+msgstr[1] "%{count} דקות"
+
+#: lib/l10n/translator.ex:202
+msgid "%{count} month"
+msgid_plural "%{count} months"
+msgstr[0] "חודש"
+msgstr[1] "%{count} חודשים"
+
+#: lib/l10n/translator.ex:194
+msgid "%{count} nanosecond"
+msgid_plural "%{count} nanoseconds"
+msgstr[0] "ננו-שניה"
+msgstr[1] "%{count} ננו-שניות"
+
+#: lib/l10n/translator.ex:197
+msgid "%{count} second"
+msgid_plural "%{count} seconds"
+msgstr[0] "שניה"
+msgstr[1] "%{count} שניות"
+
+#: lib/l10n/translator.ex:201
+msgid "%{count} week"
+msgid_plural "%{count} weeks"
+msgstr[0] "שבוע"
+msgstr[1] "%{count} שבועות"
+
+#: lib/l10n/translator.ex:203
+msgid "%{count} year"
+msgid_plural "%{count} years"
+msgstr[0] "שנה"
+msgstr[1] "%{count} שנים"
