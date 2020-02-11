@@ -1,0 +1,232 @@
+## "msgid"s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove "msgid"s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use "mix gettext.extract --merge" or "mix gettext.merge"
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: he\n"
+"Plural-Forms: nplurals=2\n"
+
+#: lib/l10n/translator.ex:259
+msgid "last month"
+msgstr "חודש שעבר"
+
+#: lib/l10n/translator.ex:265
+msgid "last week"
+msgstr "שבוע שעבר"
+
+#: lib/l10n/translator.ex:253
+msgid "last year"
+msgstr "שנה שעברה"
+
+#: lib/l10n/translator.ex:261
+msgid "next month"
+msgstr "חודש הבא"
+
+#: lib/l10n/translator.ex:267
+msgid "next week"
+msgstr "שבוע הבא"
+
+#: lib/l10n/translator.ex:255
+msgid "next year"
+msgstr "שנה הבאה"
+
+#: lib/l10n/translator.ex:260
+msgid "this month"
+msgstr "החודש"
+
+#: lib/l10n/translator.ex:266
+msgid "this week"
+msgstr "השבוע"
+
+#: lib/l10n/translator.ex:254
+msgid "this year"
+msgstr "השנה"
+
+#: lib/l10n/translator.ex:272
+msgid "today"
+msgstr "היום"
+
+#: lib/l10n/translator.ex:273
+msgid "tomorrow"
+msgstr "מחר"
+
+#: lib/l10n/translator.ex:271
+msgid "yesterday"
+msgstr "אתמול"
+
+#: lib/l10n/translator.ex:275
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "אתמול"
+msgstr[1] "לפני %{count} ימים"
+
+#: lib/l10n/translator.ex:300
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "לפני שעה"
+msgstr[1] "לפני %{count} שעות"
+
+#: lib/l10n/translator.ex:303
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "לפני דקה"
+msgstr[1] "לפני %{count} דקות"
+
+#: lib/l10n/translator.ex:263
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "לפני חודש"
+msgstr[1] "לפני %{count} חודשים"
+
+#: lib/l10n/translator.ex:306
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "לפני שניה"
+msgstr[1] "לפני %{count} שניות"
+
+#: lib/l10n/translator.ex:269
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "לפני שבוע"
+msgstr[1] "לפני %{count} שבועות"
+
+#: lib/l10n/translator.ex:257
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "לפני שנה"
+msgstr[1] "לפני %{count} שנים"
+
+#: lib/l10n/translator.ex:274
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "בעוד יום"
+msgstr[1] "בעוד %{count} ימים"
+
+#: lib/l10n/translator.ex:299
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "בעוד שעה"
+msgstr[1] "בעוד %{count} שעות"
+
+#: lib/l10n/translator.ex:302
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "בעוד דקה"
+msgstr[1] "בעוד %{count} דקות"
+
+#: lib/l10n/translator.ex:262
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "בעוד חודש"
+msgstr[1] "בעוד %{count} חודשים"
+
+#: lib/l10n/translator.ex:305
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "בעוד שניה"
+msgstr[1] "בעוד %{count} שניות"
+
+#: lib/l10n/translator.ex:268
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "בעוד שבוע"
+msgstr[1] "בעוד %{count} שבועות"
+
+#: lib/l10n/translator.ex:256
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "בעוד שנה"
+msgstr[1] "בעוד %{count} שנים"
+
+#: lib/l10n/translator.ex:289
+msgid "last friday"
+msgstr "שישי האחרון"
+
+#: lib/l10n/translator.ex:277
+msgid "last monday"
+msgstr "שני האחרון"
+
+#: lib/l10n/translator.ex:292
+msgid "last saturday"
+msgstr "שבת האחרונה"
+
+#: lib/l10n/translator.ex:295
+msgid "last sunday"
+msgstr "ראשון האחרון"
+
+#: lib/l10n/translator.ex:286
+msgid "last thursday"
+msgstr "חמישי האחרון"
+
+#: lib/l10n/translator.ex:280
+msgid "last tuesday"
+msgstr "שלישי האחרון"
+
+#: lib/l10n/translator.ex:283
+msgid "last wednesday"
+msgstr "רביעי האחרון"
+
+#: lib/l10n/translator.ex:291
+msgid "next friday"
+msgstr "שישי הבא"
+
+#: lib/l10n/translator.ex:279
+msgid "next monday"
+msgstr "שני הבא"
+
+#: lib/l10n/translator.ex:294
+msgid "next saturday"
+msgstr "שבת הבאה"
+
+#: lib/l10n/translator.ex:297
+msgid "next sunday"
+msgstr "ראשון הבא"
+
+#: lib/l10n/translator.ex:288
+msgid "next thursday"
+msgstr "חמישי הבא"
+
+#: lib/l10n/translator.ex:282
+msgid "next tuesday"
+msgstr "שלישי הבא"
+
+#: lib/l10n/translator.ex:285
+msgid "next wednesday"
+msgstr "רביעי הבא"
+
+#: lib/l10n/translator.ex:290
+msgid "this friday"
+msgstr "שישי הקרוב"
+
+#: lib/l10n/translator.ex:278
+msgid "this monday"
+msgstr "שני הקרוב"
+
+#: lib/l10n/translator.ex:293
+msgid "this saturday"
+msgstr "שבת הקרובה"
+
+#: lib/l10n/translator.ex:296
+msgid "this sunday"
+msgstr "ראשון הקרוב"
+
+#: lib/l10n/translator.ex:287
+msgid "this thursday"
+msgstr "חמישי הקרוב"
+
+#: lib/l10n/translator.ex:281
+msgid "this tuesday"
+msgstr "שלישי הקרוב"
+
+#: lib/l10n/translator.ex:284
+msgid "this wednesday"
+msgstr "רביעי הקרוב"
+
+#: lib/l10n/translator.ex:308
+msgid "now"
+msgstr "עכשיו"
