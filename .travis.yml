@@ -9,10 +9,12 @@ elixir:
   - 1.7
   - 1.8
   - 1.9
+  - 1.10
 otp_release:
   - 19.3
   - 20.3
   - 21.0
+  - 22.0
 matrix:
   exclude:
     - os: windows
