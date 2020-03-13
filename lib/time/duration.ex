@@ -54,7 +54,7 @@ defmodule Timex.Duration do
 
       iex> d = %Timex.Duration{megaseconds: 0, seconds: 4000, microseconds: 0}
       ...> Timex.Duration.to_time(d)
-      {:ok, ~T[01:06:40]}
+      {:ok, ~T[01:06:40.000000]}
 
       iex> d = %Timex.Duration{megaseconds: 1, seconds: 0, microseconds: 0}
       ...> Timex.Duration.to_time(d)
@@ -74,7 +74,7 @@ defmodule Timex.Duration do
 
       iex> d = %Timex.Duration{megaseconds: 0, seconds: 4000, microseconds: 0}
       ...> Timex.Duration.to_time!(d)
-      ~T[01:06:40]
+      ~T[01:06:40.000000]
 
       iex> d = %Timex.Duration{megaseconds: 1, seconds: 0, microseconds: 0}
       ...> Timex.Duration.to_time!(d)

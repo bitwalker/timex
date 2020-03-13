@@ -119,7 +119,7 @@ defmodule Timex.DateTime.Helpers do
   end
 
   # Input precision of -1 means it should be recalculated based on the value
-  def construct_microseconds(0, -1), do: {0, 0}
+  def construct_microseconds(0, -1), do: {0, 6}
   def construct_microseconds(0, p), do: {0, p}
   def construct_microseconds(n, -1), do: {n, precision(n)}
   def construct_microseconds(n, p), do: {to_precision(n, p), p}
