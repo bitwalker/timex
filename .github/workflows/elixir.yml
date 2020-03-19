@@ -19,7 +19,7 @@ jobs:
       - name: Setup elixir
         uses: actions/setup-elixir@v1.0.0
         with:
-          elixir-version: 1.10.x
+          elixir-version: 1.9.x
           otp-version: 22.x
 
       - name: Checkout repository
