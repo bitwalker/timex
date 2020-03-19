@@ -1,14 +1,14 @@
 task:
   name: Lint
   container:
-    image: elixir:1.10-alpine
+    image: elixir:1.10
   script:
     mix format --check-formatted
 
 task:
   name: Tests (Linux)
   container:
-    image: elixir:1.10-alpine
+    image: elixir:1.10
   env:
       MIX_ENV: 'test'
       LC_ALL: 'en_US.UTF-8'
