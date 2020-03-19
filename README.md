@@ -1,8 +1,7 @@
 ## Timex
 
-[![Master](https://travis-ci.org/bitwalker/timex.svg?branch=master)](https://travis-ci.org/bitwalker/timex)
+[![Master](https://api.cirrus-ci.com/github/bitwalker/timex.svg?branch=master)](https://cirrus-ci.com/github/bitwalker/timex)
 [![Hex.pm Version](http://img.shields.io/hexpm/v/timex.svg?style=flat)](https://hex.pm/packages/timex)
-[![InchCI](https://inch-ci.org/github/bitwalker/timex.svg?branch=master)](https://inch-ci.org/github/bitwalker/timex)
 [![Coverage Status](https://coveralls.io/repos/github/bitwalker/timex/badge.svg?branch=master)](https://coveralls.io/github/bitwalker/timex?branch=master)
 
 Timex is a rich, comprehensive Date/Time library for Elixir projects, with full timezone support via the `:tzdata` package. If

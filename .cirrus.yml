@@ -1,0 +1,15 @@
+lint_task:
+  container:
+    image: elixir:latest
+  script:
+    mix --check-formatted
+
+test_task:
+  container:
+    image: elixir:latest
+  mix_cache:
+    folder: deps
+    fingerprint_script: cat mix.lock
+    populate_script: mix deps.get
+  compile_script: mix compile
+  test_script: mix test
