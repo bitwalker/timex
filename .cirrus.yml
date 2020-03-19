@@ -1,14 +1,14 @@
 task:
   name: Lint
   container:
-    image: elixir:latest
+    image: elixir:1.10-alpine
   script:
     mix format --check-formatted
 
 task:
   name: Tests (Linux)
   container:
-    image: elixir:latest
+    image: elixir:1.10-alpine
   env:
       MIX_ENV: 'test'
       LC_ALL: 'en_US.UTF-8'
@@ -29,6 +29,8 @@ task:
     image: catalina-base
   env:
       MIX_ENV: 'test'
+  script: |
+    brew install erlang elixir
   mix_cache:
     folder: deps
     fingerprint_script: cat mix.lock
