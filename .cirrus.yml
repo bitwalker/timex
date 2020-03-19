@@ -2,14 +2,21 @@ lint_task:
   container:
     image: elixir:latest
   script:
-    mix --check-formatted
+    mix format --check-formatted
 
 test_task:
   container:
     image: elixir:latest
+  env:
+      MIX_ENV: 'test'
+      LC_ALL: 'en_US.UTF-8'
+      LANG: 'en_US.utf8'
   mix_cache:
     folder: deps
     fingerprint_script: cat mix.lock
-    populate_script: mix deps.get
+    populate_script: |
+        mix local.hex --if-missing --force
+        mix local.rebar --force
+        mix deps.get
   compile_script: mix compile
   test_script: mix test
