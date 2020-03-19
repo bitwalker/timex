@@ -1,8 +1,6 @@
 language: elixir
 sudo: false
 os:
-  - windows
-  - macos
   - linux
 elixir:
   - '1.6'
@@ -17,7 +15,6 @@ otp_release:
   - '22.2'
 matrix:
   exclude:
-    - os: windows
     - elixir: '1.6'
       otp_release: '22.2'
     - elixir: '1.7'
