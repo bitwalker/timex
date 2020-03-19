@@ -1,16 +1,34 @@
-lint_task:
+task:
+  name: Lint
   container:
     image: elixir:latest
   script:
     mix format --check-formatted
 
-test_task:
+task:
+  name: Tests (Linux)
   container:
     image: elixir:latest
   env:
       MIX_ENV: 'test'
       LC_ALL: 'en_US.UTF-8'
       LANG: 'en_US.utf8'
+  mix_cache:
+    folder: deps
+    fingerprint_script: cat mix.lock
+    populate_script: |
+        mix local.hex --if-missing --force
+        mix local.rebar --force
+        mix deps.get
+  compile_script: mix compile
+  test_script: mix test
+
+task:
+  name: Tests (macOS)
+  osx_instance:
+    image: catalina-base
+  env:
+      MIX_ENV: 'test'
   mix_cache:
     folder: deps
     fingerprint_script: cat mix.lock
