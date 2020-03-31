@@ -11,3 +11,6 @@ cover/
 
 # ignore asdf config
 .tool-versions
+
+# Ignore IDE artefacts
+.elixir_ls
