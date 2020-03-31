@@ -33,11 +33,17 @@ To use Timex with your projects, edit your `mix.exs` file and add it as a depend
 defp deps do
   [{:timex, "~> 3.5"}]
 end
+```
 
+If you are on a very old Elixir version, or you want to manage all the dependancies yourself for some reason then you can do this:
+
+```elixir
 defp application do
-  [applications: [:timex]]
+  [extra_applications: [:timex]]
 end
 ```
+
+If you don't know what the extra_applications key is you probably don't need to do that.
 
 ### Quickfast introduction
 
