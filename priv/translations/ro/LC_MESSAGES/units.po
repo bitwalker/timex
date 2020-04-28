@@ -13,10 +13,10 @@ msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
-"Last-Translator: \n"
+"Last-Translator: Mihai Târnovan <mihai@steadyhq.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.11\n"
 
@@ -30,21 +30,21 @@ msgstr[2] "%{count} de zile"
 #: lib/l10n/translator.ex:177
 msgid "%{count} hour"
 msgid_plural "%{count} hours"
-msgstr[0] "%{count} ora"
+msgstr[0] "%{count} oră"
 msgstr[1] "%{count} ore"
 msgstr[2] "%{count} de ore"
 
 #: lib/l10n/translator.ex:173
 msgid "%{count} microsecond"
 msgid_plural "%{count} microseconds"
-msgstr[0] "%{count} microsecunda"
+msgstr[0] "%{count} microsecundă"
 msgstr[1] "%{count} microsecunde"
 msgstr[2] "%{count} de microsecunde"
 
 #: lib/l10n/translator.ex:174
 msgid "%{count} millisecond"
 msgid_plural "%{count} milliseconds"
-msgstr[0] "%{count} millisecunda"
+msgstr[0] "%{count} millisecundă"
 msgstr[1] "%{count} millisecunde"
 msgstr[2] "%{count} de millisecunde"
 
@@ -58,30 +58,30 @@ msgstr[2] "%{count} de minute"
 #: lib/l10n/translator.ex:180
 msgid "%{count} month"
 msgid_plural "%{count} months"
-msgstr[0] "%{count} luna"
+msgstr[0] "%{count} lună"
 msgstr[1] "%{count} luni"
 msgstr[2] "%{count} de luni"
 
 #: lib/l10n/translator.ex:172
 msgid "%{count} nanosecond"
 msgid_plural "%{count} nanoseconds"
-msgstr[0] "%{count} nanosecunda"
+msgstr[0] "%{count} nanosecundă"
 msgstr[1] "%{count} nanosecunde"
 msgstr[2] "%{count} de nanosecunde"
 
 #: lib/l10n/translator.ex:175
 msgid "%{count} second"
 msgid_plural "%{count} seconds"
-msgstr[0] "%{count} secunda"
+msgstr[0] "%{count} secundă"
 msgstr[1] "%{count} secunde"
 msgstr[2] "%{count} de secunde"
 
 #: lib/l10n/translator.ex:179
 msgid "%{count} week"
 msgid_plural "%{count} weeks"
-msgstr[0] "%{count} saptamana"
-msgstr[1] "%{count} saptamani"
-msgstr[2] "%{count} de saptamani"
+msgstr[0] "%{count} săptămână"
+msgstr[1] "%{count} săptămâni"
+msgstr[2] "%{count} de săptămâni"
 
 #: lib/l10n/translator.ex:181
 msgid "%{count} year"
