@@ -12,16 +12,16 @@ msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
-"Last-Translator: \n"
+"Last-Translator: Mihai Târnovan <mihai@steadyhq.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.11\n"
 
 #: lib/l10n/translator.ex:220
 msgid "April"
-msgstr "Aprile"
+msgstr "Aprilie"
 
 #: lib/l10n/translator.ex:224
 msgid "August"
@@ -29,7 +29,7 @@ msgstr "August"
 
 #: lib/l10n/translator.ex:228
 msgid "December"
-msgstr "Decembre"
+msgstr "Decembrie"
 
 #: lib/l10n/translator.ex:218
 msgid "February"
