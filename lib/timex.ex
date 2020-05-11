@@ -1647,7 +1647,7 @@ defmodule Timex do
   if the shift moves to an ambiguous time period for the zone of that DateTime.
 
   Shifting by months will always return a date in the expected month. Because months
-  have different number of days, shifting to a month with fewer days may may not be
+  have different number of days, shifting to a month with fewer days may not be
   the same day of the month as the original date.
 
   If an error occurs, an error tuple will be returned.
