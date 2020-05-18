@@ -245,7 +245,16 @@ defmodule Timex.Macros do
   @doc """
   A guard macro which asserts that the given values are a valid hour, minute, second, and optional millisecond
   """
-  defmacro is_time(h, m, s, ms \\ 0) do
+  defmacro is_time(h, m, s) do
+    quote do
+      is_hour(unquote(h), :exclusive) and is_minute(unquote(m)) and is_second(unquote(s))
+    end
+  end
+
+  @doc """
+  A guard macro which asserts that the given values are a valid hour, minute, second, and optional millisecond
+  """
+  defmacro is_time(h, m, s, ms) do
     quote do
       is_hour(unquote(h), :exclusive) and is_minute(unquote(m)) and is_second(unquote(s)) and
         is_millisecond(unquote(ms))
@@ -256,7 +265,18 @@ defmodule Timex.Macros do
   A guard macro which asserts that the given values are a valid year, month, day, hour,
   minute, second, and optional millisecond
   """
-  defmacro is_datetime(y, m, d, h, mm, s, ms \\ 0) do
+  defmacro is_datetime(y, m, d, h, mm, s) do
+    quote do
+      is_date(unquote(y), unquote(m), unquote(d)) and
+        is_time(unquote(h), unquote(mm), unquote(s))
+    end
+  end
+
+  @doc """
+  A guard macro which asserts that the given values are a valid year, month, day, hour,
+  minute, second, and optional millisecond
+  """
+  defmacro is_datetime(y, m, d, h, mm, s, ms) do
     quote do
       is_date(unquote(y), unquote(m), unquote(d)) and
         is_time(unquote(h), unquote(mm), unquote(s), unquote(ms))
