@@ -484,6 +484,71 @@ defmodule Timex.Interval do
   def max(%__MODULE__{until: until, right_open: false}), do: until
   def max(%__MODULE__{until: until}), do: Timex.shift(until, microseconds: -1)
 
+  @doc """
+  Returns an Interval representing the intersection between two intervals.
+  If the intervals do not overlap, return {:error, :no_overlap_interval}.
+  If the intervals overlap at a single instant (regardless of open/closed
+  bounds), also return {:error, :no_overlap_interval}
+  """
+  @spec overlap(__MODULE__.t(), __MODULE__.t()) :: __MODULE__.t() | {:error, :no_overlap_interval}
+  def overlap(%__MODULE__{} = a, %__MODULE__{} = b) do
+    {from, left_open} = start_of_overlap(a, b)
+    {until, right_open} = end_of_overlap(a, b)
+
+    case new(from: from, until: until, left_open: left_open, right_open: right_open) do
+      {:error, _} -> {:error, :no_overlap_interval}
+      interval -> interval
+    end
+  end
+
+  @doc """
+  Take the later start time of the two overlapping intervals,
+  and the left_open value of that interval.
+  """
+  defp start_of_overlap(%__MODULE__{} = a, %__MODULE__{} = b) do
+    cond do
+      Timex.equal?(a.from, b.from)  -> {a.from, determine_bound(a.left_open, b.left_open)}
+      Timex.before?(a.from, b.from) -> {b.from, b.left_open}
+      true                          -> {a.from, a.left_open}
+    end
+  end
+
+  @doc """
+  Take the earlier end time of the 2 overlapping intervals,
+  and the right_open value of that interval.
+  """
+  defp end_of_overlap(%__MODULE__{} = a, %__MODULE__{} = b) do
+    cond do
+      Timex.equal?(a.until, b.until)  -> {a.until, determine_bound(a.right_open, b.right_open)}
+      Timex.before?(a.until, b.until) -> {a.until, a.right_open}
+      true                            -> {b.until, b.right_open}
+    end
+  end
+
+  @doc """
+  When calculating overlap, if two intervals share a `from` (or `until`), the overlap
+  interval should have a bound matching the "inner" interval (eg: if either interval has
+  an open bound, the overlap should have an open bound).
+  
+  ## Example:
+
+    [----)    <- Interval a
+    (-------] <- Interval b
+    (----)    <- overlap interval (left_open: true)
+
+    Interval a and b have the same `from` value.
+    Interval a has `left_open: false
+    Interval b has `left_open: true`
+  
+    The resulting overlap interval should have `left_open: true`
+
+  To determine the appropriate bound, if both intervals have a 'closed' bound on the matching
+  `from` or `until`, then the resulting overlap interval should have a 'closed' bound. In all
+  other cases, the overlap interval should have an 'open' bound.
+  """
+  defp determine_bound(false, false), do: false
+  defp determine_bound(_, _), do: true
+
   defimpl Enumerable do
     alias Timex.Interval
 

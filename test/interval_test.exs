@@ -196,6 +196,109 @@ defmodule IntervalTests do
     end
   end
 
+  describe "overlap" do
+    test "non-overlapping intervals" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00])
+      b = Interval.new(from: ~N[2017-01-02 15:30:00], until: ~N[2017-01-02 15:45:00])
+
+      assert {:error, _} = Interval.overlap(a, b)
+    end
+
+    test "non-overlapping back-to-back intervals" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00], right_open: true)
+      b = Interval.new(from: ~N[2017-01-02 15:15:00], until: ~N[2017-01-02 15:30:00])
+
+      assert {:error, _} = Interval.overlap(a, b)
+    end
+
+    test "overlapping at single instant with closed bounds" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00], right_open: false)
+      b = Interval.new(from: ~N[2017-01-02 15:15:00], until: ~N[2017-01-02 15:30:00], left_open: false)
+
+      assert {:error, _} = Interval.overlap(a, b)
+    end
+
+    test "first subset of second" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:45:00])
+      b = Interval.new(from: ~N[2017-01-02 15:20:00], until: ~N[2017-01-02 15:30:00])
+
+      assert Interval.new(from: ~N[2017-01-02 15:20:00], until: ~N[2017-01-02 15:30:00]) == Interval.overlap(a, b)
+      assert Interval.new(from: ~N[2017-01-02 15:20:00], until: ~N[2017-01-02 15:30:00]) == Interval.overlap(b, a)
+    end
+
+    test "partially overlapping" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00])
+      b = Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:30:00])
+
+      assert Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:15:00]) == Interval.overlap(a, b)
+      assert Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:15:00]) == Interval.overlap(b, a)
+    end
+
+    test "overlapping across hours" do
+      a = Interval.new(from: ~N[2017-01-02 14:50:00], until: ~N[2017-01-02 15:15:00])
+      b = Interval.new(from: ~N[2017-01-02 14:55:00], until: ~N[2017-01-02 15:30:00])
+      
+      assert Interval.new(from: ~N[2017-01-02 14:55:00], until: ~N[2017-01-02 15:15:00]) == Interval.overlap(a, b)
+      assert Interval.new(from: ~N[2017-01-02 14:55:00], until: ~N[2017-01-02 15:15:00]) == Interval.overlap(b, a)
+    end
+
+    test "overlapping across days" do
+      a = Interval.new(from: ~N[2017-01-15 23:40:00], until: ~N[2017-01-16 00:10:00])
+      b = Interval.new(from: ~N[2017-01-15 23:50:00], until: ~N[2017-01-16 00:20:00])
+
+      assert Interval.new(from: ~N[2017-01-15 23:50:00], until: ~N[2017-01-16 00:10:00]) == Interval.overlap(a, b)
+      assert Interval.new(from: ~N[2017-01-15 23:50:00], until: ~N[2017-01-16 00:10:00]) == Interval.overlap(b, a)
+    end
+
+    test "overlapping across months" do
+      a = Interval.new(from: ~N[2017-06-30 23:40:00], until: ~N[2017-07-01 00:10:00])
+      b = Interval.new(from: ~N[2017-06-30 23:50:00], until: ~N[2017-07-01 00:20:00])
+
+      assert Interval.new(from: ~N[2017-06-30 23:50:00], until: ~N[2017-07-01 00:10:00]) == Interval.overlap(a, b)
+      assert Interval.new(from: ~N[2017-06-30 23:50:00], until: ~N[2017-07-01 00:10:00]) == Interval.overlap(b, a)
+    end
+
+    test "overlapping across years" do
+      a = Interval.new(from: ~N[2016-12-31 23:30:00], until: ~N[2017-01-01 00:30:00])
+      b = Interval.new(from: ~N[2016-12-31 23:45:00], until: ~N[2017-01-01 00:15:00])
+
+      assert Interval.new(from: ~N[2016-12-31 23:45:00], until: ~N[2017-01-01 00:15:00]) == Interval.overlap(a, b)
+      assert Interval.new(from: ~N[2016-12-31 23:45:00], until: ~N[2017-01-01 00:15:00]) == Interval.overlap(b, a)
+    end
+
+    test "shared from/until with different openness" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00], left_open: true, right_open: false)
+      b = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00], left_open: false, right_open: true)
+
+      assert Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00], right_open: true, left_open: true) == Interval.overlap(a, b)
+      assert Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00], right_open: true, left_open: true) == Interval.overlap(b, a)
+    end
+
+    test "left_open: true, right_open: true" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00], right_open: true)
+      b = Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:30:00], left_open: true)
+
+      assert Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:15:00], right_open: true, left_open: true) == Interval.overlap(a, b)
+      assert Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:15:00], right_open: true, left_open: true) == Interval.overlap(b, a)
+    end
+
+    test "left_open: true, right_open: false" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00], right_open: false)
+      b = Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:30:00], left_open: true)
+
+      assert Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:15:00], right_open: false, left_open: true) == Interval.overlap(a, b)
+      assert Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:15:00], right_open: false, left_open: true) == Interval.overlap(b, a)
+    end
+
+    test "left_open: false, right_open: false" do
+      a = Interval.new(from: ~N[2017-01-02 15:00:00], until: ~N[2017-01-02 15:15:00], right_open: false)
+      b = Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:30:00], left_open: false)
+
+      assert Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:15:00], right_open: false, left_open: false) == Interval.overlap(a, b)
+      assert Interval.new(from: ~N[2017-01-02 15:10:00], until: ~N[2017-01-02 15:15:00], right_open: false, left_open: false) == Interval.overlap(b, a)
+    end
+  end
+
   describe "contains?/2" do
     test "non-overlapping" do
       earlier = Interval.new(from: ~D[2018-01-01], until: ~D[2018-01-04])
