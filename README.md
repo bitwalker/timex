@@ -136,6 +136,8 @@ Timex functions of the form `iso_*` behave based on how the ISO calendar represe
 
 If you need to use Timex from within an escript, add `{:tzdata, "~> 0.1.8", override: true}` to your deps, more recent versions of :tzdata are unable to work in an escript because of the need to load ETS table files from priv, and due to the way ETS loads these files, it's not possible to do so.
 
+If your build still throws an error after this, try removing the `_build` and `deps` folder. Then execute `mix deps.unlock tzdata` and `mix deps.get`.
+
 ### Automatic time zone updates
 
 Timex includes the [Tzdata](https://github.com/lau/tzdata) library for time zone data. Tzdata has an automatic update capability that fetches updates from IANA and which is enabled by default; if you want to disable it, check [the Tzdata documentation](https://github.com/lau/tzdata#automatic-data-updates) for details.
