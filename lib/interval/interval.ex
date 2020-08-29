@@ -484,7 +484,7 @@ defmodule Timex.Interval do
   def max(%__MODULE__{until: until, right_open: false}), do: until
   def max(%__MODULE__{until: until}), do: Timex.shift(until, microseconds: -1)
 
-  defimpl Enumerable do
+  defimpl Enumerable, for: Timex.Interval do
     alias Timex.Interval
 
     def reduce(%Interval{until: until, right_open: open?, step: step} = i, acc, fun) do
