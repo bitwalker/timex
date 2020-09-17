@@ -43,8 +43,8 @@ defmodule SetTests do
     end
   end
 
-  test "sets from time struct" do
-    original_date = Timex.to_datetime({{2017, 7, 21}, {1, 2, 3}})
+  test "sets DateTime time values from time struct" do
+    original_date = Timex.to_datetime({{2017, 7, 21}, {1, 2, 3, 4}})
     new_date = Timex.set(original_date, time: ~T[09:52:33.000])
 
     assert original_date.year == new_date.year
@@ -54,10 +54,25 @@ defmodule SetTests do
     assert new_date.hour == 9
     assert new_date.minute == 52
     assert new_date.second == 33
+    assert new_date.microsecond == {0, 3}
   end
 
-  test "sets from time struct with more than one change requested" do
-    original_date = Timex.to_datetime({{2017, 7, 21}, {1, 2, 3}})
+  test "sets DateTime time values from time tuple" do
+    original_date = Timex.to_datetime({{2017, 7, 21}, {1, 2, 3, 4}})
+    new_date = Timex.set(original_date, time: {9, 52, 33})
+
+    assert original_date.year == new_date.year
+    assert original_date.month == new_date.month
+    assert original_date.day == new_date.day
+
+    assert new_date.hour == 9
+    assert new_date.minute == 52
+    assert new_date.second == 33
+    assert new_date.microsecond == {4, 6}
+  end
+
+  test "sets DateTime time values from time struct with more than one change requested" do
+    original_date = Timex.to_datetime({{2017, 7, 21}, {1, 2, 3, 4}})
     new_date = Timex.set(original_date, time: ~T[09:52:33.000], year: 1989)
 
     assert new_date.year == 1989
@@ -67,6 +82,35 @@ defmodule SetTests do
     assert new_date.hour == 9
     assert new_date.minute == 52
     assert new_date.second == 33
+    assert new_date.microsecond == {0, 3}
+  end
+
+  test "sets NaiveDateTime time values from time struct" do
+    original_date = Timex.to_naive_datetime({{2017, 7, 21}, {1, 2, 3, 4}})
+    new_date = Timex.set(original_date, time: ~T[09:52:33.000])
+
+    assert original_date.year == new_date.year
+    assert original_date.month == new_date.month
+    assert original_date.day == new_date.day
+
+    assert new_date.hour == 9
+    assert new_date.minute == 52
+    assert new_date.second == 33
+    assert new_date.microsecond == {0, 3}
+  end
+
+  test "sets NaiveDateTime time values from time tuple" do
+    original_date = Timex.to_naive_datetime({{2017, 7, 21}, {1, 2, 3, 4}})
+    new_date = Timex.set(original_date, time: {9, 52, 33})
+
+    assert original_date.year == new_date.year
+    assert original_date.month == new_date.month
+    assert original_date.day == new_date.day
+
+    assert new_date.hour == 9
+    assert new_date.minute == 52
+    assert new_date.second == 33
+    assert new_date.microsecond == {4, 6}
   end
 
   test "sets from date struct" do
