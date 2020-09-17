@@ -265,8 +265,21 @@ defimpl Timex.Protocol, for: DateTime do
               %{result | :hour => h, :minute => m, :second => s}
             end
 
+          {:time, {h, m, s, ms}} ->
+            if validate? do
+              %{
+                result
+                | :hour => Timex.normalize(:hour, h),
+                  :minute => Timex.normalize(:minute, m),
+                  :second => Timex.normalize(:second, s),
+                  :microsecond => Timex.normalize(:microsecond, ms)
+              }
+            else
+              %{result | :hour => h, :minute => m, :second => s, :microsecond => ms}
+            end
+
           {:time, %Time{} = t} ->
-            Timex.set(result, time: {t.hour, t.minute, t.second})
+            Timex.set(result, time: {t.hour, t.minute, t.second, t.microsecond})
 
           {:day, d} ->
             if validate? do
@@ -312,7 +325,7 @@ defimpl Timex.Protocol, for: DateTime do
   def shift(%DateTime{time_zone: tz, microsecond: {_us, precision}} = datetime, shifts)
       when is_list(shifts) do
     {logical_shifts, shifts} = Keyword.split(shifts, [:years, :months, :weeks, :days])
-    # applied_offset is applied when converting to gregorian microseconds, 
+    # applied_offset is applied when converting to gregorian microseconds,
     # we want to reverse that when converting back to the origin timezone
     applied_offset_ms = Timezone.total_offset(datetime.std_offset, datetime.utc_offset) * -1
     datetime = logical_shift(datetime, logical_shifts)

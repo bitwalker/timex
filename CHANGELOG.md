@@ -5,7 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
-- TBD
+### Potentially Breaking
+- `Timex.set/2` now sets microseconds when setting `:time` from a `%Time{}` struct
+
+### Added
+- `Timex.set/2` now also accepts setting the `:date` from a `%Date{}` and `:time` from a `%Time{}` struct for NaiveDateTime
 
 ## 3.6.1
 

@@ -248,6 +248,9 @@ defimpl Timex.Protocol, for: NaiveDateTime do
               %{result | :year => y, :month => m, :day => d}
             end
 
+          {:date, %Date{} = d} ->
+            Timex.set(result, date: {d.year, d.month, d.day})
+
           {:time, {h, m, s}} ->
             if validate? do
               %{
@@ -259,6 +262,22 @@ defimpl Timex.Protocol, for: NaiveDateTime do
             else
               %{result | :hour => h, :minute => m, :second => s}
             end
+
+          {:time, {h, m, s, ms}} ->
+            if validate? do
+              %{
+                result
+                | :hour => Timex.normalize(:hour, h),
+                  :minute => Timex.normalize(:minute, m),
+                  :second => Timex.normalize(:second, s),
+                  :microsecond => Timex.normalize(:microsecond, ms)
+              }
+            else
+              %{result | :hour => h, :minute => m, :second => s, :microsecond => ms}
+            end
+
+          {:time, %Time{} = t} ->
+            Timex.set(result, time: {t.hour, t.minute, t.second, t.microsecond})
 
           {:day, d} ->
             if validate? do
