@@ -363,6 +363,13 @@ defmodule DateFormatTest.ParseDefault do
       )
 
     assert {:ok, ^date} = parse("3:25PM", "{kitchen}")
+
+    date =
+      Timex.to_naive_datetime(
+        Timex.set(Timex.now(), hour: 11, minute: 28, second: 0, microsecond: {0, 0})
+      )
+
+    assert {:ok, ^date} = parse("11:28AM", "{kitchen}")
   end
 
   test "parse ISO8601 (Extended)" do

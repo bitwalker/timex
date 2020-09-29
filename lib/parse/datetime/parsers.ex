@@ -630,7 +630,7 @@ defmodule Timex.Parse.DateTime.Parsers do
   """
   def kitchen(opts) do
     sequence([
-      hour12(),
+      hour12(padding: :zeroes),
       literal(char(":")),
       minute(padding: :zeroes),
       ampm(opts)
