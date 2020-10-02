@@ -11,16 +11,23 @@ task:
     image: elixir:1.10
   env:
       MIX_ENV: 'test'
+      MIX_HOME: '/opt/mix'
       LC_ALL: 'en_US.UTF-8'
       LANG: 'en_US.utf8'
   mix_cache:
-    folder: deps
-    fingerprint_script: cat mix.lock
+    folder: '/opt/mix'
     populate_script: |
         mix local.hex --if-missing --force
         mix local.rebar --force
+  deps_cache:
+    folder: deps
+    fingerprint_script:
+      - echo $CIRRUS_OS
+      - cat mix.lock
+    populate_script: |
         mix deps.get
-  compile_script: mix compile
+  compile_script: |
+        mix compile
   test_script: mix test
 
 task:
@@ -31,12 +38,15 @@ task:
       MIX_ENV: 'test'
   script: |
     brew install erlang elixir
-  mix_cache:
+  deps_cache:
     folder: deps
     fingerprint_script: cat mix.lock
     populate_script: |
         mix local.hex --if-missing --force
         mix local.rebar --force
         mix deps.get
-  compile_script: mix compile
+  compile_script: |
+      mix local.hex --if-missing --force
+      mix local.rebar --force
+      mix compile
   test_script: mix test
