@@ -1312,8 +1312,28 @@ defmodule Timex do
   """
   @spec week_of_month(Types.year(), Types.month(), Types.day()) :: Types.week_of_month()
   def week_of_month(year, month, day) when is_date(year, month, day) do
-    {_, week_index_of_given_date} = iso_week(year, month, day)
-    {_, week_index_of_first_day_of_given_month} = iso_week(year, month, 1)
+    next_year = year + 1
+    prev_year = year - 1
+
+    week_index_of_given_date =
+      case iso_week(year, month, day) do
+        {^prev_year, _} ->
+          0
+
+        {^next_year, _} ->
+          {_, week_index_of_given_date_shifted} = iso_week(year, month, day - 7)
+          week_index_of_given_date_shifted + 1
+
+        {_, week_index} ->
+          week_index
+      end
+
+    week_index_of_first_day_of_given_month =
+      case iso_week(year, month, 1) do
+        {^prev_year, _} -> 0
+        {_, week_index} -> week_index
+      end
+
     week_index_of_given_date - week_index_of_first_day_of_given_month + 1
   end
 
