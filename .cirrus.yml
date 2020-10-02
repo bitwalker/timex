@@ -11,6 +11,7 @@ task:
     image: elixir:1.10
   env:
       MIX_ENV: 'test'
+      MIX_HOME: '/opt/mix'
       LC_ALL: 'en_US.UTF-8'
       LANG: 'en_US.utf8'
   mix_cache:
