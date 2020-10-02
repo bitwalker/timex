@@ -36,7 +36,9 @@ task:
     brew install erlang elixir
   mix_cache:
     folder: deps
-    fingerprint_script: cat mix.lock
+    fingerprint_script:
+      - echo $CIRRUS_OS
+      - cat mix.lock
     populate_script: |
         mix local.hex --if-missing --force
         mix local.rebar --force
