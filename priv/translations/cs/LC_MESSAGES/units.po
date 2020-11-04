@@ -33,9 +33,9 @@ msgstr[2] "%{count} dní"
 #: lib/l10n/translator.ex:177
 msgid "%{count} hour"
 msgid_plural "%{count} hours"
-msgstr[0] "%{count} hodin"
-msgstr[1] "%{Count} hodina"
-msgstr[2] "%{Count} hodina"
+msgstr[0] "%{count} hodina"
+msgstr[1] "%{count} hodiny"
+msgstr[2] "%{count} hodin"
 
 #: lib/l10n/translator.ex:173
 msgid "%{count} microsecond"
