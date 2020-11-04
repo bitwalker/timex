@@ -27,34 +27,34 @@ msgstr ""
 msgid "%{count} day"
 msgid_plural "%{count} days"
 msgstr[0] "%{count} den"
-msgstr[1] "%{count} dní"
+msgstr[1] "%{count} dny"
 msgstr[2] "%{count} dní"
 
 #: lib/l10n/translator.ex:177
 msgid "%{count} hour"
 msgid_plural "%{count} hours"
-msgstr[0] "%{count} hodin"
-msgstr[1] "%{Count} hodina"
-msgstr[2] "%{Count} hodina"
+msgstr[0] "%{count} hodina"
+msgstr[1] "%{count} hodiny"
+msgstr[2] "%{count} hodin"
 
 #: lib/l10n/translator.ex:173
 msgid "%{count} microsecond"
 msgid_plural "%{count} microseconds"
-msgstr[0] "%{count} mikrosekund"
+msgstr[0] "%{count} mikrosekunda"
 msgstr[1] "%{count} mikrosekundy"
 msgstr[2] "%{count} mikrosekund"
 
 #: lib/l10n/translator.ex:174
 msgid "%{count} millisecond"
 msgid_plural "%{count} milliseconds"
-msgstr[0] "%{count} milisekund"
+msgstr[0] "%{count} milisekunda"
 msgstr[1] "%{count} milisekundy"
 msgstr[2] "%{count} milisekund"
 
 #: lib/l10n/translator.ex:176
 msgid "%{count} minute"
 msgid_plural "%{count} minutes"
-msgstr[0] "%{count} minut"
+msgstr[0] "%{count} minuta"
 msgstr[1] "%{count} minuty"
 msgstr[2] "%{count} minut"
 
@@ -68,27 +68,27 @@ msgstr[2] "%{count} měsíců"
 #: lib/l10n/translator.ex:172
 msgid "%{count} nanosecond"
 msgid_plural "%{count} nanoseconds"
-msgstr[0] "%{count} nanosekund"
+msgstr[0] "%{count} nanosekunda"
 msgstr[1] "%{count} nanosekundy"
 msgstr[2] "%{count} nanosekund"
 
 #: lib/l10n/translator.ex:175
 msgid "%{count} second"
 msgid_plural "%{count} seconds"
-msgstr[0] "%{count} sekund"
+msgstr[0] "%{count} sekunda"
 msgstr[1] "%{count} sekundy"
 msgstr[2] "%{count} sekund"
 
 #: lib/l10n/translator.ex:179
 msgid "%{count} week"
 msgid_plural "%{count} weeks"
-msgstr[0] "%{count} týdnů"
+msgstr[0] "%{count} týden"
 msgstr[1] "%{count} týdny"
 msgstr[2] "%{count} týdnů"
 
 #: lib/l10n/translator.ex:181
 msgid "%{count} year"
 msgid_plural "%{count} years"
-msgstr[0] "%{count} let"
+msgstr[0] "%{count} rok"
 msgstr[1] "%{count} roky"
 msgstr[2] "%{count} let"
