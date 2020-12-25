@@ -1,52 +1,16 @@
----
-name: coverage
-env:
-  MIX_ENV: test
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 on:
   push:
-    branches:
-      - master
   pull_request:
-    branches:
-      - master
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup elixir
-        uses: actions/setup-elixir@v1.0.0
+      - uses: actions/checkout@v2
+      - uses: actions/setup-elixir@v1
         with:
-          elixir-version: 1.9.x
-          otp-version: 22.x
-
-      - name: Checkout repository
-        uses: actions/checkout@v1
-
-      - name: Get deps cache
-        uses: actions/cache@v1
-        with:
-         path: deps/
-         key: ${{ runner.os }}-deps-${{ hashFiles('**/mix.lock') }}
-         restore-keys: ${{ runner.os }}-deps-
-
-      - name: Get build cache
-        uses: actions/cache@v1 
-        with:
-          path: _build/test/
-          key: ${{ runner.os }}-build-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-build-
-
-      - name: Install Dependencies
-        run: |
-          mix local.rebar --force
-          mix local.hex --force
-          mix deps.get
-          mix compile
-
-      - name: un Tests
-        run: |
-          mix coveralls.github
+          elixir-version: ['1.9.x', '1.10.x', '1.11.x']
+          otp-version: ['22.x', '23.x']
+      - run: mix deps.get
+      - run: mix test
 
