@@ -11,12 +11,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - `Timex.set/2` now also accepts setting the `:date` from a `%Date{}` and `:time` from a `%Time{}` struct for NaiveDateTime
 
+### Fixes
+- Loosen `tzdata` dependency to allow `1.x` releases
+
 ## 3.6.1
 
 ### Potentially Breaking
 
 - Require Elixir v1.6+
- 
+
 ### Added
 
 - Setup property based test framework and add sample tests (#480)
