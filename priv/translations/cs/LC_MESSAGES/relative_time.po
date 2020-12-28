@@ -37,15 +37,15 @@ msgstr "minulý rok"
 
 #: lib/l10n/translator.ex:239
 msgid "next month"
-msgstr "budoucí měsíc"
+msgstr "příští měsíc"
 
 #: lib/l10n/translator.ex:245
 msgid "next week"
-msgstr "budoucí týden"
+msgstr "příští týden"
 
 #: lib/l10n/translator.ex:233
 msgid "next year"
-msgstr "budoucí rok"
+msgstr "příští rok"
 
 #: lib/l10n/translator.ex:238
 msgid "this month"
@@ -175,7 +175,7 @@ msgstr "minulý pátek"
 
 #: lib/l10n/translator.ex:255
 msgid "last monday"
-msgstr "minulé pondelí"
+msgstr "minulé pondělí"
 
 #: lib/l10n/translator.ex:270
 msgid "last saturday"
@@ -199,31 +199,31 @@ msgstr "minulou stredu"
 
 #: lib/l10n/translator.ex:269
 msgid "next friday"
-msgstr "minulý pátek"
+msgstr "příští pátek"
 
 #: lib/l10n/translator.ex:257
 msgid "next monday"
-msgstr "minulé pondělí"
+msgstr "příští pondělí"
 
 #: lib/l10n/translator.ex:272
 msgid "next saturday"
-msgstr "minulou sobotu"
+msgstr "příští sobotu"
 
 #: lib/l10n/translator.ex:275
 msgid "next sunday"
-msgstr "minulou neděli"
+msgstr "příští neděli"
 
 #: lib/l10n/translator.ex:266
 msgid "next thursday"
-msgstr "minulý čtvrtek"
+msgstr "příští čtvrtek"
 
 #: lib/l10n/translator.ex:260
 msgid "next tuesday"
-msgstr "minulé úterý"
+msgstr "příští úterý"
 
 #: lib/l10n/translator.ex:263
 msgid "next wednesday"
-msgstr "minulou neděli"
+msgstr "příští neděli"
 
 #: lib/l10n/translator.ex:268
 msgid "this friday"
