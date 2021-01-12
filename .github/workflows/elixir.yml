@@ -3,14 +3,23 @@ on:
   pull_request:
 
 jobs:
-  test:
+  build:
+    name: OTP ${{ matrix.otp }} / Elixir ${{ matrix.elixir }}
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-elixir@v1
-        with:
-          elixir-version: ['1.9.x', '1.10.x', '1.11.x']
-          otp-version: ['22.x', '23.x']
-      - run: mix deps.get
-      - run: mix test
+    strategy:
+      matrix:
+        otp: ['22.x', '23.x']
+        elixir: ['1.9.x', '1.10.x', '1.11.x']
 
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-elixir@v1
+      with:
+        elixir-version: ${{ matrix.elixir }}
+        otp-version: ${{matrix.otp}}
+
+    - name: Test
+      run: |
+          mix deps.get
+          mix test
