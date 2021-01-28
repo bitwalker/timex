@@ -18,6 +18,10 @@ defmodule TimezoneTests do
     assert tz.full_name === "Europe/Stockholm"
     assert tz.abbreviation === "CET"
     assert tz.offset_utc === 3600
+    %TimezoneInfo{} = tz = Timezone.get("GMT-5:00", ~N[2015-01-01T01:00:00])
+    assert tz.full_name === "Etc/GMT-5:00"
+    assert tz.abbreviation === "+5:00"
+    assert tz.offset_utc === 18000
     %TimezoneInfo{} = tz = Timezone.get(:utc)
     assert tz.full_name === "Etc/UTC"
     assert tz.offset_utc === 0
