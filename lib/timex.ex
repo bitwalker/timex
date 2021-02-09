@@ -44,6 +44,12 @@ defmodule Timex do
   end
 
   @doc """
+  Returns a Date representing the current day in the provided timezone.
+  """
+  @spec today(Types.valid_timezone()) :: Date.t()
+  def today(timezone), do: now(timezone) |> DateTime.to_date()
+
+  @doc """
   Returns a DateTime representing the current moment in time in UTC
   """
   @spec now() :: DateTime.t()
