@@ -56,6 +56,7 @@ modified to remove the direct dependency.
 
 ### Added
 - `Timex.set/2` now also accepts setting the `:date` from a `%Date{}` and `:time` from a `%Time{}` struct for NaiveDateTime
+- `Timex.today/1` which returns today's date in the provided timezone
 
 ### Fixes
 - Loosen `tzdata` dependency to allow `1.x` releases
