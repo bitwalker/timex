@@ -7,6 +7,7 @@ defmodule Timex.TimezoneInfo do
     - `abbreviation` is the abbreviated name for the zone in the current period, i.e. "America/Chicago" on 3/30/15 is "CDT"
     - `offset_std` is the offset in seconds from standard time for this period
     - `offset_utc` is the offset in seconds from UTC for this period
+
   Spec:
     - `day_of_week`: :sunday, :monday, :tuesday, etc
     - `datetime`:    {{year, month, day}, {hour, minute, second}}
