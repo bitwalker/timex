@@ -75,41 +75,69 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   specification. The benefit of using these over manually constructed ISO
   formats is that these directives convert the date to UTC for you.
 
-  * `{ISO:Basic}`      - `<date>T<time><offset>`. Full date and time
-                         specification without separators.
+  * `{ISO:Basic}`      - `<date>T<time><offset>`.
 
-  * `{ISO:Basic:Z}`    - `<date>T<time>Z`. Full date and time in UTC without
-                         separators (e.g. `20070813T134801Z`)
+    Full date and time specification without separators.
 
-  * `{ISO:Extended}`   - `<date>T<time><offset>`. Full date and time
-                         specification with separators. (e.g. `2007-08-13T16:48:01 +03:00`)
+  * `{ISO:Basic:Z}`    - `<date>T<time>Z`.
 
-  * `{ISO:Extended:Z}` - `<date>T<time>Z`. Full date and time in UTC. (e.g. `2007-08-13T13:48:01Z`)
+    Full date and time in UTC without separators (e.g.
+    `20070813T134801Z`)
 
-  * `{ISOdate}`        - `YYYY-MM-DD`. That is, 4-digit year number, followed by
-                         2-digit month and day numbers (e.g. `2007-08-13`)
+  * `{ISO:Extended}`   - `<date>T<time><offset>`.
 
-  * `{ISOtime}`        - `hh:mm:ss`. That is, 2-digit hour, minute, and second,
-                         separated by colons (e.g. `13:04:05`). Midnight is 00 hours.
+    Full date and time specification with separators. (e.g.
+    `2007-08-13T16:48:01 +03:00`)
 
-  * `{ISOweek}`        - `YYYY-Www`. That is, ISO week-based year, followed by ISO
-                         week number (e.g. `2007-W09`)
+  * `{ISO:Extended:Z}` - `<date>T<time>Z`.
 
-  * `{ISOweek-day}`    - `YYYY-Www-D`. That is, an `{ISOweek}`, additionally
-                         followed by weekday (e.g. `2007-W09-1`)
+    Full date and time in UTC. (e.g. `2007-08-13T13:48:01Z`)
 
-  * `{ISOord}`         - `YYYY-DDD`. That is, year number, followed by the ordinal
-                         day number (e.g. `2007-113`)
+  * `{ISOdate}`        - `YYYY-MM-DD`.
 
-  * `{ASN1:UTCtime}`    - `YYMMDD<time>Z`. Full 2-digit year date and time in UTC without
-                        separators (e.g. `070813134801Z`)
+    That is, 4-digit year number, followed by 2-digit month and day
+    numbers (e.g. `2007-08-13`)
 
-  * `{ASN1:GeneralizedTime}` - `YYYYMMDD<time>`. Full 4-digit year date and time in local timezone without
-                        separators and with optional fractional seconds (e.g. `20070813134801.032`)
-  * `{ASN1:GeneralizedTime:Z}` - `YYYYMMDD<time>Z`. Full 4-digit year date and time in UTC without
-                        separators and with optional fractional seconds (e.g. `20070813134801.032Z`)
-  * `{ASN1:GeneralizedTime:TZ}` - `YYYYMMDD<time><offset>`. Full 4-digit year date and time in UTC without
-                        separators and with optional fractional seconds (e.g. `20070813134801.032-0500`)
+  * `{ISOtime}`        - `hh:mm:ss`.
+
+    That is, 2-digit hour, minute, and second, separated by colons
+    (e.g. `13:04:05`). Midnight is 00 hours.
+
+  * `{ISOweek}`        - `YYYY-Www`.
+
+    That is, ISO week-based year, followed by ISO week number (e.g.
+    `2007-W09`)
+
+  * `{ISOweek-day}`    - `YYYY-Www-D`.
+
+    That is, an `{ISOweek}`, additionally followed by weekday (e.g.
+    `2007-W09-1`)
+
+  * `{ISOord}`         - `YYYY-DDD`.
+
+    That is, year number, followed by the ordinal day number (e.g.
+    `2007-113`)
+
+  * `{ASN1:UTCtime}`    - `YYMMDD<time>Z`.
+
+    Full 2-digit year date and time in UTC without separators (e.g.
+    `070813134801Z`)
+
+  * `{ASN1:GeneralizedTime}` - `YYYYMMDD<time>`.
+
+    Full 4-digit year date and time in local timezone without
+    separators and with optional fractional seconds (e.g.
+    `20070813134801.032`)
+
+  * `{ASN1:GeneralizedTime:Z}` - `YYYYMMDD<time>Z`.
+
+    Full 4-digit year date and time in UTC without separators and with
+    optional fractional seconds (e.g. `20070813134801.032Z`)
+
+  * `{ASN1:GeneralizedTime:TZ}` - `YYYYMMDD<time><offset>`.
+
+    Full 4-digit year date and time in UTC without separators and with
+    optional fractional seconds (e.g. `20070813134801.032-0500`)
 
   These directives provide support for miscellaneous common formats:
 
