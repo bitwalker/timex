@@ -55,6 +55,10 @@ defmodule Timex.Format.Duration.Formatters.Default do
       ...> Duration.from_erl({1435, 180354, 590264}) |> #{__MODULE__}.format
       "P45Y6M5DT21H12M34.590264S"
 
+      iex> use Timex
+      ...> Duration.from_erl({0, 0, 0}) |> #{__MODULE__}.format
+      "PT0S"
+
   """
   @spec format(Duration.t()) :: String.t() | {:error, term}
   def format(%Duration{} = duration), do: lformat(duration, Translator.default_locale())
@@ -69,6 +73,7 @@ defmodule Timex.Format.Duration.Formatters.Default do
   def lformat(_, _locale), do: {:error, :invalid_duration}
 
   defp do_format(components), do: do_format(components, <<?P>>)
+  defp do_format([], "P"), do: "PT0S"
   defp do_format([], str), do: str
 
   defp do_format([{unit, _} = component | rest], str) do

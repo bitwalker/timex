@@ -52,6 +52,7 @@ modified to remove the direct dependency.
 
 ### Potentially Breaking
 - `Timex.set/2` now sets microseconds when setting `:time` from a `%Time{}` struct
+- `Timex.Duration.to_string/1` now returns `PT0S` instead of `P` for zero-length durations with the default formatter
 
 ### Added
 - `Timex.set/2` now also accepts setting the `:date` from a `%Date{}` and `:time` from a `%Time{}` struct for NaiveDateTime
