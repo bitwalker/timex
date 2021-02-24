@@ -407,7 +407,7 @@ defmodule Timex.Timezone do
   """
   @spec convert(date :: DateTime.t(), tz :: AmbiguousTimezoneInfo.t()) ::
           AmbiguousDateTime.t() | {:error, term}
-  @spec convert(date :: DateTime.t(), tz :: TimezoneInfo.t() | String.t()) ::
+  @spec convert(date :: DateTime.t(), tz :: TimezoneInfo.t() | Types.valid_timezone()) ::
           DateTime.t() | AmbiguousDateTime.t() | {:error, term}
 
   def convert(%DateTime{} = date, %AmbiguousTimezoneInfo{} = tz) do
