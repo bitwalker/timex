@@ -8,7 +8,7 @@
 ## to merge POT files into PO files.
 msgid ""
 msgstr ""
-"Language: bg\n"
+"Language: mk\n"
 "Plural-Forms: nplurals=2\n"
 
 #: lib/l10n/translator.ex:192
