@@ -6,6 +6,51 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 ### Potentially Breaking
+### Added/Changed
+### Fixed
+
+## 3.7.0
+
+### Potentially Breaking
+
+- Elixir 1.8+ is now required
+- Tzdata 1.0+ is now required
+- If you were previously relying on `?` suffixed functions to return
+`{:error, reason}` if given invalid date/time inputs (other than
+`is_valid?`), these functions now always return booleans and raise if an
+error with the input is encountered
+
+### Added/Changed
+
+- Refactored much of the library to delegate to the Calendar API where
+appropriate, we now make more of an effort to avoid duplication of the
+standard library functionality
+- Functions with the `?` suffix now correctly raise on invalid inputs,
+and always return booleans. This was implicitly broken before, we need
+to follow convention here.
+- Local timezone handling no longer requires parsing the zoneinfo files,
+instead we attempt to observe the timezone name that is active and feed
+that into the timezone database directly. We were just using the
+abbreviations before, but that wasn't correct behavior at all. In the
+future we may want to support the system timezone database as a proper
+implementation of `Calendar.TimeZoneDatabase`, but for now we've just
+removed the unnecessary parsing work that was going on here.
+
+### Fixed
+
+- Handling of timezones across DST. More generally we now handle gaps/ambiguity 
+much more consistently
+- ZoneInfo parser was refactored, now properly supports version 2/3
+files, addresses some small bugs in previous code
+- Some incorrect/redundant typespecs were removed/fixed
+- We now support alternative timezone databases for API operations that
+do not need to interact with the `Timex.Timezone` module directly. That
+module is still tied to tzdata for now, but in the future may be
+modified to remove the direct dependency.
+
+## 3.6.4
+
+### Potentially Breaking
 - `Timex.set/2` now sets microseconds when setting `:time` from a `%Time{}` struct
 
 ### Added
