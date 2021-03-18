@@ -1322,8 +1322,33 @@ defmodule Timex do
       4 # (i.e. Thursday)
 
   """
-  @spec weekday(Types.valid_datetime()) :: Types.weekday() | {:error, term}
+  @spec weekday(Types.valid_datetime()) :: Types.weekday() | {:error, :invalid_date}
   defdelegate weekday(datetime), to: Timex.Protocol
+
+  @doc """
+  Like `weekday/1`, but accepts a valid starting weekday value.
+
+  ## Examples
+
+      iex> Timex.epoch() |> #{__MODULE__}.weekday(:sunday)
+      5
+  """
+  @spec weekday(Types.valid_datetime(), Calendar.day_of_week()) ::
+          Types.weekday() | {:error, :invalid_date}
+  defdelegate weekday(datetime, weekstart), to: Timex.Protocol
+
+  @doc """
+  Provides a version of `weekday/1` and `weekday/2` that raises on error.
+  """
+  def weekday!(datetime, weekstart \\ :default) do
+    case weekday(datetime, weekstart) do
+      {:error, :invalid_date} ->
+        raise ArgumentError, message: "invalid_date"
+
+      weekday when is_integer(weekday) ->
+        weekday
+    end
+  end
 
   @doc """
   Returns the ordinal day number of the date.

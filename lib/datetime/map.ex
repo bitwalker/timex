@@ -52,6 +52,7 @@ defimpl Timex.Protocol, for: Map do
   def days_in_month(map), do: convert!(map, :days_in_month)
   def week_of_month(map), do: convert!(map, :week_of_month)
   def weekday(map), do: convert!(map, :weekday)
+  def weekday(map, weekstart), do: convert!(map, :weekday, [weekstart])
   def day(map), do: convert!(map, :day)
   def is_valid?(map), do: convert!(map, :is_valid?)
   def iso_week(map), do: convert!(map, :iso_week)

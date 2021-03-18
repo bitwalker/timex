@@ -178,6 +178,13 @@ defprotocol Timex.Protocol do
   def weekday(datetime)
 
   @doc """
+  Get the ordinal weekday number of the given date/time value and relative to the given weekstart
+  """
+  @spec weekday(Types.valid_datetime(), Calendar.day_of_week()) ::
+          Types.weekday() | {:error, term}
+  def weekday(datetime, weekstart)
+
+  @doc """
   Get the ordinal day number of the given date/time value
   """
   @spec day(Types.valid_datetime()) :: Types.daynum() | {:error, term}
@@ -293,6 +300,9 @@ defimpl Timex.Protocol, for: Any do
 
   def weekday(%{__struct__: _} = d), do: Timex.weekday(Map.from_struct(d))
   def weekday(_datetime), do: {:error, :invalid_date}
+
+  def weekday(%{__struct__: _} = d, weekstart), do: Timex.weekday(Map.from_struct(d), weekstart)
+  def weekday(_datetime, _weekstart), do: {:error, :invalid_date}
 
   def day(%{__struct__: _} = d), do: Timex.day(Map.from_struct(d))
   def day(_datetime), do: {:error, :invalid_date}

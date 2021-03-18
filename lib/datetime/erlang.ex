@@ -225,6 +225,14 @@ defimpl Timex.Protocol, for: Tuple do
   def weekday({{y, m, d} = date, _}) when is_date(y, m, d), do: :calendar.day_of_the_week(date)
   def weekday(_), do: {:error, :invalid_date}
 
+  def weekday({y, m, d}, weekstart) when is_date(y, m, d),
+    do: Date.day_of_week(Timex.Date.new!(y, m, d), weekstart)
+
+  def weekday({{y, m, d}, _}, weekstart) when is_date(y, m, d),
+    do: Date.day_of_week(Timex.Date.new!(y, m, d), weekstart)
+
+  def weekday(_, _), do: {:error, :invalid_date}
+
   def day({y, m, d} = date) when is_date(y, m, d),
     do: 1 + Timex.diff(date, {y, 1, 1}, :days)
 

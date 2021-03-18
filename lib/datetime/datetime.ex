@@ -268,6 +268,7 @@ defimpl Timex.Protocol, for: DateTime do
     do: Timex.week_of_month(y, m, d)
 
   def weekday(datetime), do: Date.day_of_week(datetime)
+  def weekday(datetime, weekstart), do: Date.day_of_week(datetime, weekstart)
 
   def day(datetime), do: Date.day_of_year(datetime)
 

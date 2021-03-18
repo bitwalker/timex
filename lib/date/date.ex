@@ -97,7 +97,8 @@ defimpl Timex.Protocol, for: Date do
 
   def week_of_month(%Date{:year => y, :month => m, :day => d}), do: Timex.week_of_month(y, m, d)
 
-  def weekday(%Date{:year => y, :month => m, :day => d}), do: :calendar.day_of_the_week({y, m, d})
+  def weekday(%Date{} = date), do: Date.day_of_week(date)
+  def weekday(%Date{} = date, weekstart), do: Date.day_of_week(date, weekstart)
 
   def day(%Date{} = date),
     do: 1 + Timex.diff(date, %Date{:year => date.year, :month => 1, :day => 1}, :days)

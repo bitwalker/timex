@@ -564,7 +564,7 @@ defmodule Timex.Format.DateTime.Formatter do
 
     Timex.Interval.new(from: jan1, until: Timex.shift(date, days: 1))
     |> Enum.reduce(0, fn d, acc ->
-      case Timex.weekday(d) do
+      case Timex.weekday(d, :monday) do
         1 -> acc + 1
         _ -> acc
       end
@@ -577,8 +577,8 @@ defmodule Timex.Format.DateTime.Formatter do
 
     Timex.Interval.new(from: jan1, until: Timex.shift(date, days: 1))
     |> Enum.reduce(0, fn d, acc ->
-      case Timex.weekday(d) do
-        7 -> acc + 1
+      case Timex.weekday(d, :sunday) do
+        1 -> acc + 1
         _ -> acc
       end
     end)
@@ -586,17 +586,10 @@ defmodule Timex.Format.DateTime.Formatter do
   end
 
   def format_token(_locale, :wday_mon, date, _modifiers, flags, width),
-    do: pad_numeric(Timex.weekday(date), flags, width)
+    do: pad_numeric(Timex.weekday!(date, :monday), flags, width)
 
   def format_token(_locale, :wday_sun, date, _modifiers, flags, width) do
-    # from 1..7 to 0..6
-    weekday =
-      case Timex.weekday(date) do
-        7 -> 0
-        day -> day
-      end
-
-    pad_numeric(weekday, flags, width)
+    pad_numeric(Timex.weekday!(date, :monday) - 1, flags, width)
   end
 
   def format_token(locale, :wdshort, date, _modifiers, _flags, _width) do
