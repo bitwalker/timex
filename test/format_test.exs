@@ -50,6 +50,6 @@ defmodule DateFormatTest.GeneralFormatting do
       Timex.format!("", "{M}")
     end
 
-    assert Timex.format("", "{M}") == {:error, "invalid_date"}
+    assert Timex.format("", "{M}") == {:error, :invalid_date}
   end
 end

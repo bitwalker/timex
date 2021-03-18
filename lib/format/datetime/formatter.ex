@@ -41,7 +41,9 @@ defmodule Timex.Format.DateTime.Formatter do
   @doc """
   Formats a Date, DateTime, or NaiveDateTime as a string, using the provided format string,
   locale, and formatter. If the locale does not have translations, "en" will be used by
-  default. If a formatter is not provided, the formatter used is `Timex.Format.DateTime.Formatters.DefaultFormatter`
+  default.
+
+  If a formatter is not provided, the formatter used is `Timex.Format.DateTime.Formatters.DefaultFormatter`
 
   If an error is encountered during formatting, `lformat!` will raise
   """
@@ -52,47 +54,28 @@ defmodule Timex.Format.DateTime.Formatter do
   def lformat!({:error, reason}, _format_string, _locale, _formatter),
     do: raise(ArgumentError, to_string(reason))
 
-  def lformat!(datetime, format_string, locale, :strftime),
-    do: lformat!(datetime, format_string, locale, Strftime)
+  def lformat!(date, format_string, locale, formatter) do
+    with {:ok, formatted} <- lformat(date, format_string, locale, formatter) do
+      formatted
+    else
+      {:error, :invalid_date} ->
+        raise ArgumentError, "invalid_date"
 
-  def lformat!(datetime, format_string, locale, :relative),
-    do: lformat!(datetime, format_string, locale, Relative)
+      {:error, {:format, reason}} ->
+        raise FormatError, message: to_string(reason)
 
-  def lformat!(%{__struct__: struct} = date, format_string, locale, formatter)
-      when struct in [Date, DateTime, NaiveDateTime, Time] and is_binary(format_string) and
-             is_binary(locale) and is_atom(formatter) do
-    case formatter.lformat(date, format_string, locale) do
-      {:ok, result} -> result
-      {:error, reason} -> raise FormatError, message: reason
-    end
-  end
-
-  def lformat!(date, format_string, locale, formatter)
-      when is_binary(format_string) and is_binary(locale) and is_atom(formatter) do
-    case Timex.to_naive_datetime(date) do
       {:error, reason} ->
-        raise ArgumentError, to_string(reason)
-
-      datetime ->
-        case formatter.lformat(datetime, format_string, locale) do
-          {:ok, result} -> result
-          {:error, reason} -> raise FormatError, message: reason
-        end
+        raise FormatError, message: to_string(reason)
     end
   end
-
-  def lformat!(a, b, c, d),
-    do:
-      raise(
-        "invalid argument(s) to lformat!/4: #{inspect(a)}, #{inspect(b)}, #{inspect(c)}, #{
-          inspect(d)
-        }"
-      )
 
   @doc """
   Formats a Date, DateTime, or NaiveDateTime as a string, using the provided format string,
-  locale, and formatter. If the locale provided does not have translations, "en" is used by
-  default. If a formatter is not provided, the formatter used is `Timex.Format.DateTime.Formatters.DefaultFormatter`
+  locale, and formatter.
+
+  If the locale provided does not have translations, "en" is used by default.
+
+  If a formatter is not provided, the formatter used is `Timex.Format.DateTime.Formatters.DefaultFormatter`
   """
   @spec lformat(Types.valid_datetime(), String.t(), String.t(), atom | nil) ::
           {:ok, String.t()} | {:error, term}
@@ -107,21 +90,18 @@ defmodule Timex.Format.DateTime.Formatter do
   def lformat(datetime, format_string, locale, :relative),
     do: lformat(datetime, format_string, locale, Relative)
 
-  def lformat(date, format_string, locale, formatter)
-      when is_binary(format_string) and is_binary(locale) and is_atom(formatter) do
-    try do
-      {:ok, lformat!(date, format_string, locale, formatter)}
-    catch
-      _type, %{:message => msg} ->
-        {:error, msg}
-
-      _type, reason ->
-        {:error, reason}
-    end
+  def lformat(%{__struct__: struct} = date, format_string, locale, formatter)
+      when struct in [Date, DateTime, NaiveDateTime, Time] and is_binary(format_string) and
+             is_binary(locale) and is_atom(formatter) do
+    formatter.lformat(date, format_string, locale)
   end
 
-  def lformat(_, _, _, _),
-    do: {:error, :badarg}
+  def lformat(date, format_string, locale, formatter)
+      when is_binary(format_string) and is_binary(locale) and is_atom(formatter) do
+    with %NaiveDateTime{} = datetime <- Timex.to_naive_datetime(date) do
+      formatter.lformat(datetime, format_string, locale)
+    end
+  end
 
   @doc """
   Formats a Date, DateTime, or NaiveDateTime as a string, using the provided format
@@ -176,16 +156,20 @@ defmodule Timex.Format.DateTime.Formatter do
         end
 
       case formatter.tokenize(format_string) do
-        {:error, _} = error -> error
-        {:ok, []} -> {:error, "There were no formatting directives in the provided string."}
-        {:ok, directives} when is_list(directives) -> :ok
+        {:error, _} = error ->
+          error
+
+        {:ok, []} ->
+          {:error, "There were no formatting directives in the provided string."}
+
+        {:ok, directives} when is_list(directives) ->
+          :ok
       end
     rescue
-      x -> {:error, x}
+      x ->
+        {:error, x}
     end
   end
-
-  def validate(_, _), do: {:error, :badarg}
 
   @doc """
   Given a token (as found in `Timex.Parsers.Directive`), and a Date, DateTime, or NaiveDateTime struct,
