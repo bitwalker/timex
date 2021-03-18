@@ -11,58 +11,58 @@ msgid ""
 msgstr ""
 "Language: vi\n"
 
-#: lib/l10n/translator.ex:192
+#: lib/l10n/translator.ex:214
 msgid "Fri"
 msgstr "T6"
 
-#: lib/l10n/translator.ex:200
+#: lib/l10n/translator.ex:222
 msgid "Friday"
 msgstr "Thứ 6"
 
-#: lib/l10n/translator.ex:188
+#: lib/l10n/translator.ex:210
 msgid "Mon"
 msgstr "T2"
 
-#: lib/l10n/translator.ex:196
+#: lib/l10n/translator.ex:218
 msgid "Monday"
 msgstr "Thứ 2"
 
-#: lib/l10n/translator.ex:193
+#: lib/l10n/translator.ex:215
 msgid "Sat"
 msgstr "T7"
 
-#: lib/l10n/translator.ex:201
+#: lib/l10n/translator.ex:223
 msgid "Saturday"
 msgstr "Thứ 7"
 
-#: lib/l10n/translator.ex:194
+#: lib/l10n/translator.ex:216
 msgid "Sun"
 msgstr "CN"
 
-#: lib/l10n/translator.ex:202
+#: lib/l10n/translator.ex:224
 msgid "Sunday"
 msgstr "Chủ nhật"
 
-#: lib/l10n/translator.ex:191
+#: lib/l10n/translator.ex:213
 msgid "Thu"
 msgstr "T5"
 
-#: lib/l10n/translator.ex:199
+#: lib/l10n/translator.ex:221
 msgid "Thursday"
 msgstr "Thứ 5"
 
-#: lib/l10n/translator.ex:189
+#: lib/l10n/translator.ex:211
 msgid "Tue"
 msgstr "T3"
 
-#: lib/l10n/translator.ex:197
+#: lib/l10n/translator.ex:219
 msgid "Tuesday"
 msgstr "Thứ 3"
 
-#: lib/l10n/translator.ex:190
+#: lib/l10n/translator.ex:212
 msgid "Wed"
 msgstr "T4"
 
-#: lib/l10n/translator.ex:198
+#: lib/l10n/translator.ex:220
 msgid "Wednesday"
 msgstr "Thứ 4"

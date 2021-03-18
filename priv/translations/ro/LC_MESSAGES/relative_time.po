@@ -20,236 +20,236 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.11\n"
 
-#: lib/l10n/translator.ex:237
+#: lib/l10n/translator.ex:259
 msgid "last month"
 msgstr "ultima lună"
 
-#: lib/l10n/translator.ex:243
+#: lib/l10n/translator.ex:265
 msgid "last week"
 msgstr "ultima săptămână"
 
-#: lib/l10n/translator.ex:231
+#: lib/l10n/translator.ex:253
 msgid "last year"
 msgstr "ultimul an"
 
-#: lib/l10n/translator.ex:239
+#: lib/l10n/translator.ex:261
 msgid "next month"
 msgstr "luna următoare"
 
-#: lib/l10n/translator.ex:245
+#: lib/l10n/translator.ex:267
 msgid "next week"
 msgstr "săptămâna următoare"
 
-#: lib/l10n/translator.ex:233
+#: lib/l10n/translator.ex:255
 msgid "next year"
 msgstr "anul următor"
 
-#: lib/l10n/translator.ex:238
+#: lib/l10n/translator.ex:260
 msgid "this month"
 msgstr "luna aceasta"
 
-#: lib/l10n/translator.ex:244
+#: lib/l10n/translator.ex:266
 msgid "this week"
 msgstr "săptămâna aceasta"
 
-#: lib/l10n/translator.ex:232
+#: lib/l10n/translator.ex:254
 msgid "this year"
 msgstr "anul acesta"
 
-#: lib/l10n/translator.ex:250
+#: lib/l10n/translator.ex:272
 msgid "today"
 msgstr "astăzi"
 
-#: lib/l10n/translator.ex:251
+#: lib/l10n/translator.ex:273
 msgid "tomorrow"
 msgstr "mâine"
 
-#: lib/l10n/translator.ex:249
+#: lib/l10n/translator.ex:271
 msgid "yesterday"
 msgstr "ieri"
 
-#: lib/l10n/translator.ex:253
+#: lib/l10n/translator.ex:275
 msgid "%{count} day ago"
 msgid_plural "%{count} days ago"
 msgstr[0] "acum o zi"
 msgstr[1] "acum %{count} zile"
 msgstr[2] "acum %{count} de zile"
 
-#: lib/l10n/translator.ex:278
+#: lib/l10n/translator.ex:300
 msgid "%{count} hour ago"
 msgid_plural "%{count} hours ago"
 msgstr[0] "acum o oră"
 msgstr[1] "acum %{count} ore"
 msgstr[2] "acum %{count} de ore"
 
-#: lib/l10n/translator.ex:281
+#: lib/l10n/translator.ex:303
 msgid "%{count} minute ago"
 msgid_plural "%{count} minutes ago"
 msgstr[0] "acum un minut"
 msgstr[1] "acum %{count} minute"
 msgstr[2] "acum %{count} de minute"
 
-#: lib/l10n/translator.ex:241
+#: lib/l10n/translator.ex:263
 msgid "%{count} month ago"
 msgid_plural "%{count} months ago"
 msgstr[0] "acum o lună"
 msgstr[1] "acum %{count} luni"
 msgstr[2] "acum %{count} de luni"
 
-#: lib/l10n/translator.ex:284
+#: lib/l10n/translator.ex:306
 msgid "%{count} second ago"
 msgid_plural "%{count} seconds ago"
 msgstr[0] "acum o secundă"
 msgstr[1] "acum %{count} secunde"
 msgstr[2] "acum %{count} de secunde"
 
-#: lib/l10n/translator.ex:247
+#: lib/l10n/translator.ex:269
 msgid "%{count} week ago"
 msgid_plural "%{count} weeks ago"
 msgstr[0] "acum o săptămână"
 msgstr[1] "acum %{count} săptămâni"
 msgstr[2] "acum %{count} de săptămâni"
 
-#: lib/l10n/translator.ex:235
+#: lib/l10n/translator.ex:257
 msgid "%{count} year ago"
 msgid_plural "%{count} years ago"
 msgstr[0] "acum un an"
 msgstr[1] "acum %{count} ani"
 msgstr[2] "acum %{count} de ani"
 
-#: lib/l10n/translator.ex:252
+#: lib/l10n/translator.ex:274
 msgid "in %{count} day"
 msgid_plural "in %{count} days"
 msgstr[0] "în o zi"
 msgstr[1] "în %{count} zile"
 msgstr[2] "în %{count} de zile"
 
-#: lib/l10n/translator.ex:277
+#: lib/l10n/translator.ex:299
 msgid "in %{count} hour"
 msgid_plural "in %{count} hours"
 msgstr[0] "în o oră"
 msgstr[1] "în %{count} ore"
 msgstr[2] "în %{count} de ore"
 
-#: lib/l10n/translator.ex:280
+#: lib/l10n/translator.ex:302
 msgid "in %{count} minute"
 msgid_plural "in %{count} minutes"
 msgstr[0] "în un minut"
 msgstr[1] "în %{count} minute"
 msgstr[2] "în %{count} de minute"
 
-#: lib/l10n/translator.ex:240
+#: lib/l10n/translator.ex:262
 msgid "in %{count} month"
 msgid_plural "in %{count} months"
 msgstr[0] "în o lună"
 msgstr[1] "în %{count} luni"
 msgstr[2] "în %{count} de luni"
 
-#: lib/l10n/translator.ex:283
+#: lib/l10n/translator.ex:305
 msgid "in %{count} second"
 msgid_plural "in %{count} seconds"
 msgstr[0] "în o secundă"
 msgstr[1] "în %{count} secunde"
 msgstr[2] "în %{count} de secunde"
 
-#: lib/l10n/translator.ex:246
+#: lib/l10n/translator.ex:268
 msgid "in %{count} week"
 msgid_plural "in %{count} weeks"
 msgstr[0] "în o săptămână"
 msgstr[1] "în %{count} săptămâni"
 msgstr[2] "in %{count} de săptămâni"
 
-#: lib/l10n/translator.ex:234
+#: lib/l10n/translator.ex:256
 msgid "in %{count} year"
 msgid_plural "in %{count} years"
 msgstr[0] "în un an"
 msgstr[1] "în %{count} ani"
 msgstr[2] "în %{count} de ani"
 
-#: lib/l10n/translator.ex:267
+#: lib/l10n/translator.ex:289
 msgid "last friday"
 msgstr "vinerea trecută"
 
-#: lib/l10n/translator.ex:255
+#: lib/l10n/translator.ex:277
 msgid "last monday"
 msgstr "lunea trecută"
 
-#: lib/l10n/translator.ex:270
+#: lib/l10n/translator.ex:292
 msgid "last saturday"
 msgstr "sâmbăta trecută"
 
-#: lib/l10n/translator.ex:273
+#: lib/l10n/translator.ex:295
 msgid "last sunday"
 msgstr "duminica trecută"
 
-#: lib/l10n/translator.ex:264
+#: lib/l10n/translator.ex:286
 msgid "last thursday"
 msgstr "joia trecută"
 
-#: lib/l10n/translator.ex:258
+#: lib/l10n/translator.ex:280
 msgid "last tuesday"
 msgstr "marțea trecută"
 
-#: lib/l10n/translator.ex:261
+#: lib/l10n/translator.ex:283
 msgid "last wednesday"
 msgstr "miercurea trecută"
 
-#: lib/l10n/translator.ex:269
+#: lib/l10n/translator.ex:291
 msgid "next friday"
 msgstr "vinerea viitoare"
 
-#: lib/l10n/translator.ex:257
+#: lib/l10n/translator.ex:279
 msgid "next monday"
 msgstr "lunea viitoare"
 
-#: lib/l10n/translator.ex:272
+#: lib/l10n/translator.ex:294
 msgid "next saturday"
 msgstr "sâmbăta viitoare"
 
-#: lib/l10n/translator.ex:275
+#: lib/l10n/translator.ex:297
 msgid "next sunday"
 msgstr "duminica viitoare"
 
-#: lib/l10n/translator.ex:266
+#: lib/l10n/translator.ex:288
 msgid "next thursday"
 msgstr "joia viitoare"
 
-#: lib/l10n/translator.ex:260
+#: lib/l10n/translator.ex:282
 msgid "next tuesday"
 msgstr "marțea viitoare"
 
-#: lib/l10n/translator.ex:263
+#: lib/l10n/translator.ex:285
 msgid "next wednesday"
 msgstr "miercurea viitoare"
 
-#: lib/l10n/translator.ex:268
+#: lib/l10n/translator.ex:290
 msgid "this friday"
 msgstr "vinerea aceasta"
 
-#: lib/l10n/translator.ex:256
+#: lib/l10n/translator.ex:278
 msgid "this monday"
 msgstr "lunea aceasta"
 
-#: lib/l10n/translator.ex:271
+#: lib/l10n/translator.ex:293
 msgid "this saturday"
 msgstr "sâmbăta aceasta"
 
-#: lib/l10n/translator.ex:274
+#: lib/l10n/translator.ex:296
 msgid "this sunday"
 msgstr "duminica aceasta"
 
-#: lib/l10n/translator.ex:265
+#: lib/l10n/translator.ex:287
 msgid "this thursday"
 msgstr "joia aceasta"
 
-#: lib/l10n/translator.ex:259
+#: lib/l10n/translator.ex:281
 msgid "this tuesday"
 msgstr "marțea aceasta"
 
-#: lib/l10n/translator.ex:262
+#: lib/l10n/translator.ex:284
 msgid "this wednesday"
 msgstr "miercurea aceasta"
 
-#: lib/l10n/translator.ex:286
+#: lib/l10n/translator.ex:308
 msgid "now"
 msgstr "acum"

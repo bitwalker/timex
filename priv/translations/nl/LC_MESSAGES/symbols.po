@@ -10,30 +10,30 @@ msgid ""
 msgstr ""
 "Language: nl\n"
 
-#: lib/l10n/translator.ex:292
+#: lib/l10n/translator.ex:318
 msgid "+"
 msgstr "+"
 
-#: lib/l10n/translator.ex:290
+#: lib/l10n/translator.ex:314
 msgid ","
 msgstr ","
 
-#: lib/l10n/translator.ex:293
+#: lib/l10n/translator.ex:320
 msgid "-"
 msgstr "-"
 
-#: lib/l10n/translator.ex:289
+#: lib/l10n/translator.ex:312
 msgid "."
 msgstr "."
 
-#: lib/l10n/translator.ex:295
+#: lib/l10n/translator.ex:324
 msgid ":"
 msgstr ":"
 
-#: lib/l10n/translator.ex:291
+#: lib/l10n/translator.ex:316
 msgid ";"
 msgstr ";"
 
-#: lib/l10n/translator.ex:294
+#: lib/l10n/translator.ex:322
 msgid "E"
 msgstr "E"

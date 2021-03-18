@@ -20,50 +20,50 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.2.1\n"
 
-#: lib/l10n/translator.ex:220
+#: lib/l10n/translator.ex:242
 msgid "April"
 msgstr "Duben"
 
-#: lib/l10n/translator.ex:224
+#: lib/l10n/translator.ex:246
 msgid "August"
 msgstr "Srpen"
 
-#: lib/l10n/translator.ex:228
+#: lib/l10n/translator.ex:250
 msgid "December"
 msgstr "Prosinec"
 
-#: lib/l10n/translator.ex:218
+#: lib/l10n/translator.ex:240
 msgid "February"
 msgstr "Únor"
 
-#: lib/l10n/translator.ex:217
+#: lib/l10n/translator.ex:239
 msgid "January"
 msgstr "Leden"
 
-#: lib/l10n/translator.ex:223
+#: lib/l10n/translator.ex:245
 msgid "July"
 msgstr "Červenec"
 
-#: lib/l10n/translator.ex:222
+#: lib/l10n/translator.ex:244
 msgid "June"
 msgstr "Červen"
 
-#: lib/l10n/translator.ex:219
+#: lib/l10n/translator.ex:241
 msgid "March"
 msgstr "Březen"
 
-#: lib/l10n/translator.ex:221
+#: lib/l10n/translator.ex:243
 msgid "May"
 msgstr "Květen"
 
-#: lib/l10n/translator.ex:227
+#: lib/l10n/translator.ex:249
 msgid "November"
 msgstr "Listopad"
 
-#: lib/l10n/translator.ex:226
+#: lib/l10n/translator.ex:248
 msgid "October"
 msgstr "Říjen"
 
-#: lib/l10n/translator.ex:225
+#: lib/l10n/translator.ex:247
 msgid "September"
 msgstr "Září"

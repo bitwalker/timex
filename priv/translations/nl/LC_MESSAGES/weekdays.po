@@ -10,58 +10,58 @@ msgid ""
 msgstr ""
 "Language: nl\n"
 
-#: lib/l10n/translator.ex:192
+#: lib/l10n/translator.ex:214
 msgid "Fri"
 msgstr "vr"
 
-#: lib/l10n/translator.ex:200
+#: lib/l10n/translator.ex:222
 msgid "Friday"
 msgstr "vrijdag"
 
-#: lib/l10n/translator.ex:188
+#: lib/l10n/translator.ex:210
 msgid "Mon"
 msgstr "ma"
 
-#: lib/l10n/translator.ex:196
+#: lib/l10n/translator.ex:218
 msgid "Monday"
 msgstr "maandag"
 
-#: lib/l10n/translator.ex:193
+#: lib/l10n/translator.ex:215
 msgid "Sat"
 msgstr "za"
 
-#: lib/l10n/translator.ex:201
+#: lib/l10n/translator.ex:223
 msgid "Saturday"
 msgstr "zaterdag"
 
-#: lib/l10n/translator.ex:194
+#: lib/l10n/translator.ex:216
 msgid "Sun"
 msgstr "zo"
 
-#: lib/l10n/translator.ex:202
+#: lib/l10n/translator.ex:224
 msgid "Sunday"
 msgstr "zondag"
 
-#: lib/l10n/translator.ex:191
+#: lib/l10n/translator.ex:213
 msgid "Thu"
 msgstr "do"
 
-#: lib/l10n/translator.ex:199
+#: lib/l10n/translator.ex:221
 msgid "Thursday"
 msgstr "donderdag"
 
-#: lib/l10n/translator.ex:189
+#: lib/l10n/translator.ex:211
 msgid "Tue"
 msgstr "di"
 
-#: lib/l10n/translator.ex:197
+#: lib/l10n/translator.ex:219
 msgid "Tuesday"
 msgstr "dinsdag"
 
-#: lib/l10n/translator.ex:190
+#: lib/l10n/translator.ex:212
 msgid "Wed"
 msgstr "wo"
 
-#: lib/l10n/translator.ex:198
+#: lib/l10n/translator.ex:220
 msgid "Wednesday"
 msgstr "woensdag"

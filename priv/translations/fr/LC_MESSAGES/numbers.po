@@ -11,6 +11,6 @@ msgid ""
 msgstr ""
 "Language: fr\n"
 
-#: lib/l10n/translator.ex:298
+#: lib/l10n/translator.ex:328
 msgid "#,##0.###"
 msgstr "#.##0,###"

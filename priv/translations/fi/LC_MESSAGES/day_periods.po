@@ -1,0 +1,15 @@
+#: lib/l10n/translator.ex:205
+msgid "AM"
+msgstr ""
+
+#: lib/l10n/translator.ex:207
+msgid "PM"
+msgstr ""
+
+#: lib/l10n/translator.ex:206
+msgid "am"
+msgstr ""
+
+#: lib/l10n/translator.ex:208
+msgid "pm"
+msgstr ""
