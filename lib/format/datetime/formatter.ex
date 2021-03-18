@@ -418,7 +418,8 @@ defmodule Timex.Format.DateTime.Formatter do
     hour = format_token(locale, :hour24, date, modifiers, flags, width_spec(2..2))
     min = format_token(locale, :min, date, modifiers, flags, width_spec(2..2))
     sec = format_token(locale, :sec, date, modifiers, flags, width_spec(2..2))
-    "#{year}#{month}#{day}#{hour}#{min}#{sec}"
+    ms = format_token(locale, :sec_fractional, date, modifiers, flags, width_spec(-1, nil))
+    "#{year}#{month}#{day}#{hour}#{min}#{sec}#{ms}"
   end
 
   def format_token(locale, :asn1_generalized_time_z, date, modifiers, flags, width) do
