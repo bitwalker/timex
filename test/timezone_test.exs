@@ -37,28 +37,6 @@ defmodule TimezoneTests do
     assert %TimezoneInfo{} = Timezone.local()
   end
 
-  test "diff" do
-    utc = Timezone.get(:utc)
-    cst = Timezone.get("America/Chicago", ~N[2015-01-01T12:00:00])
-    cdt = Timezone.get("America/Chicago", ~N[2015-03-30T12:00:00])
-    gmt_plus_two = Timezone.get(2)
-    gmt_minus_three = Timezone.get(-3)
-    # How many minutes do I apply to UTC when shifting to CST
-    assert Timex.to_datetime({{2014, 2, 24}, {0, 0, 0}}, utc) |> Timezone.diff(cst) === -21600
-    # How many minutes do I apply to UTC when shifting to CDT
-    assert Timex.to_datetime({{2014, 3, 30}, {0, 0, 0}}, utc) |> Timezone.diff(cdt) === -18000
-    # And vice versa
-    assert Timex.to_datetime({{2014, 2, 24}, {0, 0, 0}}, cst) |> Timezone.diff(utc) === 21600
-    assert Timex.to_datetime({{2014, 3, 30}, {0, 0, 0}}, cdt) |> Timezone.diff(utc) === 18000
-    # How many minutes do I apply to gmt_plus_two when shifting to gmt_minus_three?
-    assert Timex.to_datetime({{2014, 2, 24}, {0, 0, 0}}, gmt_plus_two)
-           |> Timezone.diff(gmt_minus_three) === -18000
-
-    # And vice versa
-    assert Timex.to_datetime({{2014, 2, 24}, {0, 0, 0}}, gmt_minus_three)
-           |> Timezone.diff(gmt_plus_two) === 18000
-  end
-
   property "convert always returns DateTime or AmbiguousDateTime" do
     check all(
             input_date <- PropertyHelpers.date_time_generator(:tuple),

@@ -523,25 +523,6 @@ defmodule Timex.Timezone do
   defp period_boundary_to_naive(_), do: {:error, :invalid_period}
 
   @doc """
-  Determine what offset is required to convert a date into a target timezone
-  """
-  @spec diff(date :: DateTime.t(), tz :: TimezoneInfo.t()) :: integer | {:error, term}
-  def diff(%DateTime{} = dt, %TimezoneInfo{} = dest) do
-    origin = %TimezoneInfo{
-      full_name: dt.time_zone,
-      abbreviation: dt.zone_abbr,
-      offset_utc: dt.utc_offset,
-      offset_std: dt.std_offset
-    }
-
-    diff(origin, dest)
-  end
-
-  def diff(%TimezoneInfo{} = origin, %TimezoneInfo{} = dest) do
-    total_offset(dest) - total_offset(origin)
-  end
-
-  @doc """
   Shifts the provided DateTime to the beginning of the day in it's timezone
   """
   @spec beginning_of_day(DateTime.t()) :: DateTime.t()
