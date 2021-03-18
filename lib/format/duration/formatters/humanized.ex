@@ -78,9 +78,11 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
 
   defp do_format([{unit, value} | rest], str, locale) do
     unit = Atom.to_string(unit)
+    count = trunc(value)
 
     unit_with_value =
-      Translator.translate_plural(locale, "units", "%{count} #{unit}", "%{count} #{unit}s", value)
+      Translator.translate_plural(locale, "units", "%{count} #{unit}", "%{count} #{unit}s", count)
+      |> String.replace(to_string(count), to_string(value))
 
     separator = Translator.translate(locale, "symbols", ",")
 

@@ -175,10 +175,9 @@ defmodule Timex.Translator do
           n :: integer
         ) :: String.t()
   defp get_plural_domain_text(locale, domain, msgid, msgid_plural, n) do
-    case Timex.Gettext.lngettext(locale, domain, msgid, msgid_plural, n, %{}) do
-      {:ok, translated} -> translated
-      {:default, default} -> default
-    end
+    Gettext.with_locale(Timex.Gettext, locale, fn ->
+      Gettext.dngettext(Timex.Gettext, domain, msgid, msgid_plural, n, %{})
+    end)
   end
 
   ### After this point, all gettext calls are here for use with compile-time tooling
