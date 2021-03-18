@@ -1,6 +1,6 @@
 ## Timex
 
-[![Master](https://api.cirrus-ci.com/github/bitwalker/timex.svg?branch=master)](https://cirrus-ci.com/github/bitwalker/timex)
+[![Master](https://github.com/bitwalker/timex/workflows/elixir/badge.svg?branch=master)](https://github.com/bitwalker/timex/actions?query=workflow%3A%22elixir%22+branch%3Amaster) |
 [![Hex.pm Version](http://img.shields.io/hexpm/v/timex.svg?style=flat)](https://hex.pm/packages/timex)
 [![Coverage Status](https://coveralls.io/repos/github/bitwalker/timex/badge.svg?branch=master)](https://coveralls.io/github/bitwalker/timex?branch=master)
 
