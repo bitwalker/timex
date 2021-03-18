@@ -9,7 +9,8 @@ defmodule Timex.Parse.ZoneInfo.Parser do
     @moduledoc """
     Represents the data retreived from a binary tzfile.
     """
-    defstruct version: nil, # Maximum version encountered
+    # Maximum version encountered
+    defstruct version: nil,
               # Transition times
               transitions: [],
               # Leap second adjustments
@@ -56,8 +57,10 @@ defmodule Timex.Parse.ZoneInfo.Parser do
 
   defmodule LeapSecond do
     @moduledoc false
-    defstruct epoch: 0, # The time at which this leap second occurs
-              correction: 0 # The number of leap seconds to be applied to UTC on/after epoch
+    # The time at which this leap second occurs
+    defstruct epoch: 0,
+              # The number of leap seconds to be applied to UTC on/after epoch
+              correction: 0
   end
 
   defmodule Rule do
@@ -70,7 +73,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
               end_time: nil
   end
 
-  defguardp is_digit(c) when (c >= ?0 and c <= ?9)
+  defguardp is_digit(c) when c >= ?0 and c <= ?9
   defguardp is_alphabetic(c) when (c >= ?A and c <= ?Z) or (c >= ?a and c <= ?z)
 
   ##############
@@ -109,15 +112,21 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   def parse(<<?T, ?Z, ?i, ?f, version::bytes(1), _reserved::bytes(15), rest::binary>>) do
     version =
       case version do
-        <<0>> -> 1
-        <<?2>> -> 2
-        <<?3>> -> 3
+        <<0>> ->
+          1
+
+        <<?2>> ->
+          2
+
+        <<?3>> ->
+          3
+
         byte ->
           {:error, {:invalid_tzfile_version, byte}, rest}
       end
 
     with v when is_integer(v) <- version,
-        {:ok, zoneinfo, _} <- parse_versioned_content(v, rest) do
+         {:ok, zoneinfo, _} <- parse_versioned_content(v, rest) do
       {:ok, zoneinfo}
     else
       {:error, reason, _} ->
@@ -140,7 +149,6 @@ defmodule Timex.Parse.ZoneInfo.Parser do
     end
   end
 
-
   # Parses the content of a tzinfo file based on the version format
   defp parse_versioned_content(version, data)
 
@@ -159,25 +167,29 @@ defmodule Timex.Parse.ZoneInfo.Parser do
         2 -> <<?2>>
         3 -> <<?3>>
       end
+
     with {:ok, zone1, rest} <- parse_content(1, data, %Zone{version: 1}),
-         {:header, <<?T, ?Z, ?i, ?f, ^expected_version::bytes(1), _::bytes(15), rest::binary>>} <- {:header, rest},
+         {:header, <<?T, ?Z, ?i, ?f, ^expected_version::bytes(1), _::bytes(15), rest::binary>>} <-
+           {:header, rest},
          {:ok, zone2, rest} <- parse_content(version, rest, %Zone{version: version}) do
       # Append the second set of zone info to the first set
-      transitions = 
+      transitions =
         zone1.transitions
         |> Enum.concat(zone2.transitions)
         |> Enum.sort_by(fn tx -> tx.starts_at end)
-      leaps = 
+
+      leaps =
         zone1.leaps
         |> Enum.concat(zone2.leaps)
         |> Enum.sort_by(fn leap -> leap.epoch end)
-      zone = 
-        %Zone{
-          version: zone2.version, 
-          transitions: transitions, 
-          leaps: leaps, 
-          rule: zone2.rule
-        }
+
+      zone = %Zone{
+        version: zone2.version,
+        transitions: transitions,
+        leaps: leaps,
+        rule: zone2.rule
+      }
+
       {:ok, zone, rest}
     else
       {:header, bytes} ->
@@ -242,15 +254,14 @@ defmodule Timex.Parse.ZoneInfo.Parser do
     {type_count, header_raw} = parse_i32(header_raw)
     {abbrev_length, _} = parse_i32(header_raw)
 
-    header = 
-      %Header{
-        utc_count: utc_count,
-        wall_count: wall_count,
-        leap_count: leap_count,
-        transition_count: tx_count,
-        type_count: type_count,
-        abbrev_length: abbrev_length
-      }
+    header = %Header{
+      utc_count: utc_count,
+      wall_count: wall_count,
+      leap_count: leap_count,
+      transition_count: tx_count,
+      type_count: type_count,
+      abbrev_length: abbrev_length
+    }
 
     parse_transition_times(version, rest, header, zone)
   end
@@ -276,12 +287,11 @@ defmodule Timex.Parse.ZoneInfo.Parser do
         {is_dst, next} = parse_char(next)
         {abbrev_index, next} = parse_uchar(next)
 
-        info = 
-          %TransitionInfo{
-            gmt_offset: gmt_offset,
-            is_dst?: is_dst == 1,
-            abbrev_index: abbrev_index
-          }
+        info = %TransitionInfo{
+          gmt_offset: gmt_offset,
+          is_dst?: is_dst == 1,
+          abbrev_index: abbrev_index
+        }
 
         {info, next}
       end)
@@ -323,11 +333,10 @@ defmodule Timex.Parse.ZoneInfo.Parser do
         {epoch, next} = parse_int(version, data)
         {correction, next} = parse_i32(next)
 
-        leap = 
-          %LeapSecond{
-            epoch: epoch,
-            correction: correction
-          }
+        leap = %LeapSecond{
+          epoch: epoch,
+          correction: correction
+        }
 
         {leap, next}
       end)
@@ -472,7 +481,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
           end
 
         _ ->
-          {:ok, {date, Time.new(2, 0, 0, 0)}, rest}
+          {:ok, {date, Timex.Time.new!(2, 0, 0, 0)}, rest}
       end
     end
   end
@@ -524,6 +533,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   defp parse_julian_day(str, opts) do
     with {:ok, day, rest} <- parse_integer_unsigned(str) do
       allow_leaps? = Keyword.get(opts, :allow_leap_days, true)
+
       cond do
         # Day of year including Feb 29
         allow_leaps? and day >= 0 and day <= 365 ->
@@ -547,41 +557,40 @@ defmodule Timex.Parse.ZoneInfo.Parser do
 
   defp parse_quoted_abbrev(str, acc \\ "")
 
-  defp parse_quoted_abbrev(<<?>, rest::binary>>, acc) when byte_size(acc) < 3, 
+  defp parse_quoted_abbrev(<<?>, rest::binary>>, acc) when byte_size(acc) < 3,
     do: {:error, {:invalid_quoted_abbreviation, acc}, rest}
 
-  defp parse_quoted_abbrev(<<?>, rest::binary>>, acc), 
+  defp parse_quoted_abbrev(<<?>, rest::binary>>, acc),
     do: {:ok, acc, rest}
 
-  defp parse_quoted_abbrev(<<c::char(), rest::binary>>, acc), 
+  defp parse_quoted_abbrev(<<c::char(), rest::binary>>, acc),
     do: parse_quoted_abbrev(rest, acc <> <<c::char()>>)
 
-  defp parse_quoted_abbrev(<<>>, acc), 
+  defp parse_quoted_abbrev(<<>>, acc),
     do: {:error, :unclosed_quoted_abbreviation, acc}
-
 
   defp parse_unquoted_abbrev(str, acc \\ "")
 
   defp parse_unquoted_abbrev(<<c::char(), rest::binary>>, acc) when is_alphabetic(c),
     do: parse_unquoted_abbrev(rest, acc <> <<c::char()>>)
 
-  defp parse_unquoted_abbrev(rest, acc) when byte_size(acc) < 3, 
+  defp parse_unquoted_abbrev(rest, acc) when byte_size(acc) < 3,
     do: {:error, {:invalid_unquoted_abbreviation, acc}, rest}
 
-  defp parse_unquoted_abbrev(rest, acc), 
+  defp parse_unquoted_abbrev(rest, acc),
     do: {:ok, acc, rest}
-
 
   defp parse_offset(<<sign::char(), rest::binary>>) when sign in [?+, ?-],
     do: parse_offset(rest, sign)
 
-  defp parse_offset(str) when is_binary(str), 
+  defp parse_offset(str) when is_binary(str),
     do: parse_offset(str, ?+)
 
   defp parse_offset(str, sign) do
     sign = if sign == ?+, do: 1, else: -1
+
     with {:ok, time, rest} <- parse_time(str),
-         {seconds, _} <- Time.to_seconds_after_midnight(time) do
+         {seconds, _} <- Timex.Time.to_seconds_after_midnight(time) do
       {:ok, sign * seconds, rest}
     end
   end
@@ -593,21 +602,21 @@ defmodule Timex.Parse.ZoneInfo.Parser do
           {:ok, mm, <<?:, rest::binary>>} when mm >= 0 and mm < 60 ->
             case parse_integer_unsigned(rest) do
               {:ok, ss, rest} when ss >= 0 and ss < 60 ->
-                {:ok, Time.new!(hh, mm, ss, 0), rest}
+                {:ok, Timex.Time.new!(hh, mm, ss, 0), rest}
 
               _ ->
-                {:ok, Time.new!(hh, mm, 0, 0), rest}
+                {:ok, Timex.Time.new!(hh, mm, 0, 0), rest}
             end
 
           {:ok, mm, rest} when mm >= 0 and mm < 60 ->
-            {:ok, Time.new!(hh, mm, 0, 0), rest}
+            {:ok, Timex.Time.new!(hh, mm, 0, 0), rest}
 
           _ ->
-            {:ok, Time.new!(hh, 0, 0, 0), rest}
+            {:ok, Timex.Time.new!(hh, 0, 0, 0), rest}
         end
 
       {:ok, hh, rest} when hh >= 0 and hh <= 24 ->
-        {:ok, Time.new!(hh, 0, 0, 0), rest}
+        {:ok, Timex.Time.new!(hh, 0, 0, 0), rest}
 
       {:ok, _, _} ->
         {:error, :invalid_hour, str}
@@ -618,7 +627,8 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   end
 
   defp to_integer(n) when is_integer(n) and n >= 0, do: {:ok, n}
-  defp to_integer(s) when is_binary(s) do 
+
+  defp to_integer(s) when is_binary(s) do
     with {:ok, n, _} <- parse_integer_signed(s) do
       {:ok, n}
     end
@@ -680,6 +690,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
 
   defp parse_null_terminated_str(<<>>, acc), do: {:ok, acc, ""}
   defp parse_null_terminated_str(<<0, rest::binary>>, acc), do: {:ok, acc, rest}
+
   defp parse_null_terminated_str(<<c::char(), rest::binary>>, acc) do
     parse_null_terminated_str(rest, acc <> <<c::char()>>)
   end
@@ -688,6 +699,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
 
   defp parse_newline_terminated_str(<<>>, acc), do: {:ok, acc, ""}
   defp parse_newline_terminated_str(<<?\n, rest::binary>>, acc), do: {:ok, acc, rest}
+
   defp parse_newline_terminated_str(<<c::char(), rest::binary>>, acc) do
     parse_newline_terminated_str(rest, acc <> <<c::char()>>)
   end

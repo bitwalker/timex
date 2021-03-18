@@ -41,7 +41,7 @@ defimpl Timex.Protocol, for: Tuple do
 
   def to_datetime({{y, m, d}, {h, mm, s, us}}, timezone) when is_datetime(y, m, d, h, mm, s) do
     us = Timex.DateTime.Helpers.construct_microseconds(us)
-    dt = NaiveDateTime.new!(y, m, d, h, mm, s, us)
+    dt = Timex.NaiveDateTime.new!(y, m, d, h, mm, s, us)
 
     with {:tzdata, tz} when is_binary(tz) <- {:tzdata, Timex.Timezone.name_of(timezone)},
          {:ok, datetime} <- DateTime.from_naive(dt, tz, Timex.tzdb()) do
@@ -62,12 +62,12 @@ defimpl Timex.Protocol, for: Tuple do
 
   def to_naive_datetime({{y, m, d}, {h, mm, s, us}}) when is_datetime(y, m, d, h, mm, s) do
     us = Timex.DateTime.Helpers.construct_microseconds(us)
-    NaiveDateTime.new!(y, m, d, h, mm, s, us)
+    Timex.NaiveDateTime.new!(y, m, d, h, mm, s, us)
   end
 
   def to_naive_datetime(date) do
     with {:ok, {{y, m, d}, {h, mm, s}}} <- to_erl_datetime(date) do
-      NaiveDateTime.new!(y, m, d, h, mm, s)
+      Timex.NaiveDateTime.new!(y, m, d, h, mm, s)
     end
   end
 
@@ -102,8 +102,8 @@ defimpl Timex.Protocol, for: Tuple do
 
   def beginning_of_week({y, m, d}, weekstart) when is_date(y, m, d) do
     with ws when is_atom(ws) <- Timex.standardize_week_start(weekstart) do
-      Date.new!(y, m, d)
-      |> Date.beginning_of_week(weekstart)
+      Timex.Date.new!(y, m, d)
+      |> Timex.Date.beginning_of_week(weekstart)
       |> Date.to_erl()
     end
   end
@@ -111,8 +111,8 @@ defimpl Timex.Protocol, for: Tuple do
   def beginning_of_week({{y, m, d}, _}, weekstart) when is_date(y, m, d) do
     with ws when is_atom(ws) <- Timex.standardize_week_start(weekstart) do
       date =
-        Date.new!(y, m, d)
-        |> Date.beginning_of_week(ws)
+        Timex.Date.new!(y, m, d)
+        |> Timex.Date.beginning_of_week(ws)
         |> Date.to_erl()
 
       {date, {0, 0, 0}}
@@ -123,8 +123,8 @@ defimpl Timex.Protocol, for: Tuple do
 
   def end_of_week({y, m, d}, weekstart) when is_date(y, m, d) do
     with ws when is_atom(ws) <- Timex.standardize_week_start(weekstart) do
-      Date.new!(y, m, d)
-      |> Date.end_of_week(ws)
+      Timex.Date.new!(y, m, d)
+      |> Timex.Date.end_of_week(ws)
       |> Date.to_erl()
     end
   end
@@ -132,8 +132,8 @@ defimpl Timex.Protocol, for: Tuple do
   def end_of_week({{y, m, d}, _}, weekstart) when is_date(y, m, d) do
     with ws when is_atom(ws) <- Timex.standardize_week_start(weekstart) do
       date =
-        Date.new!(y, m, d)
-        |> Date.end_of_week(ws)
+        Timex.Date.new!(y, m, d)
+        |> Timex.Date.end_of_week(ws)
         |> Date.to_erl()
 
       {date, {23, 59, 59}}
@@ -209,8 +209,8 @@ defimpl Timex.Protocol, for: Tuple do
 
   def end_of_month(_), do: {:error, :invalid_date}
 
-  def quarter({y, m, d}) when is_date(y, m, d), do: Timex.quarter(m)
-  def quarter({{y, m, d}, _}) when is_date(y, m, d), do: Timex.quarter(m)
+  def quarter({y, m, d}) when is_date(y, m, d), do: Calendar.ISO.quarter_of_year(y, m, d)
+  def quarter({{y, m, d}, _}) when is_date(y, m, d), do: Calendar.ISO.quarter_of_year(y, m, d)
   def quarter(_), do: {:error, :invalid_date}
 
   def days_in_month({y, m, d}) when is_date(y, m, d), do: Timex.days_in_month(y, m)

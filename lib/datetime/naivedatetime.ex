@@ -14,17 +14,17 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   end
 
   def to_gregorian_seconds(date) do
-    with {s, _} <- NaiveDateTime.to_gregorian_seconds(date), do: s
+    with {s, _} <- Timex.NaiveDateTime.to_gregorian_seconds(date), do: s
   end
 
   def to_gregorian_microseconds(%NaiveDateTime{} = date) do
-    with {s, us} <- NaiveDateTime.to_gregorian_seconds(date) do
+    with {s, us} <- Timex.NaiveDateTime.to_gregorian_seconds(date) do
       s * (1_000 * 1_000) + us
     end
   end
 
   def to_unix(date) do
-    with {s, _} <- NaiveDateTime.to_gregorian_seconds(date) do
+    with {s, _} <- Timex.NaiveDateTime.to_gregorian_seconds(date) do
       s - @epoch_seconds
     end
   end
@@ -66,26 +66,26 @@ defimpl Timex.Protocol, for: NaiveDateTime do
 
   def beginning_of_week(%NaiveDateTime{microsecond: {_, precision}} = date, weekstart) do
     with ws when is_atom(ws) <- Timex.standardize_week_start(weekstart) do
-      date = Date.beginning_of_week(date, ws)
-      NaiveDateTime.new!(date.year, date.month, date.day, 0, 0, 0, {0, precision})
+      date = Timex.Date.beginning_of_week(date, ws)
+      Timex.NaiveDateTime.new!(date.year, date.month, date.day, 0, 0, 0, {0, precision})
     end
   end
 
   def end_of_week(%NaiveDateTime{microsecond: {_, precision}} = date, weekstart) do
     with ws when is_atom(ws) <- Timex.standardize_week_start(weekstart) do
-      date = Date.end_of_week(date, ws)
+      date = Timex.Date.end_of_week(date, ws)
       us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
-      NaiveDateTime.new!(date.year, date.month, date.day, 23, 59, 59, us)
+      Timex.NaiveDateTime.new!(date.year, date.month, date.day, 23, 59, 59, us)
     end
   end
 
   def beginning_of_year(%NaiveDateTime{year: year, microsecond: {_, precision}}) do
-    NaiveDateTime.new!(year, 1, 1, 0, 0, 0, {0, precision})
+    Timex.NaiveDateTime.new!(year, 1, 1, 0, 0, 0, {0, precision})
   end
 
   def end_of_year(%NaiveDateTime{year: year, microsecond: {_, precision}}) do
     us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
-    NaiveDateTime.new!(year, 12, 31, 23, 59, 59, us)
+    Timex.NaiveDateTime.new!(year, 12, 31, 23, 59, 59, us)
   end
 
   def beginning_of_quarter(%NaiveDateTime{month: month} = date) do
@@ -99,15 +99,16 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   end
 
   def beginning_of_month(%NaiveDateTime{year: year, month: month, microsecond: {_, precision}}),
-    do: NaiveDateTime.new!(year, month, 1, 0, 0, 0, {0, precision})
+    do: Timex.NaiveDateTime.new!(year, month, 1, 0, 0, 0, {0, precision})
 
   def end_of_month(%NaiveDateTime{year: year, month: month, microsecond: {_, precision}} = date) do
     day = days_in_month(date)
     us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
-    NaiveDateTime.new!(year, month, day, 23, 59, 59, us)
+    Timex.NaiveDateTime.new!(year, month, day, 23, 59, 59, us)
   end
 
-  def quarter(%NaiveDateTime{month: month}), do: Timex.quarter(month)
+  def quarter(%NaiveDateTime{year: y, month: m, day: d}),
+    do: Calendar.ISO.quarter_of_year(y, m, d)
 
   def days_in_month(%NaiveDateTime{year: y, month: m}), do: Timex.days_in_month(y, m)
 

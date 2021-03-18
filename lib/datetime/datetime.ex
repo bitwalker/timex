@@ -19,11 +19,11 @@ defimpl Timex.Protocol, for: DateTime do
   end
 
   def to_gregorian_seconds(date) do
-    with {s, _} <- DateTime.to_gregorian_seconds(date), do: s
+    with {s, _} <- Timex.DateTime.to_gregorian_seconds(date), do: s
   end
 
   def to_gregorian_microseconds(%DateTime{} = date) do
-    with {s, us} <- DateTime.to_gregorian_seconds(date), do: s * (1_000 * 1_000) + us
+    with {s, us} <- Timex.DateTime.to_gregorian_seconds(date), do: s * (1_000 * 1_000) + us
   end
 
   def to_unix(date), do: DateTime.to_unix(date)
@@ -43,7 +43,7 @@ defimpl Timex.Protocol, for: DateTime do
     # NOTE: For legacy reasons we shift DateTimes to UTC when making them naive, 
     # but the standard library just drops the timezone info
     d
-    |> DateTime.shift_zone!("Etc/UTC", Timex.tzdb())
+    |> Timex.DateTime.shift_zone!("Etc/UTC", Timex.tzdb())
     |> DateTime.to_naive()
   end
 
@@ -57,10 +57,10 @@ defimpl Timex.Protocol, for: DateTime do
 
   def beginning_of_day(%DateTime{time_zone: time_zone, microsecond: {_, precision}} = datetime) do
     us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
-    time = Time.new!(0, 0, 0, us)
+    time = Timex.Time.new!(0, 0, 0, us)
 
     with {:ok, datetime} <-
-           DateTime.new(DateTime.to_date(datetime), time, time_zone, Timex.tzdb()) do
+           Timex.DateTime.new(DateTime.to_date(datetime), time, time_zone, Timex.tzdb()) do
       datetime
     else
       {:gap, _a, b} ->
@@ -75,10 +75,10 @@ defimpl Timex.Protocol, for: DateTime do
 
   def end_of_day(%DateTime{time_zone: time_zone, microsecond: {_, precision}} = datetime) do
     us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
-    time = Time.new!(23, 59, 59, us)
+    time = Timex.Time.new!(23, 59, 59, us)
 
     with {:ok, datetime} <-
-           DateTime.new(DateTime.to_date(datetime), time, time_zone, Timex.tzdb()) do
+           Timex.DateTime.new(DateTime.to_date(datetime), time, time_zone, Timex.tzdb()) do
       datetime
     else
       {:gap, a, _b} ->
@@ -96,11 +96,11 @@ defimpl Timex.Protocol, for: DateTime do
         weekstart
       ) do
     us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
-    time = Time.new!(0, 0, 0, us)
+    time = Timex.Time.new!(0, 0, 0, us)
 
     with weekstart when is_atom(weekstart) <- Timex.standardize_week_start(weekstart),
-         date = Date.beginning_of_week(DateTime.to_date(date), weekstart),
-         {:ok, datetime} <- DateTime.new(date, time, time_zone, Timex.tzdb()) do
+         date = Timex.Date.beginning_of_week(DateTime.to_date(date), weekstart),
+         {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.tzdb()) do
       datetime
     else
       {:gap, _a, b} ->
@@ -117,10 +117,10 @@ defimpl Timex.Protocol, for: DateTime do
 
   def end_of_week(%DateTime{time_zone: time_zone, microsecond: {_, precision}} = date, weekstart) do
     with weekstart when is_atom(weekstart) <- Timex.standardize_week_start(weekstart),
-         date = Date.end_of_week(DateTime.to_date(date), weekstart),
+         date = Timex.Date.end_of_week(DateTime.to_date(date), weekstart),
          us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision),
-         time = Time.new!(23, 59, 59, us),
-         {:ok, datetime} <- DateTime.new(date, time, time_zone, Timex.tzdb()) do
+         time = Timex.Time.new!(23, 59, 59, us),
+         {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.tzdb()) do
       datetime
     else
       {:gap, a, _b} ->
@@ -135,12 +135,12 @@ defimpl Timex.Protocol, for: DateTime do
     end
   end
 
-  @spec beginning_of_year(DateTime.t()) :: AmbiguousDateTime.t() | DateTime.t()
   def beginning_of_year(%DateTime{year: year, time_zone: time_zone, microsecond: {_, precision}}) do
     us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
-    time = Time.new!(0, 0, 0, us)
+    time = Timex.Time.new!(0, 0, 0, us)
 
-    with {:ok, datetime} <- DateTime.new(Date.new!(year, 1, 1), time, time_zone, Timex.tzdb()) do
+    with {:ok, datetime} <-
+           Timex.DateTime.new(Timex.Date.new!(year, 1, 1), time, time_zone, Timex.tzdb()) do
       datetime
     else
       {:gap, _a, b} ->
@@ -152,12 +152,12 @@ defimpl Timex.Protocol, for: DateTime do
     end
   end
 
-  @spec end_of_year(DateTime.t()) :: AmbiguousDateTime.t() | DateTime.t()
   def end_of_year(%DateTime{year: year, time_zone: time_zone, microsecond: {_, precision}}) do
     us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
-    time = Time.new!(23, 59, 59, us)
+    time = Timex.Time.new!(23, 59, 59, us)
 
-    with {:ok, datetime} <- DateTime.new(Date.new!(year, 12, 31), time, time_zone, Timex.tzdb()) do
+    with {:ok, datetime} <-
+           Timex.DateTime.new(Timex.Date.new!(year, 12, 31), time, time_zone, Timex.tzdb()) do
       datetime
     else
       {:gap, a, _b} ->
@@ -169,7 +169,6 @@ defimpl Timex.Protocol, for: DateTime do
     end
   end
 
-  @spec beginning_of_quarter(DateTime.t()) :: DateTime.t()
   def beginning_of_quarter(%DateTime{
         year: year,
         month: month,
@@ -178,9 +177,10 @@ defimpl Timex.Protocol, for: DateTime do
       }) do
     month = 1 + 3 * (Timex.quarter(month) - 1)
     us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
-    time = Time.new!(0, 0, 0, us)
+    time = Timex.Time.new!(0, 0, 0, us)
 
-    with {:ok, datetime} <- DateTime.new(Date.new!(year, month, 1), time, time_zone, Timex.tzdb()) do
+    with {:ok, datetime} <-
+           Timex.DateTime.new(Timex.Date.new!(year, month, 1), time, time_zone, Timex.tzdb()) do
       datetime
     else
       {:gap, _a, b} ->
@@ -192,7 +192,6 @@ defimpl Timex.Protocol, for: DateTime do
     end
   end
 
-  @spec end_of_quarter(DateTime.t()) :: DateTime.t() | AmbiguousDateTime.t()
   def end_of_quarter(%DateTime{
         year: year,
         month: month,
@@ -200,11 +199,11 @@ defimpl Timex.Protocol, for: DateTime do
         microsecond: {_, precision}
       }) do
     month = 3 * Timex.quarter(month)
-    date = Date.end_of_month(Date.new!(year, month, 1))
+    date = Timex.Date.end_of_month(Timex.Date.new!(year, month, 1))
     us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
-    time = Time.new!(23, 59, 59, us)
+    time = Timex.Time.new!(23, 59, 59, us)
 
-    with {:ok, datetime} <- DateTime.new(date, time, time_zone, Timex.tzdb()) do
+    with {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.tzdb()) do
       datetime
     else
       {:gap, a, _b} ->
@@ -216,7 +215,6 @@ defimpl Timex.Protocol, for: DateTime do
     end
   end
 
-  @spec beginning_of_month(DateTime.t()) :: AmbiguousDateTime.t() | DateTime.t()
   def beginning_of_month(%DateTime{
         year: year,
         month: month,
@@ -224,9 +222,10 @@ defimpl Timex.Protocol, for: DateTime do
         microsecond: {_, precision}
       }) do
     us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
-    time = Time.new!(0, 0, 0, us)
+    time = Timex.Time.new!(0, 0, 0, us)
 
-    with {:ok, datetime} <- DateTime.new(Date.new!(year, month, 1), time, time_zone, Timex.tzdb()) do
+    with {:ok, datetime} <-
+           Timex.DateTime.new(Timex.Date.new!(year, month, 1), time, time_zone, Timex.tzdb()) do
       datetime
     else
       {:gap, _a, b} ->
@@ -238,18 +237,17 @@ defimpl Timex.Protocol, for: DateTime do
     end
   end
 
-  @spec end_of_month(DateTime.t()) :: DateTime.t()
   def end_of_month(%DateTime{
         year: year,
         month: month,
         time_zone: time_zone,
         microsecond: {_, precision}
       }) do
-    date = Date.end_of_month(Date.new!(year, month, 1))
+    date = Timex.Date.end_of_month(Timex.Date.new!(year, month, 1))
     us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
-    time = Time.new!(23, 59, 59, us)
+    time = Timex.Time.new!(23, 59, 59, us)
 
-    with {:ok, datetime} <- DateTime.new(date, time, time_zone, Timex.tzdb()) do
+    with {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.tzdb()) do
       datetime
     else
       {:gap, a, _b} ->
@@ -261,8 +259,8 @@ defimpl Timex.Protocol, for: DateTime do
     end
   end
 
-  @spec quarter(DateTime.t()) :: 1..4
-  def quarter(%DateTime{month: month}), do: Timex.quarter(month)
+  def quarter(%DateTime{year: y, month: m, day: d}),
+    do: Calendar.ISO.quarter_of_year(y, m, d)
 
   def days_in_month(d), do: Date.days_in_month(d)
 

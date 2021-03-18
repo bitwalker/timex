@@ -5,31 +5,23 @@ defimpl Timex.Protocol, for: Date do
   use Timex.Constants
   import Timex.Macros
 
-  alias Timex.Types
-
   @epoch_seconds :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
 
-  @spec to_julian(Date.t()) :: float
   def to_julian(%Date{:year => y, :month => m, :day => d}) do
     Timex.Calendar.Julian.julian_date(y, m, d)
   end
 
-  @spec to_gregorian_seconds(Date.t()) :: non_neg_integer
   def to_gregorian_seconds(date), do: to_seconds(date, :zero)
 
-  @spec to_gregorian_microseconds(Date.t()) :: non_neg_integer
   def to_gregorian_microseconds(date), do: to_seconds(date, :zero) * (1_000 * 1_000)
 
-  @spec to_unix(Date.t()) :: non_neg_integer
   def to_unix(date), do: trunc(to_seconds(date, :epoch))
 
-  @spec to_date(Date.t()) :: Date.t()
   def to_date(date), do: date
 
-  @spec to_datetime(Date.t(), timezone :: Types.valid_timezone()) :: DateTime.t() | {:error, term}
   def to_datetime(%Date{} = date, timezone) do
     with {:tzdata, tz} when is_binary(tz) <- {:tzdata, Timex.Timezone.name_of(timezone)},
-         {:ok, datetime} <- DateTime.new(date, ~T[00:00:00], tz, Timex.tzdb()) do
+         {:ok, datetime} <- Timex.DateTime.new(date, ~T[00:00:00], tz, Timex.tzdb()) do
       datetime
     else
       {:tzdata, err} ->
@@ -46,27 +38,20 @@ defimpl Timex.Protocol, for: Date do
     end
   end
 
-  @spec to_naive_datetime(Date.t()) :: NaiveDateTime.t()
   def to_naive_datetime(%Date{year: y, month: m, day: d}) do
-    NaiveDateTime.new!(y, m, d, 0, 0, 0)
+    Timex.NaiveDateTime.new!(y, m, d, 0, 0, 0)
   end
 
-  @spec to_erl(Date.t()) :: Types.date()
   def to_erl(%Date{year: y, month: m, day: d}), do: {y, m, d}
 
-  @spec century(Date.t()) :: non_neg_integer
   def century(%Date{:year => year}), do: Timex.century(year)
 
-  @spec is_leap?(Date.t()) :: boolean
   def is_leap?(%Date{year: year}), do: :calendar.is_leap_year(year)
 
-  @spec beginning_of_day(Date.t()) :: Date.t()
   def beginning_of_day(%Date{} = date), do: date
 
-  @spec end_of_day(Date.t()) :: Date.t()
   def end_of_day(%Date{} = date), do: date
 
-  @spec beginning_of_week(Date.t(), Types.weekstart()) :: Date.t()
   def beginning_of_week(%Date{} = date, weekstart) do
     case Timex.days_to_beginning_of_week(date, weekstart) do
       {:error, _} = err -> err
@@ -74,7 +59,6 @@ defimpl Timex.Protocol, for: Date do
     end
   end
 
-  @spec end_of_week(Date.t(), Types.weekstart()) :: Date.t()
   def end_of_week(%Date{} = date, weekstart) do
     case Timex.days_to_end_of_week(date, weekstart) do
       {:error, _} = err ->
@@ -85,36 +69,29 @@ defimpl Timex.Protocol, for: Date do
     end
   end
 
-  @spec beginning_of_year(Date.t()) :: Date.t()
   def beginning_of_year(%Date{} = date),
     do: %{date | :month => 1, :day => 1}
 
-  @spec end_of_year(Date.t()) :: Date.t()
   def end_of_year(%Date{} = date),
     do: %{date | :month => 12, :day => 31}
 
-  @spec beginning_of_quarter(Date.t()) :: Date.t()
   def beginning_of_quarter(%Date{month: month} = date) do
     month = 1 + 3 * (Timex.quarter(month) - 1)
     %{date | :month => month, :day => 1}
   end
 
-  @spec end_of_quarter(Date.t()) :: Date.t()
   def end_of_quarter(%Date{month: month} = date) do
     month = 3 * Timex.quarter(month)
     end_of_month(%{date | :month => month, :day => 1})
   end
 
-  @spec beginning_of_month(Date.t()) :: Date.t()
   def beginning_of_month(%Date{} = date),
     do: %{date | :day => 1}
 
-  @spec end_of_month(Date.t()) :: Date.t()
   def end_of_month(%Date{} = date),
     do: %{date | :day => days_in_month(date)}
 
-  @spec quarter(Date.t()) :: 1..4
-  def quarter(%Date{month: month}), do: Timex.quarter(month)
+  def quarter(%Date{year: y, month: m, day: d}), do: Calendar.ISO.quarter_of_year(y, m, d)
 
   def days_in_month(%Date{:year => y, :month => m}), do: Timex.days_in_month(y, m)
 
@@ -137,10 +114,6 @@ defimpl Timex.Protocol, for: Date do
     %Date{year: year, month: month, day: day_of_month}
   end
 
-  @doc """
-  See docs for Timex.set/2 for details.
-  """
-  @spec set(Date.t(), list({atom(), term})) :: Date.t() | {:error, term}
   def set(%Date{} = date, options) do
     validate? = Keyword.get(options, :validate, true)
 
@@ -196,7 +169,6 @@ defimpl Timex.Protocol, for: Date do
     end)
   end
 
-  @spec shift(Date.t(), list({atom(), term})) :: Date.t() | {:error, term}
   def shift(%Date{} = date, [{_, 0}]), do: date
 
   def shift(%Date{} = date, options) do
