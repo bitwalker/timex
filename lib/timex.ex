@@ -867,7 +867,7 @@ defmodule Timex do
   @doc """
   Returns a boolean indicating whether the first `Timex.Comparable` occurs before the second
   """
-  @spec before?(Time, Time) :: boolean
+  @spec before?(Time.t(), Time.t()) :: boolean
   @spec before?(Comparable.comparable(), Comparable.comparable()) :: boolean
   def before?(a, b) do
     case compare(a, b) do
@@ -885,7 +885,7 @@ defmodule Timex do
   @doc """
   Returns a boolean indicating whether the first `Timex.Comparable` occurs after the second
   """
-  @spec after?(Time, Time) :: boolean
+  @spec after?(Time.t(), Time.t()) :: boolean
   @spec after?(Comparable.comparable(), Comparable.comparable()) :: boolean
   def after?(a, b) do
     case compare(a, b) do
@@ -917,7 +917,7 @@ defmodule Timex do
             | :start
             | :end
         ]
-  @spec between?(Time, Time, Time, between_options) :: boolean
+  @spec between?(Time.t(), Time.t(), Time.t(), between_options) :: boolean
   @spec between?(
           Comparable.comparable(),
           Comparable.comparable(),
