@@ -27,21 +27,28 @@ defimpl Timex.Protocol, for: Date do
   def to_date(date), do: date
 
   @spec to_datetime(Date.t(), timezone :: Types.valid_timezone()) :: DateTime.t() | {:error, term}
-  def to_datetime(%Date{:year => y, :month => m, :day => d}, timezone) do
-    case Timex.DateTime.Helpers.construct({{y, m, d}, {0, 0, 0, 0}}, 0, timezone, :wall) do
-      {:error, _} ->
-        # This happens for date/times that fall on a timezone boundary and don't exist,
-        # advance forward an hour and try again
-        Timex.DateTime.Helpers.construct({{y, m, d}, {1, 0, 0, 0}}, 0, timezone, :wall)
+  def to_datetime(%Date{} = date, timezone) do
+    with {:tzdata, tz} when is_binary(tz) <- {:tzdata, Timex.Timezone.name_of(timezone)},
+         {:ok, datetime} <- DateTime.new(date, ~T[00:00:00], tz, Timex.tzdb()) do
+      datetime
+    else
+      {:tzdata, err} ->
+        err
 
-      datetime ->
-        datetime
+      {:error, _} = err ->
+        err
+
+      {:gap, _a, b} ->
+        b
+
+      {:ambiguous, _a, b} ->
+        b
     end
   end
 
   @spec to_naive_datetime(Date.t()) :: NaiveDateTime.t()
-  def to_naive_datetime(%Date{:year => y, :month => m, :day => d}) do
-    %NaiveDateTime{year: y, month: m, day: d, hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
+  def to_naive_datetime(%Date{year: y, month: m, day: d}) do
+    NaiveDateTime.new!(y, m, d, 0, 0, 0)
   end
 
   @spec to_erl(Date.t()) :: Types.date()

@@ -20,20 +20,20 @@ defmodule Timex.Timezone do
   alias Timex.Parse.Timezones.Posix.PosixTimezone, as: PosixTz
   alias Timex.Types
 
+  @behaviour Calendar.TimeZoneDatabase
+
   @doc """
   Determines if a given zone name exists
   """
   @spec exists?(String.t()) :: boolean
   def exists?(zone) when is_binary(zone) do
-    case Tzdata.zone_exists?(zone) do
-      true ->
-        true
-
-      false ->
-        case lookup_posix(zone) do
-          tz when is_binary(tz) -> true
-          _ -> false
-        end
+    if Tzdata.zone_exists?(zone) do
+      true
+    else
+      case lookup_posix(zone) do
+        tz when is_binary(tz) -> true
+        _ -> false
+      end
     end
   end
 
@@ -52,9 +52,12 @@ defmodule Timex.Timezone do
   def local(date) do
     secs = Timex.to_gregorian_seconds(date)
 
-    case Local.lookup(secs) do
-      {:error, _} = err -> err
-      tz -> resolve(tz, secs)
+    case Local.lookup() do
+      {:error, _} = err ->
+        err
+
+      tz ->
+        resolve(tz, secs)
     end
   end
 
@@ -170,18 +173,16 @@ defmodule Timex.Timezone do
   def name_of(<<"GMT", ?-, offset::binary>>), do: "Etc/GMT-#{offset}"
 
   def name_of(tz) when is_binary(tz) do
-    case Tzdata.zone_exists?(tz) do
-      true ->
-        tz
+    if Tzdata.zone_exists?(tz) do
+      tz
+    else
+      case lookup_posix(tz) do
+        full_name when is_binary(full_name) ->
+          full_name
 
-      false ->
-        case lookup_posix(tz) do
-          full_name when is_binary(full_name) ->
-            full_name
-
-          nil ->
-            {:error, {:invalid_timezone, tz}}
-        end
+        nil ->
+          {:error, {:invalid_timezone, tz}}
+      end
     end
   end
 
@@ -420,106 +421,18 @@ defmodule Timex.Timezone do
     date
   end
 
-  def convert(%DateTime{} = date, %TimezoneInfo{full_name: name} = tz) do
-    # Calculate the difference between `date`'s timezone, and the target timezone
-    delta = diff(date, tz)
-    secs = Timex.to_gregorian_seconds(date) + delta
+  def convert(%DateTime{} = date, %TimezoneInfo{full_name: name} = tzinfo) do
+    with {:ok, datetime} <- DateTime.shift_zone(date, name, Timex.tzdb()) do
+      datetime
+    else
+      {ty, a, b} when ty in [:gap, :ambiguous] ->
+        %AmbiguousDateTime{before: a, after: b, type: ty}
 
-    # if the zone does not exist, use the provided zoneinfo
-    timezone =
-      if Tzdata.zone_exists?(name) do
-        case resolve(name, secs, :wall) do
-          {:error, _} ->
-            # This wall clock time doesn't exist in that timezone, advance an hour and try again
-            resolve(name, secs + 3600, :wall)
+      {:error, :time_zone_not_found} ->
+        convert_fallback(date, tzinfo)
 
-          tz ->
-            tz
-        end
-      else
-        tz
-      end
-
-    # Offset the provided date's time by the difference
-    case timezone do
       {:error, _} = err ->
         err
-
-      ^tz ->
-        {seconds_from_zeroyear, microsecs} = do_shift(date, delta)
-        {{y, m, d}, {h, mm, s}} = :calendar.gregorian_seconds_to_datetime(seconds_from_zeroyear)
-
-        %DateTime{
-          :year => y,
-          :month => m,
-          :day => d,
-          :hour => h,
-          :minute => mm,
-          :second => s,
-          :microsecond => microsecs,
-          :time_zone => tz.full_name,
-          :zone_abbr => tz.abbreviation,
-          :utc_offset => tz.offset_utc,
-          :std_offset => tz.offset_std
-        }
-
-      %TimezoneInfo{} = new_zone ->
-        delta = diff(date, new_zone)
-        {seconds_from_zeroyear, microsecs} = do_shift(date, delta)
-        {{y, m, d}, {h, mm, s}} = :calendar.gregorian_seconds_to_datetime(seconds_from_zeroyear)
-
-        %DateTime{
-          :year => y,
-          :month => m,
-          :day => d,
-          :hour => h,
-          :minute => mm,
-          :second => s,
-          :microsecond => microsecs,
-          :time_zone => new_zone.full_name,
-          :zone_abbr => new_zone.abbreviation,
-          :utc_offset => new_zone.offset_utc,
-          :std_offset => new_zone.offset_std
-        }
-
-      %AmbiguousTimezoneInfo{before: before_tz, after: after_tz} ->
-        before_delta = diff(date, before_tz)
-        {before_shifted, before_us} = do_shift(date, before_delta)
-        after_delta = diff(date, after_tz)
-        {after_shifted, after_us} = do_shift(date, after_delta)
-        {{y, m, d}, {h, mm, s}} = :calendar.gregorian_seconds_to_datetime(before_shifted)
-
-        before_dt = %DateTime{
-          :year => y,
-          :month => m,
-          :day => d,
-          :hour => h,
-          :minute => mm,
-          :second => s,
-          :microsecond => before_us,
-          :time_zone => before_tz.full_name,
-          :zone_abbr => before_tz.abbreviation,
-          :utc_offset => before_tz.offset_utc,
-          :std_offset => before_tz.offset_std
-        }
-
-        {{y, m, d}, {h, mm, s}} = :calendar.gregorian_seconds_to_datetime(after_shifted)
-
-        after_dt = %DateTime{
-          :year => y,
-          :month => m,
-          :day => d,
-          :hour => h,
-          :minute => mm,
-          :second => s,
-          :microsecond => after_us,
-          :time_zone => after_tz.full_name,
-          :zone_abbr => after_tz.abbreviation,
-          :utc_offset => after_tz.offset_utc,
-          :std_offset => after_tz.offset_std
-        }
-
-        %AmbiguousDateTime{:before => before_dt, :after => after_dt}
     end
   end
 
@@ -534,40 +447,80 @@ defmodule Timex.Timezone do
   end
 
   def convert(date, tz) do
-    case Timex.to_datetime(date) do
-      {:error, _} = err -> err
-      date -> convert(date, tz)
+    case Timex.to_datetime(date, tz) do
+      {:error, _} = err ->
+        err
+
+      datetime ->
+        datetime
     end
   end
 
-  defp do_shift(%DateTime{:microsecond => us} = datetime, seconds) do
-    secs_from_zero =
-      :calendar.datetime_to_gregorian_seconds({
-        {datetime.year, datetime.month, datetime.day},
-        {datetime.hour, datetime.minute, datetime.second}
-      })
+  defp convert_fallback(%DateTime{} = date, %TimezoneInfo{full_name: name} = tzinfo) do
+    # Temporarily push the custom tzinfo into process state for our database
+    Process.put(__MODULE__.Database, tzinfo)
 
-    do_shift(secs_from_zero, us, seconds)
-  end
-
-  defp do_shift(secs_from_zero, microseconds, seconds)
-       when is_integer(secs_from_zero) do
-    case seconds do
-      0 ->
-        {secs_from_zero, microseconds}
-
-      _ ->
-        new_secs_from_zero = secs_from_zero + seconds
-
-        cond do
-          new_secs_from_zero <= 0 ->
-            raise "cannot shift a datetime before the beginning of the gregorian calendar!"
-
-          :else ->
-            {new_secs_from_zero, microseconds}
-        end
+    with {:ok, datetime} <- DateTime.shift_zone(date, name, __MODULE__) do
+      datetime
     end
   end
+
+  @impl Calendar.TimeZoneDatabase
+  @doc false
+  def time_zone_period_from_utc_iso_days(iso_days, time_zone) do
+    # Get a NaiveDateTime for time_zone_periods_from_wall_datetime
+    {year, month, day, hour, minute, second, microsecond} =
+      Calendar.ISO.naive_datetime_from_iso_days(iso_days)
+
+    with {:ok, naive} <- NaiveDateTime.new(year, month, day, hour, minute, second, microsecond) do
+      time_zone_periods_from_wall_datetime(naive, time_zone)
+    else
+      {:error, _} ->
+        {:error, :time_zone_not_found}
+    end
+  end
+
+  @impl Calendar.TimeZoneDatabase
+  @doc false
+  def time_zone_periods_from_wall_datetime(naive, _time_zone) do
+    # Pop the time zone from process state, validate the desired datetime falls
+    # within the bounds of the time zone, and return its period description if so
+    %TimezoneInfo{from: from, until: until} = tz = Process.put(__MODULE__.Database, nil)
+
+    with {:ok, range_start} <- period_boundary_to_naive(from),
+         {:ok, range_end} <- period_boundary_to_naive(until) do
+      cond do
+        range_start == :min and range_end == :max ->
+          {:ok, TimezoneInfo.to_period(tz)}
+
+        range_start == :min and NaiveDateTime.compare(naive, range_end) in [:lt, :eq] ->
+          {:ok, TimezoneInfo.to_period(tz)}
+
+        range_end == :max and NaiveDateTime.compare(naive, range_start) in [:gt, :eq] ->
+          {:ok, TimezoneInfo.to_period(tz)}
+
+        range_start != :min and range_end != :max and
+          NaiveDateTime.compare(naive, range_start) in [:gt, :eq] and
+            NaiveDateTime.compare(naive, range_end) in [:lt, :eq] ->
+          {:ok, TimezoneInfo.to_period(tz)}
+
+        :else ->
+          {:error, :time_zone_not_found}
+      end
+    else
+      {:error, _} ->
+        {:error, :time_zone_not_found}
+    end
+  end
+
+  defp period_boundary_to_naive(:min), do: {:ok, :min}
+  defp period_boundary_to_naive(:max), do: {:ok, :max}
+
+  defp period_boundary_to_naive({_, {{y, m, d}, {hh, mm, ss}}}) do
+    NaiveDateTime.new(y, m, d, hh, mm, ss)
+  end
+
+  defp period_boundary_to_naive(_), do: {:error, :invalid_period}
 
   @doc """
   Determine what offset is required to convert a date into a target timezone
@@ -690,8 +643,8 @@ defmodule Timex.Timezone do
       abbreviation: abbr,
       offset_std: std_off_secs,
       offset_utc: utc_off_secs,
-      from: start_bound |> erlang_datetime_to_boundary_date,
-      until: end_bound |> erlang_datetime_to_boundary_date
+      from: erlang_datetime_to_boundary_date(start_bound),
+      until: erlang_datetime_to_boundary_date(end_bound)
     }
   end
 

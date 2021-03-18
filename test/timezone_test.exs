@@ -34,16 +34,7 @@ defmodule TimezoneTests do
   end
 
   test "local" do
-    local = Timezone.local()
-
-    is_error =
-      case local do
-        %TimezoneInfo{} -> false
-        {:error, _} -> true
-        _ -> true
-      end
-
-    assert is_error == false
+    assert %TimezoneInfo{} = Timezone.local()
   end
 
   test "diff" do

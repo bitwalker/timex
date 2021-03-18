@@ -117,6 +117,9 @@ defmodule Timex.DateTime.Helpers do
   def construct_microseconds({us, p}) when is_integer(us) and is_integer(p) do
     construct_microseconds(us, p)
   end
+  def construct_microseconds(us) when is_integer(us) do
+    construct_microseconds(us, -1)
+  end
 
   # Input precision of -1 means it should be recalculated based on the value
   def construct_microseconds(0, -1), do: {0, 0}
@@ -126,6 +129,7 @@ defmodule Timex.DateTime.Helpers do
 
   def to_precision(0, _p), do: 0
 
+  def to_precision(_, 0), do: 0
   def to_precision(us, p) do
     case precision(us) do
       detected_p when detected_p > p ->

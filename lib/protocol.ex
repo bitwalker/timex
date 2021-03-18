@@ -11,7 +11,7 @@ defprotocol Timex.Protocol do
   @doc """
   Convert a date/time value to a Julian calendar date number
   """
-  @spec to_julian(Types.valid_datetime()) :: float | {:error, term}
+  @spec to_julian(Types.valid_datetime()) :: integer | {:error, term}
   def to_julian(datetime)
 
   @doc """

@@ -13,179 +13,265 @@ defimpl Timex.Protocol, for: DateTime do
 
   alias Timex.{Duration, AmbiguousDateTime}
   alias Timex.{Timezone, TimezoneInfo}
-  alias Timex.Types
 
-  @epoch_seconds :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
-
-  @spec to_julian(DateTime.t()) :: float
   def to_julian(%DateTime{:year => y, :month => m, :day => d}) do
     Timex.Calendar.Julian.julian_date(y, m, d)
   end
 
-  @spec to_gregorian_seconds(DateTime.t()) :: non_neg_integer
-  def to_gregorian_seconds(date), do: to_seconds(date, :zero)
-
-  @spec to_gregorian_microseconds(DateTime.t()) :: non_neg_integer
-  def to_gregorian_microseconds(%DateTime{microsecond: {us, _}} = date) do
-    s = to_seconds(date, :zero)
-    s * (1_000 * 1_000) + us
+  def to_gregorian_seconds(date) do
+    with {s, _} <- DateTime.to_gregorian_seconds(date), do: s
   end
 
-  @spec to_unix(DateTime.t()) :: non_neg_integer
-  def to_unix(date), do: trunc(to_seconds(date, :epoch))
+  def to_gregorian_microseconds(%DateTime{} = date) do
+    with {s, us} <- DateTime.to_gregorian_seconds(date), do: s * (1_000 * 1_000) + us
+  end
 
-  @spec to_date(DateTime.t()) :: Date.t()
+  def to_unix(date), do: DateTime.to_unix(date)
+
   def to_date(date), do: DateTime.to_date(date)
 
-  @spec to_datetime(DateTime.t(), timezone :: Types.valid_timezone()) ::
-          DateTime.t() | AmbiguousDateTime.t() | {:error, term}
   def to_datetime(%DateTime{time_zone: timezone} = d, timezone), do: d
-  def to_datetime(%DateTime{} = d, timezone), do: Timezone.convert(d, timezone)
 
-  @spec to_naive_datetime(DateTime.t()) :: NaiveDateTime.t()
-  def to_naive_datetime(%DateTime{time_zone: nil} = d) do
-    %NaiveDateTime{
-      year: d.year,
-      month: d.month,
-      day: d.day,
-      hour: d.hour,
-      minute: d.minute,
-      second: d.second,
-      microsecond: d.microsecond
-    }
+  def to_datetime(%DateTime{} = d, timezone) do
+    with tz when is_binary(tz) <- Timezone.name_of(timezone),
+         {:ok, datetime} <- DateTime.shift_zone(d, tz) do
+      datetime
+    end
   end
 
   def to_naive_datetime(%DateTime{} = d) do
-    nd = %NaiveDateTime{
-      year: d.year,
-      month: d.month,
-      day: d.day,
-      hour: d.hour,
-      minute: d.minute,
-      second: d.second,
-      microsecond: d.microsecond
-    }
-
-    Timex.shift(nd, seconds: -1 * Timex.Timezone.total_offset(d.std_offset, d.utc_offset))
+    # NOTE: For legacy reasons we shift DateTimes to UTC when making them naive, 
+    # but the standard library just drops the timezone info
+    d
+    |> DateTime.shift_zone!("Etc/UTC", Timex.tzdb())
+    |> DateTime.to_naive()
   end
 
-  @spec to_erl(DateTime.t()) :: Types.datetime()
   def to_erl(%DateTime{} = d) do
     {{d.year, d.month, d.day}, {d.hour, d.minute, d.second}}
   end
 
-  @spec century(DateTime.t()) :: non_neg_integer
   def century(%DateTime{:year => year}), do: Timex.century(year)
 
-  @spec is_leap?(DateTime.t()) :: boolean
   def is_leap?(%DateTime{year: year}), do: :calendar.is_leap_year(year)
 
-  @spec beginning_of_day(DateTime.t()) :: DateTime.t()
-  def beginning_of_day(%DateTime{} = datetime) do
-    Timex.Timezone.beginning_of_day(datetime)
-  end
+  def beginning_of_day(%DateTime{time_zone: time_zone, microsecond: {_, precision}} = datetime) do
+    us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
+    time = Time.new!(0, 0, 0, us)
 
-  @spec end_of_day(DateTime.t()) :: DateTime.t()
-  def end_of_day(%DateTime{} = datetime) do
-    Timex.Timezone.end_of_day(datetime)
-  end
+    with {:ok, datetime} <-
+           DateTime.new(DateTime.to_date(datetime), time, time_zone, Timex.tzdb()) do
+      datetime
+    else
+      {:gap, _a, b} ->
+        # Beginning of the day is after the gap
+        b
 
-  @spec beginning_of_week(DateTime.t(), Types.weekstart()) ::
-          DateTime.t() | AmbiguousDateTime.t() | {:error, term}
-  def beginning_of_week(%DateTime{} = date, weekstart) do
-    case Timex.days_to_beginning_of_week(date, weekstart) do
-      {:error, _} = err -> err
-      days -> beginning_of_day(shift(date, days: -days))
+      {:ambiguous, _a, b} ->
+        # Choose the latter of the ambiguous times
+        b
     end
   end
 
-  @spec end_of_week(DateTime.t(), Types.weekstart()) ::
-          DateTime.t() | AmbiguousDateTime.t() | {:error, term}
-  def end_of_week(%DateTime{} = date, weekstart) do
-    case Timex.days_to_end_of_week(date, weekstart) do
+  def end_of_day(%DateTime{time_zone: time_zone, microsecond: {_, precision}} = datetime) do
+    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    time = Time.new!(23, 59, 59, us)
+
+    with {:ok, datetime} <-
+           DateTime.new(DateTime.to_date(datetime), time, time_zone, Timex.tzdb()) do
+      datetime
+    else
+      {:gap, a, _b} ->
+        # End of day is before the gap
+        a
+
+      {:ambiguous, a, _b} ->
+        # Choose the former of the ambiguous times
+        a
+    end
+  end
+
+  def beginning_of_week(
+        %DateTime{time_zone: time_zone, microsecond: {_, precision}} = date,
+        weekstart
+      ) do
+    us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
+    time = Time.new!(0, 0, 0, us)
+
+    with weekstart when is_atom(weekstart) <- Timex.standardize_week_start(weekstart),
+         date = Date.beginning_of_week(DateTime.to_date(date), weekstart),
+         {:ok, datetime} <- DateTime.new(date, time, time_zone, Timex.tzdb()) do
+      datetime
+    else
+      {:gap, _a, b} ->
+        # Beginning of week is after the gap
+        b
+
+      {:ambiguous, _a, b} ->
+        b
+
       {:error, _} = err ->
         err
-
-      days_to_end ->
-        end_of_day(shift(date, days: days_to_end))
     end
   end
 
-  @spec beginning_of_year(DateTime.t()) :: DateTime.t()
-  def beginning_of_year(%DateTime{year: year, time_zone: tz}) do
-    Timex.to_datetime({year, 1, 1}, tz)
+  def end_of_week(%DateTime{time_zone: time_zone, microsecond: {_, precision}} = date, weekstart) do
+    with weekstart when is_atom(weekstart) <- Timex.standardize_week_start(weekstart),
+         date = Date.end_of_week(DateTime.to_date(date), weekstart),
+         us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision),
+         time = Time.new!(23, 59, 59, us),
+         {:ok, datetime} <- DateTime.new(date, time, time_zone, Timex.tzdb()) do
+      datetime
+    else
+      {:gap, a, _b} ->
+        # End of week is before the gap
+        a
+
+      {:ambiguous, a, _b} ->
+        a
+
+      {:error, _} = err ->
+        err
+    end
   end
 
-  @spec end_of_year(DateTime.t()) :: DateTime.t()
-  def end_of_year(%DateTime{year: year, time_zone: tz, microsecond: {_, precision}}) do
-    us = Timex.DateTime.Helpers.to_precision(999_999, precision)
-    %{Timex.to_datetime({{year, 12, 31}, {23, 59, 59}}, tz) | :microsecond => {us, precision}}
+  @spec beginning_of_year(DateTime.t()) :: AmbiguousDateTime.t() | DateTime.t()
+  def beginning_of_year(%DateTime{year: year, time_zone: time_zone, microsecond: {_, precision}}) do
+    us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
+    time = Time.new!(0, 0, 0, us)
+
+    with {:ok, datetime} <- DateTime.new(Date.new!(year, 1, 1), time, time_zone, Timex.tzdb()) do
+      datetime
+    else
+      {:gap, _a, b} ->
+        # Beginning of year is after the gap
+        b
+
+      {:ambiguous, _a, b} ->
+        b
+    end
+  end
+
+  @spec end_of_year(DateTime.t()) :: AmbiguousDateTime.t() | DateTime.t()
+  def end_of_year(%DateTime{year: year, time_zone: time_zone, microsecond: {_, precision}}) do
+    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    time = Time.new!(23, 59, 59, us)
+
+    with {:ok, datetime} <- DateTime.new(Date.new!(year, 12, 31), time, time_zone, Timex.tzdb()) do
+      datetime
+    else
+      {:gap, a, _b} ->
+        # End of year is before the gap
+        a
+
+      {:ambiguous, a, _b} ->
+        a
+    end
   end
 
   @spec beginning_of_quarter(DateTime.t()) :: DateTime.t()
-  def beginning_of_quarter(%DateTime{year: year, month: month, time_zone: tz} = date) do
+  def beginning_of_quarter(%DateTime{
+        year: year,
+        month: month,
+        time_zone: time_zone,
+        microsecond: {_, precision}
+      }) do
     month = 1 + 3 * (Timex.quarter(month) - 1)
-    {_, precision} = date.microsecond
-    Timex.DateTime.Helpers.construct({{year, month, 1}, {0, 0, 0, 0}}, precision, tz)
-  end
+    us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
+    time = Time.new!(0, 0, 0, us)
 
-  @spec end_of_quarter(DateTime.t()) :: DateTime.t() | AmbiguousDateTime.t()
-  def end_of_quarter(%DateTime{year: year, month: month, time_zone: tz} = date) do
-    month = 3 * Timex.quarter(month)
-    {_, precision} = date.microsecond
+    with {:ok, datetime} <- DateTime.new(Date.new!(year, month, 1), time, time_zone, Timex.tzdb()) do
+      datetime
+    else
+      {:gap, _a, b} ->
+        # Beginning of quarter is after the gap
+        b
 
-    case Timex.DateTime.Helpers.construct(
-           {{year, month, 1}, {23, 59, 59, 999_999}},
-           precision,
-           tz
-         ) do
-      {:error, _} = err ->
-        err
-
-      %DateTime{} = d ->
-        end_of_month(d)
-
-      %AmbiguousDateTime{:before => b, :after => a} ->
-        %AmbiguousDateTime{:before => end_of_month(b), :after => end_of_month(a)}
+      {:ambiguous, _a, b} ->
+        b
     end
   end
 
-  @spec beginning_of_month(DateTime.t()) :: DateTime.t()
+  @spec end_of_quarter(DateTime.t()) :: DateTime.t() | AmbiguousDateTime.t()
+  def end_of_quarter(%DateTime{
+        year: year,
+        month: month,
+        time_zone: time_zone,
+        microsecond: {_, precision}
+      }) do
+    month = 3 * Timex.quarter(month)
+    date = Date.end_of_month(Date.new!(year, month, 1))
+    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    time = Time.new!(23, 59, 59, us)
+
+    with {:ok, datetime} <- DateTime.new(date, time, time_zone, Timex.tzdb()) do
+      datetime
+    else
+      {:gap, a, _b} ->
+        # End of quarter is before the gap
+        a
+
+      {:ambiguous, a, _b} ->
+        a
+    end
+  end
+
+  @spec beginning_of_month(DateTime.t()) :: AmbiguousDateTime.t() | DateTime.t()
   def beginning_of_month(%DateTime{
         year: year,
         month: month,
-        time_zone: tz,
+        time_zone: time_zone,
         microsecond: {_, precision}
       }) do
-    Timex.DateTime.Helpers.construct({{year, month, 1}, {0, 0, 0, 0}}, precision, tz)
+    us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
+    time = Time.new!(0, 0, 0, us)
+
+    with {:ok, datetime} <- DateTime.new(Date.new!(year, month, 1), time, time_zone, Timex.tzdb()) do
+      datetime
+    else
+      {:gap, _a, b} ->
+        # Beginning of month is after the gap
+        b
+
+      {:ambiguous, _a, b} ->
+        b
+    end
   end
 
   @spec end_of_month(DateTime.t()) :: DateTime.t()
-  def end_of_month(
-        %DateTime{year: year, month: month, time_zone: tz, microsecond: {_, precision}} = date
-      ) do
-    Timex.DateTime.Helpers.construct(
-      {{year, month, days_in_month(date)}, {23, 59, 59, 999_999}},
-      precision,
-      tz
-    )
+  def end_of_month(%DateTime{
+        year: year,
+        month: month,
+        time_zone: time_zone,
+        microsecond: {_, precision}
+      }) do
+    date = Date.end_of_month(Date.new!(year, month, 1))
+    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    time = Time.new!(23, 59, 59, us)
+
+    with {:ok, datetime} <- DateTime.new(date, time, time_zone, Timex.tzdb()) do
+      datetime
+    else
+      {:gap, a, _b} ->
+        # End of month is before the gap
+        a
+
+      {:ambiguous, a, _b} ->
+        a
+    end
   end
 
   @spec quarter(DateTime.t()) :: 1..4
   def quarter(%DateTime{month: month}), do: Timex.quarter(month)
 
-  def days_in_month(%DateTime{:year => y, :month => m}), do: Timex.days_in_month(y, m)
+  def days_in_month(d), do: Date.days_in_month(d)
 
   def week_of_month(%DateTime{:year => y, :month => m, :day => d}),
     do: Timex.week_of_month(y, m, d)
 
-  def weekday(%DateTime{:year => y, :month => m, :day => d}),
-    do: :calendar.day_of_the_week({y, m, d})
+  def weekday(datetime), do: Date.day_of_week(datetime)
 
-  def day(%DateTime{} = date) do
-    ref = beginning_of_year(date)
-    1 + Timex.diff(date, ref, :days)
-  end
+  def day(datetime), do: Date.day_of_year(datetime)
 
   def is_valid?(%DateTime{
         :year => y,
@@ -203,10 +289,9 @@ defimpl Timex.Protocol, for: DateTime do
 
   def from_iso_day(%DateTime{year: year} = date, day) when is_day_of_year(day) do
     {year, month, day_of_month} = Timex.Helpers.iso_day_to_date_tuple(year, day)
-    %{date | :year => year, :month => month, :day => day_of_month}
+    %DateTime{date | :year => year, :month => month, :day => day_of_month}
   end
 
-  @spec set(DateTime.t(), list({atom(), term})) :: DateTime.t() | {:error, term}
   def set(%DateTime{} = date, options) do
     validate? = Keyword.get(options, :validate, true)
 
@@ -322,54 +407,69 @@ defimpl Timex.Protocol, for: DateTime do
   See docs for Timex.shift/2 for details.
   """
   @spec shift(DateTime.t(), list({atom(), term})) :: DateTime.t() | {:error, term}
-  def shift(%DateTime{time_zone: tz, microsecond: {_us, precision}} = datetime, shifts)
-      when is_list(shifts) do
+  def shift(%DateTime{} = datetime, shifts) when is_list(shifts) do
     {logical_shifts, shifts} = Keyword.split(shifts, [:years, :months, :weeks, :days])
-    # applied_offset is applied when converting to gregorian microseconds,
-    # we want to reverse that when converting back to the origin timezone
-    applied_offset_ms = Timezone.total_offset(datetime.std_offset, datetime.utc_offset) * -1
-    datetime = logical_shift(datetime, logical_shifts)
-    us = to_gregorian_microseconds(datetime)
     shift = calculate_shift(shifts)
-    shifted_us = us + shift
-    shifted_secs = div(shifted_us, 1_000 * 1_000) + applied_offset_ms * -1
-    rem_us = rem(shifted_us, 1_000 * 1_000)
 
-    new_precision =
-      case Timex.DateTime.Helpers.precision(rem_us) do
-        np when np < precision ->
-          precision
+    shifted =
+      case logical_shift(datetime, logical_shifts) do
+        {:error, _} = err ->
+          err
 
-        np ->
-          np
+        %DateTime{} = datetime when shift != 0 ->
+          DateTime.add(datetime, shift, :microsecond, Timex.tzdb())
+
+        %DateTime{} = datetime ->
+          datetime
+
+        {{ty, _, _}, %DateTime{} = orig} when ty in [:gap, :ambiguous] and shift != 0 ->
+          DateTime.add(orig, shift, :microsecond, Timex.tzdb())
+
+        {{ty, _a, _b} = amb, _} when ty in [:gap, :ambiguous] ->
+          amb
       end
 
-    # Convert back to original timezone
-    case raw_convert(shifted_secs, {rem_us, new_precision}, tz, :wall) do
-      {:error, {:could_not_resolve_timezone, _, _, _}} ->
-        # This occurs when the shifted date/time doesn't exist because of a leap forward
-        # This doesn't mean the shift is invalid, simply that we need to ask for the right wall time
-        # Which in these cases means asking for the time + 1h
-        raw_convert(shifted_secs + 3600, {rem_us, new_precision}, tz, :wall)
+    case shifted do
+      {ty, a, b} when ty in [:gap, :ambiguous] ->
+        %AmbiguousDateTime{before: a, after: b, type: ty}
 
       result ->
         result
     end
+  rescue
+    err in [FunctionClauseError] ->
+      case {err.module, err.function} do
+        {Calendar.ISO, :date_from_iso_days} ->
+          {:error, :invalid_date}
+
+        _ ->
+          reraise err, __STACKTRACE__
+      end
   catch
     :throw, {:error, _} = err ->
       err
-  end
-
-  defp raw_convert(secs, {us, precision}, tz, utc_or_wall) do
-    {date, {h, mm, s}} = :calendar.gregorian_seconds_to_datetime(secs)
-    Timex.DateTime.Helpers.construct({date, {h, mm, s, us}}, precision, tz, utc_or_wall)
   end
 
   defp logical_shift(datetime, []), do: datetime
 
   defp logical_shift(datetime, shifts) do
     sorted = Enum.sort_by(shifts, &elem(&1, 0), &compare_unit/2)
-    do_logical_shift(datetime, sorted)
+
+    case do_logical_shift(datetime, sorted) do
+      %DateTime{time_zone: time_zone} = dt ->
+        with {:ok, shifted} <- DateTime.from_naive(DateTime.to_naive(dt), time_zone, Timex.tzdb()) do
+          shifted
+        else
+          {ty, _, _} = amb when ty in [:gap, :ambiguous] ->
+            {amb, dt}
+
+          {:error, _} = err ->
+            err
+        end
+
+      err ->
+        err
+    end
   end
 
   defp do_logical_shift(datetime, []), do: datetime
@@ -418,19 +518,25 @@ defimpl Timex.Protocol, for: DateTime do
     calculate_shift(rest, acc + value)
   end
 
-  defp calculate_shift([other | _], _acc),
-    do: throw({:error, {:invalid_shift, other}})
+  defp calculate_shift([{k, _} | _], _acc),
+    do: throw({:error, {:unknown_shift_unit, k}})
 
-  defp shift_by(%DateTime{year: y} = datetime, value, :years) do
-    shifted = %DateTime{datetime | year: y + value}
-    # If a plain shift of the year fails, then it likely falls on a leap day,
-    # so set the day to the last day of that month
-    case :calendar.valid_date({shifted.year, shifted.month, shifted.day}) do
-      false ->
-        last_day = :calendar.last_day_of_the_month(shifted.year, shifted.month)
-        %DateTime{shifted | day: last_day}
+  defp shift_by(%DateTime{year: y, month: m, day: d} = datetime, value, :years) do
+    new_year = y + value
+    shifted = %DateTime{datetime | year: new_year}
 
-      true ->
+    cond do
+      new_year < 0 ->
+        {:error, :shift_to_invalid_date}
+
+      m == 2 and d == 29 and :calendar.is_leap_year(y) and :calendar.is_leap_year(new_year) ->
+        shifted
+
+      m == 2 and d == 29 and :calendar.is_leap_year(y) ->
+        # Shift to March 1st in non-leap years
+        %DateTime{shifted | month: 3, day: 1}
+
+      :else ->
         shifted
     end
   end
@@ -441,34 +547,53 @@ defimpl Timex.Protocol, for: DateTime do
   # Positive shifts
   defp shift_by(%DateTime{year: year, month: month, day: day} = datetime, value, :months)
        when value > 0 do
-    if month + value <= 12 do
-      ldom = :calendar.last_day_of_the_month(year, month + value)
+    add_years = div(value, 12)
+    add_months = rem(value, 12)
 
-      if day > ldom do
-        %DateTime{datetime | month: month + value, day: ldom}
+    {year, month} =
+      if month + add_months <= 12 do
+        {year + add_years, month + add_months}
       else
-        %DateTime{datetime | month: month + value}
+        total_months = month + add_months
+        {year + add_years + 1, total_months - 12}
       end
-    else
-      diff = 12 - month + 1
-      shift_by(%DateTime{datetime | year: year + 1, month: 1}, value - diff, :months)
+
+    ldom = :calendar.last_day_of_the_month(year, month)
+
+    cond do
+      day > ldom ->
+        %DateTime{datetime | year: year, month: month, day: ldom}
+
+      :else ->
+        %DateTime{datetime | year: year, month: month}
     end
   end
 
   # Negative shifts
   defp shift_by(%DateTime{year: year, month: month, day: day} = datetime, value, :months) do
-    cond do
-      month + value >= 1 ->
-        ldom = :calendar.last_day_of_the_month(year, month + value)
+    add_years = div(value, 12)
+    add_months = rem(value, 12)
 
-        if day > ldom do
-          %DateTime{datetime | month: month + value, day: ldom}
-        else
-          %DateTime{datetime | month: month + value}
-        end
+    {year, month} =
+      if month + add_months < 1 do
+        total_months = month + add_months
+        {year + (add_years - 1), 12 + total_months}
+      else
+        {year + add_years, month + add_months}
+      end
 
-      :else ->
-        shift_by(%DateTime{datetime | year: year - 1, month: 12}, value + month, :months)
+    if year < 0 do
+      {:error, :shift_to_invalid_date}
+    else
+      ldom = :calendar.last_day_of_the_month(year, month)
+
+      cond do
+        day > ldom ->
+          %DateTime{datetime | year: year, month: month, day: ldom}
+
+        :else ->
+          %DateTime{datetime | year: year, month: month}
+      end
     end
   end
 
@@ -512,21 +637,4 @@ defimpl Timex.Protocol, for: DateTime do
         shift_by(%DateTime{datetime | year: year - 1, month: 12, day: ldom}, value + day, :days)
     end
   end
-
-  @spec to_seconds(DateTime.t(), :epoch | :zero) :: integer | {:error, atom}
-  defp to_seconds(%DateTime{} = date, :epoch) do
-    case to_seconds(date, :zero) do
-      {:error, _} = err -> err
-      secs -> secs - @epoch_seconds
-    end
-  end
-
-  defp to_seconds(%DateTime{} = dt, :zero) do
-    total_offset = Timezone.total_offset(dt.std_offset, dt.utc_offset) * -1
-    date = {dt.year, dt.month, dt.day}
-    time = {dt.hour, dt.minute, dt.second}
-    :calendar.datetime_to_gregorian_seconds({date, time}) + total_offset
-  end
-
-  defp to_seconds(_, _), do: {:error, :badarg}
 end

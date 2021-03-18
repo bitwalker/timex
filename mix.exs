@@ -7,7 +7,7 @@ defmodule Timex.Mixfile do
     [
       app: :timex,
       version: @version,
-      elixir: "~> 1.6",
+      elixir: "~> 1.8",
       description: description(),
       package: package(),
       deps: deps(),
@@ -29,7 +29,6 @@ defmodule Timex.Mixfile do
 
   def application do
     [
-      applications: [:logger, :tzdata, :gettext, :combine],
       env: [local_timezone: nil, default_locale: "en"],
       mod: {Timex, []}
     ]
@@ -56,7 +55,7 @@ defmodule Timex.Mixfile do
 
   def deps do
     [
-      {:tzdata, "~> 0.1.8 or ~> 0.5 or ~> 1.0"},
+      {:tzdata, "~> 1.0"},
       {:combine, "~> 0.10"},
       {:gettext, "~> 0.10"},
       {:ex_doc, "~> 0.13", only: [:docs]},
