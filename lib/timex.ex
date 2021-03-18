@@ -1177,6 +1177,16 @@ defmodule Timex do
   end)
 
   # Make an attempt at cleaning up the provided string
+  def day_to_num(day) when is_binary(day) do
+    case Map.get(Timex.Translator.get_weekdays_lookup(Timex.Translator.current_locale()), day) do
+      nil ->
+        {:error, :invalid_day_name}
+
+      num ->
+        num
+    end
+  end
+
   def day_to_num(_), do: {:error, :invalid_day_name}
 
   @doc """

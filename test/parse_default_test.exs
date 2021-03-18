@@ -1,6 +1,7 @@
 defmodule DateFormatTest.ParseDefault do
   use ExUnit.Case, async: true
   use Timex
+  require Timex.Translator
 
   test "exceptions" do
     date = "2013-03-02"
@@ -452,6 +453,13 @@ defmodule DateFormatTest.ParseDefault do
   test "roundtrip bug #318" do
     {:ok, d} = Timex.parse("2017-06-27T08:32:55.80011111123333Z", "{ISO:Extended}")
     assert "2017-06-27T08:32:55.800111+00:00" = Timex.format!(d, "{ISO:Extended}")
+  end
+
+  test "can parse a date/time using a specific locale" do
+    {:ok, d} = Timex.lformat(DateTime.utc_now(), "{ANSIC}", "ru")
+
+    assert {:ok, %NaiveDateTime{}} =
+             Timex.Translator.with_locale("ru", do: Timex.parse(d, "{ANSIC}"))
   end
 
   defp parse(date, fmt) do

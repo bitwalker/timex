@@ -98,6 +98,26 @@ defmodule Timex.Translator do
     }
   end
 
+  @doc false
+  def get_weekdays_lookup(locale) do
+    %{
+      get_domain_text(locale, "weekdays", "Mon") => 1,
+      get_domain_text(locale, "weekdays", "Tue") => 2,
+      get_domain_text(locale, "weekdays", "Wed") => 3,
+      get_domain_text(locale, "weekdays", "Thu") => 4,
+      get_domain_text(locale, "weekdays", "Fri") => 5,
+      get_domain_text(locale, "weekdays", "Sat") => 6,
+      get_domain_text(locale, "weekdays", "Sun") => 7,
+      get_domain_text(locale, "weekdays", "Monday") => 1,
+      get_domain_text(locale, "weekdays", "Tuesday") => 2,
+      get_domain_text(locale, "weekdays", "Wednesday") => 3,
+      get_domain_text(locale, "weekdays", "Thursday") => 4,
+      get_domain_text(locale, "weekdays", "Friday") => 5,
+      get_domain_text(locale, "weekdays", "Saturday") => 6,
+      get_domain_text(locale, "weekdays", "Sunday") => 7
+    }
+  end
+
   @doc """
   Returns a map of ordinal months to month names
   """
@@ -140,6 +160,36 @@ defmodule Timex.Translator do
     }
   end
 
+  @doc false
+  def get_months_lookup(locale) do
+    %{
+      get_domain_text(locale, "months", "January") => 1,
+      get_domain_text(locale, "months", "February") => 2,
+      get_domain_text(locale, "months", "March") => 3,
+      get_domain_text(locale, "months", "April") => 4,
+      get_domain_text(locale, "months", "May") => 5,
+      get_domain_text(locale, "months", "June") => 6,
+      get_domain_text(locale, "months", "July") => 7,
+      get_domain_text(locale, "months", "August") => 8,
+      get_domain_text(locale, "months", "September") => 9,
+      get_domain_text(locale, "months", "October") => 10,
+      get_domain_text(locale, "months", "November") => 11,
+      get_domain_text(locale, "months", "December") => 12,
+      get_domain_text(locale, "months_abbr", "Jan") => 1,
+      get_domain_text(locale, "months_abbr", "Feb") => 2,
+      get_domain_text(locale, "months_abbr", "Mar") => 3,
+      get_domain_text(locale, "months_abbr", "Apr") => 4,
+      get_domain_text(locale, "months_abbr", "May") => 5,
+      get_domain_text(locale, "months_abbr", "Jun") => 6,
+      get_domain_text(locale, "months_abbr", "Jul") => 7,
+      get_domain_text(locale, "months_abbr", "Aug") => 8,
+      get_domain_text(locale, "months_abbr", "Sep") => 9,
+      get_domain_text(locale, "months_abbr", "Oct") => 10,
+      get_domain_text(locale, "months_abbr", "Nov") => 11,
+      get_domain_text(locale, "months_abbr", "Dec") => 12
+    }
+  end
+
   @doc """
   Returns a map of day period types to translated day period names
 
@@ -156,6 +206,32 @@ defmodule Timex.Translator do
       :am => get_domain_text(locale, "day_periods", "am"),
       :PM => get_domain_text(locale, "day_periods", "PM"),
       :pm => get_domain_text(locale, "day_periods", "pm")
+    }
+  end
+
+  @doc false
+  def get_day_periods_lower(locale) do
+    [
+      get_domain_text(locale, "day_periods", "am"),
+      get_domain_text(locale, "day_periods", "pm")
+    ]
+  end
+
+  @doc false
+  def get_day_periods_upper(locale) do
+    [
+      get_domain_text(locale, "day_periods", "AM"),
+      get_domain_text(locale, "day_periods", "PM")
+    ]
+  end
+
+  @doc false
+  def get_day_periods_lookup(locale) do
+    %{
+      get_domain_text(locale, "day_periods", "AM") => :AM,
+      get_domain_text(locale, "day_periods", "am") => :am,
+      get_domain_text(locale, "day_periods", "PM") => :PM,
+      get_domain_text(locale, "day_periods", "pm") => :pm
     }
   end
 

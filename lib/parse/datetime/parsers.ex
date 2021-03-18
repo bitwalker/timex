@@ -89,9 +89,7 @@ defmodule Timex.Parse.DateTime.Parsers do
   end
 
   def month_short(_) do
-    abbrs = Helpers.months() |> Enum.map(fn m -> String.slice(m, 0, 3) end)
-
-    one_of(word_of(~r/[[:alpha:]]/), abbrs)
+    one_of(word_of(~r/[[:alpha:]]/u), Helpers.months_abbr())
     |> map(&Helpers.to_month_num/1)
     |> label("month abbreviation")
   end
@@ -155,19 +153,19 @@ defmodule Timex.Parse.DateTime.Parsers do
   end
 
   def ampm_lower(_) do
-    one_of(word(), ["am", "pm"])
+    one_of(word(), Helpers.ampm_lower())
     |> map(&Helpers.to_ampm/1)
     |> label("am/pm")
   end
 
   def ampm_upper(_) do
-    one_of(word(), ["AM", "PM"])
+    one_of(word(), Helpers.ampm_upper())
     |> map(&Helpers.to_ampm/1)
     |> label("AM/PM")
   end
 
   def ampm(_) do
-    one_of(word(), ["am", "AM", "pm", "PM"])
+    one_of(word(), Helpers.ampm_any())
     |> map(&Helpers.to_ampm/1)
     |> label("am/pm or AM/PM")
   end

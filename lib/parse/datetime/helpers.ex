@@ -5,7 +5,14 @@ defmodule Timex.Parse.DateTime.Helpers do
   alias Combine.Parsers.Text
   use Timex.Constants
 
-  def months, do: @month_names
+  def months do
+    @month_names ++ Map.values(Timex.Translator.get_months(Timex.Translator.current_locale()))
+  end
+
+  def months_abbr do
+    @month_abbrs ++
+      Map.values(Timex.Translator.get_months_abbreviated(Timex.Translator.current_locale()))
+  end
 
   def to_month(month) when is_integer(month), do: [month: month]
 
@@ -22,13 +29,25 @@ defmodule Timex.Parse.DateTime.Helpers do
   def to_month_num(m) when m in ["November", "Nov"], do: to_month(11)
   def to_month_num(m) when m in ["December", "Dec"], do: to_month(12)
 
+  def to_month_num(m) when is_binary(m) do
+    Map.fetch!(Timex.Translator.get_months_lookup(Timex.Translator.current_locale()), m)
+  end
+
   def is_weekday(name) do
     n = String.downcase(name)
 
     cond do
-      n in @weekday_abbrs_lower -> true
-      n in @weekday_names_lower -> true
-      true -> false
+      n in @weekday_abbrs_lower ->
+        true
+
+      n in @weekday_names_lower ->
+        true
+
+      Map.has_key?(Timex.Translator.get_weekdays_lookup(Timex.Translator.current_locale()), name) ->
+        true
+
+      :else ->
+        false
     end
   end
 
@@ -36,13 +55,29 @@ defmodule Timex.Parse.DateTime.Helpers do
     n = String.downcase(name)
 
     case n do
-      n when n in ["mon", "monday"] -> 1
-      n when n in ["tue", "tuesday"] -> 2
-      n when n in ["wed", "wednesday"] -> 3
-      n when n in ["thu", "thursday"] -> 4
-      n when n in ["fri", "friday"] -> 5
-      n when n in ["sat", "saturday"] -> 6
-      n when n in ["sun", "sunday"] -> 7
+      n when n in ["mon", "monday"] ->
+        1
+
+      n when n in ["tue", "tuesday"] ->
+        2
+
+      n when n in ["wed", "wednesday"] ->
+        3
+
+      n when n in ["thu", "thursday"] ->
+        4
+
+      n when n in ["fri", "friday"] ->
+        5
+
+      n when n in ["sat", "saturday"] ->
+        6
+
+      n when n in ["sun", "sunday"] ->
+        7
+
+      _ ->
+        Map.fetch!(Timex.Translator.get_weekdays_lookup(Timex.Translator.current_locale()), name)
     end
   end
 
@@ -80,10 +115,34 @@ defmodule Timex.Parse.DateTime.Helpers do
     end
   end
 
+  def ampm_lower do
+    ["am", "pm"] ++
+      Timex.Translator.get_day_periods_lower(Timex.Translator.current_locale())
+  end
+
+  def ampm_upper do
+    ["AM", "PM"] ++
+      Timex.Translator.get_day_periods_upper(Timex.Translator.current_locale())
+  end
+
+  def ampm_any do
+    ampm_lower() ++ ampm_upper()
+  end
+
   def to_ampm("am"), do: [am: "am"]
   def to_ampm("AM"), do: [AM: "AM"]
   def to_ampm("pm"), do: [am: "pm"]
   def to_ampm("PM"), do: [AM: "PM"]
+
+  def to_ampm(value) when is_binary(value) do
+    type =
+      Map.fetch!(
+        Timex.Translator.get_day_periods_lookup(Timex.Translator.current_locale()),
+        value
+      )
+
+    [{type, value}]
+  end
 
   def integer(opts \\ []) do
     min_width =
