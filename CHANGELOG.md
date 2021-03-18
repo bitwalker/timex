@@ -9,6 +9,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added/Changed
 ### Fixed
 
+## 3.7.1
+
+### Fixed
+
+- `local/0` and `local/1` were incorrectly returning TimezoneInfo structs due to a bad match
+
 ## 3.7.0
 
 ### Potentially Breaking
