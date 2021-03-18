@@ -6,7 +6,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 ### Potentially Breaking
+
 ### Added/Changed
+
+- Removed `Timex.Timezone.diff`, as it is no longer used in Timex
+
 ### Fixed
 
 ## 3.7.1
@@ -58,6 +62,7 @@ modified to remove the direct dependency.
 ## 3.6.4
 
 ### Potentially Breaking
+
 - `Timex.set/2` now sets microseconds when setting `:time` from a `%Time{}` struct
 - `Timex.Duration.to_string/1` now returns `PT0S` instead of `P` for zero-length durations with the default formatter
 
@@ -66,6 +71,36 @@ modified to remove the direct dependency.
 
 ### Fixes
 - Loosen `tzdata` dependency to allow `1.x` releases
+
+## 3.6.3
+
+### Added
+
+- Switched to GitHub Actions for CI
+- Finnish translations
+- Enumerable implementation for Timex.Interval
+
+### Fixed
+
+- Czech translation fixes
+- #616
+- #615
+
+## 3.6.2
+
+### Added
+
+- Updated tzdata to 1.0.1
+- Vietnamese/Czech/Hebrew/Bosnian translations
+- Formatter settings, and ran the formatter on the codebase
+
+### Fixed
+
+- Romanian translation fixes
+- Various documentation/typespec fixes
+- Parser for ISOweek
+- #559
+- #577
 
 ## 3.6.1
 
