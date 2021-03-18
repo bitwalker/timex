@@ -37,6 +37,16 @@ defmodule TimezoneTests do
     assert %TimezoneInfo{} = Timezone.local()
   end
 
+  test "creation/conversion/difference" do
+    datetime = ~U[2020-11-01T04:00:00Z]
+    tz = Timex.timezone("America/Los_Angeles", datetime)
+    zoned = Timex.to_datetime(datetime, "America/Los_Angeles")
+    assert zoned == Timex.Timezone.convert(datetime, "America/Los_Angeles")
+
+    shifted = DateTime.add(datetime, tz.offset_std)
+    assert Timex.diff(Timex.Timezone.convert(zoned, "Etc/UTC"), shifted, :second) == 0
+  end
+
   property "convert always returns DateTime or AmbiguousDateTime" do
     check all(
             input_date <- PropertyHelpers.date_time_generator(:tuple),
