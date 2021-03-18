@@ -361,37 +361,37 @@ defmodule Timex.Duration do
   @doc """
   Converts an integer value representing milliseconds to a Duration
   """
-  @spec from_milliseconds(integer) :: __MODULE__.t()
+  @spec from_milliseconds(integer | float) :: __MODULE__.t()
   def from_milliseconds(ms), do: from_microseconds(ms * @usecs_in_msec)
 
   @doc """
   Converts an integer value representing seconds to a Duration
   """
-  @spec from_seconds(integer) :: __MODULE__.t()
+  @spec from_seconds(integer | float) :: __MODULE__.t()
   def from_seconds(s), do: from_microseconds(s * @usecs_in_sec)
 
   @doc """
   Converts an integer value representing minutes to a Duration
   """
-  @spec from_minutes(integer) :: __MODULE__.t()
+  @spec from_minutes(integer | float) :: __MODULE__.t()
   def from_minutes(m), do: from_seconds(m * @secs_in_min)
 
   @doc """
   Converts an integer value representing hours to a Duration
   """
-  @spec from_hours(integer) :: __MODULE__.t()
+  @spec from_hours(integer | float) :: __MODULE__.t()
   def from_hours(h), do: from_seconds(h * @secs_in_hour)
 
   @doc """
   Converts an integer value representing days to a Duration
   """
-  @spec from_days(integer) :: __MODULE__.t()
+  @spec from_days(integer | float) :: __MODULE__.t()
   def from_days(d), do: from_seconds(d * @secs_in_day)
 
   @doc """
   Converts an integer value representing weeks to a Duration
   """
-  @spec from_weeks(integer) :: __MODULE__.t()
+  @spec from_weeks(integer | float) :: __MODULE__.t()
   def from_weeks(w), do: from_seconds(w * @secs_in_week)
 
   @doc """
