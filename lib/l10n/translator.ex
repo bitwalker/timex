@@ -2,19 +2,6 @@ defmodule Timex.Translator do
   import Timex.Gettext
 
   @doc """
-  This macro sets the locale during execution of a given block of code.
-  """
-  defmacro with_locale(locale, do: block) do
-    quote do
-      old_locale = Gettext.get_locale(Timex.Gettext)
-      Gettext.put_locale(Timex.Gettext, unquote(locale))
-      result = unquote(block)
-      Gettext.put_locale(Timex.Gettext, old_locale)
-      result
-    end
-  end
-
-  @doc """
   Translates a string for a given locale and domain.
 
   ## Examples
@@ -169,10 +156,9 @@ defmodule Timex.Translator do
   @spec get_domain_text(locale :: String.t(), domain :: String.t(), msgid :: String.t()) ::
           String.t()
   defp get_domain_text(locale, domain, msgid) do
-    case Timex.Gettext.lgettext(locale, domain, msgid, %{}) do
-      {:ok, translated} -> translated
-      {:default, default} -> default
-    end
+    Gettext.with_locale(Timex.Gettext, locale, fn ->
+      Gettext.dgettext(Timex.Gettext, domain, msgid, %{})
+    end)
   end
 
   @spec get_plural_domain_text(
