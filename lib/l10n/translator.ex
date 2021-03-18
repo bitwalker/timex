@@ -1,6 +1,12 @@
 defmodule Timex.Translator do
   import Timex.Gettext
 
+  defmacro with_locale(locale, do: block) do
+    quote do
+      Gettext.with_locale(Timex.Gettext, unquote(locale), fn -> unquote(block) end)
+    end
+  end
+
   @doc """
   Translates a string for a given locale and domain.
 
