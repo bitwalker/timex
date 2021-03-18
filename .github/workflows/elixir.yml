@@ -9,11 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        otp: ['22.x', '23.x']
-        elixir: ['1.10.x', '1.11.x']
+        otp: ['22.3', '23.2']
+        elixir: ['1.9.4', '1.10.4', '1.11.3']
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-elixir@v1
+      - uses: erlef/setup-elixir@v1
         with:
           otp-version: ${{matrix.otp}}
           elixir-version: ${{matrix.elixir}}
