@@ -85,10 +85,16 @@ defmodule Timex do
 
   @doc """
   Returns a DateTime representing the current moment in time in the local timezone.
+
+  ## Example
+
+      iex> %DateTime{time_zone: tz} = Timex.local();
+      ...> tz != "Etc/UTC"
+      true
   """
   @spec local() :: DateTime.t() | {:error, term}
   def local() do
-    with {:ok, tz} <- Timezone.local(),
+    with tz when is_binary(tz) <- Timezone.Local.lookup(),
          {:ok, datetime} <- DateTime.now(tz, tzdb()) do
       datetime
     end
@@ -96,10 +102,16 @@ defmodule Timex do
 
   @doc """
   Returns a DateTime representing the given date/time in the local timezone
+
+  ## Example
+
+      iex> %DateTime{time_zone: tz} = Timex.local(DateTime.utc_now());
+      ...> tz != "Etc/UTC"
+      true
   """
   @spec local(Types.valid_datetime()) :: DateTime.t() | AmbiguousDateTime.t() | {:error, term}
   def local(%DateTime{} = datetime) do
-    with {:ok, tz} <- Timezone.local(),
+    with tz when is_binary(tz) <- Timezone.Local.lookup(),
          {:ok, datetime} <- DateTime.shift_zone(datetime, tz, tzdb()) do
       datetime
     end

@@ -53,11 +53,17 @@ defmodule Timex.Timezone.Local do
             {:unix, :darwin} -> localtz(:osx)
             {:unix, _} -> localtz(:unix)
             {:win32, :nt} -> localtz(:win)
-            _ -> {:error, {:localtz, :unsupported_operating_system}}
+            _ -> {:error, :time_zone_not_found}
           end
 
-        Application.put_env(:timex, :local_timezone, tz)
-        tz
+        with tz when is_binary(tz) <- tz do
+          Application.put_env(:timex, :local_timezone, tz)
+          tz
+        else
+          {:error, _} ->
+            {:error, :time_zone_not_found}
+        end
+
 
       tz ->
         tz
