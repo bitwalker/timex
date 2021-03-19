@@ -336,7 +336,7 @@ defmodule Timex.Parse.DateTime.Parser do
         reset |> Timex.shift(weeks: value)
 
       :weekday ->
-        current_dow = Timex.Date.day_of_week(date.year, date.month, date.day, :monday)
+        current_dow = Timex.Date.day_of_week(date, :monday)
 
         if current_dow == value do
           date
