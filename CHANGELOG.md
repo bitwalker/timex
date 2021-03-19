@@ -7,6 +7,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Potentially Breaking
 
+- Fixed handling of `Etc/GMT` vs `GMT` timezones. The former must be POSIX compatible, which inverts the meaning of the sign, whereas the latter have no such restriction and are equivalent to `UTC(+/-)HH:MM`,
+while this is fixing incorrect behavior, it could potentially break users relying on the incorrect behavior.
+
+### Fixed
+
+- #494, incorrect handling of parsing week numbers
+- Improve parsing of timezones
+- Incorrect stringification of error values returned in some circumstances
+
 ### Added/Changed
 
 - Removed `Timex.Timezone.diff`, as it is no longer used in Timex

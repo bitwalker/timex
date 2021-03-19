@@ -93,7 +93,7 @@ defmodule ConversionTests do
     "second" => "12",
     "time_zone" => "UTC"
   }
-  @default_utc_datetime Timex.to_datetime(~N[2015-02-28T13:37:12], "UTC")
+  @default_utc_datetime Timex.to_datetime(~N[2015-02-28T13:37:12], "Etc/UTC")
   @default_cph_datetime Timex.to_datetime(~N[2015-02-28T13:37:12], "Europe/Copenhagen")
 
   test "map with timezone to_datetime" do

@@ -30,13 +30,14 @@ defimpl Timex.Protocol, for: DateTime do
 
   def to_date(date), do: DateTime.to_date(date)
 
-  def to_datetime(%DateTime{time_zone: timezone} = d, timezone), do: d
+  def to_datetime(%DateTime{time_zone: timezone} = d, timezone),
+    do: d
+
+  def to_datetime(%DateTime{time_zone: tz} = d, %TimezoneInfo{full_name: tz}),
+    do: d
 
   def to_datetime(%DateTime{} = d, timezone) do
-    with tz when is_binary(tz) <- Timezone.name_of(timezone),
-         {:ok, datetime} <- DateTime.shift_zone(d, tz) do
-      datetime
-    end
+    Timezone.convert(d, timezone)
   end
 
   def to_naive_datetime(%DateTime{} = d) do

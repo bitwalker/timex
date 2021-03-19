@@ -43,15 +43,11 @@ defimpl Timex.Protocol, for: Tuple do
     us = Timex.DateTime.Helpers.construct_microseconds(us)
     dt = Timex.NaiveDateTime.new!(y, m, d, h, mm, s, us)
 
-    with {:tzdata, tz} when is_binary(tz) <- {:tzdata, Timex.Timezone.name_of(timezone)},
-         {:ok, datetime} <- DateTime.from_naive(dt, tz, Timex.tzdb()) do
+    with %DateTime{} = datetime <- Timex.Timezone.convert(dt, timezone) do
       datetime
     else
-      {ty, a, b} when ty in [:gap, :ambiguous] ->
-        %AmbiguousDateTime{before: a, after: b, type: ty}
-
-      {:tzdata, err} ->
-        err
+      %AmbiguousDateTime{} = datetime ->
+        datetime
 
       {:error, _} = err ->
         err

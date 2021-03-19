@@ -770,42 +770,12 @@ defmodule Timex do
 
       iex> tz = #{__MODULE__}.timezone(+2, {2015, 4, 12})
       ...> {tz.full_name, tz.abbreviation}
-      {"Etc/GMT-2", "+02"}
+      {"Etc/UTC+2", "+02"}
 
   """
   @spec timezone(Types.valid_timezone() | TimezoneInfo.t(), Types.valid_datetime()) ::
           TimezoneInfo.t() | AmbiguousTimezoneInfo.t() | {:error, term}
-  def timezone(:utc, _), do: %TimezoneInfo{}
-  def timezone("UTC", _), do: %TimezoneInfo{}
-  def timezone("Etc/UTC", _), do: %TimezoneInfo{}
-
-  def timezone(tz, datetime) when is_binary(tz) do
-    case to_gregorian_seconds(datetime) do
-      {:error, _} = err ->
-        err
-
-      seconds_from_zeroyear ->
-        Timezone.resolve(tz, seconds_from_zeroyear)
-    end
-  end
-
-  def timezone(%TimezoneInfo{} = tz, datetime), do: Timezone.get(tz, datetime)
-
-  def timezone(tz, datetime) do
-    case to_gregorian_seconds(datetime) do
-      {:error, _} = err ->
-        err
-
-      seconds_from_zeroyear ->
-        case Timezone.name_of(tz) do
-          {:error, _} = err ->
-            err
-
-          tzname ->
-            Timezone.resolve(tzname, seconds_from_zeroyear)
-        end
-    end
-  end
+  def timezone(tz, datetime), do: Timezone.get(tz, datetime)
 
   @doc """
   Return a boolean indicating whether the given date is valid.

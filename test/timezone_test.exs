@@ -22,10 +22,10 @@ defmodule TimezoneTests do
     assert tz.full_name === "Etc/UTC"
     assert tz.offset_utc === 0
     %TimezoneInfo{} = tz = Timezone.get(2)
-    assert tz.full_name === "Etc/GMT-2"
+    assert tz.full_name === "Etc/UTC+2"
     assert tz.offset_utc === 7200
     %TimezoneInfo{} = tz = Timezone.get(-3)
-    assert tz.full_name === "Etc/GMT+3"
+    assert tz.full_name === "Etc/UTC-3"
     assert tz.offset_utc === -10800
     %TimezoneInfo{} = tz = Timezone.get("America/Chicago", ~N[2015-05-01T12:00:00])
     assert tz.full_name === "America/Chicago"
@@ -39,12 +39,9 @@ defmodule TimezoneTests do
 
   test "creation/conversion/difference" do
     datetime = ~U[2020-11-01T04:00:00Z]
-    tz = Timex.timezone("America/Los_Angeles", datetime)
     zoned = Timex.to_datetime(datetime, "America/Los_Angeles")
-    assert zoned == Timex.Timezone.convert(datetime, "America/Los_Angeles")
 
-    shifted = DateTime.add(datetime, tz.offset_std)
-    assert Timex.diff(Timex.Timezone.convert(zoned, "Etc/UTC"), shifted, :second) == 0
+    assert Timex.diff(datetime, zoned, :second) == 0
   end
 
   property "convert always returns DateTime or AmbiguousDateTime" do

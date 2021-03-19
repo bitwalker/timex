@@ -6,23 +6,9 @@ defmodule Timex.DateTime.Helpers do
   @type precision :: -1 | 0..6
 
   @doc """
-  Constructs an empty DateTime, for internal use only
+  Constructs an empty NaiveDateTime, for internal use only
   """
-  def empty() do
-    %DateTime{
-      year: 0,
-      month: 1,
-      day: 1,
-      hour: 0,
-      minute: 0,
-      second: 0,
-      microsecond: {0, 0},
-      time_zone: nil,
-      zone_abbr: nil,
-      utc_offset: 0,
-      std_offset: 0
-    }
-  end
+  def empty(), do: Timex.NaiveDateTime.new!(0, 1, 1, 0, 0, 0)
 
   @doc """
   Constructs a DateTime from an Erlang date or datetime tuple and a timezone.

@@ -31,16 +31,12 @@ defimpl Timex.Protocol, for: NaiveDateTime do
 
   def to_date(date), do: NaiveDateTime.to_date(date)
 
-  def to_datetime(%NaiveDateTime{} = d, timezone) do
-    with {:tzdata, tz} when is_binary(tz) <- {:tzdata, Timex.Timezone.name_of(timezone)},
-         {:ok, datetime} <- DateTime.from_naive(d, tz, Timex.tzdb()) do
+  def to_datetime(%NaiveDateTime{} = naive, timezone) do
+    with %DateTime{} = datetime <- Timex.Timezone.convert(naive, timezone) do
       datetime
     else
-      {ty, a, b} when ty in [:gap, :ambiguous] ->
-        %AmbiguousDateTime{before: a, after: b, type: ty}
-
-      {:tzdata, err} ->
-        err
+      %AmbiguousDateTime{} = datetime ->
+        datetime
 
       {:error, _} = err ->
         err
