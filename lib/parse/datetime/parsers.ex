@@ -108,14 +108,26 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("day of year")
   end
 
-  def week_of_year(opts \\ []) do
+  def week_of_year_mon(opts \\ []) do
     Helpers.integer(opts)
-    |> satisfy(fn week -> week >= 1 && week <= 53 end)
-    |> map(fn n -> [week_of_year: n] end)
-    |> label("week of year")
+    |> satisfy(fn week -> week >= 0 && week <= 52 end)
+    |> map(fn n -> [week_of_year_mon: n] end)
+    |> label("week of year (mon)")
   end
 
-  defdelegate week_of_year_sun(opts \\ []), to: __MODULE__, as: :week_of_year
+  def week_of_year_sun(opts \\ []) do
+    Helpers.integer(opts)
+    |> satisfy(fn week -> week >= 0 && week <= 52 end)
+    |> map(fn n -> [week_of_year_sun: n] end)
+    |> label("week of year (sun)")
+  end
+
+  def week_of_year_iso(opts \\ []) do
+    Helpers.integer(opts)
+    |> satisfy(fn week -> week >= 0 && week <= 53 end)
+    |> map(fn n -> [week_of_year_iso: n] end)
+    |> label("ISO week of year")
+  end
 
   def weekday(_) do
     fixed_integer(1)
@@ -297,7 +309,7 @@ defmodule Timex.Parse.DateTime.Parsers do
       year4(padding: :zeroes),
       ignore(char("-")),
       ignore(char("W")),
-      week_of_year(padding: :zeroes)
+      week_of_year_iso(padding: :zeroes)
     ])
   end
 

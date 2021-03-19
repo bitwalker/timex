@@ -561,28 +561,44 @@ defmodule Timex.Format.DateTime.Formatter do
   end
 
   def format_token(_locale, :week_mon, %{:year => year} = date, _modifiers, flags, width) do
-    {:ok, jan1} = Date.new(year, 1, 1)
+    new_year = Timex.Date.new!(year, 1, 1)
+    week_start = Timex.Date.beginning_of_week(new_year, :monday)
 
-    Timex.Interval.new(from: jan1, until: Timex.shift(date, days: 1))
-    |> Enum.reduce(0, fn d, acc ->
-      case Timex.weekday(d, :monday) do
-        1 -> acc + 1
-        _ -> acc
+    # This date can be calculated by taking the day number of the year,
+    # shifting the day number of the year down by the number of days which
+    # occurred in the previous year, then dividing by 7
+    day_num =
+      if Date.compare(week_start, new_year) == :lt do
+        prev_year_day_start = Date.day_of_year(week_start)
+        prev_year_day_end = Date.day_of_year(Timex.Date.new!(week_start.year, 12, 31))
+        shift = prev_year_day_end - prev_year_day_start
+        shift + Date.day_of_year(Timex.Date.new!(year, date.month, date.day))
+      else
+        Date.day_of_year(Timex.Date.new!(year, date.month, date.day))
       end
-    end)
+
+    div(day_num, 7)
     |> pad_numeric(flags, width)
   end
 
   def format_token(_locale, :week_sun, %{:year => year} = date, _modifiers, flags, width) do
-    {:ok, jan1} = Date.new(year, 1, 1)
+    new_year = Timex.Date.new!(year, 1, 1)
+    week_start = Timex.Date.beginning_of_week(new_year, :sunday)
 
-    Timex.Interval.new(from: jan1, until: Timex.shift(date, days: 1))
-    |> Enum.reduce(0, fn d, acc ->
-      case Timex.weekday(d, :sunday) do
-        1 -> acc + 1
-        _ -> acc
+    # This date can be calculated by taking the day number of the year,
+    # shifting the day number of the year down by the number of days which
+    # occurred in the previous year, then dividing by 7
+    day_num =
+      if Date.compare(week_start, new_year) == :lt do
+        prev_year_day_start = Date.day_of_year(week_start)
+        prev_year_day_end = Date.day_of_year(Timex.Date.new!(week_start.year, 12, 31))
+        shift = prev_year_day_end - prev_year_day_start
+        shift + Date.day_of_year(Timex.Date.new!(year, date.month, date.day))
+      else
+        Date.day_of_year(Timex.Date.new!(year, date.month, date.day))
       end
-    end)
+
+    div(day_num, 7)
     |> pad_numeric(flags, width)
   end
 

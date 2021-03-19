@@ -63,8 +63,8 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
   ### Weeks
 
   * `%V` - ISO week number (01..53)
-  * `%W` - week number of the year, Monday first (00..53)
-  * `%U` - week number of the year, Sunday first (00..53)
+  * `%W` - week number of the year, Monday first (00..52)
+  * `%U` - week number of the year, Sunday first (00..52)
 
   ### Time
 

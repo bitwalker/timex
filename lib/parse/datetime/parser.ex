@@ -392,7 +392,13 @@ defmodule Timex.Parse.DateTime.Parser do
         reset |> Timex.shift(weeks: value)
 
       :weekday ->
-        date |> Timex.shift(days: value - 1)
+        current_dow = Calendar.ISO.day_of_week(date.year, date.month, date.day)
+
+        if current_dow == value do
+          date
+        else
+          Timex.shift(date, days: value - current_dow)
+        end
 
       # Hours
       hour when hour in [:hour24, :hour12] ->
@@ -730,11 +736,14 @@ defmodule Timex.Parse.DateTime.Parser do
       :literal ->
         date
 
-      :week_of_year ->
-        shift_to_week_of_year(:mon, date, value)
+      :week_of_year_iso ->
+        shift_to_week_of_year(:iso, date, value)
+
+      :week_of_year_mon ->
+        shift_to_week_of_year(:monday, date, value)
 
       :week_of_year_sun ->
-        shift_to_week_of_year(:sun, date, value)
+        shift_to_week_of_year(:sunday, date, value)
 
       _ ->
         case tokenizer.apply(date, token, value) do
@@ -750,76 +759,38 @@ defmodule Timex.Parse.DateTime.Parser do
     end
   end
 
-  defp shift_to_week_of_year(:mon, %{year: y} = datetime, value) when is_integer(value) do
-    shift =
-      case :calendar.day_of_the_week({y, 1, 1}) do
-        # Week 1, seek backwards to beginning of week
-        n when n < 5 ->
-          [days: -(7 - (7 - (n - 1)))]
+  defp shift_to_week_of_year(:iso, %{year: y} = datetime, value) when is_integer(value) do
+    {dow11, _, _} = Calendar.ISO.day_of_week(y, 1, 1, :monday)
+    {dow14, _, _} = Calendar.ISO.day_of_week(y, 1, 4, :monday)
 
-        # Part of last year's week, seek forwards to beginning of week
-        n ->
-          [days: 7 - (n - 1)]
+    # See https://en.wikipedia.org/wiki/ISO_week_date#Calculating_an_ordinal_or_month_date_from_a_week_date
+    ordinal = value * 7 + dow11 - (dow14 + 3)
+    {year, month, day} = Timex.Helpers.iso_day_to_date_tuple(y, ordinal)
+
+    %Date{year: year, month: month, day: day} =
+      Timex.Date.beginning_of_week(Timex.Date.new!(year, month, day))
+
+    %{datetime | year: year, month: month, day: day}
+  end
+
+  defp shift_to_week_of_year(weekstart, %{year: y} = datetime, value) when is_integer(value) do
+    new_year = Timex.Date.new!(y, 1, 1)
+    week_start = Timex.Date.beginning_of_week(new_year, weekstart)
+
+    # This date can be calculated by taking the day number of the year,
+    # shifting the day number of the year down by the number of days which
+    # occurred in the previous year, then dividing by 7
+    day_num =
+      if Date.compare(week_start, new_year) == :lt do
+        prev_year_day_start = Date.day_of_year(week_start)
+        prev_year_day_end = Date.day_of_year(Timex.Date.new!(week_start.year, 12, 31))
+        shift = prev_year_day_end - prev_year_day_start
+        shift + value * 7
+      else
+        value * 7
       end
 
     datetime = Timex.to_naive_datetime(datetime)
-    do_shift_to_week_of_year(Timex.shift(%{datetime | month: 1, day: 1}, shift), value)
-  end
-
-  defp shift_to_week_of_year(:sun, %{year: y} = datetime, value) when is_integer(value) do
-    n = :calendar.day_of_the_week({y, 1, 1})
-    shift = [days: -1 - (7 - (7 - (n - 1)))]
-    datetime = Timex.to_naive_datetime(datetime)
-    do_shift_to_week_of_year(Timex.shift(%{datetime | month: 1, day: 1}, shift), value)
-  end
-
-  defp do_shift_to_week_of_year(%{year: y} = datetime, weeks) do
-    # On leap years which start on Thursday, week numbers
-    # are incremented by 1 from March thru the rest of the year
-    shifted = Timex.shift(datetime, days: 7 * (weeks - 1))
-
-    if :calendar.is_leap_year(y) do
-      case :calendar.day_of_the_week({y, 1, 1}) do
-        4 ->
-          case shifted do
-            %{month: m} when m < 3 ->
-              shifted
-
-            _ ->
-              Timex.shift(shifted, days: 7)
-          end
-
-        _n ->
-          shifted
-      end
-    else
-      shifted
-    end
-  end
-
-  defp to_datetime(%DateTime{} = dt), do: dt
-
-  defp to_datetime(%NaiveDateTime{
-         year: y,
-         month: m,
-         day: d,
-         hour: h,
-         minute: mm,
-         second: ss,
-         microsecond: us
-       }) do
-    %DateTime{
-      year: y,
-      month: m,
-      day: d,
-      hour: h,
-      minute: mm,
-      second: ss,
-      microsecond: us,
-      time_zone: "Etc/UTC",
-      zone_abbr: "UTC",
-      utc_offset: 0,
-      std_offset: 0
-    }
+    Timex.shift(%{datetime | month: 1, day: 1}, days: day_num)
   end
 end
