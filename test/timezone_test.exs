@@ -38,7 +38,7 @@ defmodule TimezoneTests do
   end
 
   test "creation/conversion/difference" do
-    datetime = ~U[2020-11-01T04:00:00Z]
+    {:ok, datetime} = DateTime.from_naive(~N[2020-11-01T04:00:00], "Etc/UTC")
     zoned = Timex.to_datetime(datetime, "America/Los_Angeles")
 
     assert Timex.diff(datetime, zoned, :second) == 0
@@ -128,7 +128,7 @@ defmodule TimezoneTests do
   test "converting with custom time zone" do
     assert {:ok, posix_tz, _} = Timex.Parse.Timezones.Posix.parse("EZT6EYT")
     custom_tx = Timex.PosixTimezone.to_timezone_info(posix_tz, ~N[2017-03-15 12:00:00])
-    noon = ~U[2017-03-15 12:00:00Z]
+    assert {:ok, noon} = DateTime.from_naive(~N[2017-03-15 12:00:00], "Etc/UTC")
 
     assert ~N[2017-03-15 06:00:00] = Timezone.convert(noon, custom_tx) |> DateTime.to_naive()
   end
