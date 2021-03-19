@@ -89,7 +89,7 @@ defmodule Timex do
   ## Example
 
       iex> %DateTime{time_zone: tz} = Timex.local();
-      ...> tz != "Etc/UTC"
+      ...> tz != nil
       true
   """
   @spec local() :: DateTime.t() | {:error, term}
@@ -106,7 +106,7 @@ defmodule Timex do
   ## Example
 
       iex> %DateTime{time_zone: tz} = Timex.local(DateTime.utc_now());
-      ...> tz != "Etc/UTC"
+      ...> tz != nil
       true
   """
   @spec local(Types.valid_datetime()) :: DateTime.t() | AmbiguousDateTime.t() | {:error, term}
