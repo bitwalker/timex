@@ -115,7 +115,7 @@ defimpl Timex.Protocol, for: NaiveDateTime do
     do: :calendar.day_of_the_week({y, m, d})
 
   def weekday(%NaiveDateTime{} = date, weekstart),
-    do: Date.day_of_week(date, weekstart)
+    do: Timex.Date.day_of_week(date, weekstart)
 
   def day(%NaiveDateTime{} = date), do: Date.day_of_year(date)
 

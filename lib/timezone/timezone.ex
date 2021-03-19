@@ -193,6 +193,9 @@ defmodule Timex.Timezone do
       {:error, _} = err ->
         err
 
+      "Etc/UTC" ->
+        "Etc/UTC"
+
       "GMT" <> rest ->
         "Etc/GMT" <> rest
     end

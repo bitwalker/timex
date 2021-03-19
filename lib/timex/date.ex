@@ -80,6 +80,17 @@ defmodule Timex.Date do
     end
 
     @doc false
+    def day_of_week(%{year: y, month: m, day: d}, starting_on \\ :default) do
+      with {dow, _, _} <- day_of_week(y, m, d, starting_on), do: dow
+    end
+
+    @doc false
+    def day_of_week(year, month, day, starting_on) do
+      iso_days = Calendar.ISO.date_to_iso_days(year, month, day)
+      {iso_days_to_day_of_week(iso_days, starting_on), 1, 7}
+    end
+
+    @doc false
     def iso_days_to_day_of_week(iso_days, starting_on) do
       Integer.mod(iso_days + day_of_week_offset(starting_on), 7) + 1
     end
@@ -104,5 +115,11 @@ defmodule Timex.Date do
 
     @doc false
     defdelegate end_of_month(date), to: Date
+
+    @doc false
+    defdelegate day_of_week(date, starting_on \\ :default), to: Date
+
+    @doc false
+    defdelegate day_of_week(year, month, day, starting_on), to: Calendar.ISO
   end
 end

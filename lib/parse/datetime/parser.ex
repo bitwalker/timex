@@ -336,7 +336,7 @@ defmodule Timex.Parse.DateTime.Parser do
         reset |> Timex.shift(weeks: value)
 
       :weekday ->
-        current_dow = Calendar.ISO.day_of_week(date.year, date.month, date.day)
+        current_dow = Timex.Date.day_of_week(date.year, date.month, date.day)
 
         if current_dow == value do
           date
@@ -463,8 +463,8 @@ defmodule Timex.Parse.DateTime.Parser do
   end
 
   defp shift_to_week_of_year(:iso, %{year: y} = datetime, value) when is_integer(value) do
-    {dow11, _, _} = Calendar.ISO.day_of_week(y, 1, 1, :monday)
-    {dow14, _, _} = Calendar.ISO.day_of_week(y, 1, 4, :monday)
+    {dow11, _, _} = Timex.Date.day_of_week(y, 1, 1, :monday)
+    {dow14, _, _} = Timex.Date.day_of_week(y, 1, 4, :monday)
 
     # See https://en.wikipedia.org/wiki/ISO_week_date#Calculating_an_ordinal_or_month_date_from_a_week_date
     ordinal = value * 7 + dow11 - (dow14 + 3)

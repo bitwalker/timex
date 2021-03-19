@@ -268,8 +268,8 @@ defimpl Timex.Protocol, for: DateTime do
   def week_of_month(%DateTime{:year => y, :month => m, :day => d}),
     do: Timex.week_of_month(y, m, d)
 
-  def weekday(datetime), do: Date.day_of_week(datetime)
-  def weekday(datetime, weekstart), do: Date.day_of_week(datetime, weekstart)
+  def weekday(datetime), do: Timex.Date.day_of_week(datetime)
+  def weekday(datetime, weekstart), do: Timex.Date.day_of_week(datetime, weekstart)
 
   def day(datetime), do: Date.day_of_year(datetime)
 
