@@ -56,15 +56,9 @@ defmodule Timex.Parse.DateTime.Parser do
       when is_binary(date_string) and is_binary(format_string) do
     try do
       {:ok, parse!(date_string, format_string, tokenizer)}
-    catch
-      _type, %ParseError{:message => msg} ->
-        {:error, msg}
-
-      _type, %{:message => msg} ->
-        {:error, msg}
-
-      _type, reason ->
-        {:error, reason}
+    rescue
+      err in [ParseError] ->
+        {:error, err.message}
     end
   end
 
@@ -86,7 +80,7 @@ defmodule Timex.Parse.DateTime.Parser do
         raise ParseError, message: err
 
       {:error, err} ->
-        raise ParseError, message: "#{inspect(err)}"
+        raise ParseError, message: err
 
       {:ok, []} ->
         raise ParseError,
@@ -98,25 +92,15 @@ defmodule Timex.Parse.DateTime.Parser do
             raise ParseError, message: "Input datetime string cannot be empty!"
 
           _ ->
-            datetime =
-              case do_parse(date_string, directives, tokenizer) do
-                {:ok, %DateTime{time_zone: nil} = dt} ->
-                  Timex.to_naive_datetime(dt)
+            case do_parse(date_string, directives, tokenizer) do
+              {:ok, dt} ->
+                dt
 
-                {:ok, dt} ->
-                  dt
+              {:error, reason} when is_binary(reason) ->
+                raise ParseError, message: reason
 
-                {:error, reason} when is_binary(reason) ->
-                  raise ParseError, message: reason
-
-                {:error, reason} ->
-                  raise ParseError, message: "#{inspect(reason)}"
-              end
-
-            if :calendar.valid_date(datetime.year, datetime.month, datetime.day) do
-              datetime
-            else
-              raise ParseError, message: "#{inspect(datetime)} is an invalid date!"
+              {:error, reason} ->
+                raise ParseError, message: reason
             end
         end
     end
@@ -251,8 +235,11 @@ defmodule Timex.Parse.DateTime.Parser do
 
   defp apply_directives([{token, value} | tokens], date, tokenizer) do
     case update_date(date, token, value, tokenizer) do
-      {:error, _} = error -> error
-      updated -> apply_directives(tokens, updated, tokenizer)
+      {:error, _} = error ->
+        error
+
+      updated ->
+        apply_directives(tokens, updated, tokenizer)
     end
   end
 

@@ -147,27 +147,22 @@ defmodule Timex.Format.DateTime.Formatter do
   def validate(format_string, formatter \\ Default)
 
   def validate(format_string, formatter) when is_binary(format_string) and is_atom(formatter) do
-    try do
-      formatter =
-        case formatter do
-          :strftime -> Strftime
-          :relative -> Relative
-          _ -> formatter
-        end
-
-      case formatter.tokenize(format_string) do
-        {:error, _} = error ->
-          error
-
-        {:ok, []} ->
-          {:error, "There were no formatting directives in the provided string."}
-
-        {:ok, directives} when is_list(directives) ->
-          :ok
+    formatter =
+      case formatter do
+        :strftime -> Strftime
+        :relative -> Relative
+        _ -> formatter
       end
-    rescue
-      x ->
-        {:error, x}
+
+    case formatter.tokenize(format_string) do
+      {:error, _} = error ->
+        error
+
+      {:ok, []} ->
+        {:error, "There were no formatting directives in the provided string."}
+
+      {:ok, directives} when is_list(directives) ->
+        :ok
     end
   end
 

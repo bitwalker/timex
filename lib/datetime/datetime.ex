@@ -438,7 +438,7 @@ defimpl Timex.Protocol, for: DateTime do
   rescue
     err in [FunctionClauseError] ->
       case {err.module, err.function} do
-        {Calendar.ISO, :date_from_iso_days} ->
+        {Calendar.ISO, _} ->
           {:error, :invalid_date}
 
         _ ->
@@ -630,6 +630,9 @@ defimpl Timex.Protocol, for: DateTime do
       month - 1 >= 1 ->
         ldom = :calendar.last_day_of_the_month(year, month - 1)
         shift_by(%DateTime{datetime | month: month - 1, day: ldom}, value + day, :days)
+
+      year == 0 ->
+        {:error, :shift_to_invalid_date}
 
       :else ->
         ldom = :calendar.last_day_of_the_month(year - 1, 12)
