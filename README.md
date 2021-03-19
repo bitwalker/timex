@@ -12,28 +12,27 @@ The complete documentation for Timex is located [here](https://hexdocs.pm/timex)
 
 ## Migrating to Timex 3.x
 
-See the Migrating section further down for details. If you are migrating from earlier than 2.x,
-please review [this migration doc for 1.x to 2.x](https://github.com/bitwalker/timex/tree/2.2.1#migrating).
+If you are coming from an earlier version of Timex, it is recommended that you evaluate whether or not the functionality provided
+by the standard library `Calendar` API is sufficient for your needs, as you may be able to avoid the dependency entirely.
 
-Timex 3.0 is a significant rewrite, in order to accommodate Elixir 1.3's new Calendar types in a semantically
-correct way. The external API is mostly the same, but there are changes, many without deprecations, so please
-read the changelog carefully.
+For those that require Timex for one reason or another, Timex now delegates to the standard library where possible, and provides
+backward compatibility to Elixir 1.8 for APIs which are used. This is to avoid duplicating effort, and to ease the maintenance of
+this library in the future. Take a look at the documentation to see what APIs are available and how to use them. Many of them may have
+changed, been removed/renamed, or have had their semantics improved since early versions of the library, so if you are coming from
+an earlier version, you will need to review how you are using various APIs. The CHANGELOG is a helpful document to sort through what
+has changed in general.
+
+Timex is primarily oriented around the Olson timezone database, and so you are encouraged to use those timezones in favor of alternatives. 
+Timex does provide compatibility with the POSIX-TZ standard, which allows specification of custom timezones, see 
+[this document](https://pubs.opengroup.org/onlinepubs/9699919799/) for more information. Timex does not provide support
+for timezones which do not adhere to one of those two standards. While Timex attempted to support timezone abbreviations without context
+in prior versions, this was broken, and has been removed.
 
 ## Getting Started
 
 There are some brief examples on usage below, but I highly recommend you review the
 API docs [here](https://hexdocs.pm/timex), there are many examples, and some extra pages with
 richer documentation on specific subjects such as custom formatters/parsers, etc.
-
-### Adding Timex To Your Project
-
-To use Timex with your projects, edit your `mix.exs` file and add it as a dependency:
-
-```elixir
-defp deps do
-  [{:timex, "~> 3.6"}]
-end
-```
 
 ### Quickfast introduction
 
@@ -45,16 +44,16 @@ Here's a few simple examples:
 
 ```elixir
 > use Timex
-> Timex.today
+> Timex.today()
 ~D[2016-02-29]
 
-> datetime = Timex.now
+> datetime = Timex.now()
 #<DateTime(2016-02-29T12:30:30.120+00:00Z Etc/UTC)
 
 > Timex.now("America/Chicago")
 #<DateTime(2016-02-29T06:30:30.120-06:00 America/Chicago)
 
-> Duration.now
+> Duration.now()
 #<Duration(P46Y6M24DT21H57M33.977711S)>
 
 > {:ok, default_str} = Timex.format(datetime, "{ISO:Extended}")
@@ -72,7 +71,7 @@ Here's a few simple examples:
 > Timex.parse!(strftime_str, "%FT%T%:z", :strftime)
 #<DateTime(2016-02-29T12:30:30.120+00:00 Etc/Utc)
 
-> Duration.diff(Duration.now, Duration.zero, :days)
+> Duration.diff(Duration.now(), Duration.zero(), :days)
 16850
 
 > Timex.shift(date, days: 3)
@@ -81,16 +80,16 @@ Here's a few simple examples:
 > Timex.shift(datetime, hours: 2, minutes: 13)
 #<DateTime(2016-02-29T14:43:30.120Z Etc/UTC)>
 
-> timezone = Timezone.get("America/Chicago", Timex.now)
+> timezone = Timezone.get("America/Chicago", Timex.now())
 #<TimezoneInfo(America/Chicago - CDT (-06:00:00))>
 
 > Timezone.convert(datetime, timezone)
 #<DateTime(2016-02-29T06:30:30.120-06:00 America/Chicago)>
 
-> Timex.before?(Timex.today, Timex.shift(Timex.today, days: 1))
+> Timex.before?(Timex.today(), Timex.shift(Timex.today, days: 1))
 true
 
-> Timex.before?(Timex.shift(Timex.today, days: 1), Timex.today)
+> Timex.before?(Timex.shift(Timex.today(), days: 1), Timex.today())
 false
 
 > interval = Timex.Interval.new(from: ~D[2016-03-03], until: [days: 3])
@@ -114,23 +113,21 @@ false
 
 ```
 
-There are a ton of other functions, all of which work with Erlang datetime tuples, Date, NaiveDateTime, and DateTime. The Duration module contains functions for working with Durations, including Erlang timestamps (such as those returned from `:timer.tc`)
+There are a ton of other functions, all of which work with Erlang datetime tuples, Date, NaiveDateTime, and DateTime. 
+The Duration module contains functions for working with Durations, including Erlang timestamps (such as those returned from `:timer.tc`)
 
 ## Extensibility
 
 Timex exposes a number of extension points for you, in order to accommodate different use cases:
 
-Timex itself defines it's core operations on the Date, DateTime, and NaiveDateTime types using the `Timex.Protocol` protocol. From there, all other Timex functionality is derived. If you have custom date/datetime types you want to use with Timex, this is the protocol you would need to implement.
+Timex itself defines it's core operations on the Date, DateTime, and NaiveDateTime types using the `Timex.Protocol` protocol. 
+From there, all other Timex functionality is derived. If you have custom date/datetime types you want to use with Timex, 
+this is the protocol you would need to implement.
 
 Timex also defines a `Timex.Comparable` protocol, which you can extend to add comparisons to custom date/datetime types.
 
-You can provide your own formatter/parser for datetime strings by implementing the `Timex.Format.DateTime.Formatter` and/or `Timex.Parse.DateTime.Parser` behaviours, depending on your needs.
-
-## Common Issues
-
-### `iso_*` Functions
-
-Timex functions of the form `iso_*` behave based on how the ISO calendar represents dates/times and not the ISO8601 date format. This confusion has occurred before, and it's important to note this!
+You can provide your own formatter/parser for datetime strings by implementing the `Timex.Format.DateTime.Formatter` 
+and/or `Timex.Parse.DateTime.Parser` behaviours, depending on your needs.
 
 ### Timex with escript
 
@@ -140,44 +137,9 @@ If your build still throws an error after this, try removing the `_build` and `d
 
 ### Automatic time zone updates
 
-Timex includes the [Tzdata](https://github.com/lau/tzdata) library for time zone data. Tzdata has an automatic update capability that fetches updates from IANA and which is enabled by default; if you want to disable it, check [the Tzdata documentation](https://github.com/lau/tzdata#automatic-data-updates) for details.
-
-## Migrating
-
-If you have been using Timex pre-3.x, and you are looking to migrate, it will be fairly painless as long as you review the `CHANGELOG.md` file and make note of anything that has changed which you are using. In almost every single case, the functionality has simply moved, or is accessed slightly differently. In some cases behaviour has changed, but the old behaviour can be achieved manually. For those things which were removed or are no longer available, it is almost certainly because those things are no longer recommended, or no longer make sense for this library. If I have missed something, or there is a good justification for re-adding something which was removed, I'm always open to discussing it on the issue tracker.
-
-### Overview of 3.x changes
-
-Please see the `CHANGELOG.md` file for the list of all changes made, below are a brief recap of the major points, and
-instructions on how to migrate your existing Timex-based code to 3.x.
-
-- Virtually all of Timex's API is consolidated around three modules: `Timex`, `Duration`, and `Interval`. There are public APIs in other modules of course, but most everything you do can be done via one of those three.
-- All Timex-provided types have been removed, with the exception of `Time` which has been renamed to `Duration` to better fit it's purpose,
-`TimezoneInfo`, which is still used internally, and accessible externally, and `AmbiguousDateTime`, which is still required when dealing with ambiguous `DateTime` structs. `Date` and `DateTime` are now part of Elixir 1.3, and `NaiveDateTime` has been added as a first class type as well.
-- Conversions have been rehashed, and are now accessed via the `Timex` module: `to_date`, `to_datetime`, `to_naive_datetime`, `to_erl`, `to_unix`, `to_gregorian_seconds`, and `to_gregorian_microseconds`. Use these to convert back and forth between types. With very few exceptions, there are no `from_*` conversions. You must construct a standard type either with the standard library functions (such as `NaiveDateTime.new`), or by converting from another standard type (i.e. Erlang datetime tuple to NaiveDateTime).
-
-A variety of improvements came about as well:
-
-- Microsecond precision everywhere it can be maintained
-- Various bug fixes from the 2.x release which were held back
-- A lot of code clean up
-- Faster compilation
-- Fixed typespecs, docs, and tests across the board
-- Added Julian calendar support
-
-
-## Roadmap
-
-The following are an unordered list of things I plan for Timex in the future, if you
-have specific requests, please open an issue with "RFC" in the title, and we can discuss
-it, and hopefully get input from the community.
-
-- 100% test coverage (well under way!)
-- QuickCheck tests (haven't started this, but I really want to start ASAP)
-- `{ASP.NET}` formatting/parsing token for interop with .NET services (probably in the next release)
-- Relative time formatter/parser, along the lines of Moment.js's `fromNow`, `toNow`, `timeTo`, and `timeFrom` formatting functions.
-- Calendar time formatter/parser, along the lines of Moment.js's calendar time formatter
-- Recurring dates/times API
+Timex includes the [Tzdata](https://github.com/lau/tzdata) library for time zone data.
+Tzdata has an automatic update capability that fetches updates from IANA and which is enabled by default; 
+if you want to disable it, check [the Tzdata documentation](https://github.com/lau/tzdata#automatic-data-updates) for details.
 
 ## License
 
