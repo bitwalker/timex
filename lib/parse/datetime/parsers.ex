@@ -222,7 +222,7 @@ defmodule Timex.Parse.DateTime.Parsers do
   end
 
   def zname(_) do
-    word_of(~r/[\/\w_-]/)
+    word_of(~r/[\/\w_\-\:]/)
     |> map(fn name -> [zname: name] end)
     |> label("timezone name")
   end
@@ -232,14 +232,11 @@ defmodule Timex.Parse.DateTime.Parsers do
       [
         one_of(char(), ["-", "+"]),
         digit(),
-        digit(),
+        option(digit()),
         option(digit()),
         option(digit())
       ],
-      fn
-        [sign, h1, h2, nil, nil] -> [zoffs: "#{sign}#{h1}#{h2}"]
-        [sign, h1, h2, m1, m2] -> [zoffs: "#{sign}#{h1}#{h2}#{m1}#{m2}"]
-      end
+      fn xs -> [zoffs: Enum.join(Enum.reject(xs, &is_nil/1))] end
     )
     |> label("timezone offset (+/-hhmm)")
   end
@@ -249,12 +246,12 @@ defmodule Timex.Parse.DateTime.Parsers do
       [
         one_of(char(), ["-", "+"]),
         digit(),
-        digit(),
+        option(digit()),
         char(":"),
         digit(),
         digit()
       ],
-      fn xs -> [zoffs_colon: Enum.join(xs)] end
+      fn xs -> [zoffs_colon: Enum.join(Enum.reject(xs, &is_nil/1))] end
     )
     |> label("timezone offset (+/-hh:mm)")
   end
@@ -264,7 +261,7 @@ defmodule Timex.Parse.DateTime.Parsers do
       [
         one_of(char(), ["-", "+"]),
         digit(),
-        digit(),
+        option(digit()),
         char(":"),
         digit(),
         digit(),
@@ -272,7 +269,7 @@ defmodule Timex.Parse.DateTime.Parsers do
         digit(),
         digit()
       ],
-      fn xs -> [zoffs_sec: Enum.join(xs)] end
+      fn xs -> [zoffs_sec: Enum.join(Enum.reject(xs, &is_nil/1))] end
     )
     |> label("timezone offset (+/-hh:mm:ss)")
   end

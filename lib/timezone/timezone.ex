@@ -138,7 +138,16 @@ defmodule Timex.Timezone do
     "Etc/UTC" <> <<sign::utf8, h::binary>>
   end
 
+  def name_of(<<sign::utf8, h::binary-size(1)-unit(8), ?:, ?0, ?0>>) when sign in [?+, ?-] do
+    "Etc/UTC" <> <<sign::utf8, h::binary>>
+  end
+
   def name_of(<<sign::utf8, h::binary-size(2)-unit(8), ?:, m::binary-size(2)-unit(8)>>)
+      when sign in [?+, ?-] do
+    "Etc/UTC" <> <<sign::utf8, h::binary, ?:, m::binary>>
+  end
+
+  def name_of(<<sign::utf8, h::binary-size(1)-unit(8), ?:, m::binary-size(2)-unit(8)>>)
       when sign in [?+, ?-] do
     "Etc/UTC" <> <<sign::utf8, h::binary, ?:, m::binary>>
   end
@@ -151,7 +160,20 @@ defmodule Timex.Timezone do
     "Etc/UTC" <> <<sign::utf8, h::binary, ?:, m::binary, ?:, s::binary>>
   end
 
+  def name_of(
+        <<sign::utf8, h::binary-size(1)-unit(8), ?:, m::binary-size(2)-unit(8), ?:,
+          s::binary-size(2)-unit(8)>>
+      )
+      when sign in [?+, ?-] do
+    "Etc/UTC" <> <<sign::utf8, h::binary, ?:, m::binary, ?:, s::binary>>
+  end
+
   def name_of(<<sign::utf8, h::binary-size(2)-unit(8), m::binary-size(2)-unit(8)>>)
+      when sign in [?+, ?-] do
+    "Etc/UTC" <> <<sign::utf8, h::binary, ?:, m::binary>>
+  end
+
+  def name_of(<<sign::utf8, h::binary-size(1)-unit(8), m::binary-size(2)-unit(8)>>)
       when sign in [?+, ?-] do
     "Etc/UTC" <> <<sign::utf8, h::binary, ?:, m::binary>>
   end
@@ -186,7 +208,15 @@ defmodule Timex.Timezone do
       when sign in [?+, ?-],
       do: "GMT" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
 
+  def name_of(<<"GMT", sign::utf8, hh::binary-size(1)-unit(8), ?:, mm::binary-size(2)-unit(8)>>)
+      when sign in [?+, ?-],
+      do: "GMT" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
+
   def name_of(<<"GMT", sign::utf8, hh::binary-size(2)-unit(8), mm::binary-size(2)-unit(8)>>)
+      when sign in [?+, ?-],
+      do: "GMT" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
+
+  def name_of(<<"GMT", sign::utf8, hh::binary-size(1)-unit(8), mm::binary-size(2)-unit(8)>>)
       when sign in [?+, ?-],
       do: "GMT" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
 
@@ -361,7 +391,31 @@ defmodule Timex.Timezone do
     end
   end
 
+  defp parse_offset(
+         <<h::binary-size(1)-unit(8), ?:, m::binary-size(2)-unit(8), ?:,
+           s::binary-size(2)-unit(8)>>
+       ) do
+    with {hh, _} <- Integer.parse(h),
+         {mm, _} <- Integer.parse(m),
+         {ss, _} <- Integer.parse(s) do
+      hh * 3600 + mm * 60 + ss
+    else
+      _ ->
+        {:error, :invalid_offset}
+    end
+  end
+
   defp parse_offset(<<h::binary-size(2)-unit(8), ?:, m::binary-size(2)-unit(8)>>) do
+    with {hh, _} <- Integer.parse(h),
+         {mm, _} <- Integer.parse(m) do
+      hh * 3600 + mm * 60
+    else
+      _ ->
+        {:error, :invalid_offset}
+    end
+  end
+
+  defp parse_offset(<<h::binary-size(1)-unit(8), ?:, m::binary-size(2)-unit(8)>>) do
     with {hh, _} <- Integer.parse(h),
          {mm, _} <- Integer.parse(m) do
       hh * 3600 + mm * 60
