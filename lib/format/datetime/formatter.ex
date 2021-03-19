@@ -41,7 +41,9 @@ defmodule Timex.Format.DateTime.Formatter do
   @doc """
   Formats a Date, DateTime, or NaiveDateTime as a string, using the provided format string,
   locale, and formatter. If the locale does not have translations, "en" will be used by
-  default. If a formatter is not provided, the formatter used is `Timex.Format.DateTime.Formatters.DefaultFormatter`
+  default.
+
+  If a formatter is not provided, the formatter used is `Timex.Format.DateTime.Formatters.DefaultFormatter`
 
   If an error is encountered during formatting, `lformat!` will raise
   """
@@ -52,47 +54,28 @@ defmodule Timex.Format.DateTime.Formatter do
   def lformat!({:error, reason}, _format_string, _locale, _formatter),
     do: raise(ArgumentError, to_string(reason))
 
-  def lformat!(datetime, format_string, locale, :strftime),
-    do: lformat!(datetime, format_string, locale, Strftime)
+  def lformat!(date, format_string, locale, formatter) do
+    with {:ok, formatted} <- lformat(date, format_string, locale, formatter) do
+      formatted
+    else
+      {:error, :invalid_date} ->
+        raise ArgumentError, "invalid_date"
 
-  def lformat!(datetime, format_string, locale, :relative),
-    do: lformat!(datetime, format_string, locale, Relative)
+      {:error, {:format, reason}} ->
+        raise FormatError, message: to_string(reason)
 
-  def lformat!(%{__struct__: struct} = date, format_string, locale, formatter)
-      when struct in [Date, DateTime, NaiveDateTime, Time] and is_binary(format_string) and
-             is_binary(locale) and is_atom(formatter) do
-    case formatter.lformat(date, format_string, locale) do
-      {:ok, result} -> result
-      {:error, reason} -> raise FormatError, message: reason
-    end
-  end
-
-  def lformat!(date, format_string, locale, formatter)
-      when is_binary(format_string) and is_binary(locale) and is_atom(formatter) do
-    case Timex.to_naive_datetime(date) do
       {:error, reason} ->
-        raise ArgumentError, to_string(reason)
-
-      datetime ->
-        case formatter.lformat(datetime, format_string, locale) do
-          {:ok, result} -> result
-          {:error, reason} -> raise FormatError, message: reason
-        end
+        raise FormatError, message: to_string(reason)
     end
   end
-
-  def lformat!(a, b, c, d),
-    do:
-      raise(
-        "invalid argument(s) to lformat!/4: #{inspect(a)}, #{inspect(b)}, #{inspect(c)}, #{
-          inspect(d)
-        }"
-      )
 
   @doc """
   Formats a Date, DateTime, or NaiveDateTime as a string, using the provided format string,
-  locale, and formatter. If the locale provided does not have translations, "en" is used by
-  default. If a formatter is not provided, the formatter used is `Timex.Format.DateTime.Formatters.DefaultFormatter`
+  locale, and formatter.
+
+  If the locale provided does not have translations, "en" is used by default.
+
+  If a formatter is not provided, the formatter used is `Timex.Format.DateTime.Formatters.DefaultFormatter`
   """
   @spec lformat(Types.valid_datetime(), String.t(), String.t(), atom | nil) ::
           {:ok, String.t()} | {:error, term}
@@ -107,21 +90,18 @@ defmodule Timex.Format.DateTime.Formatter do
   def lformat(datetime, format_string, locale, :relative),
     do: lformat(datetime, format_string, locale, Relative)
 
-  def lformat(date, format_string, locale, formatter)
-      when is_binary(format_string) and is_binary(locale) and is_atom(formatter) do
-    try do
-      {:ok, lformat!(date, format_string, locale, formatter)}
-    catch
-      _type, %{:message => msg} ->
-        {:error, msg}
-
-      _type, reason ->
-        {:error, reason}
-    end
+  def lformat(%{__struct__: struct} = date, format_string, locale, formatter)
+      when struct in [Date, DateTime, NaiveDateTime, Time] and is_binary(format_string) and
+             is_binary(locale) and is_atom(formatter) do
+    formatter.lformat(date, format_string, locale)
   end
 
-  def lformat(_, _, _, _),
-    do: {:error, :badarg}
+  def lformat(date, format_string, locale, formatter)
+      when is_binary(format_string) and is_binary(locale) and is_atom(formatter) do
+    with %NaiveDateTime{} = datetime <- Timex.to_naive_datetime(date) do
+      formatter.lformat(datetime, format_string, locale)
+    end
+  end
 
   @doc """
   Formats a Date, DateTime, or NaiveDateTime as a string, using the provided format
@@ -167,25 +147,24 @@ defmodule Timex.Format.DateTime.Formatter do
   def validate(format_string, formatter \\ Default)
 
   def validate(format_string, formatter) when is_binary(format_string) and is_atom(formatter) do
-    try do
-      formatter =
-        case formatter do
-          :strftime -> Strftime
-          :relative -> Relative
-          _ -> formatter
-        end
-
-      case formatter.tokenize(format_string) do
-        {:error, _} = error -> error
-        {:ok, []} -> {:error, "There were no formatting directives in the provided string."}
-        {:ok, directives} when is_list(directives) -> :ok
+    formatter =
+      case formatter do
+        :strftime -> Strftime
+        :relative -> Relative
+        _ -> formatter
       end
-    rescue
-      x -> {:error, x}
+
+    case formatter.tokenize(format_string) do
+      {:error, _} = error ->
+        error
+
+      {:ok, []} ->
+        {:error, "There were no formatting directives in the provided string."}
+
+      {:ok, directives} when is_list(directives) ->
+        :ok
     end
   end
-
-  def validate(_, _), do: {:error, :badarg}
 
   @doc """
   Given a token (as found in `Timex.Parsers.Directive`), and a Date, DateTime, or NaiveDateTime struct,
@@ -434,7 +413,8 @@ defmodule Timex.Format.DateTime.Formatter do
     hour = format_token(locale, :hour24, date, modifiers, flags, width_spec(2..2))
     min = format_token(locale, :min, date, modifiers, flags, width_spec(2..2))
     sec = format_token(locale, :sec, date, modifiers, flags, width_spec(2..2))
-    "#{year}#{month}#{day}#{hour}#{min}#{sec}"
+    ms = format_token(locale, :sec_fractional, date, modifiers, flags, width_spec(-1, nil))
+    "#{year}#{month}#{day}#{hour}#{min}#{sec}#{ms}"
   end
 
   def format_token(locale, :asn1_generalized_time_z, date, modifiers, flags, width) do
@@ -576,43 +556,52 @@ defmodule Timex.Format.DateTime.Formatter do
   end
 
   def format_token(_locale, :week_mon, %{:year => year} = date, _modifiers, flags, width) do
-    {:ok, jan1} = Date.new(year, 1, 1)
+    new_year = Timex.Date.new!(year, 1, 1)
+    week_start = Timex.Date.beginning_of_week(new_year, :monday)
 
-    Timex.Interval.new(from: jan1, until: Timex.shift(date, days: 1))
-    |> Enum.reduce(0, fn d, acc ->
-      case Timex.weekday(d) do
-        1 -> acc + 1
-        _ -> acc
+    # This date can be calculated by taking the day number of the year,
+    # shifting the day number of the year down by the number of days which
+    # occurred in the previous year, then dividing by 7
+    day_num =
+      if Date.compare(week_start, new_year) == :lt do
+        prev_year_day_start = Date.day_of_year(week_start)
+        prev_year_day_end = Date.day_of_year(Timex.Date.new!(week_start.year, 12, 31))
+        shift = prev_year_day_end - prev_year_day_start
+        shift + Date.day_of_year(Timex.Date.new!(year, date.month, date.day))
+      else
+        Date.day_of_year(Timex.Date.new!(year, date.month, date.day))
       end
-    end)
+
+    div(day_num, 7)
     |> pad_numeric(flags, width)
   end
 
   def format_token(_locale, :week_sun, %{:year => year} = date, _modifiers, flags, width) do
-    {:ok, jan1} = Date.new(year, 1, 1)
+    new_year = Timex.Date.new!(year, 1, 1)
+    week_start = Timex.Date.beginning_of_week(new_year, :sunday)
 
-    Timex.Interval.new(from: jan1, until: Timex.shift(date, days: 1))
-    |> Enum.reduce(0, fn d, acc ->
-      case Timex.weekday(d) do
-        7 -> acc + 1
-        _ -> acc
+    # This date can be calculated by taking the day number of the year,
+    # shifting the day number of the year down by the number of days which
+    # occurred in the previous year, then dividing by 7
+    day_num =
+      if Date.compare(week_start, new_year) == :lt do
+        prev_year_day_start = Date.day_of_year(week_start)
+        prev_year_day_end = Date.day_of_year(Timex.Date.new!(week_start.year, 12, 31))
+        shift = prev_year_day_end - prev_year_day_start
+        shift + Date.day_of_year(Timex.Date.new!(year, date.month, date.day))
+      else
+        Date.day_of_year(Timex.Date.new!(year, date.month, date.day))
       end
-    end)
+
+    div(day_num, 7)
     |> pad_numeric(flags, width)
   end
 
   def format_token(_locale, :wday_mon, date, _modifiers, flags, width),
-    do: pad_numeric(Timex.weekday(date), flags, width)
+    do: pad_numeric(Timex.weekday!(date, :monday), flags, width)
 
   def format_token(_locale, :wday_sun, date, _modifiers, flags, width) do
-    # from 1..7 to 0..6
-    weekday =
-      case Timex.weekday(date) do
-        7 -> 0
-        day -> day
-      end
-
-    pad_numeric(weekday, flags, width)
+    pad_numeric(Timex.weekday!(date, :monday) - 1, flags, width)
   end
 
   def format_token(locale, :wdshort, date, _modifiers, _flags, _width) do

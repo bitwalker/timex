@@ -22,10 +22,10 @@ defmodule TimezoneTests do
     assert tz.full_name === "Etc/UTC"
     assert tz.offset_utc === 0
     %TimezoneInfo{} = tz = Timezone.get(2)
-    assert tz.full_name === "Etc/GMT-2"
+    assert tz.full_name === "Etc/UTC+2"
     assert tz.offset_utc === 7200
     %TimezoneInfo{} = tz = Timezone.get(-3)
-    assert tz.full_name === "Etc/GMT+3"
+    assert tz.full_name === "Etc/UTC-3"
     assert tz.offset_utc === -10800
     %TimezoneInfo{} = tz = Timezone.get("America/Chicago", ~N[2015-05-01T12:00:00])
     assert tz.full_name === "America/Chicago"
@@ -34,38 +34,14 @@ defmodule TimezoneTests do
   end
 
   test "local" do
-    local = Timezone.local()
-
-    is_error =
-      case local do
-        %TimezoneInfo{} -> false
-        {:error, _} -> true
-        _ -> true
-      end
-
-    assert is_error == false
+    assert %TimezoneInfo{} = Timezone.local()
   end
 
-  test "diff" do
-    utc = Timezone.get(:utc)
-    cst = Timezone.get("America/Chicago", ~N[2015-01-01T12:00:00])
-    cdt = Timezone.get("America/Chicago", ~N[2015-03-30T12:00:00])
-    gmt_plus_two = Timezone.get(2)
-    gmt_minus_three = Timezone.get(-3)
-    # How many minutes do I apply to UTC when shifting to CST
-    assert Timex.to_datetime({{2014, 2, 24}, {0, 0, 0}}, utc) |> Timezone.diff(cst) === -21600
-    # How many minutes do I apply to UTC when shifting to CDT
-    assert Timex.to_datetime({{2014, 3, 30}, {0, 0, 0}}, utc) |> Timezone.diff(cdt) === -18000
-    # And vice versa
-    assert Timex.to_datetime({{2014, 2, 24}, {0, 0, 0}}, cst) |> Timezone.diff(utc) === 21600
-    assert Timex.to_datetime({{2014, 3, 30}, {0, 0, 0}}, cdt) |> Timezone.diff(utc) === 18000
-    # How many minutes do I apply to gmt_plus_two when shifting to gmt_minus_three?
-    assert Timex.to_datetime({{2014, 2, 24}, {0, 0, 0}}, gmt_plus_two)
-           |> Timezone.diff(gmt_minus_three) === -18000
+  test "creation/conversion/difference" do
+    datetime = ~U[2020-11-01T04:00:00Z]
+    zoned = Timex.to_datetime(datetime, "America/Los_Angeles")
 
-    # And vice versa
-    assert Timex.to_datetime({{2014, 2, 24}, {0, 0, 0}}, gmt_minus_three)
-           |> Timezone.diff(gmt_plus_two) === 18000
+    assert Timex.diff(datetime, zoned, :second) == 0
   end
 
   property "convert always returns DateTime or AmbiguousDateTime" do

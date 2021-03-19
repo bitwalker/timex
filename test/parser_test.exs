@@ -62,8 +62,8 @@ defmodule Timex.Parser.Test do
   end
 
   test "parsers: week_of_year" do
-    assert [[week_of_year: 3]] = Combine.parse("3", week_of_year(min: 1, max: 2))
-    assert {:error, _} = Combine.parse("65", week_of_year(min: 1, max: 2))
+    assert [[week_of_year_iso: 3]] = Combine.parse("3", week_of_year_iso(min: 1, max: 2))
+    assert {:error, _} = Combine.parse("65", week_of_year_iso(min: 1, max: 2))
   end
 
   test "parsers: weekday" do

@@ -1,6 +1,7 @@
 defmodule DateFormatTest.ParseDefault do
   use ExUnit.Case, async: true
   use Timex
+  require Timex.Translator
 
   test "exceptions" do
     date = "2013-03-02"
@@ -246,7 +247,7 @@ defmodule DateFormatTest.ParseDefault do
 
   test "parse RFC822" do
     # * `{RFC822}`      - e.g. `Mon, 05 Jun 14 23:20:59 UT`
-    date = Timex.to_datetime({{2014, 6, 5}, {23, 20, 59}}, "Etc/GMT+12")
+    date = Timex.to_datetime({{2014, 6, 5}, {23, 20, 59}}, "Etc/UTC-12")
     assert {:ok, ^date} = parse("Mon, 05 Jun 14 23:20:59 Y", "{RFC822}")
     assert {:ok, ^date} = parse("Mon, 5 Jun 14 23:20:59 Y", "{RFC822}")
     assert {:ok, ^date} = parse("5 Jun 14 23:20:59 Y", "{RFC822}")
@@ -259,7 +260,7 @@ defmodule DateFormatTest.ParseDefault do
 
   test "parse RFC3339" do
     # * `{RFC3339}`     - e.g. `2013-03-05T23:25:19+02:00`
-    date = Timex.to_datetime({{2013, 3, 5}, {23, 25, 19}}, "GMT-2")
+    date = Timex.to_datetime({{2013, 3, 5}, {23, 25, 19}}, "Etc/UTC+2")
     assert {:ok, ^date} = parse("2013-03-05T23:25:19+02:00", "{RFC3339}")
 
     # * `{RFC3339z}`    - e.g. `2013-03-05T23:25:19Z`
@@ -342,16 +343,16 @@ defmodule DateFormatTest.ParseDefault do
     {:ok, result} = parse("20090305232519.456-0700", "{ASN1:GeneralizedTime:TZ}")
     assert 1_236_320_719 = Timex.to_unix(result)
 
-    date = Timex.to_datetime({{2009, 3, 5}, {23, 25, 19}}, "Etc/GMT+7")
+    date = Timex.to_datetime({{2009, 3, 5}, {23, 25, 19}}, "Etc/UTC-7")
     assert {:ok, ^date} = parse("20090305232519.000-0700", "{ASN1:GeneralizedTime:TZ}")
 
-    date = Timex.to_datetime({{2009, 3, 5}, {23, 25, 19}}, "Etc/GMT+7")
+    date = Timex.to_datetime({{2009, 3, 5}, {23, 25, 19}}, "Etc/UTC-7")
     assert {:ok, ^date} = parse("20090305232519-0700", "{ASN1:GeneralizedTime:TZ}")
 
-    date = Timex.to_datetime({{2015, 11, 16}, {22, 23, 00}}, "Etc/GMT+7")
+    date = Timex.to_datetime({{2015, 11, 16}, {22, 23, 00}}, "Etc/UTC-7")
     assert {:ok, ^date} = parse("201511162223-0700", "{ASN1:GeneralizedTime:TZ}")
 
-    date = Timex.to_datetime({{2015, 11, 16}, {22, 00, 00}}, "Etc/GMT+7")
+    date = Timex.to_datetime({{2015, 11, 16}, {22, 00, 00}}, "Etc/UTC-7")
     assert {:ok, ^date} = parse("2015111622-0700", "{ASN1:GeneralizedTime:TZ}")
   end
 
@@ -363,6 +364,13 @@ defmodule DateFormatTest.ParseDefault do
       )
 
     assert {:ok, ^date} = parse("3:25PM", "{kitchen}")
+
+    date =
+      Timex.to_naive_datetime(
+        Timex.set(Timex.now(), hour: 11, minute: 28, second: 0, microsecond: {0, 0})
+      )
+
+    assert {:ok, ^date} = parse("11:28AM", "{kitchen}")
   end
 
   test "parse ISO8601 (Extended)" do
@@ -384,7 +392,7 @@ defmodule DateFormatTest.ParseDefault do
     assert {:ok, ^date2} = parse("2014-08-14T12:34:33.199Z", "{ISO:Extended}")
     assert {:ok, ^date2} = parse("2014-08-14T12:34:33.199Z", "{ISO:Extended:Z}")
 
-    date3 = Timex.to_datetime({{2014, 8, 14}, {12, 34, 33}}, "Etc/GMT+5")
+    date3 = Timex.to_datetime({{2014, 8, 14}, {12, 34, 33}}, "Etc/UTC-5")
     assert {:ok, ^date3} = parse("2014-08-14T12:34:33-05:00", "{ISO:Extended}")
     assert {:ok, ^date3} = parse("2014-08-14T12:34:33-0500", "{ISO:Extended}")
     assert {:ok, ^date3} = parse("2014-08-14T12:34:33-05", "{ISO:Extended}")
@@ -399,7 +407,7 @@ defmodule DateFormatTest.ParseDefault do
 
     date6 = %{
       date6
-      | :time_zone => "Etc/GMT-5:30",
+      | :time_zone => "Etc/UTC+5:30",
         :zone_abbr => "+05:30",
         :utc_offset => 330 * 60,
         :std_offset => 0
@@ -410,21 +418,19 @@ defmodule DateFormatTest.ParseDefault do
 
   test "parse ISO8601 (Basic)" do
     date1z = Timex.to_datetime({{2014, 8, 14}, {12, 34, 33}})
-    date1 = %{date1z | :time_zone => "Etc/GMT+0", :zone_abbr => "GMT"}
     date2z = %{date1z | :microsecond => {199_000, 3}}
-    date2 = %{date2z | :time_zone => "Etc/GMT+0", :zone_abbr => "GMT"}
 
-    assert {:ok, ^date1} = parse("20140814T123433-0000", "{ISO:Basic}")
-    assert {:ok, ^date1} = parse("20140814T123433-00", "{ISO:Basic}")
+    assert {:ok, ^date1z} = parse("20140814T123433-0000", "{ISO:Basic}")
+    assert {:ok, ^date1z} = parse("20140814T123433-00", "{ISO:Basic}")
     assert {:ok, ^date1z} = parse("20140814T123433Z", "{ISO:Basic}")
     assert {:ok, ^date1z} = parse("20140814T123433Z", "{ISO:Basic:Z}")
 
-    assert {:ok, ^date2} = parse("20140814T123433.199-0000", "{ISO:Basic}")
-    assert {:ok, ^date2} = parse("20140814T123433.199-00", "{ISO:Basic}")
+    assert {:ok, ^date2z} = parse("20140814T123433.199-0000", "{ISO:Basic}")
+    assert {:ok, ^date2z} = parse("20140814T123433.199-00", "{ISO:Basic}")
     assert {:ok, ^date2z} = parse("20140814T123433.199Z", "{ISO:Basic}")
     assert {:ok, ^date2z} = parse("20140814T123433.199Z", "{ISO:Basic:Z}")
 
-    date3 = Timex.to_datetime({{2014, 8, 14}, {12, 34, 33}}, "Etc/GMT+5")
+    date3 = Timex.to_datetime({{2014, 8, 14}, {12, 34, 33}}, "Etc/UTC-5")
     assert {:ok, ^date3} = parse("20140814T123433-0500", "{ISO:Basic}")
     assert {:ok, ^date3} = parse("20140814T123433-05", "{ISO:Basic}")
 
@@ -445,6 +451,13 @@ defmodule DateFormatTest.ParseDefault do
   test "roundtrip bug #318" do
     {:ok, d} = Timex.parse("2017-06-27T08:32:55.80011111123333Z", "{ISO:Extended}")
     assert "2017-06-27T08:32:55.800111+00:00" = Timex.format!(d, "{ISO:Extended}")
+  end
+
+  test "can parse a date/time using a specific locale" do
+    {:ok, d} = Timex.lformat(DateTime.utc_now(), "{ANSIC}", "ru")
+
+    assert {:ok, %NaiveDateTime{}} =
+             Timex.Translator.with_locale("ru", do: Timex.parse(d, "{ANSIC}"))
   end
 
   defp parse(date, fmt) do

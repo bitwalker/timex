@@ -17,7 +17,17 @@ defmodule Timex.Duration do
           seconds: integer,
           microseconds: integer
         }
-  @type units :: :microseconds | :milliseconds | :seconds | :minutes | :hours | :days | :weeks
+  @type units ::
+          :microsecond
+          | :microseconds
+          | :millisecond
+          | :milliseconds
+          | :second
+          | :seconds
+          | :minutes
+          | :hours
+          | :days
+          | :weeks
   @type measurement_units :: :microseconds | :milliseconds | :seconds | :minutes | :hours
   @type to_options :: [truncate: boolean]
 
@@ -142,6 +152,8 @@ defmodule Timex.Duration do
   @spec parse!(String.t(), module()) :: __MODULE__.t() | no_return
   defdelegate parse!(str, module), to: Timex.Parse.Duration.Parser
 
+  @microseconds_per_hour 3600 * 1_000_000
+
   @doc """
   Converts a Duration to a clock tuple, i.e. `{hour,minute,second,microsecond}`.
 
@@ -151,19 +163,16 @@ defmodule Timex.Duration do
       ...> Timex.Duration.to_clock(d)
       {277, 46, 41, 50}
   """
-  def to_clock(%__MODULE__{megaseconds: mega, seconds: sec, microseconds: micro}) do
-    ss = mega * 1_000_000 + sec
+  def to_clock(%__MODULE__{} = duration) do
+    us = to_microseconds(duration)
 
-    ss =
-      cond do
-        micro > 1_000_000 -> ss + div(micro, 1_000_000)
-        :else -> ss
-      end
+    hours = div(us, @microseconds_per_hour)
+    total_secs = div(rem(us, @microseconds_per_hour), 1_000_000)
+    mins = div(total_secs, 60)
+    secs = rem(total_secs, 60)
+    micros = rem(rem(us, @microseconds_per_hour), 1_000_000)
 
-    hour = div(ss, 60 * 60)
-    min = div(rem(ss, 60 * 60), 60)
-    secs = rem(rem(ss, 60 * 60), 60)
-    {hour, min, secs, rem(micro, 1_000_000)}
+    {hours, mins, secs, micros}
   end
 
   @doc """
@@ -174,11 +183,9 @@ defmodule Timex.Duration do
       iex> Timex.Duration.from_clock({1, 2, 3, 4})
       %Timex.Duration{megaseconds: 0, seconds: 3723, microseconds: 4}
   """
-  def from_clock({hour, minute, second, usec}) do
-    total_seconds = hour * 60 * 60 + minute * 60 + second
-    mega = div(total_seconds, 1_000_000)
-    ss = rem(total_seconds, 1_000_000)
-    from_erl({mega, ss, usec})
+  def from_clock({hours, mins, secs, us}) do
+    us = us + (secs + mins * 60) * 1_000_000 + hours * @microseconds_per_hour
+    from_microseconds(us)
   end
 
   @doc """
@@ -192,9 +199,7 @@ defmodule Timex.Duration do
   @spec to_microseconds(__MODULE__.t()) :: integer
   @spec to_microseconds(__MODULE__.t(), to_options) :: integer
   def to_microseconds(%Duration{megaseconds: mega, seconds: sec, microseconds: micro}) do
-    total_seconds = mega * @million + sec
-    total_microseconds = total_seconds * 1_000 * 1_000 + micro
-    total_microseconds
+    mega * 1_000_000_000_000 + sec * 1_000_000 + micro
   end
 
   def to_microseconds(%Duration{} = duration, _opts), do: to_microseconds(duration)
@@ -342,47 +347,51 @@ defmodule Timex.Duration do
   Converts an integer value representing microseconds to a Duration
   """
   @spec from_microseconds(integer) :: __MODULE__.t()
-  def from_microseconds(us) do
-    us = round(us)
-    {sec, micro} = mdivmod(us)
-    {mega, sec} = mdivmod(sec)
+  def from_microseconds(us) when is_integer(us) do
+    mega = div(us, 1_000_000_000_000)
+    sec = div(rem(us, 1_000_000_000_000), 1_000_000)
+    micro = rem(us, 1_000_000)
     %Duration{megaseconds: mega, seconds: sec, microseconds: micro}
+  end
+
+  def from_microseconds(us) when is_float(us) do
+    from_microseconds(trunc(us))
   end
 
   @doc """
   Converts an integer value representing milliseconds to a Duration
   """
-  @spec from_milliseconds(integer) :: __MODULE__.t()
+  @spec from_milliseconds(integer | float) :: __MODULE__.t()
   def from_milliseconds(ms), do: from_microseconds(ms * @usecs_in_msec)
 
   @doc """
   Converts an integer value representing seconds to a Duration
   """
-  @spec from_seconds(integer) :: __MODULE__.t()
+  @spec from_seconds(integer | float) :: __MODULE__.t()
   def from_seconds(s), do: from_microseconds(s * @usecs_in_sec)
 
   @doc """
   Converts an integer value representing minutes to a Duration
   """
-  @spec from_minutes(integer) :: __MODULE__.t()
+  @spec from_minutes(integer | float) :: __MODULE__.t()
   def from_minutes(m), do: from_seconds(m * @secs_in_min)
 
   @doc """
   Converts an integer value representing hours to a Duration
   """
-  @spec from_hours(integer) :: __MODULE__.t()
+  @spec from_hours(integer | float) :: __MODULE__.t()
   def from_hours(h), do: from_seconds(h * @secs_in_hour)
 
   @doc """
   Converts an integer value representing days to a Duration
   """
-  @spec from_days(integer) :: __MODULE__.t()
+  @spec from_days(integer | float) :: __MODULE__.t()
   def from_days(d), do: from_seconds(d * @secs_in_day)
 
   @doc """
   Converts an integer value representing weeks to a Duration
   """
-  @spec from_weeks(integer) :: __MODULE__.t()
+  @spec from_weeks(integer | float) :: __MODULE__.t()
   def from_weeks(w), do: from_seconds(w * @secs_in_week)
 
   @doc """
@@ -582,9 +591,9 @@ defmodule Timex.Duration do
   The argument is an atom indicating the type of time units to return.
 
   The allowed unit type atoms are:
-  - :microseconds
-  - :milliseconds
-  - :seconds
+  - :microsecond(s)
+  - :millisecond(s)
+  - :second(s)
   - :minutes
   - :hours
   - :days
@@ -605,14 +614,21 @@ defmodule Timex.Duration do
   @spec now(units) :: non_neg_integer
   def now(type \\ nil)
 
-  def now(nil), do: :os.system_time(:micro_seconds) |> from_microseconds
-  def now(:microseconds), do: :os.system_time(:micro_seconds)
-  def now(:milliseconds), do: :os.system_time(:milli_seconds)
-  def now(:seconds), do: :os.system_time(:seconds)
-  def now(:minutes), do: :os.system_time(:seconds) |> from_seconds |> to_minutes
-  def now(:hours), do: :os.system_time(:seconds) |> from_seconds |> to_hours
-  def now(:days), do: :os.system_time(:seconds) |> from_seconds |> to_days
-  def now(:weeks), do: :os.system_time(:seconds) |> from_seconds |> to_weeks
+  @from_micros_units [:native, :nanosecond, :nanoseconds, :microsecond, :microseconds]
+
+  def now(nil), do: from_microseconds(now(:microsecond))
+
+  def now(unit) when unit in @from_micros_units,
+    do: System.system_time(:microsecond)
+
+  def now(ms) when ms in [:millisecond, :milliseconds],
+    do: System.system_time(:millisecond)
+
+  def now(s) when s in [:second, :seconds], do: System.system_time(:second)
+  def now(:minutes), do: to_minutes(now(:microsecond))
+  def now(:hours), do: to_hours(now(:microsecond))
+  def now(:days), do: to_days(now(:microsecond))
+  def now(:weeks), do: to_weeks(now(:microsecond))
 
   @doc """
   An alias for `Duration.diff/3`
@@ -661,10 +677,7 @@ defmodule Timex.Duration do
 
   defp do_diff(%Duration{} = t1, %Duration{} = t2) do
     microsecs = :timer.now_diff(to_erl(t1), to_erl(t2))
-    mega = div(microsecs, 1_000_000_000_000)
-    secs = div(microsecs - mega * 1_000_000_000_000, 1_000_000)
-    micro = rem(microsecs, 1_000_000)
-    %Duration{megaseconds: mega, seconds: secs, microseconds: micro}
+    from_microseconds(microsecs)
   end
 
   @doc """
@@ -720,17 +733,12 @@ defmodule Timex.Duration do
   end
 
   def normalize(%Duration{megaseconds: mega, seconds: sec, microseconds: micro}) do
-    # TODO: check for negative values
-    {sec, micro} = mdivmod(sec, micro)
-    {mega, sec} = mdivmod(mega, sec)
+    normalized = mega * 1_000_000_000_000 + sec * 1_000_000 + micro
+    mega = div(normalized, 1_000_000_000_000)
+    sec = div(rem(normalized, 1_000_000_000_000), 1_000_000)
+    micro = rem(normalized, 1_000_000)
     %Duration{megaseconds: mega, seconds: sec, microseconds: micro}
   end
-
-  defp divmod(a, b), do: {div(a, b), rem(a, b)}
-  defp divmod(initial, a, b), do: {initial + div(a, b), rem(a, b)}
-
-  defp mdivmod(a), do: divmod(a, 1_000_000)
-  defp mdivmod(initial, a), do: divmod(initial, a, 1_000_000)
 
   defp do_round(value) when is_integer(value), do: value
   defp do_round(value) when is_float(value), do: Float.round(value, 6)

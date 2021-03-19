@@ -1,13 +1,13 @@
 defmodule Timex.Mixfile do
   use Mix.Project
 
-  @version "3.6.2"
+  @version "3.7.1"
 
   def project do
     [
       app: :timex,
       version: @version,
-      elixir: "~> 1.6",
+      elixir: "~> 1.8",
       description: description(),
       package: package(),
       deps: deps(),
@@ -29,7 +29,6 @@ defmodule Timex.Mixfile do
 
   def application do
     [
-      applications: [:logger, :tzdata, :gettext, :combine],
       env: [local_timezone: nil],
       mod: {Timex, []}
     ]
@@ -56,12 +55,12 @@ defmodule Timex.Mixfile do
 
   def deps do
     [
-      {:tzdata, "~> 0.1.8 or ~> 0.5 or ~> 1.0.0"},
+      {:tzdata, "~> 1.0"},
       {:combine, "~> 0.10"},
       {:gettext, "~> 0.10"},
       {:ex_doc, "~> 0.13", only: [:docs]},
       {:benchfella, "~> 0.3", only: [:bench]},
-      {:dialyxir, "~> 0.5", only: [:dev]},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:excoveralls, "~> 0.4", only: [:test]},
       {:stream_data, "~> 0.4", only: [:test]}
     ]

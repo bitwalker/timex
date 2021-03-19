@@ -38,10 +38,28 @@ defmodule Timex.AmbiguousDateTime do
   """
 
   defstruct before: nil,
-            after: nil
+            after: nil,
+            type: :ambiguous
 
   @type t :: %__MODULE__{
           :before => DateTime.t(),
-          :after => DateTime.t()
+          :after => DateTime.t(),
+          :type => :ambiguous | :gap
         }
+
+  defimpl Inspect do
+    alias Timex.AmbiguousDateTime
+
+    def inspect(datetime, %{:structs => false} = opts) do
+      Inspect.Algebra.to_doc(datetime, opts)
+    end
+
+    def inspect(%AmbiguousDateTime{before: before, after: aft, type: :gap}, _opts) do
+      "#<Gap(#{inspect(before)} ~ #{inspect(aft)})>"
+    end
+
+    def inspect(%AmbiguousDateTime{before: before, after: aft}, _opts) do
+      "#<Ambiguous(#{inspect(before)} ~ #{inspect(aft)})>"
+    end
+  end
 end

@@ -1,0 +1,232 @@
+## "msgid"s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove "msgid"s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use "mix gettext.extract --merge" or "mix gettext.merge"
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: bg\n"
+"Plural-Forms: nplurals=2\n"
+
+#: lib/l10n/translator.ex:259
+msgid "last month"
+msgstr "миналия месец"
+
+#: lib/l10n/translator.ex:265
+msgid "last week"
+msgstr "миналата седмица"
+
+#: lib/l10n/translator.ex:253
+msgid "last year"
+msgstr "миналата година"
+
+#: lib/l10n/translator.ex:261
+msgid "next month"
+msgstr "следващ месец"
+
+#: lib/l10n/translator.ex:267
+msgid "next week"
+msgstr "следваща седмица"
+
+#: lib/l10n/translator.ex:255
+msgid "next year"
+msgstr "следваща година"
+
+#: lib/l10n/translator.ex:260
+msgid "this month"
+msgstr "този месец"
+
+#: lib/l10n/translator.ex:266
+msgid "this week"
+msgstr "тази седмица"
+
+#: lib/l10n/translator.ex:254
+msgid "this year"
+msgstr "тази година"
+
+#: lib/l10n/translator.ex:272
+msgid "today"
+msgstr "днес"
+
+#: lib/l10n/translator.ex:273
+msgid "tomorrow"
+msgstr "утре"
+
+#: lib/l10n/translator.ex:271
+msgid "yesterday"
+msgstr "вчера"
+
+#: lib/l10n/translator.ex:275
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "преди %{count} ден"
+msgstr[1] "преди %{count} дни"
+
+#: lib/l10n/translator.ex:300
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "преди %{count} час"
+msgstr[1] "преди %{count} часа"
+
+#: lib/l10n/translator.ex:303
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "преди %{count} минута"
+msgstr[1] "преди %{count} минути"
+
+#: lib/l10n/translator.ex:263
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "преди %{count} месец"
+msgstr[1] "преди %{count} месеца"
+
+#: lib/l10n/translator.ex:306
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "преди %{count} секунда"
+msgstr[1] "преди %{count} секунди"
+
+#: lib/l10n/translator.ex:269
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "преди %{count} седмица"
+msgstr[1] "преди %{count} седмици"
+
+#: lib/l10n/translator.ex:257
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "преди %{count} година"
+msgstr[1] "преди %{count} години"
+
+#: lib/l10n/translator.ex:274
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "след %{count} ден"
+msgstr[1] "след %{count} дни"
+
+#: lib/l10n/translator.ex:299
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "след %{count} час"
+msgstr[1] "след %{count} часа"
+
+#: lib/l10n/translator.ex:302
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "след %{count} минута"
+msgstr[1] "след %{count} минути"
+
+#: lib/l10n/translator.ex:262
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "след %{count} месец"
+msgstr[1] "след %{count} месеца"
+
+#: lib/l10n/translator.ex:305
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "след %{count} секунда"
+msgstr[1] "след %{count} секунди"
+
+#: lib/l10n/translator.ex:268
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "след %{count} седмица"
+msgstr[1] "след %{count} седмици"
+
+#: lib/l10n/translator.ex:256
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "след %{count} година"
+msgstr[1] "след %{count} години"
+
+#: lib/l10n/translator.ex:289
+msgid "last friday"
+msgstr "миналия петък"
+
+#: lib/l10n/translator.ex:277
+msgid "last monday"
+msgstr "миналия понеделник"
+
+#: lib/l10n/translator.ex:292
+msgid "last saturday"
+msgstr "миналата събота"
+
+#: lib/l10n/translator.ex:295
+msgid "last sunday"
+msgstr "миналата неделя"
+
+#: lib/l10n/translator.ex:286
+msgid "last thursday"
+msgstr "миналия четвъртък"
+
+#: lib/l10n/translator.ex:280
+msgid "last tuesday"
+msgstr "миналия вторник"
+
+#: lib/l10n/translator.ex:283
+msgid "last wednesday"
+msgstr "миналата сряда"
+
+#: lib/l10n/translator.ex:291
+msgid "next friday"
+msgstr "следващия петък"
+
+#: lib/l10n/translator.ex:279
+msgid "next monday"
+msgstr "следващия понеделник"
+
+#: lib/l10n/translator.ex:294
+msgid "next saturday"
+msgstr "следващата събота"
+
+#: lib/l10n/translator.ex:297
+msgid "next sunday"
+msgstr "следващата неделя"
+
+#: lib/l10n/translator.ex:288
+msgid "next thursday"
+msgstr "следващия четвъртък"
+
+#: lib/l10n/translator.ex:282
+msgid "next tuesday"
+msgstr "следващия вторник"
+
+#: lib/l10n/translator.ex:285
+msgid "next wednesday"
+msgstr "следващата сряда"
+
+#: lib/l10n/translator.ex:290
+msgid "this friday"
+msgstr "този петък"
+
+#: lib/l10n/translator.ex:278
+msgid "this monday"
+msgstr "този понеделник"
+
+#: lib/l10n/translator.ex:293
+msgid "this saturday"
+msgstr "тази събота"
+
+#: lib/l10n/translator.ex:296
+msgid "this sunday"
+msgstr "тази неделя"
+
+#: lib/l10n/translator.ex:287
+msgid "this thursday"
+msgstr "този четвъртък"
+
+#: lib/l10n/translator.ex:281
+msgid "this tuesday"
+msgstr "този вторник"
+
+#: lib/l10n/translator.ex:284
+msgid "this wednesday"
+msgstr "тази сряда"
+
+#: lib/l10n/translator.ex:308
+msgid "now"
+msgstr "сега"

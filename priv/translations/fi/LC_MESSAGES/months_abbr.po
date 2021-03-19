@@ -1,0 +1,60 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: fi\n"
+
+#: lib/l10n/translator.ex:229
+msgid "Apr"
+msgstr "huhti"
+
+#: lib/l10n/translator.ex:233
+msgid "Aug"
+msgstr "elo"
+
+#: lib/l10n/translator.ex:237
+msgid "Dec"
+msgstr "joulu"
+
+#: lib/l10n/translator.ex:227
+msgid "Feb"
+msgstr "helmi"
+
+#: lib/l10n/translator.ex:226
+msgid "Jan"
+msgstr "tammi"
+
+#: lib/l10n/translator.ex:232
+msgid "Jul"
+msgstr "heinä"
+
+#: lib/l10n/translator.ex:231
+msgid "Jun"
+msgstr "kesä"
+
+#: lib/l10n/translator.ex:228
+msgid "Mar"
+msgstr "maalis"
+
+#: lib/l10n/translator.ex:230
+msgid "May"
+msgstr "touko"
+
+#: lib/l10n/translator.ex:236
+msgid "Nov"
+msgstr "marras"
+
+#: lib/l10n/translator.ex:235
+msgid "Oct"
+msgstr "loka"
+
+#: lib/l10n/translator.ex:234
+msgid "Sep"
+msgstr "syys"

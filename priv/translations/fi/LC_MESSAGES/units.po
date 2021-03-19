@@ -1,0 +1,72 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: fi\n"
+
+#: lib/l10n/translator.ex:200
+msgid "%{count} day"
+msgid_plural "%{count} days"
+msgstr[0] "%{count} päivä"
+msgstr[1] "%{count} päivää"
+
+#: lib/l10n/translator.ex:199
+msgid "%{count} hour"
+msgid_plural "%{count} hours"
+msgstr[0] "%{count} tunti"
+msgstr[1] "%{count} tuntia"
+
+#: lib/l10n/translator.ex:195
+msgid "%{count} microsecond"
+msgid_plural "%{count} microseconds"
+msgstr[0] "%{count} mikrosekunti"
+msgstr[1] "%{count} mikrosekuntia"
+
+#: lib/l10n/translator.ex:196
+msgid "%{count} millisecond"
+msgid_plural "%{count} milliseconds"
+msgstr[0] "%{count} millisekunti"
+msgstr[1] "%{count} millisekuntia"
+
+#: lib/l10n/translator.ex:198
+msgid "%{count} minute"
+msgid_plural "%{count} minutes"
+msgstr[0] "%{count} minuutti"
+msgstr[1] "%{count} minuuttia"
+
+#: lib/l10n/translator.ex:202
+msgid "%{count} month"
+msgid_plural "%{count} months"
+msgstr[0] "%{count} kuukausi"
+msgstr[1] "%{count} kuukautta"
+
+#: lib/l10n/translator.ex:194
+msgid "%{count} nanosecond"
+msgid_plural "%{count} nanoseconds"
+msgstr[0] "%{count} nanosekunti"
+msgstr[1] "%{count} nanosekuntia"
+
+#: lib/l10n/translator.ex:197
+msgid "%{count} second"
+msgid_plural "%{count} seconds"
+msgstr[0] "%{count} sekunti"
+msgstr[1] "%{count} sekuntia"
+
+#: lib/l10n/translator.ex:201
+msgid "%{count} week"
+msgid_plural "%{count} weeks"
+msgstr[0] "%{count} viikko"
+msgstr[1] "%{count} viikkoa"
+
+#: lib/l10n/translator.ex:203
+msgid "%{count} year"
+msgid_plural "%{count} years"
+msgstr[0] "%{count} vuosi"
+msgstr[1] "%{count} vuotta"

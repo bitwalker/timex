@@ -176,12 +176,10 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
           )
 
         diff >= @day && diff < @day * 2 ->
-          Translator.translate_plural(
+          Translator.translate(
             locale,
             "relative_time",
-            "in %{count} day",
-            "in %{count} days",
-            1
+            "tomorrow"
           )
 
         diff >= @day * 2 && diff < @month ->
@@ -276,12 +274,10 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
           )
 
         diff <= @day && diff > @day * 2 * -1 ->
-          Translator.translate_plural(
+          Translator.translate(
             locale,
             "relative_time",
-            "%{count} day ago",
-            "%{count} days ago",
-            1
+            "yesterday"
           )
 
         diff <= @day * 2 && diff > @month * -1 ->

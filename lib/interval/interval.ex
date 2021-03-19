@@ -309,20 +309,20 @@ defmodule Timex.Interval do
 
   ## Examples
 
-  iex> #{__MODULE__}.contains?(#{__MODULE__}.new(from: ~D[2018-01-01], until: ~D[2018-01-31]), #{
+      iex> #{__MODULE__}.contains?(#{__MODULE__}.new(from: ~D[2018-01-01], until: ~D[2018-01-31]), #{
     __MODULE__
   }.new(from: ~D[2018-01-01], until: ~D[2018-01-30]))
-  true
+      true
 
-  iex> #{__MODULE__}.contains?(#{__MODULE__}.new(from: ~D[2018-01-01], until: ~D[2018-01-30]), #{
+      iex> #{__MODULE__}.contains?(#{__MODULE__}.new(from: ~D[2018-01-01], until: ~D[2018-01-30]), #{
     __MODULE__
   }.new(from: ~D[2018-01-01], until: ~D[2018-01-31]))
-  false
+      false
 
-  iex> #{__MODULE__}.contains?(#{__MODULE__}.new(from: ~D[2018-01-01], until: ~D[2018-01-10]), #{
+      iex> #{__MODULE__}.contains?(#{__MODULE__}.new(from: ~D[2018-01-01], until: ~D[2018-01-10]), #{
     __MODULE__
   }.new(from: ~D[2018-01-05], until: ~D[2018-01-15]))
-  false
+      false
   """
   @spec contains?(__MODULE__.t(), __MODULE__.t()) :: boolean()
   def contains?(%__MODULE__{} = a, %__MODULE__{} = b) do
@@ -484,7 +484,7 @@ defmodule Timex.Interval do
   def max(%__MODULE__{until: until, right_open: false}), do: until
   def max(%__MODULE__{until: until}), do: Timex.shift(until, microseconds: -1)
 
-  defimpl Enumerable do
+  defimpl Enumerable, for: Timex.Interval do
     alias Timex.Interval
 
     def reduce(%Interval{until: until, right_open: open?, step: step} = i, acc, fun) do

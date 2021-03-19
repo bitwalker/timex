@@ -11,10 +11,6 @@ the vast majority of functionality you will care about.
 To use Timex with your projects, edit your `mix.exs` file and add it as a dependency, as well as add `:timex` to your applications list.
 
 ```elixir
-def application do
-  [applications: [:timex]]
-end
-
 defp deps do
   [{:timex, "~> 3.0"}]
 end

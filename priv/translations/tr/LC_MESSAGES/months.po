@@ -20,50 +20,50 @@ msgstr ""
 "X-Generator: Poedit 2.2.1\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: lib/l10n/translator.ex:220
+#: lib/l10n/translator.ex:242
 msgid "April"
 msgstr "Nisan"
 
-#: lib/l10n/translator.ex:224
+#: lib/l10n/translator.ex:246
 msgid "August"
 msgstr "Ağustos"
 
-#: lib/l10n/translator.ex:228
+#: lib/l10n/translator.ex:250
 msgid "December"
 msgstr "Aralık"
 
-#: lib/l10n/translator.ex:218
+#: lib/l10n/translator.ex:240
 msgid "February"
 msgstr "Şubat"
 
-#: lib/l10n/translator.ex:217
+#: lib/l10n/translator.ex:239
 msgid "January"
 msgstr "Ocak"
 
-#: lib/l10n/translator.ex:223
+#: lib/l10n/translator.ex:245
 msgid "July"
 msgstr "Temmuz"
 
-#: lib/l10n/translator.ex:222
+#: lib/l10n/translator.ex:244
 msgid "June"
 msgstr "Haziran"
 
-#: lib/l10n/translator.ex:219
+#: lib/l10n/translator.ex:241
 msgid "March"
 msgstr "Mart"
 
-#: lib/l10n/translator.ex:221
+#: lib/l10n/translator.ex:243
 msgid "May"
 msgstr "Mayıs"
 
-#: lib/l10n/translator.ex:227
+#: lib/l10n/translator.ex:249
 msgid "November"
 msgstr "Kasım"
 
-#: lib/l10n/translator.ex:226
+#: lib/l10n/translator.ex:248
 msgid "October"
 msgstr "Ekim"
 
-#: lib/l10n/translator.ex:225
+#: lib/l10n/translator.ex:247
 msgid "September"
 msgstr "Eylül"

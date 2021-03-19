@@ -50,7 +50,7 @@ defmodule ShiftTests do
 
   test "shift by year from leap year" do
     date = Timex.shift(~D[2016-02-29], years: 2)
-    expected = ~D[2018-02-28]
+    expected = ~D[2018-03-01]
     assert expected === date
   end
 
@@ -179,7 +179,7 @@ defmodule ShiftTests do
   end
 
   test "shift to an invalid datetime" do
-    result = Timex.shift(~N[0000-01-01 00:00:00], seconds: -1)
+    result = Timex.shift(~N[0000-01-01 00:00:00], months: -1)
     assert {:error, :shift_to_invalid_date} === result
   end
 

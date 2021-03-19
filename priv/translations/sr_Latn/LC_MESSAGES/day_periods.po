@@ -21,18 +21,18 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "Language: sr@latin\n"
 
-#: lib/l10n/translator.ex:183
+#: lib/l10n/translator.ex:205
 msgid "AM"
 msgstr "pre podne"
 
-#: lib/l10n/translator.ex:185
+#: lib/l10n/translator.ex:207
 msgid "PM"
 msgstr "popodne"
 
-#: lib/l10n/translator.ex:184
+#: lib/l10n/translator.ex:206
 msgid "am"
 msgstr "pre podne"
 
-#: lib/l10n/translator.ex:186
+#: lib/l10n/translator.ex:208
 msgid "pm"
 msgstr "popodne"

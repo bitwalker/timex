@@ -48,7 +48,7 @@ defmodule Timex.Parse.DateTime.Parser do
       iex> dt.day
       29
       iex> dt.time_zone
-      "Etc/GMT+2"
+      "Etc/UTC-2"
 
   """
   @spec parse(binary, binary, atom) :: {:ok, DateTime.t() | NaiveDateTime.t()} | {:error, term}
@@ -56,15 +56,9 @@ defmodule Timex.Parse.DateTime.Parser do
       when is_binary(date_string) and is_binary(format_string) do
     try do
       {:ok, parse!(date_string, format_string, tokenizer)}
-    catch
-      _type, %ParseError{:message => msg} ->
-        {:error, msg}
-
-      _type, %{:message => msg} ->
-        {:error, msg}
-
-      _type, reason ->
-        {:error, reason}
+    rescue
+      err in [ParseError] ->
+        {:error, err.message}
     end
   end
 
@@ -86,7 +80,7 @@ defmodule Timex.Parse.DateTime.Parser do
         raise ParseError, message: err
 
       {:error, err} ->
-        raise ParseError, message: "#{inspect(err)}"
+        raise ParseError, message: err
 
       {:ok, []} ->
         raise ParseError,
@@ -98,25 +92,15 @@ defmodule Timex.Parse.DateTime.Parser do
             raise ParseError, message: "Input datetime string cannot be empty!"
 
           _ ->
-            datetime =
-              case do_parse(date_string, directives, tokenizer) do
-                {:ok, %DateTime{time_zone: nil} = dt} ->
-                  Timex.to_naive_datetime(dt)
+            case do_parse(date_string, directives, tokenizer) do
+              {:ok, dt} ->
+                dt
 
-                {:ok, dt} ->
-                  dt
+              {:error, reason} when is_binary(reason) ->
+                raise ParseError, message: reason
 
-                {:error, reason} when is_binary(reason) ->
-                  raise ParseError, message: reason
-
-                {:error, reason} ->
-                  raise ParseError, message: "#{inspect(reason)}"
-              end
-
-            if :calendar.valid_date(datetime.year, datetime.month, datetime.day) do
-              datetime
-            else
-              raise ParseError, message: "#{inspect(datetime)} is an invalid date!"
+              {:error, reason} ->
+                raise ParseError, message: reason
             end
         end
     end
@@ -135,38 +119,18 @@ defmodule Timex.Parse.DateTime.Parser do
             mm = Map.get(mapped, :min, 0)
             ss = Map.get(mapped, :sec, 0)
             us = Map.get(mapped, :sec_fractional, {0, 0})
-            tz = Timezone.get(tzname, {{y, m, d}, {h, mm, ss}})
+            naive = Timex.NaiveDateTime.new!(y, m, d, h, mm, ss, us)
 
-            {:ok,
-             %DateTime{
-               year: y,
-               month: m,
-               day: d,
-               hour: h,
-               minute: mm,
-               second: ss,
-               microsecond: us,
-               time_zone: tz.full_name,
-               zone_abbr: tz.abbreviation,
-               utc_offset: tz.offset_utc,
-               std_offset: tz.offset_std
-             }}
+            with %DateTime{} = datetime <- Timex.Timezone.convert(naive, tzname) do
+              {:ok, datetime}
+            end
 
           %{year4: y, month: m, day: d, hour24: h} = mapped ->
             mm = Map.get(mapped, :min, 0)
             ss = Map.get(mapped, :sec, 0)
             us = Map.get(mapped, :sec_fractional, {0, 0})
 
-            {:ok,
-             %NaiveDateTime{
-               year: y,
-               month: m,
-               day: d,
-               hour: h,
-               minute: mm,
-               second: ss,
-               microsecond: us
-             }}
+            NaiveDateTime.new(y, m, d, h, mm, ss, us)
         end
     end
   end
@@ -251,8 +215,11 @@ defmodule Timex.Parse.DateTime.Parser do
 
   defp apply_directives([{token, value} | tokens], date, tokenizer) do
     case update_date(date, token, value, tokenizer) do
-      {:error, _} = error -> error
-      updated -> apply_directives(tokens, updated, tokenizer)
+      {:error, _} = error ->
+        error
+
+      updated ->
+        apply_directives(tokens, updated, tokenizer)
     end
   end
 
@@ -304,45 +271,22 @@ defmodule Timex.Parse.DateTime.Parser do
       y when y in [:year4, :iso_year4] ->
         # Special case for UNIX format dates, where the year is parsed after the timezone,
         # so we must lookup the timezone again to ensure it's properly set
-        case date do
-          %{time_zone: tzname} when is_nil(tzname) == false ->
+        case Map.get(date, :time_zone) do
+          time_zone when is_binary(time_zone) ->
             seconds_from_zeroyear = Timex.to_gregorian_seconds(date)
-            date = to_datetime(date)
 
-            case Timezone.resolve(tzname, seconds_from_zeroyear) do
+            case Timezone.resolve(time_zone, seconds_from_zeroyear) do
               %TimezoneInfo{} = tz ->
-                %{
-                  date
-                  | :year => value,
-                    :time_zone => tz.full_name,
-                    :zone_abbr => tz.abbreviation,
-                    :utc_offset => tz.offset_utc,
-                    :std_offset => tz.offset_std
-                }
+                Timex.to_datetime(date, tz)
 
               %AmbiguousTimezoneInfo{before: b, after: a} ->
-                bd = %{
-                  date
-                  | :year => value,
-                    :time_zone => b.full_name,
-                    :zone_abbr => b.abbreviation,
-                    :utc_offset => b.offset_utc,
-                    :std_offset => b.offset_std
-                }
-
-                ad = %{
-                  date
-                  | :year => value,
-                    :time_zone => a.full_name,
-                    :zone_abbr => a.abbreviation,
-                    :utc_offset => a.offset_utc,
-                    :std_offset => a.offset_std
-                }
+                bd = Timex.to_datetime(date, b)
+                ad = Timex.to_datetime(date, a)
 
                 %AmbiguousDateTime{:before => bd, :after => ad}
             end
 
-          _ ->
+          nil ->
             %{date | :year => value}
         end
 
@@ -392,7 +336,13 @@ defmodule Timex.Parse.DateTime.Parser do
         reset |> Timex.shift(weeks: value)
 
       :weekday ->
-        date |> Timex.shift(days: value - 1)
+        current_dow = Calendar.ISO.day_of_week(date.year, date.month, date.day)
+
+        if current_dow == value do
+          date
+        else
+          Timex.shift(date, days: value - current_dow)
+        end
 
       # Hours
       hour when hour in [:hour24, :hour12] ->
@@ -404,10 +354,7 @@ defmodule Timex.Parse.DateTime.Parser do
       :sec ->
         case value do
           60 ->
-            date
-            |> Timex.to_naive_datetime()
-            |> Timex.set(second: 0)
-            |> Timex.shift(minutes: 1)
+            Timex.shift(date, minutes: 1)
 
           value ->
             %{date | :second => value}
@@ -451,290 +398,55 @@ defmodule Timex.Parse.DateTime.Parser do
 
       # Timezones
       :zoffs ->
-        date = to_datetime(date)
-
         case value do
-          <<sign::utf8, h1::utf8, h2::utf8>> ->
-            hour = <<h1::utf8, h2::utf8>>
-            hours = String.to_integer(hour)
-            minutes = 0
+          <<sign::utf8, _::binary-size(2)-unit(8)>> = zone when sign in [?+, ?-] ->
+            Timex.to_datetime(date, zone)
 
-            {gmt_sign, total_offset} =
-              case sign do
-                ?- -> {?+, -1 * (hours * 60 * 60 + minutes * 60)}
-                ?+ -> {?-, hours * 60 * 60 + minutes * 60}
-              end
-
-            case hours do
-              0 ->
-                %{
-                  date
-                  | :time_zone => "Etc/GMT+0",
-                    :zone_abbr => "GMT",
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-
-              h when h < 10 ->
-                %{
-                  date
-                  | :time_zone => <<"Etc/GMT", gmt_sign::utf8, h2::utf8>>,
-                    :zone_abbr => <<sign::utf8, ?0, h2::utf8>>,
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-
-              _ ->
-                %{
-                  date
-                  | :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary>>,
-                    :zone_abbr => <<sign::utf8, hour::binary>>,
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-            end
-
-          <<sign::utf8, h1::utf8, h2::utf8, m1::utf8, m2::utf8>> ->
-            hour = <<h1::utf8, h2::utf8>>
-            hours = String.to_integer(hour)
-            minute = <<m1::utf8, m2::utf8>>
-            minutes = String.to_integer(minute)
-
-            {gmt_sign, total_offset} =
-              case sign do
-                ?- -> {?+, -1 * (hours * 60 * 60 + minutes * 60)}
-                ?+ -> {?-, hours * 60 * 60 + minutes * 60}
-              end
-
-            case {hours, minutes} do
-              {0, 0} ->
-                %{
-                  date
-                  | :time_zone => "Etc/GMT+0",
-                    :zone_abbr => "GMT",
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-
-              {h, 0} when h < 10 ->
-                %{
-                  date
-                  | :time_zone => <<"Etc/GMT", gmt_sign::utf8, h2::utf8>>,
-                    :zone_abbr => <<sign::utf8, ?0, h2::utf8>>,
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-
-              {_, 0} ->
-                %{
-                  date
-                  | :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary>>,
-                    :zone_abbr => <<sign::utf8, hour::binary>>,
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-
-              _ ->
-                %{
-                  date
-                  | :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary, ?:, minute::binary>>,
-                    :zone_abbr => <<sign::utf8, hour::binary, ?:, minute::binary>>,
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-            end
+          <<sign::utf8, _::binary-size(4)-unit(8)>> = zone when sign in [?+, ?-] ->
+            Timex.to_datetime(date, zone)
 
           _ ->
-            {:error, "invalid offset: #{inspect(value)}"}
+            {:error, {:invalid_zoffs, value}}
         end
 
       :zname ->
-        seconds_from_zeroyear = Timex.to_gregorian_seconds(date)
-
-        case Timezone.name_of(value) do
-          {:error, _} = err ->
-            err
-
-          tzname ->
-            date = to_datetime(date)
-
-            case Timezone.resolve(tzname, seconds_from_zeroyear) do
-              %TimezoneInfo{} = tz ->
-                %{
-                  date
-                  | :time_zone => tz.full_name,
-                    :zone_abbr => tz.abbreviation,
-                    :utc_offset => tz.offset_utc,
-                    :std_offset => tz.offset_std
-                }
-
-              %AmbiguousTimezoneInfo{before: b, after: a} ->
-                bd = %{
-                  date
-                  | :time_zone => b.full_name,
-                    :zone_abbr => b.abbreviation,
-                    :utc_offset => b.offset_utc,
-                    :std_offset => b.offset_std
-                }
-
-                ad = %{
-                  date
-                  | :time_zone => a.full_name,
-                    :zone_abbr => a.abbreviation,
-                    :utc_offset => a.offset_utc,
-                    :std_offset => a.offset_std
-                }
-
-                %AmbiguousDateTime{:before => bd, :after => ad}
-            end
-        end
+        Timex.to_datetime(date, value)
 
       :zoffs_colon ->
-        date = to_datetime(date)
-
         case value do
-          <<sign::utf8, h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8>> ->
-            hour = <<h1::utf8, h2::utf8>>
-            hours = String.to_integer(hour)
-            minute = <<m1::utf8, m2::utf8>>
-            minutes = String.to_integer(minute)
-
-            {gmt_sign, total_offset} =
-              case sign do
-                ?- -> {?+, -1 * (hours * 60 * 60 + minutes * 60)}
-                ?+ -> {?-, hours * 60 * 60 + minutes * 60}
-              end
-
-            case {hours, minutes} do
-              {0, 0} ->
-                %{
-                  date
-                  | :time_zone => "Etc/GMT+0",
-                    :zone_abbr => "GMT",
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-
-              {h, 0} when h < 10 ->
-                %{
-                  date
-                  | :time_zone => <<"Etc/GMT", gmt_sign::utf8, h2::utf8>>,
-                    :zone_abbr => <<sign::utf8, ?0, h2::utf8>>,
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-
-              {_, 0} ->
-                %{
-                  date
-                  | :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary>>,
-                    :zone_abbr => <<sign::utf8, hour::binary>>,
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-
-              _ ->
-                %{
-                  date
-                  | :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary, ?:, minute::binary>>,
-                    :zone_abbr => <<sign::utf8, hour::binary, ?:, minute::binary>>,
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-            end
+          <<sign::utf8, _::binary-size(2)-unit(8), ?:, _::binary-size(2)-unit(8)>> = zone
+          when sign in [?+, ?-] ->
+            Timex.to_datetime(date, zone)
 
           _ ->
-            {:error, "invalid offset: #{inspect(value)}"}
+            {:error, {:invalid_zoffs_colon, value}}
         end
 
       :zoffs_sec ->
-        date = to_datetime(date)
-
         case value do
-          <<sign::utf8, h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8, ?:, s1::utf8, s2::utf8>> ->
-            hour = <<h1::utf8, h2::utf8>>
-            hours = String.to_integer(hour)
-            minute = <<m1::utf8, m2::utf8>>
-            minutes = String.to_integer(minute)
-            second = <<s1::utf8, s2::utf8>>
-            seconds = String.to_integer(second)
-
-            {gmt_sign, total_offset} =
-              case sign do
-                ?- -> {?+, -1 * (hours * 60 * 60 + minutes * 60)}
-                ?+ -> {?-, hours * 60 * 60 + minutes * 60}
-              end
-
-            case {hours, minutes, seconds} do
-              {0, 0, 0} ->
-                %{
-                  date
-                  | :time_zone => "Etc/GMT+0",
-                    :zone_abbr => "GMT",
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-
-              {h, 0, 0} when h < 10 ->
-                %{
-                  date
-                  | :time_zone => <<"Etc/GMT", gmt_sign::utf8, h2::utf8>>,
-                    :zone_abbr => <<sign::utf8, ?0, h2::utf8>>,
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-
-              {_, 0, 0} ->
-                %{
-                  date
-                  | :time_zone => <<"Etc/GMT", gmt_sign::utf8, hour::binary>>,
-                    :zone_abbr => <<sign::utf8, hour::binary>>,
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-
-              _ ->
-                %{
-                  date
-                  | :time_zone =>
-                      <<"Etc/GMT", gmt_sign::utf8, hour::binary, ?:, minute::binary, ?:,
-                        second::binary>>,
-                    :zone_abbr =>
-                      <<sign::utf8, hour::binary, ?:, minute::binary, ?:, second::binary>>,
-                    :utc_offset => total_offset,
-                    :std_offset => 0
-                }
-            end
+          <<sign::utf8, _::binary-size(2)-unit(8), ?:, _::binary-size(2)-unit(8), ?:,
+            _::binary-size(2)-unit(8)>> = zone
+          when sign in [?+, ?-] ->
+            Timex.to_datetime(date, zone)
 
           _ ->
-            {:error, "invalid offset: #{inspect(value)}"}
+            {:error, {:invalid_zoffs_sec, value}}
         end
 
       :force_utc ->
-        date = to_datetime(date)
-
-        case date.time_zone do
-          nil ->
-            %{
-              date
-              | :time_zone => "Etc/UTC",
-                :zone_abbr => "UTC",
-                :utc_offset => 0,
-                :std_offset => 0
-            }
-
-          _ ->
-            Timezone.convert(date, "UTC")
-        end
+        Timex.to_datetime(date, "Etc/UTC")
 
       :literal ->
         date
 
-      :week_of_year ->
-        shift_to_week_of_year(:mon, date, value)
+      :week_of_year_iso ->
+        shift_to_week_of_year(:iso, date, value)
+
+      :week_of_year_mon ->
+        shift_to_week_of_year(:monday, date, value)
 
       :week_of_year_sun ->
-        shift_to_week_of_year(:sun, date, value)
+        shift_to_week_of_year(:sunday, date, value)
 
       _ ->
         case tokenizer.apply(date, token, value) do
@@ -750,76 +462,38 @@ defmodule Timex.Parse.DateTime.Parser do
     end
   end
 
-  defp shift_to_week_of_year(:mon, %{year: y} = datetime, value) when is_integer(value) do
-    shift =
-      case :calendar.day_of_the_week({y, 1, 1}) do
-        # Week 1, seek backwards to beginning of week
-        n when n < 5 ->
-          [days: -(7 - (7 - (n - 1)))]
+  defp shift_to_week_of_year(:iso, %{year: y} = datetime, value) when is_integer(value) do
+    {dow11, _, _} = Calendar.ISO.day_of_week(y, 1, 1, :monday)
+    {dow14, _, _} = Calendar.ISO.day_of_week(y, 1, 4, :monday)
 
-        # Part of last year's week, seek forwards to beginning of week
-        n ->
-          [days: 7 - (n - 1)]
+    # See https://en.wikipedia.org/wiki/ISO_week_date#Calculating_an_ordinal_or_month_date_from_a_week_date
+    ordinal = value * 7 + dow11 - (dow14 + 3)
+    {year, month, day} = Timex.Helpers.iso_day_to_date_tuple(y, ordinal)
+
+    %Date{year: year, month: month, day: day} =
+      Timex.Date.beginning_of_week(Timex.Date.new!(year, month, day))
+
+    %{datetime | year: year, month: month, day: day}
+  end
+
+  defp shift_to_week_of_year(weekstart, %{year: y} = datetime, value) when is_integer(value) do
+    new_year = Timex.Date.new!(y, 1, 1)
+    week_start = Timex.Date.beginning_of_week(new_year, weekstart)
+
+    # This date can be calculated by taking the day number of the year,
+    # shifting the day number of the year down by the number of days which
+    # occurred in the previous year, then dividing by 7
+    day_num =
+      if Date.compare(week_start, new_year) == :lt do
+        prev_year_day_start = Date.day_of_year(week_start)
+        prev_year_day_end = Date.day_of_year(Timex.Date.new!(week_start.year, 12, 31))
+        shift = prev_year_day_end - prev_year_day_start
+        shift + value * 7
+      else
+        value * 7
       end
 
     datetime = Timex.to_naive_datetime(datetime)
-    do_shift_to_week_of_year(Timex.shift(%{datetime | month: 1, day: 1}, shift), value)
-  end
-
-  defp shift_to_week_of_year(:sun, %{year: y} = datetime, value) when is_integer(value) do
-    n = :calendar.day_of_the_week({y, 1, 1})
-    shift = [days: -1 - (7 - (7 - (n - 1)))]
-    datetime = Timex.to_naive_datetime(datetime)
-    do_shift_to_week_of_year(Timex.shift(%{datetime | month: 1, day: 1}, shift), value)
-  end
-
-  defp do_shift_to_week_of_year(%{year: y} = datetime, weeks) do
-    # On leap years which start on Thursday, week numbers
-    # are incremented by 1 from March thru the rest of the year
-    shifted = Timex.shift(datetime, days: 7 * (weeks - 1))
-
-    if :calendar.is_leap_year(y) do
-      case :calendar.day_of_the_week({y, 1, 1}) do
-        4 ->
-          case shifted do
-            %{month: m} when m < 3 ->
-              shifted
-
-            _ ->
-              Timex.shift(shifted, days: 7)
-          end
-
-        _n ->
-          shifted
-      end
-    else
-      shifted
-    end
-  end
-
-  defp to_datetime(%DateTime{} = dt), do: dt
-
-  defp to_datetime(%NaiveDateTime{
-         year: y,
-         month: m,
-         day: d,
-         hour: h,
-         minute: mm,
-         second: ss,
-         microsecond: us
-       }) do
-    %DateTime{
-      year: y,
-      month: m,
-      day: d,
-      hour: h,
-      minute: mm,
-      second: ss,
-      microsecond: us,
-      time_zone: "Etc/UTC",
-      zone_abbr: "UTC",
-      utc_offset: 0,
-      std_offset: 0
-    }
+    Timex.shift(%{datetime | month: 1, day: 1}, days: day_num)
   end
 end

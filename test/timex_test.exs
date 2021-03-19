@@ -158,6 +158,28 @@ defmodule TimexTests do
     assert {:error, :invalid_date} = Timex.days_in_month(nil)
   end
 
+  test "week_of_month" do
+    assert Timex.week_of_month(~D[2019-01-01]) == 1
+
+    assert Timex.week_of_month(~D[2021-01-01]) == 1
+    assert Timex.week_of_month(~D[2021-01-04]) == 2
+    assert Timex.week_of_month(~D[2021-01-11]) == 3
+
+    assert Timex.week_of_month(~D[2021-02-08]) == 2
+
+    assert Timex.week_of_month(~D[2019-12-01]) == 1
+    assert Timex.week_of_month(~D[2019-12-31]) == 6
+
+    assert Timex.week_of_month(~N[2021-01-01T00:00:00Z]) == 1
+
+    assert Timex.week_of_month(2019, 12, 31) == 6
+    assert Timex.week_of_month(2021, 1, 11) == 3
+
+    assert {:error, :invalid_date} = Timex.week_of_month(2020, 40, 40)
+    assert {:error, :invalid_date} = Timex.week_of_month(2020, nil, 10)
+    assert {:error, :invalid_date} = Timex.week_of_month(nil)
+  end
+
   test "month_to_num" do
     assert Timex.month_to_num("April") == 4
     assert Timex.month_to_num("april") == 4
@@ -318,8 +340,14 @@ defmodule TimexTests do
 
     assert true == Timex.before?({{2013, 1, 1}, {1, 1, 1}}, {{2013, 1, 1}, {1, 1, 2}})
     assert true == Timex.after?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 1}})
-    assert {:error, :invalid_date} == Timex.before?({}, {{2013, 1, 1}, {1, 1, 2}})
-    assert {:error, :invalid_date} == Timex.after?({{2013, 1, 1}, {1, 1, 2}}, {})
+
+    assert_raise ArgumentError, fn ->
+      Timex.before?({}, {{2013, 1, 1}, {1, 1, 2}})
+    end
+
+    assert_raise ArgumentError, fn ->
+      Timex.after?({{2013, 1, 1}, {1, 1, 2}}, {})
+    end
 
     assert Timex.before?(~T[09:00:00], ~T[12:00:00])
     refute Timex.before?(~T[09:00:00], ~T[09:00:00])
@@ -339,14 +367,17 @@ defmodule TimexTests do
     assert false == Timex.between?(date1, date1, date3)
     assert false == Timex.between?(date3, date1, date3)
 
-    assert {:error, :invalid_date} ==
-             Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}})
+    assert_raise ArgumentError, fn ->
+      Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}})
+    end
 
-    assert {:error, :invalid_date} ==
-             Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}})
+    assert_raise ArgumentError, fn ->
+      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}})
+    end
 
-    assert {:error, :invalid_date} ==
-             Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {})
+    assert_raise ArgumentError, fn ->
+      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {})
+    end
 
     assert Timex.between?(~T[12:00:00], ~T[09:00:00], ~T[17:00:00])
     refute Timex.between?(~T[07:00:00], ~T[09:00:00], ~T[17:00:00])
@@ -366,14 +397,17 @@ defmodule TimexTests do
     assert false == Timex.between?(date1, date2, date3, options)
     assert false == Timex.between?(date3, date1, date2, options)
 
-    assert {:error, :invalid_date} ==
-             Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    assert_raise ArgumentError, fn ->
+      Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    end
 
-    assert {:error, :invalid_date} ==
-             Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    assert_raise ArgumentError, fn ->
+      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    end
 
-    assert {:error, :invalid_date} ==
-             Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+    assert_raise ArgumentError, fn ->
+      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+    end
   end
 
   test "between? inclusive_start" do
@@ -390,14 +424,17 @@ defmodule TimexTests do
     assert false == Timex.between?(date1, date2, date3, options)
     assert false == Timex.between?(date3, date1, date2, options)
 
-    assert {:error, :invalid_date} ==
-             Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    assert_raise ArgumentError, fn ->
+      Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    end
 
-    assert {:error, :invalid_date} ==
-             Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    assert_raise ArgumentError, fn ->
+      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    end
 
-    assert {:error, :invalid_date} ==
-             Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+    assert_raise ArgumentError, fn ->
+      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+    end
   end
 
   test "between? inclusive_end" do
@@ -414,14 +451,17 @@ defmodule TimexTests do
     assert false == Timex.between?(date1, date2, date3, options)
     assert false == Timex.between?(date3, date1, date2, options)
 
-    assert {:error, :invalid_date} ==
-             Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    assert_raise ArgumentError, fn ->
+      Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    end
 
-    assert {:error, :invalid_date} ==
-             Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    assert_raise ArgumentError, fn ->
+      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
+    end
 
-    assert {:error, :invalid_date} ==
-             Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+    assert_raise ArgumentError, fn ->
+      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+    end
   end
 
   test "equal" do

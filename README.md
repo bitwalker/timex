@@ -1,6 +1,6 @@
 ## Timex
 
-[![Master](https://api.cirrus-ci.com/github/bitwalker/timex.svg?branch=master)](https://cirrus-ci.com/github/bitwalker/timex)
+[![Master](https://github.com/bitwalker/timex/workflows/elixir/badge.svg?branch=master)](https://github.com/bitwalker/timex/actions?query=workflow%3A%22elixir%22+branch%3Amaster)
 [![Hex.pm Version](http://img.shields.io/hexpm/v/timex.svg?style=flat)](https://hex.pm/packages/timex)
 [![Coverage Status](https://coveralls.io/repos/github/bitwalker/timex/badge.svg?branch=master)](https://coveralls.io/github/bitwalker/timex?branch=master)
 
@@ -31,7 +31,7 @@ To use Timex with your projects, edit your `mix.exs` file and add it as a depend
 
 ```elixir
 defp deps do
-  [{:timex, "~> 3.5"}]
+  [{:timex, "~> 3.6"}]
 end
 ```
 
@@ -135,6 +135,8 @@ Timex functions of the form `iso_*` behave based on how the ISO calendar represe
 ### Timex with escript
 
 If you need to use Timex from within an escript, add `{:tzdata, "~> 0.1.8", override: true}` to your deps, more recent versions of :tzdata are unable to work in an escript because of the need to load ETS table files from priv, and due to the way ETS loads these files, it's not possible to do so.
+
+If your build still throws an error after this, try removing the `_build` and `deps` folder. Then execute `mix deps.unlock tzdata` and `mix deps.get`.
 
 ### Automatic time zone updates
 

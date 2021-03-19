@@ -19,12 +19,12 @@ defmodule Timex.Calendar.Julian do
   due to the fact that their algorithm assumes there is no Gregorian calendar before that
   date.
   """
-  @spec julian_date(Types.date()) :: float
+  @spec julian_date(Types.date()) :: integer
   def julian_date({year, month, day}),
     do: julian_date(year, month, day)
 
   # Same as julian_date/1, except takes an Erlang datetime, and returns a more precise Julian date number
-  @spec julian_date(Types.datetime()) :: float
+  @spec julian_date(Types.datetime()) :: integer
   def julian_date({{year, month, day}, {hour, minute, second}}) do
     julian_date(year, month, day, hour, minute, second)
   end
@@ -34,7 +34,7 @@ defmodule Timex.Calendar.Julian do
   @doc """
   Same as julian_date/1, except takes year/month/day as distinct arguments
   """
-  @spec julian_date(Types.year(), Types.month(), Types.day()) :: float
+  @spec julian_date(Types.year(), Types.month(), Types.day()) :: integer
   def julian_date(year, month, day) when is_date(year, month, day) do
     a = div(14 - month, 12)
     y = year + 4800 - a

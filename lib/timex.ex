@@ -3,11 +3,21 @@ defmodule Timex do
 
   use Application
 
+  @doc false
   def start(_type, _args) do
-    apps = Enum.map(Application.started_applications(), &elem(&1, 0))
+    apps = Application.started_applications()
+    tzdata_started? = Enum.find(apps, &(elem(&1, 0) == :tzdata)) != nil
 
     cond do
-      :tzdata in apps ->
+      tzdata_started? ->
+        case Calendar.get_time_zone_database() do
+          Calendar.UTCOnlyTimeZoneDatabase ->
+            Calendar.put_time_zone_database(Tzdata.TimeZoneDatabase)
+
+          _ ->
+            :ok
+        end
+
         Supervisor.start_link([], strategy: :one_for_one, name: Timex.Supervisor)
 
       :else ->
@@ -34,42 +44,39 @@ defmodule Timex do
   use Timex.Constants
   import Timex.Macros
 
+  @doc false
+  def tzdb, do: Application.get_env(:elixir, :time_zone_database, Tzdata.TimeZoneDatabase)
+
   @doc """
   Returns a Date representing the current day in UTC
   """
   @spec today() :: Date.t()
-  def today() do
-    {{year, month, day}, _} = :calendar.universal_time()
-    %Date{year: year, month: month, day: day}
-  end
+  defdelegate today(), to: Date, as: :utc_today
+
+  @doc """
+  Returns a Date representing the current day in the provided timezone.
+  """
+  @spec today(Types.valid_timezone()) :: Date.t()
+  def today(timezone), do: now(timezone) |> DateTime.to_date()
 
   @doc """
   Returns a DateTime representing the current moment in time in UTC
   """
   @spec now() :: DateTime.t()
-  def now(), do: from_unix(:os.system_time(), :native)
+  defdelegate now(), to: DateTime, as: :utc_now
 
   @doc """
   Returns a DateTime representing the current moment in time in the provided
   timezone.
   """
   @spec now(Types.valid_timezone()) :: DateTime.t() | AmbiguousDateTime.t() | {:error, term}
-  def now(tz), do: Timezone.convert(now(), tz)
-
-  @doc """
-  Returns a DateTime representing the current moment in time in the local timezone.
-  """
-  @spec local() :: DateTime.t() | AmbiguousDateTime.t() | {:error, term}
-  def local() do
-    case Timezone.local(:calendar.local_time()) do
-      %AmbiguousTimezoneInfo{after: a, before: b} ->
-        d = now()
-        ad = Timezone.convert(d, a.full_name)
-        bd = Timezone.convert(d, b.full_name)
-        %AmbiguousDateTime{after: ad, before: bd}
-
-      %TimezoneInfo{full_name: tz} ->
-        now(tz)
+  def now(tz) do
+    with {:tzdata, tzname} when is_binary(tzname) <- {:tzdata, Timezone.name_of(tz)},
+         {:ok, dt} <- DateTime.now(tzname, tzdb()) do
+      dt
+    else
+      {:tzdata, {:error, _} = err} ->
+        err
 
       {:error, _} = err ->
         err
@@ -77,15 +84,42 @@ defmodule Timex do
   end
 
   @doc """
+  Returns a DateTime representing the current moment in time in the local timezone.
+
+  ## Example
+
+      iex> %DateTime{time_zone: tz} = Timex.local();
+      ...> tz != "Etc/UTC"
+      true
+  """
+  @spec local() :: DateTime.t() | {:error, term}
+  def local() do
+    with tz when is_binary(tz) <- Timezone.Local.lookup(),
+         {:ok, datetime} <- DateTime.now(tz, tzdb()) do
+      datetime
+    end
+  end
+
+  @doc """
   Returns a DateTime representing the given date/time in the local timezone
+
+  ## Example
+
+      iex> %DateTime{time_zone: tz} = Timex.local(DateTime.utc_now());
+      ...> tz != "Etc/UTC"
+      true
   """
   @spec local(Types.valid_datetime()) :: DateTime.t() | AmbiguousDateTime.t() | {:error, term}
-  def local(date) do
-    reference_date = to_erl(date)
+  def local(%DateTime{} = datetime) do
+    with tz when is_binary(tz) <- Timezone.Local.lookup(),
+         {:ok, datetime} <- DateTime.shift_zone(datetime, tz, tzdb()) do
+      datetime
+    end
+  end
 
-    case Timezone.local(reference_date) do
-      {:error, _} = err -> err
-      tz -> Timezone.convert(date, tz.full_name)
+  def local(date) do
+    with {:ok, tz} <- Timezone.local() do
+      to_datetime(date, tz)
     end
   end
 
@@ -123,13 +157,9 @@ defmodule Timex do
   @spec to_datetime(Types.valid_datetime()) :: DateTime.t() | {:error, term}
   @spec to_datetime(Types.valid_datetime(), Types.valid_timezone()) ::
           DateTime.t() | AmbiguousDateTime.t() | {:error, term}
+  def to_datetime(%DateTime{} = dt), do: dt
   def to_datetime(from), do: Timex.Protocol.to_datetime(from, "Etc/UTC")
   defdelegate to_datetime(from, timezone), to: Timex.Protocol
-
-  @doc false
-  defdeprecated datetime(from, timezone), "use to_datetime/2 instead" do
-    to_datetime(from, timezone)
-  end
 
   @doc """
   Convert a date/time value to it's Erlang representation
@@ -740,42 +770,12 @@ defmodule Timex do
 
       iex> tz = #{__MODULE__}.timezone(+2, {2015, 4, 12})
       ...> {tz.full_name, tz.abbreviation}
-      {"Etc/GMT-2", "+02"}
+      {"Etc/UTC+2", "+02"}
 
   """
   @spec timezone(Types.valid_timezone() | TimezoneInfo.t(), Types.valid_datetime()) ::
           TimezoneInfo.t() | AmbiguousTimezoneInfo.t() | {:error, term}
-  def timezone(:utc, _), do: %TimezoneInfo{}
-  def timezone("UTC", _), do: %TimezoneInfo{}
-  def timezone("Etc/UTC", _), do: %TimezoneInfo{}
-
-  def timezone(tz, datetime) when is_binary(tz) do
-    case to_gregorian_seconds(datetime) do
-      {:error, _} = err ->
-        err
-
-      seconds_from_zeroyear ->
-        Timezone.resolve(tz, seconds_from_zeroyear)
-    end
-  end
-
-  def timezone(%TimezoneInfo{} = tz, datetime), do: Timezone.get(tz, datetime)
-
-  def timezone(tz, datetime) do
-    case to_gregorian_seconds(datetime) do
-      {:error, _} = err ->
-        err
-
-      seconds_from_zeroyear ->
-        case Timezone.name_of(tz) do
-          {:error, _} = err ->
-            err
-
-          tzname ->
-            Timezone.resolve(tzname, seconds_from_zeroyear)
-        end
-    end
-  end
+  def timezone(tz, datetime), do: Timezone.get(tz, datetime)
 
   @doc """
   Return a boolean indicating whether the given date is valid.
@@ -791,8 +791,16 @@ defmodule Timex do
       false
 
   """
-  @spec is_valid?(Types.valid_datetime()) :: boolean | {:error, term}
-  defdelegate is_valid?(datetime), to: Timex.Protocol
+  @spec is_valid?(Types.valid_datetime()) :: boolean
+  def is_valid?(datetime) do
+    case Timex.Protocol.is_valid?(datetime) do
+      {:error, _reason} ->
+        false
+
+      b when is_boolean(b) ->
+        b
+    end
+  end
 
   @doc """
   Returns a boolean indicating whether the provided term represents a valid time,
@@ -829,26 +837,36 @@ defmodule Timex do
   @doc """
   Returns a boolean indicating whether the first `Timex.Comparable` occurs before the second
   """
-  @spec before?(Time, Time) :: boolean | {:error, term}
-  @spec before?(Comparable.comparable(), Comparable.comparable()) :: boolean | {:error, term}
+  @spec before?(Time.t(), Time.t()) :: boolean
+  @spec before?(Comparable.comparable(), Comparable.comparable()) :: boolean
   def before?(a, b) do
     case compare(a, b) do
-      -1 -> true
-      {:error, _} = res -> res
-      _ -> false
+      {:error, reason} ->
+        raise ArgumentError, message: "#{inspect(reason)}"
+
+      -1 ->
+        true
+
+      _ ->
+        false
     end
   end
 
   @doc """
   Returns a boolean indicating whether the first `Timex.Comparable` occurs after the second
   """
-  @spec after?(Time, Time) :: boolean | {:error, term}
-  @spec after?(Comparable.comparable(), Comparable.comparable()) :: boolean | {:error, term}
+  @spec after?(Time.t(), Time.t()) :: boolean
+  @spec after?(Comparable.comparable(), Comparable.comparable()) :: boolean
   def after?(a, b) do
     case compare(a, b) do
-      1 -> true
-      {:error, _} = res -> res
-      _ -> false
+      {:error, reason} ->
+        raise ArgumentError, message: "#{inspect(reason)}"
+
+      1 ->
+        true
+
+      _ ->
+        false
     end
   end
 
@@ -869,13 +887,13 @@ defmodule Timex do
             | :start
             | :end
         ]
-  @spec between?(Time, Time, Time, between_options) :: boolean | {:error, term}
+  @spec between?(Time.t(), Time.t(), Time.t(), between_options) :: boolean
   @spec between?(
           Comparable.comparable(),
           Comparable.comparable(),
           Comparable.comparable(),
           between_options
-        ) :: boolean | {:error, term}
+        ) :: boolean
   def between?(a, start, ending, options \\ []) do
     {start_test, ending_test} =
       case Keyword.get(options, :inclusive, false) do
@@ -888,8 +906,11 @@ defmodule Timex do
     in_bounds?(compare(a, start), compare(ending, a), start_test, ending_test)
   end
 
-  defp in_bounds?({:error, _e} = error, _, _, _), do: error
-  defp in_bounds?(_, {:error, _e} = error, _, _), do: error
+  defp in_bounds?({:error, reason}, _, _, _),
+    do: raise(ArgumentError, message: "#{inspect(reason)}")
+
+  defp in_bounds?(_, {:error, reason}, _, _),
+    do: raise(ArgumentError, message: "#{inspect(reason)}")
 
   defp in_bounds?(start_comparison, ending_comparison, start_test, ending_test) do
     start_comparison >= start_test && ending_comparison >= ending_test
@@ -915,17 +936,22 @@ defmodule Timex do
       ...> #{__MODULE__}.equal?(date1, date2)
       true
   """
-  @spec equal?(Time, Time, Comparable.granularity()) :: boolean | {:error, :badarg}
+  @spec equal?(Time, Time, Comparable.granularity()) :: boolean | no_return
   @spec equal?(Comparable.comparable(), Comparable.comparable(), Comparable.granularity()) ::
-          boolean | {:error, :badarg}
+          boolean | no_return
   def equal?(a, a, granularity \\ :seconds)
   def equal?(a, a, _granularity), do: true
 
   def equal?(a, b, granularity) do
     case compare(a, b, granularity) do
-      0 -> true
-      {:error, _} = res -> res
-      _ -> false
+      {:error, reason} ->
+        raise ArgumentError, message: "#{inspect(reason)}"
+
+      0 ->
+        true
+
+      _ ->
+        false
     end
   end
 
@@ -978,7 +1004,7 @@ defmodule Timex do
   - :microseconds
   - :duration
 
-  and the dates will be compared with the cooresponding accuracy.
+  and the dates will be compared with the corresponding accuracy.
   The default granularity is `:microsecond`.
 
   ## Examples
@@ -1121,6 +1147,16 @@ defmodule Timex do
   end)
 
   # Make an attempt at cleaning up the provided string
+  def day_to_num(day) when is_binary(day) do
+    case Map.get(Timex.Translator.get_weekdays_lookup(Timex.Translator.current_locale()), day) do
+      nil ->
+        {:error, :invalid_day_name}
+
+      num ->
+        num
+    end
+  end
+
   def day_to_num(_), do: {:error, :invalid_day_name}
 
   @doc """
@@ -1256,8 +1292,33 @@ defmodule Timex do
       4 # (i.e. Thursday)
 
   """
-  @spec weekday(Types.valid_datetime()) :: Types.weekday() | {:error, term}
+  @spec weekday(Types.valid_datetime()) :: Types.weekday() | {:error, :invalid_date}
   defdelegate weekday(datetime), to: Timex.Protocol
+
+  @doc """
+  Like `weekday/1`, but accepts a valid starting weekday value.
+
+  ## Examples
+
+      iex> Timex.epoch() |> #{__MODULE__}.weekday(:sunday)
+      5
+  """
+  @spec weekday(Types.valid_datetime(), Calendar.day_of_week()) ::
+          Types.weekday() | {:error, :invalid_date}
+  defdelegate weekday(datetime, weekstart), to: Timex.Protocol
+
+  @doc """
+  Provides a version of `weekday/1` and `weekday/2` that raises on error.
+  """
+  def weekday!(datetime, weekstart \\ :default) do
+    case weekday(datetime, weekstart) do
+      {:error, :invalid_date} ->
+        raise ArgumentError, message: "invalid_date"
+
+      weekday when is_integer(weekday) ->
+        weekday
+    end
+  end
 
   @doc """
   Returns the ordinal day number of the date.
@@ -1312,8 +1373,28 @@ defmodule Timex do
   """
   @spec week_of_month(Types.year(), Types.month(), Types.day()) :: Types.week_of_month()
   def week_of_month(year, month, day) when is_date(year, month, day) do
-    {_, week_index_of_given_date} = iso_week(year, month, day)
-    {_, week_index_of_first_day_of_given_month} = iso_week(year, month, 1)
+    next_year = year + 1
+    prev_year = year - 1
+
+    week_index_of_given_date =
+      case iso_week(year, month, day) do
+        {^prev_year, _} ->
+          0
+
+        {^next_year, _} ->
+          {_, week_index_of_given_date_shifted} = iso_week(year, month, day - 7)
+          week_index_of_given_date_shifted + 1
+
+        {_, week_index} ->
+          week_index
+      end
+
+    week_index_of_first_day_of_given_month =
+      case iso_week(year, month, 1) do
+        {^prev_year, _} -> 0
+        {_, week_index} -> week_index
+      end
+
     week_index_of_given_date - week_index_of_first_day_of_given_month + 1
   end
 
@@ -1660,7 +1741,7 @@ defmodule Timex do
       ...> datetime = Timex.to_datetime({{2016,3,13}, {1,0,0}}, "America/Chicago")
       ...> # 2-3 AM doesn't exist due to leap forward, shift accounts for this
       ...> %DateTime{hour: 3} = Timex.shift(datetime, hours: 1)
-      ...> shifted = Timex.shift(datetime, hours: 2)
+      ...> shifted = Timex.shift(datetime, hours: 1)
       ...> {datetime.zone_abbr, shifted.zone_abbr, shifted.hour}
       {"CST", "CDT", 3}
 
@@ -1669,7 +1750,7 @@ defmodule Timex do
       iex> use Timex
       ...> date = ~D[2016-02-29]
       ...> Timex.shift(date, years: -1)
-      ~D[2015-02-28]
+      ~D[2015-03-01]
 
   ### Shifting by months
 
@@ -1850,4 +1931,45 @@ defmodule Timex do
       :else -> day
     end
   end
+
+  @weekdays [
+    :monday,
+    :tuesday,
+    :wednesday,
+    :thursday,
+    :friday,
+    :saturday,
+    :sunday
+  ]
+
+  @doc false
+  def standardize_week_start(value)
+
+  def standardize_week_start(a) when is_atom(a) and a in @weekdays, do: a
+  def standardize_week_start(:mon), do: :monday
+  def standardize_week_start(:tue), do: :tuesday
+  def standardize_week_start(:wed), do: :wednesday
+  def standardize_week_start(:thu), do: :thursday
+  def standardize_week_start(:fri), do: :friday
+  def standardize_week_start(:sat), do: :saturday
+  def standardize_week_start(:sun), do: :sunday
+
+  def standardize_week_start(n) when is_integer(n) and n >= 1 and n <= 7 do
+    Enum.at(@weekdays, n - 1)
+  end
+
+  def standardize_week_start(s) when is_binary(s) do
+    a = s |> String.downcase() |> String.to_existing_atom()
+
+    if a in @weekdays do
+      a
+    else
+      {:error, :invalid_week_start}
+    end
+  rescue
+    _ ->
+      {:error, :invalid_week_start}
+  end
+
+  def standardize_week_start(_), do: {:error, :invalid_week_start}
 end

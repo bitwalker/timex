@@ -21,70 +21,70 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "Language: sr@latin\n"
 
-#: lib/l10n/translator.ex:178
+#: lib/l10n/translator.ex:200
 msgid "%{count} day"
 msgid_plural "%{count} days"
 msgstr[0] "%{count} dan"
 msgstr[1] "%{count} dana"
 msgstr[2] "%{count} dana"
 
-#: lib/l10n/translator.ex:177
+#: lib/l10n/translator.ex:199
 msgid "%{count} hour"
 msgid_plural "%{count} hours"
 msgstr[0] "%{count} sat"
 msgstr[1] "%{count} sata"
 msgstr[2] "%{count} sati"
 
-#: lib/l10n/translator.ex:173
+#: lib/l10n/translator.ex:195
 msgid "%{count} microsecond"
 msgid_plural "%{count} microseconds"
 msgstr[0] "%{count} mikrosekunda"
 msgstr[1] "%{count} mikrosekunde"
 msgstr[2] "%{count} mikrosekundi"
 
-#: lib/l10n/translator.ex:174
+#: lib/l10n/translator.ex:196
 msgid "%{count} millisecond"
 msgid_plural "%{count} milliseconds"
 msgstr[0] "%{count} milisekunda"
 msgstr[1] "%{count} milisekunde"
 msgstr[2] "%{count} milisekundi"
 
-#: lib/l10n/translator.ex:176
+#: lib/l10n/translator.ex:198
 msgid "%{count} minute"
 msgid_plural "%{count} minutes"
 msgstr[0] "%{count} minut"
 msgstr[1] "%{count} minute"
 msgstr[2] "%{count} minuta"
 
-#: lib/l10n/translator.ex:180
+#: lib/l10n/translator.ex:202
 msgid "%{count} month"
 msgid_plural "%{count} months"
 msgstr[0] "%{count} mesec"
 msgstr[1] "%{count} meseca"
 msgstr[2] "%{count} meseci"
 
-#: lib/l10n/translator.ex:172
+#: lib/l10n/translator.ex:194
 msgid "%{count} nanosecond"
 msgid_plural "%{count} nanoseconds"
 msgstr[0] "%{count} nanosekunda"
 msgstr[1] "%{count} nanosekunde"
 msgstr[2] "%{count} nanosekundi"
 
-#: lib/l10n/translator.ex:175
+#: lib/l10n/translator.ex:197
 msgid "%{count} second"
 msgid_plural "%{count} seconds"
 msgstr[0] "%{count} sekunda"
 msgstr[1] "%{count} sekunde"
 msgstr[2] "%{count} sekundi"
 
-#: lib/l10n/translator.ex:179
+#: lib/l10n/translator.ex:201
 msgid "%{count} week"
 msgid_plural "%{count} weeks"
 msgstr[0] "%{count} nedelja"
 msgstr[1] "%{count} nedelje"
 msgstr[2] "%{count} nedelja"
 
-#: lib/l10n/translator.ex:181
+#: lib/l10n/translator.ex:203
 msgid "%{count} year"
 msgid_plural "%{count} years"
 msgstr[0] "%{count} godina"

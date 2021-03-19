@@ -6,23 +6,9 @@ defmodule Timex.DateTime.Helpers do
   @type precision :: -1 | 0..6
 
   @doc """
-  Constructs an empty DateTime, for internal use only
+  Constructs an empty NaiveDateTime, for internal use only
   """
-  def empty() do
-    %DateTime{
-      year: 0,
-      month: 1,
-      day: 1,
-      hour: 0,
-      minute: 0,
-      second: 0,
-      microsecond: {0, 0},
-      time_zone: nil,
-      zone_abbr: nil,
-      utc_offset: 0,
-      std_offset: 0
-    }
-  end
+  def empty(), do: Timex.NaiveDateTime.new!(0, 1, 1, 0, 0, 0)
 
   @doc """
   Constructs a DateTime from an Erlang date or datetime tuple and a timezone.
@@ -118,6 +104,10 @@ defmodule Timex.DateTime.Helpers do
     construct_microseconds(us, p)
   end
 
+  def construct_microseconds(us) when is_integer(us) do
+    construct_microseconds(us, -1)
+  end
+
   # Input precision of -1 means it should be recalculated based on the value
   def construct_microseconds(0, -1), do: {0, 0}
   def construct_microseconds(0, p), do: {0, p}
@@ -125,6 +115,8 @@ defmodule Timex.DateTime.Helpers do
   def construct_microseconds(n, p), do: {to_precision(n, p), p}
 
   def to_precision(0, _p), do: 0
+
+  def to_precision(_, 0), do: 0
 
   def to_precision(us, p) do
     case precision(us) do

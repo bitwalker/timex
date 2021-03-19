@@ -2,188 +2,122 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   @moduledoc """
   This module implements Timex functionality for NaiveDateTime
   """
-  alias Timex.{Types, Duration}
+  alias Timex.AmbiguousDateTime
   import Timex.Macros
 
   @epoch_seconds :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
 
-  @spec now() :: NaiveDateTime.t()
-  def now() do
-    Timex.to_naive_datetime(Timex.from_unix(:os.system_time(), :native))
-  end
+  def now(), do: NaiveDateTime.utc_now()
 
-  @spec to_julian(NaiveDateTime.t()) :: float
-  def to_julian(%NaiveDateTime{:year => y, :month => m, :day => d}) do
+  def to_julian(%NaiveDateTime{year: y, month: m, day: d}) do
     Timex.Calendar.Julian.julian_date(y, m, d)
   end
 
-  @spec to_gregorian_seconds(NaiveDateTime.t()) :: non_neg_integer
-  def to_gregorian_seconds(date), do: to_seconds(date, :zero)
-
-  @spec to_gregorian_microseconds(NaiveDateTime.t()) :: non_neg_integer
-  def to_gregorian_microseconds(%NaiveDateTime{microsecond: {us, _}} = date) do
-    s = to_seconds(date, :zero)
-    s * (1_000 * 1_000) + us
+  def to_gregorian_seconds(date) do
+    with {s, _} <- Timex.NaiveDateTime.to_gregorian_seconds(date), do: s
   end
 
-  @spec to_unix(NaiveDateTime.t()) :: non_neg_integer
-  def to_unix(date), do: trunc(to_seconds(date, :epoch))
+  def to_gregorian_microseconds(%NaiveDateTime{} = date) do
+    with {s, us} <- Timex.NaiveDateTime.to_gregorian_seconds(date) do
+      s * (1_000 * 1_000) + us
+    end
+  end
 
-  @spec to_date(NaiveDateTime.t()) :: Date.t()
+  def to_unix(date) do
+    with {s, _} <- Timex.NaiveDateTime.to_gregorian_seconds(date) do
+      s - @epoch_seconds
+    end
+  end
+
   def to_date(date), do: NaiveDateTime.to_date(date)
 
-  @spec to_datetime(NaiveDateTime.t(), timezone :: Types.valid_timezone()) ::
-          DateTime.t() | {:error, term}
-  def to_datetime(%NaiveDateTime{:microsecond => {us, precision}} = d, timezone) do
-    {date, {h, mm, s}} = NaiveDateTime.to_erl(d)
-    Timex.DateTime.Helpers.construct({date, {h, mm, s, us}}, precision, timezone)
+  def to_datetime(%NaiveDateTime{} = naive, timezone) do
+    with %DateTime{} = datetime <- Timex.Timezone.convert(naive, timezone) do
+      datetime
+    else
+      %AmbiguousDateTime{} = datetime ->
+        datetime
+
+      {:error, _} = err ->
+        err
+    end
   end
 
-  @spec to_naive_datetime(NaiveDateTime.t()) :: NaiveDateTime.t()
   def to_naive_datetime(%NaiveDateTime{} = date), do: date
 
-  @spec to_erl(NaiveDateTime.t()) :: Types.datetime()
   def to_erl(%NaiveDateTime{} = d), do: NaiveDateTime.to_erl(d)
 
-  @spec century(NaiveDateTime.t()) :: non_neg_integer
   def century(%NaiveDateTime{:year => year}), do: Timex.century(year)
 
-  @spec is_leap?(NaiveDateTime.t()) :: boolean
   def is_leap?(%NaiveDateTime{year: year}), do: :calendar.is_leap_year(year)
 
-  @spec beginning_of_day(NaiveDateTime.t()) :: NaiveDateTime.t()
   def beginning_of_day(%NaiveDateTime{:microsecond => {_, precision}} = datetime) do
     %{datetime | :hour => 0, :minute => 0, :second => 0, :microsecond => {0, precision}}
   end
 
-  @spec end_of_day(NaiveDateTime.t()) :: NaiveDateTime.t()
   def end_of_day(%NaiveDateTime{microsecond: {_, precision}} = datetime) do
-    if precision > 0 do
-      us = Timex.DateTime.Helpers.to_precision(999_999, precision)
-      %{datetime | :hour => 23, :minute => 59, :second => 59, :microsecond => {us, precision}}
-    else
-      %{datetime | :hour => 23, :minute => 59, :second => 59, :microsecond => {0, 0}}
+    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    %{datetime | :hour => 23, :minute => 59, :second => 59, :microsecond => us}
+  end
+
+  def beginning_of_week(%NaiveDateTime{microsecond: {_, precision}} = date, weekstart) do
+    with ws when is_atom(ws) <- Timex.standardize_week_start(weekstart) do
+      date = Timex.Date.beginning_of_week(date, ws)
+      Timex.NaiveDateTime.new!(date.year, date.month, date.day, 0, 0, 0, {0, precision})
     end
   end
 
-  @spec beginning_of_week(NaiveDateTime.t(), Types.weekstart()) :: NaiveDateTime.t()
-  def beginning_of_week(%NaiveDateTime{} = date, weekstart) do
-    case Timex.days_to_beginning_of_week(date, weekstart) do
-      {:error, _} = err ->
-        err
-
-      days ->
-        beginning_of_day(shift(date, days: -days))
+  def end_of_week(%NaiveDateTime{microsecond: {_, precision}} = date, weekstart) do
+    with ws when is_atom(ws) <- Timex.standardize_week_start(weekstart) do
+      date = Timex.Date.end_of_week(date, ws)
+      us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+      Timex.NaiveDateTime.new!(date.year, date.month, date.day, 23, 59, 59, us)
     end
   end
 
-  @spec end_of_week(NaiveDateTime.t(), Types.weekstart()) :: NaiveDateTime.t()
-  def end_of_week(%NaiveDateTime{} = date, weekstart) do
-    case Timex.days_to_end_of_week(date, weekstart) do
-      {:error, _} = err ->
-        err
-
-      days_to_end ->
-        end_of_day(shift(date, days: days_to_end))
-    end
+  def beginning_of_year(%NaiveDateTime{year: year, microsecond: {_, precision}}) do
+    Timex.NaiveDateTime.new!(year, 1, 1, 0, 0, 0, {0, precision})
   end
 
-  @spec beginning_of_year(NaiveDateTime.t()) :: NaiveDateTime.t()
-  def beginning_of_year(%NaiveDateTime{:year => y}) do
-    {:ok, nd} = NaiveDateTime.new(y, 1, 1, 0, 0, 0)
-    nd
+  def end_of_year(%NaiveDateTime{year: year, microsecond: {_, precision}}) do
+    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    Timex.NaiveDateTime.new!(year, 12, 31, 23, 59, 59, us)
   end
 
-  @spec end_of_year(NaiveDateTime.t()) :: NaiveDateTime.t()
-  def end_of_year(%NaiveDateTime{microsecond: {_, precision}} = date) do
-    if precision > 0 do
-      us = Timex.DateTime.Helpers.to_precision(999_999, precision)
-
-      %{
-        date
-        | :month => 12,
-          :day => 31,
-          :hour => 23,
-          :minute => 59,
-          :second => 59,
-          :microsecond => {us, precision}
-      }
-    else
-      %{
-        date
-        | :month => 12,
-          :day => 31,
-          :hour => 23,
-          :minute => 59,
-          :second => 59,
-          :microsecond => {0, 0}
-      }
-    end
-  end
-
-  @spec beginning_of_quarter(NaiveDateTime.t()) :: NaiveDateTime.t()
   def beginning_of_quarter(%NaiveDateTime{month: month} = date) do
     month = 1 + 3 * (Timex.quarter(month) - 1)
     beginning_of_month(%{date | :month => month, :day => 1})
   end
 
-  @spec end_of_quarter(NaiveDateTime.t()) :: NaiveDateTime.t()
   def end_of_quarter(%NaiveDateTime{month: month} = date) do
     month = 3 * Timex.quarter(month)
     end_of_month(%{date | :month => month, :day => 1})
   end
 
-  @spec beginning_of_month(NaiveDateTime.t()) :: NaiveDateTime.t()
-  def beginning_of_month(%NaiveDateTime{microsecond: {_, precision}} = datetime),
-    do: %{
-      datetime
-      | :day => 1,
-        :hour => 0,
-        :minute => 0,
-        :second => 0,
-        :microsecond => {0, precision}
-    }
+  def beginning_of_month(%NaiveDateTime{year: year, month: month, microsecond: {_, precision}}),
+    do: Timex.NaiveDateTime.new!(year, month, 1, 0, 0, 0, {0, precision})
 
-  @spec end_of_month(NaiveDateTime.t()) :: NaiveDateTime.t()
-  def end_of_month(%NaiveDateTime{microsecond: {_, precision}} = date) do
-    if precision > 0 do
-      us = Timex.DateTime.Helpers.to_precision(999_999, precision)
-
-      %{
-        date
-        | :day => days_in_month(date),
-          :hour => 23,
-          :minute => 59,
-          :second => 59,
-          :microsecond => {us, precision}
-      }
-    else
-      %{
-        date
-        | :day => days_in_month(date),
-          :hour => 23,
-          :minute => 59,
-          :second => 59,
-          :microsecond => {0, 0}
-      }
-    end
+  def end_of_month(%NaiveDateTime{year: year, month: month, microsecond: {_, precision}} = date) do
+    day = days_in_month(date)
+    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    Timex.NaiveDateTime.new!(year, month, day, 23, 59, 59, us)
   end
 
-  @spec quarter(NaiveDateTime.t()) :: 1..4
-  def quarter(%NaiveDateTime{month: month}), do: Timex.quarter(month)
+  def quarter(%NaiveDateTime{year: y, month: m, day: d}),
+    do: Calendar.ISO.quarter_of_year(y, m, d)
 
-  def days_in_month(%NaiveDateTime{:year => y, :month => m}), do: Timex.days_in_month(y, m)
+  def days_in_month(%NaiveDateTime{year: y, month: m}), do: Timex.days_in_month(y, m)
 
-  def week_of_month(%NaiveDateTime{:year => y, :month => m, :day => d}),
+  def week_of_month(%NaiveDateTime{year: y, month: m, day: d}),
     do: Timex.week_of_month(y, m, d)
 
-  def weekday(%NaiveDateTime{:year => y, :month => m, :day => d}),
+  def weekday(%NaiveDateTime{year: y, month: m, day: d}),
     do: :calendar.day_of_the_week({y, m, d})
 
-  def day(%NaiveDateTime{} = date) do
-    {:ok, nd} = NaiveDateTime.new(date.year, 1, 1, 0, 0, 0)
-    1 + Timex.diff(date, nd, :days)
-  end
+  def weekday(%NaiveDateTime{} = date, weekstart),
+    do: Date.day_of_week(date, weekstart)
+
+  def day(%NaiveDateTime{} = date), do: Date.day_of_year(date)
 
   def is_valid?(%NaiveDateTime{
         :year => y,
@@ -204,7 +138,6 @@ defimpl Timex.Protocol, for: NaiveDateTime do
     %{date | :year => year, :month => month, :day => day_of_month}
   end
 
-  @spec set(NaiveDateTime.t(), list({atom(), term})) :: NaiveDateTime.t() | {:error, term}
   def set(%NaiveDateTime{} = date, options) do
     validate? = Keyword.get(options, :validate, true)
 
@@ -248,6 +181,9 @@ defimpl Timex.Protocol, for: NaiveDateTime do
               %{result | :year => y, :month => m, :day => d}
             end
 
+          {:date, %Date{} = d} ->
+            Timex.set(result, date: {d.year, d.month, d.day})
+
           {:time, {h, m, s}} ->
             if validate? do
               %{
@@ -259,6 +195,22 @@ defimpl Timex.Protocol, for: NaiveDateTime do
             else
               %{result | :hour => h, :minute => m, :second => s}
             end
+
+          {:time, {h, m, s, ms}} ->
+            if validate? do
+              %{
+                result
+                | :hour => Timex.normalize(:hour, h),
+                  :minute => Timex.normalize(:minute, m),
+                  :second => Timex.normalize(:second, s),
+                  :microsecond => Timex.normalize(:microsecond, ms)
+              }
+            else
+              %{result | :hour => h, :minute => m, :second => s, :microsecond => ms}
+            end
+
+          {:time, %Time{} = t} ->
+            Timex.set(result, time: {t.hour, t.minute, t.second, t.microsecond})
 
           {:day, d} ->
             if validate? do
@@ -283,145 +235,18 @@ defimpl Timex.Protocol, for: NaiveDateTime do
     end)
   end
 
-  @spec shift(NaiveDateTime.t(), list({atom(), term})) :: NaiveDateTime.t() | {:error, term}
   def shift(%NaiveDateTime{} = datetime, shifts) when is_list(shifts) do
-    apply_shifts(datetime, shifts)
-  end
+    with {:ok, dt} <- DateTime.from_naive(datetime, "Etc/UTC", Timex.tzdb()) do
+      case Timex.shift(dt, shifts) do
+        {:error, _} = err ->
+          err
 
-  defp apply_shifts(datetime, []),
-    do: datetime
+        %AmbiguousDateTime{after: datetime} ->
+          DateTime.to_naive(datetime)
 
-  defp apply_shifts(datetime, [{:duration, %Duration{} = duration} | rest]) do
-    duration_microseconds = Duration.to_microseconds(duration)
-    shifted = shift_by(datetime, duration_microseconds, :microseconds)
-    apply_shifts(shifted, rest)
-  end
-
-  defp apply_shifts(datetime, [{unit, 0} | rest]) when is_atom(unit),
-    do: apply_shifts(datetime, rest)
-
-  defp apply_shifts(datetime, [{unit, value} | rest]) when is_atom(unit) and is_integer(value) do
-    shifted = shift_by(datetime, value, unit)
-    apply_shifts(shifted, rest)
-  end
-
-  defp apply_shifts({:error, _} = err, _),
-    do: err
-
-  defp shift_by(%NaiveDateTime{:year => y} = datetime, value, :years) do
-    shifted = %{datetime | :year => y + value}
-    # If a plain shift of the year fails, then it likely falls on a leap day,
-    # so set the day to the last day of that month
-    case :calendar.valid_date({shifted.year, shifted.month, shifted.day}) do
-      false ->
-        last_day = :calendar.last_day_of_the_month(shifted.year, shifted.month)
-
-        cond do
-          shifted.day <= last_day ->
-            shifted
-
-          :else ->
-            %{shifted | :day => last_day}
-        end
-
-      true ->
-        shifted
-    end
-  end
-
-  defp shift_by(%NaiveDateTime{:year => year, :month => month} = datetime, value, :months) do
-    m = month + value
-
-    shifted =
-      cond do
-        m > 0 ->
-          years = div(m - 1, 12)
-          month = rem(m - 1, 12) + 1
-          %{datetime | :year => year + years, :month => month}
-
-        m <= 0 ->
-          years = div(m, 12) - 1
-          month = 12 + rem(m, 12)
-          %{datetime | :year => year + years, :month => month}
+        %DateTime{} = datetime ->
+          DateTime.to_naive(datetime)
       end
-
-    # If the shift fails, it's because it's a high day number, and the month
-    # shifted to does not have that many days. This will be handled by always
-    # shifting to the last day of the month shifted to.
-    case :calendar.valid_date({shifted.year, shifted.month, shifted.day}) do
-      false ->
-        last_day = :calendar.last_day_of_the_month(shifted.year, shifted.month)
-
-        cond do
-          shifted.day <= last_day ->
-            shifted
-
-          :else ->
-            %{shifted | :day => last_day}
-        end
-
-      true ->
-        shifted
     end
-  end
-
-  defp shift_by(datetime, value, :weeks),
-    do: shift_by(datetime, value * 60 * 60 * 24 * 7 * 1_000_000, :microseconds)
-
-  defp shift_by(datetime, value, :days),
-    do: shift_by(datetime, value * 60 * 60 * 24 * 1_000_000, :microseconds)
-
-  defp shift_by(datetime, value, :hours),
-    do: shift_by(datetime, value * 60 * 60 * 1_000_000, :microseconds)
-
-  defp shift_by(datetime, value, :minutes),
-    do: shift_by(datetime, value * 60 * 1_000_000, :microseconds)
-
-  defp shift_by(datetime, value, :seconds),
-    do: shift_by(datetime, value * 1_000_000, :microseconds)
-
-  defp shift_by(datetime, value, :milliseconds),
-    do: shift_by(datetime, value * 1_000, :microseconds)
-
-  defp shift_by(
-         %NaiveDateTime{microsecond: {current_microseconds, current_precision}} = datetime,
-         value,
-         :microseconds
-       ) do
-    microseconds_from_zero =
-      :calendar.datetime_to_gregorian_seconds({
-        {datetime.year, datetime.month, datetime.day},
-        {datetime.hour, datetime.minute, datetime.second}
-      }) * 1_000_000 + current_microseconds + value
-
-    if microseconds_from_zero < 0 do
-      {:error, :shift_to_invalid_date}
-    else
-      seconds_from_zero = div(microseconds_from_zero, 1_000_000)
-      rem_microseconds = rem(microseconds_from_zero, 1_000_000)
-      us = Timex.DateTime.Helpers.to_precision(rem_microseconds, current_precision)
-
-      seconds_from_zero
-      |> :calendar.gregorian_seconds_to_datetime()
-      |> Timex.to_naive_datetime()
-      |> Map.put(:microsecond, {us, current_precision})
-    end
-  end
-
-  defp shift_by(_datetime, _value, units),
-    do: {:error, {:unknown_shift_unit, units}}
-
-  defp to_seconds(
-         %NaiveDateTime{year: y, month: m, day: d, hour: h, minute: mm, second: s},
-         :zero
-       ) do
-    :calendar.datetime_to_gregorian_seconds({{y, m, d}, {h, mm, s}})
-  end
-
-  defp to_seconds(
-         %NaiveDateTime{year: y, month: m, day: d, hour: h, minute: mm, second: s},
-         :epoch
-       ) do
-    :calendar.datetime_to_gregorian_seconds({{y, m, d}, {h, mm, s}}) - @epoch_seconds
   end
 end

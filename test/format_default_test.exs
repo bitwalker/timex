@@ -100,11 +100,11 @@ defmodule DateFormatTest.FormatDefault do
 
   test "format day of week" do
     date = Timex.to_datetime({2007, 11, 18})
-    assert {:ok, "0"} = format(date, "{WDsun}")
+    assert {:ok, "6"} = format(date, "{WDsun}")
     assert {:ok, "7"} = format(date, "{WDmon}")
-    assert {:ok, "0"} = format(date, "{0WDsun}")
+    assert {:ok, "6"} = format(date, "{0WDsun}")
     assert {:ok, "7"} = format(date, "{0WDmon}")
-    assert {:ok, "0"} = format(date, "{_WDsun}")
+    assert {:ok, "6"} = format(date, "{_WDsun}")
     assert {:ok, "7"} = format(date, "{_WDmon}")
   end
 
@@ -155,18 +155,18 @@ defmodule DateFormatTest.FormatDefault do
     assert {:ok, " 1"} = format(date, "{_Wmon}")
     assert {:ok, " 1"} = format(date, "{_Wsun}")
 
-    date = Timex.to_datetime({2012, 1, 1})
-    # Is actually part of previous year
+    date = Timex.to_datetime({2015, 1, 4})
+    # Is actually part of previous year when based from monday
     assert {:ok, "0"} = format(date, "{Wmon}")
     assert {:ok, "1"} = format(date, "{Wsun}")
 
-    date = Timex.to_datetime({2012, 1, 2})
+    date = Timex.to_datetime({2015, 1, 5})
     assert {:ok, "1"} = format(date, "{Wmon}")
     assert {:ok, "1"} = format(date, "{Wsun}")
 
-    date = Timex.to_datetime({2012, 12, 30})
+    date = Timex.to_datetime({2014, 12, 31})
     assert {:ok, "52"} = format(date, "{Wmon}")
-    assert {:ok, "53"} = format(date, "{Wsun}")
+    assert {:ok, "52"} = format(date, "{Wsun}")
   end
 
   test "format simple compound date formats" do

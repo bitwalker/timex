@@ -40,4 +40,37 @@ defmodule Timex.Time do
       :pm -> hour + 12
     end
   end
+
+  if Version.compare(System.version(), "1.11.0") == :lt do
+    @doc false
+    def new!(hour, minute, second, microsecond \\ {0, 0}, calendar \\ Calendar.ISO) do
+      case Time.new(hour, minute, second, microsecond, calendar) do
+        {:ok, time} ->
+          time
+
+        {:error, reason} ->
+          raise ArgumentError, "cannot build time, reason: #{inspect(reason)}"
+      end
+    end
+
+    @doc false
+    def to_seconds_after_midnight(%Time{
+          hour: h,
+          minute: m,
+          second: s,
+          microsecond: us,
+          calendar: cal
+        }) do
+      {microsecond, _} = us
+      iso_days = {0, cal.time_to_day_fraction(h, m, s, us)}
+      {Calendar.ISO.iso_days_to_unit(iso_days, :second), microsecond}
+    end
+  else
+    @doc false
+    defdelegate new!(hour, minute, second, microsecond \\ {0, 0}, calendar \\ Calendar.ISO),
+      to: Time
+
+    @doc false
+    defdelegate to_seconds_after_midnight(time), to: Time
+  end
 end

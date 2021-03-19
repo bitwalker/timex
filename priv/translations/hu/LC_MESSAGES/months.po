@@ -21,50 +21,50 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Language: hu\n"
 
-#: lib/l10n/translator.ex:220
+#: lib/l10n/translator.ex:242
 msgid "April"
 msgstr "április"
 
-#: lib/l10n/translator.ex:224
+#: lib/l10n/translator.ex:246
 msgid "August"
 msgstr "augusztus"
 
-#: lib/l10n/translator.ex:228
+#: lib/l10n/translator.ex:250
 msgid "December"
 msgstr "december"
 
-#: lib/l10n/translator.ex:218
+#: lib/l10n/translator.ex:240
 msgid "February"
 msgstr "február"
 
-#: lib/l10n/translator.ex:217
+#: lib/l10n/translator.ex:239
 msgid "January"
 msgstr "január"
 
-#: lib/l10n/translator.ex:223
+#: lib/l10n/translator.ex:245
 msgid "July"
 msgstr "július"
 
-#: lib/l10n/translator.ex:222
+#: lib/l10n/translator.ex:244
 msgid "June"
 msgstr "június"
 
-#: lib/l10n/translator.ex:219
+#: lib/l10n/translator.ex:241
 msgid "March"
 msgstr "március"
 
-#: lib/l10n/translator.ex:221
+#: lib/l10n/translator.ex:243
 msgid "May"
 msgstr "május"
 
-#: lib/l10n/translator.ex:227
+#: lib/l10n/translator.ex:249
 msgid "November"
 msgstr "november"
 
-#: lib/l10n/translator.ex:226
+#: lib/l10n/translator.ex:248
 msgid "October"
 msgstr "október"
 
-#: lib/l10n/translator.ex:225
+#: lib/l10n/translator.ex:247
 msgid "September"
 msgstr "szeptember"

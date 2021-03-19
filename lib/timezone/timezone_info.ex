@@ -7,6 +7,7 @@ defmodule Timex.TimezoneInfo do
     - `abbreviation` is the abbreviated name for the zone in the current period, i.e. "America/Chicago" on 3/30/15 is "CDT"
     - `offset_std` is the offset in seconds from standard time for this period
     - `offset_utc` is the offset in seconds from UTC for this period
+
   Spec:
     - `day_of_week`: :sunday, :monday, :tuesday, etc
     - `datetime`:    {{year, month, day}, {hour, minute, second}}
@@ -79,6 +80,27 @@ defmodule Timex.TimezoneInfo do
       until: until || :max
     }
     |> validate_and_return()
+  end
+
+  def from_datetime(%DateTime{
+        time_zone: name,
+        zone_abbr: abbr,
+        std_offset: std_offset,
+        utc_offset: utc_offset
+      }) do
+    %__MODULE__{
+      full_name: name,
+      abbreviation: abbr,
+      offset_std: std_offset,
+      offset_utc: utc_offset,
+      from: :min,
+      until: :max
+    }
+  end
+
+  @doc false
+  def to_period(%__MODULE__{offset_utc: utc, offset_std: std, abbreviation: abbr}) do
+    %{std_offset: std, utc_offset: utc, zone_abbr: abbr}
   end
 
   defp validate_and_return(%__MODULE__{} = tz) do

@@ -20,50 +20,50 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));\n"
 "Language: ro\n"
 
-#: lib/l10n/translator.ex:207
+#: lib/l10n/translator.ex:229
 msgid "Apr"
 msgstr ""
 
-#: lib/l10n/translator.ex:211
+#: lib/l10n/translator.ex:233
 msgid "Aug"
 msgstr ""
 
-#: lib/l10n/translator.ex:215
+#: lib/l10n/translator.ex:237
 msgid "Dec"
 msgstr ""
 
-#: lib/l10n/translator.ex:205
+#: lib/l10n/translator.ex:227
 msgid "Feb"
 msgstr ""
 
-#: lib/l10n/translator.ex:204
+#: lib/l10n/translator.ex:226
 msgid "Jan"
 msgstr "Ian"
 
-#: lib/l10n/translator.ex:210
+#: lib/l10n/translator.ex:232
 msgid "Jul"
 msgstr "Iul"
 
-#: lib/l10n/translator.ex:209
+#: lib/l10n/translator.ex:231
 msgid "Jun"
 msgstr "Iun"
 
-#: lib/l10n/translator.ex:206
+#: lib/l10n/translator.ex:228
 msgid "Mar"
 msgstr ""
 
-#: lib/l10n/translator.ex:208
+#: lib/l10n/translator.ex:230
 msgid "May"
 msgstr "Mai"
 
-#: lib/l10n/translator.ex:214
+#: lib/l10n/translator.ex:236
 msgid "Nov"
 msgstr "Noi"
 
-#: lib/l10n/translator.ex:213
+#: lib/l10n/translator.ex:235
 msgid "Oct"
 msgstr ""
 
-#: lib/l10n/translator.ex:212
+#: lib/l10n/translator.ex:234
 msgid "Sep"
 msgstr ""

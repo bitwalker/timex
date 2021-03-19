@@ -5,6 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+
 **NOTE:** The config of the Timex default locale is changed to:
 ```ex
 config :timex, Timex.Gettext, default_locale: "en"
@@ -20,9 +21,112 @@ The Gettext backend for Timex will follow suit. If for some reason you want Time
 Timex.Gettext.put_locale("de")
 ```
 
+### Potentially Breaking
+
+- Fixed handling of `Etc/GMT` vs `GMT` timezones. The former must be POSIX compatible, which inverts the meaning of the sign, whereas the latter have no such restriction and are equivalent to `UTC(+/-)HH:MM`,
+while this is fixing incorrect behavior, it could potentially break users relying on the incorrect behavior.
+
 ### Fixed
 
+- #494, incorrect handling of parsing week numbers
+- Improve parsing of timezones
+- Incorrect stringification of error values returned in some circumstances
 - Let Timex follow the locale set by the global Gettext. See #501
+
+### Added/Changed
+
+- Removed `Timex.Timezone.diff`, as it is no longer used in Timex
+
+### Fixed
+
+## 3.7.1
+
+### Fixed
+
+- `local/0` and `local/1` were incorrectly returning TimezoneInfo structs due to a bad match
+
+## 3.7.0
+
+### Potentially Breaking
+
+- Elixir 1.8+ is now required
+- Tzdata 1.0+ is now required
+- If you were previously relying on `?` suffixed functions to return
+`{:error, reason}` if given invalid date/time inputs (other than
+`is_valid?`), these functions now always return booleans and raise if an
+error with the input is encountered
+
+### Added/Changed
+
+- Refactored much of the library to delegate to the Calendar API where
+appropriate, we now make more of an effort to avoid duplication of the
+standard library functionality
+- Functions with the `?` suffix now correctly raise on invalid inputs,
+and always return booleans. This was implicitly broken before, we need
+to follow convention here.
+- Local timezone handling no longer requires parsing the zoneinfo files,
+instead we attempt to observe the timezone name that is active and feed
+that into the timezone database directly. We were just using the
+abbreviations before, but that wasn't correct behavior at all. In the
+future we may want to support the system timezone database as a proper
+implementation of `Calendar.TimeZoneDatabase`, but for now we've just
+removed the unnecessary parsing work that was going on here.
+- `Timex.today/1` which returns today's date in the provided timezone
+
+### Fixed
+
+- Handling of timezones across DST. More generally we now handle gaps/ambiguity 
+much more consistently
+- ZoneInfo parser was refactored, now properly supports version 2/3
+files, addresses some small bugs in previous code
+- Some incorrect/redundant typespecs were removed/fixed
+- We now support alternative timezone databases for API operations that
+do not need to interact with the `Timex.Timezone` module directly. That
+module is still tied to tzdata for now, but in the future may be
+modified to remove the direct dependency.
+
+## 3.6.4
+
+### Potentially Breaking
+
+- `Timex.set/2` now sets microseconds when setting `:time` from a `%Time{}` struct
+- `Timex.Duration.to_string/1` now returns `PT0S` instead of `P` for zero-length durations with the default formatter
+
+### Added
+- `Timex.set/2` now also accepts setting the `:date` from a `%Date{}` and `:time` from a `%Time{}` struct for NaiveDateTime
+
+### Fixes
+- Loosen `tzdata` dependency to allow `1.x` releases
+
+## 3.6.3
+
+### Added
+
+- Switched to GitHub Actions for CI
+- Finnish translations
+- Enumerable implementation for Timex.Interval
+
+### Fixed
+
+- Czech translation fixes
+- #616
+- #615
+
+## 3.6.2
+
+### Added
+
+- Updated tzdata to 1.0.1
+- Vietnamese/Czech/Hebrew/Bosnian translations
+- Formatter settings, and ran the formatter on the codebase
+
+### Fixed
+
+- Romanian translation fixes
+- Various documentation/typespec fixes
+- Parser for ISOweek
+- #559
+- #577
 
 ## 3.6.1
 

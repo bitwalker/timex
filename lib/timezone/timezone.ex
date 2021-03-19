@@ -20,20 +20,20 @@ defmodule Timex.Timezone do
   alias Timex.Parse.Timezones.Posix.PosixTimezone, as: PosixTz
   alias Timex.Types
 
+  @behaviour Calendar.TimeZoneDatabase
+
   @doc """
   Determines if a given zone name exists
   """
   @spec exists?(String.t()) :: boolean
   def exists?(zone) when is_binary(zone) do
-    case Tzdata.zone_exists?(zone) do
-      true ->
-        true
-
-      false ->
-        case lookup_posix(zone) do
-          tz when is_binary(tz) -> true
-          _ -> false
-        end
+    if Tzdata.zone_exists?(zone) do
+      true
+    else
+      case lookup_posix(zone) do
+        tz when is_binary(tz) -> true
+        _ -> false
+      end
     end
   end
 
@@ -52,9 +52,12 @@ defmodule Timex.Timezone do
   def local(date) do
     secs = Timex.to_gregorian_seconds(date)
 
-    case Local.lookup(secs) do
-      {:error, _} = err -> err
-      tz -> resolve(tz, secs)
+    case Local.lookup() do
+      {:error, _} = err ->
+        err
+
+      tz ->
+        resolve(tz, secs)
     end
   end
 
@@ -72,120 +75,136 @@ defmodule Timex.Timezone do
   """
   @spec name_of(Types.valid_timezone() | TimezoneInfo.t() | AmbiguousTimezoneInfo.t()) ::
           String.t()
-          | {:error, {:invalid_timezone, term}}
-          | {:error, {:no_such_zone, term}}
+          | {:error, :time_zone_not_found}
           | {:error, term}
   def name_of(%TimezoneInfo{:full_name => name}), do: name
   def name_of(:utc), do: "Etc/UTC"
+  def name_of(:local), do: name_of(Local.lookup())
 
-  def name_of(:local) do
-    case local(DateTime.utc_now()) do
-      {:error, _} = err -> err
-      tz -> name_of(tz)
-    end
-  end
-
+  def name_of("Etc/UTC"), do: "Etc/UTC"
+  def name_of("GMT"), do: "Etc/UTC"
   def name_of("UTC"), do: "Etc/UTC"
-  def name_of(0), do: "Etc/UTC"
-  def name_of("A"), do: name_of(1)
-  def name_of("M"), do: name_of(12)
-  def name_of("N"), do: name_of(-1)
-  def name_of("Y"), do: name_of(-12)
-  def name_of("Z"), do: "Etc/UTC"
   def name_of("UT"), do: "Etc/UTC"
+  def name_of("Z"), do: "Etc/UTC"
+  def name_of("A"), do: "Etc/UTC+1"
+  def name_of("M"), do: "Etc/UTC+12"
+  def name_of("N"), do: "Etc/UTC-1"
+  def name_of("Y"), do: "Etc/UTC-12"
+
+  def name_of(0), do: "Etc/UTC"
 
   def name_of(offset) when is_integer(offset) do
-    if offset > 0 do
-      "Etc/GMT-#{offset}"
-    else
-      "Etc/GMT+#{offset * -1}"
+    cond do
+      offset <= -100 ->
+        hh = div(offset * -1, 100)
+        mm = rem(offset, 100) * -1
+
+        if mm == 0 do
+          "Etc/UTC-#{hh}"
+        else
+          hh = String.pad_leading(to_string(hh), 2, "0")
+          mm = String.pad_leading(to_string(mm), 2, "0")
+          "Etc/UTC-#{hh}:#{mm}"
+        end
+
+      offset >= 100 ->
+        hh = div(offset, 100)
+        mm = rem(offset, 100)
+
+        if mm == 0 do
+          "Etc/UTC+#{hh}"
+        else
+          hh = String.pad_leading(to_string(hh), 2, "0")
+          mm = String.pad_leading(to_string(mm), 2, "0")
+          "Etc/UTC+#{hh}:#{mm}"
+        end
+
+      offset >= 0 and offset < 24 ->
+        "Etc/UTC+#{offset}"
+
+      offset <= 0 and offset > -24 ->
+        "Etc/UTC-#{offset * -1}"
+
+      :else ->
+        {:error, :time_zone_not_found}
     end
   end
 
-  def name_of(offset) when is_float(offset) do
-    IO.warn(
-      "use of floating point offsets is dangerous as they are not guaranteed to be precise " <>
-        "it is recommended that you use either a proper Olson timezone name, or build a timezone info manually " <>
-        "with Timex.Timezone.create/6"
-    )
-
-    if offset > 0 do
-      "Etc/GMT-#{offset}"
-    else
-      "Etc/GMT+#{offset * -1}"
-    end
-  end
-
-  def name_of(<<?+, ?0, ?0, ?:, ?0, ?0>>) do
+  def name_of(<<sign::utf8, ?0, ?0, ?:, ?0, ?0>>) when sign in [?+, ?-] do
     "Etc/UTC"
   end
 
-  def name_of(<<?+, h1::utf8, h2::utf8, ?:, ?0, ?0>>) do
-    "Etc/GMT-" <> <<h1::utf8, h2::utf8>>
+  def name_of(<<sign::utf8, h::binary-size(2)-unit(8), ?:, ?0, ?0>>) when sign in [?+, ?-] do
+    "Etc/UTC" <> <<sign::utf8, h::binary>>
   end
 
-  def name_of(<<?+, h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8>>) do
-    "Etc/GMT-" <> <<h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8>>
+  def name_of(<<sign::utf8, h::binary-size(2)-unit(8), ?:, m::binary-size(2)-unit(8)>>)
+      when sign in [?+, ?-] do
+    "Etc/UTC" <> <<sign::utf8, h::binary, ?:, m::binary>>
   end
 
-  def name_of(<<?+, offset::binary>> = tz) do
-    case Integer.parse(offset) do
-      {num, _} ->
-        cond do
-          num >= 100 -> name_of(trunc(num / 100))
-          true -> name_of(num)
-        end
+  def name_of(
+        <<sign::utf8, h::binary-size(2)-unit(8), ?:, m::binary-size(2)-unit(8), ?:,
+          s::binary-size(2)-unit(8)>>
+      )
+      when sign in [?+, ?-] do
+    "Etc/UTC" <> <<sign::utf8, h::binary, ?:, m::binary, ?:, s::binary>>
+  end
 
-      :error ->
-        {:error, {:no_such_zone, tz}}
+  def name_of(<<sign::utf8, h::binary-size(2)-unit(8), m::binary-size(2)-unit(8)>>)
+      when sign in [?+, ?-] do
+    "Etc/UTC" <> <<sign::utf8, h::binary, ?:, m::binary>>
+  end
+
+  def name_of(<<sign::utf8, h::binary-size(2)-unit(8)>>) when sign in [?+, ?-] do
+    "Etc/UTC" <> <<sign::utf8, h::binary>>
+  end
+
+  def name_of(<<sign::utf8, h::utf8>>) when sign in [?+, ?-] and h >= ?0 and h <= ?9 do
+    "Etc/UTC" <> <<sign::utf8, h::utf8>>
+  end
+
+  def name_of("Etc/UTC" <> offset), do: name_of(offset)
+
+  def name_of("Etc/GMT" <> offset) do
+    case name_of("GMT" <> offset) do
+      {:error, _} = err ->
+        err
+
+      "GMT" <> rest ->
+        "Etc/GMT" <> rest
     end
   end
 
-  def name_of(<<?-, ?0, ?0, ?:, ?0, ?0>>) do
-    "Etc/UTC"
-  end
+  def name_of(<<"GMT", sign::utf8, hh::utf8>>) when sign in [?+, ?-],
+    do: "GMT" <> <<sign::utf8, hh::utf8>>
 
-  def name_of(<<?-, h1::utf8, h2::utf8, ?:, ?0, ?0>>) do
-    "Etc/GMT+" <> <<h1::utf8, h2::utf8>>
-  end
+  def name_of(<<"GMT", sign::utf8, hh::binary-size(2)-unit(8)>>) when sign in [?+, ?-],
+    do: "GMT" <> <<sign::utf8, hh::binary>>
 
-  def name_of(<<?-, h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8>>) do
-    "Etc/GMT+" <> <<h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8>>
-  end
+  def name_of(<<"GMT", sign::utf8, hh::binary-size(2)-unit(8), ?:, mm::binary-size(2)-unit(8)>>)
+      when sign in [?+, ?-],
+      do: "GMT" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
 
-  def name_of(<<?-, offset::binary>> = tz) do
-    case Integer.parse(offset) do
-      {num, _} ->
-        cond do
-          num >= 100 -> name_of(trunc(num / 100) * -1)
-          true -> name_of(num * -1)
-        end
-
-      :error ->
-        {:error, {:no_such_zone, tz}}
-    end
-  end
-
-  def name_of(<<"GMT", ?+, offset::binary>>), do: "Etc/GMT+#{offset}"
-  def name_of(<<"GMT", ?-, offset::binary>>), do: "Etc/GMT-#{offset}"
+  def name_of(<<"GMT", sign::utf8, hh::binary-size(2)-unit(8), mm::binary-size(2)-unit(8)>>)
+      when sign in [?+, ?-],
+      do: "GMT" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
 
   def name_of(tz) when is_binary(tz) do
-    case Tzdata.zone_exists?(tz) do
-      true ->
-        tz
+    if Tzdata.zone_exists?(tz) do
+      tz
+    else
+      case lookup_posix(tz) do
+        full_name when is_binary(full_name) ->
+          full_name
 
-      false ->
-        case lookup_posix(tz) do
-          full_name when is_binary(full_name) ->
-            full_name
-
-          nil ->
-            {:error, {:invalid_timezone, tz}}
-        end
+        nil ->
+          {:error, :time_zone_not_found}
+      end
     end
   end
 
-  def name_of(tz), do: {:error, {:invalid_timezone, tz}}
+  def name_of(_tz), do: {:error, :time_zone_not_found}
 
   @doc """
   Gets timezone info for a given zone name and date. The date provided
@@ -196,140 +215,174 @@ defmodule Timex.Timezone do
           TimezoneInfo.t() | AmbiguousTimezoneInfo.t() | {:error, term}
   @spec get(Types.valid_timezone(), Types.valid_datetime()) ::
           TimezoneInfo.t() | AmbiguousTimezoneInfo.t() | {:error, term}
-  def get(tz, datetime \\ :calendar.universal_time())
+  def get(tz, datetime \\ NaiveDateTime.utc_now())
 
   def get(:utc, _datetime), do: %TimezoneInfo{}
   def get(:local, datetime), do: local(datetime)
 
   def get(tz, datetime) do
+    utc_or_wall = if match?(%DateTime{}, datetime), do: :utc, else: :wall
+
     case name_of(tz) do
       {:error, _} = err ->
         err
 
-      "Etc/UTC" ->
-        %TimezoneInfo{}
-
       name ->
-        do_get(name, datetime)
+        get_info(name, datetime, utc_or_wall)
     end
   end
 
-  defp do_get(timezone, datetime, utc_or_wall \\ :wall)
+  defp get_info(timezone, datetime, utc_or_wall)
 
-  defp do_get("Etc/GMT+" <> offset, _datetime, _utc_or_wall) do
-    {suffix, offset_secs} = parse_offset(offset)
+  defp get_info("Etc/UTC", _datetime, _utc_or_wall),
+    do: %TimezoneInfo{}
 
-    %TimezoneInfo{
-      full_name: "Etc/GMT+" <> suffix,
-      abbreviation: "-" <> offset,
-      offset_std: 0,
-      offset_utc: offset_secs * -1,
-      from: :min,
-      until: :max
-    }
+  defp get_info("Etc/GMT", _datetime, _utc_or_wall),
+    do: %TimezoneInfo{}
+
+  defp get_info(<<"Etc/UTC", sign::utf8, offset::binary>>, datetime, utc_or_wall)
+       when sign in [?+, ?-] do
+    get_utc_info("Etc/UTC", <<sign::utf8, offset::binary>>, datetime, utc_or_wall)
   end
 
-  defp do_get("Etc/GMT-" <> offset, _datetime, _utc_or_wall) do
-    {suffix, offset_secs} = parse_offset(offset)
-
-    %TimezoneInfo{
-      full_name: "Etc/GMT-" <> suffix,
-      abbreviation: "+" <> offset,
-      offset_std: 0,
-      offset_utc: offset_secs,
-      from: :min,
-      until: :max
-    }
+  defp get_info(<<"Etc/GMT", sign::utf8, offset::binary>>, datetime, utc_or_wall)
+       when sign in [?+, ?-] do
+    get_utc_info("Etc/GMT", <<sign::utf8, offset::binary>>, datetime, utc_or_wall)
   end
 
-  defp do_get(timezone, datetime, utc_or_wall) do
-    name = name_of(timezone)
+  defp get_info(<<"GMT", sign::utf8, offset::binary>>, _datetime, _utc_or_wall)
+       when sign in [?+, ?-] do
+    with offset_secs when is_integer(offset_secs) <- parse_offset(offset) do
+      hours = div(offset_secs, 3600)
+      minutes = div(rem(offset_secs, 3600), 60)
+
+      if hours != 0 or minutes != 0 do
+        hh = String.pad_leading(to_string(hours), 2, "0")
+        mm = String.pad_leading(to_string(minutes), 2, "0")
+
+        {suffix, abbr, offset_utc} =
+          cond do
+            sign == ?+ and minutes == 0 ->
+              {"+#{hours}", "-#{hh}", offset_secs * -1}
+
+            sign == ?+ ->
+              {"+#{hours}:#{mm}", "-#{hh}:#{mm}", offset_secs * -1}
+
+            sign == ?- and minutes == 0 ->
+              {"-#{hours}", "+#{hh}", offset_secs}
+
+            sign == ?- ->
+              {"-#{hours}:#{mm}", "+#{hh}:#{mm}", offset_secs}
+          end
+
+        %TimezoneInfo{
+          full_name: <<"Etc/GMT", suffix::binary>>,
+          abbreviation: abbr,
+          offset_std: 0,
+          offset_utc: offset_utc,
+          from: :min,
+          until: :max
+        }
+      else
+        %TimezoneInfo{
+          full_name: "Etc/GMT",
+          abbreviation: "GMT",
+          offset_std: 0,
+          offset_utc: 0,
+          from: :min,
+          until: :max
+        }
+      end
+    end
+  end
+
+  defp get_info(name, datetime, utc_or_wall) when is_binary(name) do
     seconds_from_zeroyear = Timex.to_gregorian_seconds(datetime)
 
-    case name do
-      "Etc/GMT-" <> _offset ->
-        do_get(name, datetime, utc_or_wall)
-
-      "Etc/GMT+" <> _offset ->
-        do_get(name, datetime, utc_or_wall)
-
-      _ ->
-        case Tzdata.zone_exists?(name) do
-          false ->
-            lookup_timezone_by_abbreviation(name, seconds_from_zeroyear, utc_or_wall)
-
-          true ->
-            resolve(name, seconds_from_zeroyear, utc_or_wall)
-        end
+    if Tzdata.zone_exists?(name) do
+      resolve(name, seconds_from_zeroyear, utc_or_wall)
+    else
+      lookup_timezone_by_abbreviation(name, seconds_from_zeroyear, utc_or_wall)
     end
   end
 
-  defp parse_offset(<<?0, h2::utf8, ?:, m1::utf8, m2::utf8, ?:, s1::utf8, s2::utf8>>) do
-    secs = String.to_integer(<<h2::utf8>>) * 60 * 60
-    secs = secs + String.to_integer(<<m1::utf8, m2::utf8>>) * 60
-    secs = secs + String.to_integer(<<s1::utf8, s2::utf8>>)
-    {<<h2::utf8, ?:, m1::utf8, m2::utf8, ?:, s1::utf8, s2::utf8>>, secs}
+  defp get_info(%TimezoneInfo{} = info, _datetime, _utc_or_wall), do: info
+
+  defp get_utc_info(prefix, <<sign::utf8, offset::binary>>, _datetime, _utc_or_wall)
+       when sign in [?+, ?-] do
+    with offset_secs when is_integer(offset_secs) <- parse_offset(offset) do
+      hours = div(offset_secs, 3600)
+      minutes = div(rem(offset_secs, 3600), 60)
+
+      if hours != 0 or minutes != 0 do
+        hh = String.pad_leading(to_string(hours), 2, "0")
+        mm = String.pad_leading(to_string(minutes), 2, "0")
+
+        {suffix, abbr, offset_utc} =
+          cond do
+            sign == ?+ and minutes == 0 ->
+              {"#{hours}", "+#{hh}", offset_secs}
+
+            sign == ?+ ->
+              {"#{hours}:#{mm}", "+#{hh}:#{mm}", offset_secs}
+
+            sign == ?- and minutes == 0 ->
+              {"#{hours}", "-#{hh}", offset_secs * -1}
+
+            sign == ?- ->
+              {"#{hours}:#{mm}", "-#{hh}:#{mm}", offset_secs * -1}
+          end
+
+        %TimezoneInfo{
+          full_name: <<prefix::binary, sign::utf8, suffix::binary>>,
+          abbreviation: abbr,
+          offset_std: 0,
+          offset_utc: offset_utc,
+          from: :min,
+          until: :max
+        }
+      else
+        %TimezoneInfo{}
+      end
+    end
   end
 
   defp parse_offset(
-         <<h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8, ?:, s1::utf8, s2::utf8>> = suffix
+         <<h::binary-size(2)-unit(8), ?:, m::binary-size(2)-unit(8), ?:,
+           s::binary-size(2)-unit(8)>>
        ) do
-    secs = String.to_integer(<<h1::utf8, h2::utf8>>) * 60 * 60
-    secs = secs + String.to_integer(<<m1::utf8, m2::utf8>>) * 60
-    secs = secs + String.to_integer(<<s1::utf8, s2::utf8>>)
-    {suffix, secs}
+    with {hh, _} <- Integer.parse(h),
+         {mm, _} <- Integer.parse(m),
+         {ss, _} <- Integer.parse(s) do
+      hh * 3600 + mm * 60 + ss
+    else
+      _ ->
+        {:error, :invalid_offset}
+    end
   end
 
-  defp parse_offset(<<?0, h2::utf8, ?:, m1::utf8, m2::utf8>>) do
-    secs = String.to_integer(<<h2::utf8>>) * 60 * 60
-    secs = secs + String.to_integer(<<m1::utf8, m2::utf8>>) * 60
-    {<<h2::utf8, ?:, m1::utf8, m2::utf8>>, secs}
+  defp parse_offset(<<h::binary-size(2)-unit(8), ?:, m::binary-size(2)-unit(8)>>) do
+    with {hh, _} <- Integer.parse(h),
+         {mm, _} <- Integer.parse(m) do
+      hh * 3600 + mm * 60
+    else
+      _ ->
+        {:error, :invalid_offset}
+    end
   end
 
-  defp parse_offset(<<h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8>> = suffix) do
-    secs = String.to_integer(<<h1::utf8, h2::utf8>>) * 60 * 60
-    secs = secs + String.to_integer(<<m1::utf8, m2::utf8>>) * 60
-    {suffix, secs}
+  defp parse_offset(<<h::binary-size(2)-unit(8)>>) do
+    with {hh, _} <- Integer.parse(h) do
+      hh * 3600
+    else
+      _ ->
+        {:error, :invalid_offset}
+    end
   end
 
-  defp parse_offset(<<?0, h2::utf8>>) do
-    secs = String.to_integer(<<h2::utf8>>) * 60 * 60
-    {<<h2::utf8>>, secs}
+  defp parse_offset(<<h::utf8>> = input) when h >= ?0 and h <= ?9 do
+    String.to_integer(input) * 3600
   end
-
-  defp parse_offset(<<h1::utf8, h2::utf8>> = suffix) do
-    secs = String.to_integer(<<h1::utf8, h2::utf8>>) * 60 * 60
-    {suffix, secs}
-  end
-
-  defp parse_offset(<<h1::utf8, h2::utf8, ?., rest::binary>>) do
-    hours = String.to_integer(<<h1::utf8, h2::utf8>>)
-    hours = hours + String.to_float(<<?0, ?., rest::binary>>)
-    secs = trunc(Float.round(hours * 60 * 60))
-    mm = div(rem(secs, 60 * 60), 60)
-
-    {m1, m2} =
-      cond do
-        mm > 9 ->
-          <<m1::utf8, m2::utf8>> = Integer.to_string(mm)
-          {m1, m2}
-
-        :else ->
-          <<m2::utf8>> = Integer.to_string(mm)
-          {?0, m2}
-      end
-
-    {<<h1::utf8, h2::utf8, ?:, m1::utf8, m2::utf8>>, secs}
-  end
-
-  defp parse_offset(<<h2::utf8, ?., rest::binary>>) do
-    parse_offset(<<?0, h2::utf8, ?., rest::binary>>)
-  end
-
-  defp parse_offset("0"), do: {"0", 0}
-
-  defp parse_offset(<<h1::utf8>> = suffix),
-    do: {suffix, String.to_integer(<<h1::utf8>>) * 60 * 60}
 
   def total_offset(%TimezoneInfo{offset_std: std, offset_utc: utc}) do
     utc + std
@@ -355,48 +408,31 @@ defmodule Timex.Timezone do
 
   def resolve(name, seconds_from_zeroyear, utc_or_wall)
       when is_binary(name) and is_integer(seconds_from_zeroyear) and utc_or_wall in [:utc, :wall] do
-    case Tzdata.zone_exists?(name) do
-      false ->
-        # Timezone doesn't exist, so it must be either a custom timezone, or an odd offset
-        case name do
-          "Etc/GMT" <> _offset ->
-            do_get(
-              name,
-              :calendar.gregorian_seconds_to_datetime(seconds_from_zeroyear),
-              utc_or_wall
-            )
+    case Tzdata.periods_for_time(name, seconds_from_zeroyear, utc_or_wall) do
+      [] ->
+        {:error, {:could_not_resolve_timezone, name, seconds_from_zeroyear, utc_or_wall}}
 
-          _ ->
-            {:error, {:unknown_timezone, name}}
-        end
+      # Resolved
+      [period] ->
+        tzdata_to_timezone(period, name)
 
-      true ->
-        case Tzdata.periods_for_time(name, seconds_from_zeroyear, utc_or_wall) do
+      # This case happens when using wall clock time, we resolve it by using UTC clock time instead
+      [before_period, after_period | _] ->
+        case Tzdata.periods_for_time(name, seconds_from_zeroyear, :utc) do
           [] ->
-            {:error, {:could_not_resolve_timezone, name, seconds_from_zeroyear, utc_or_wall}}
+            # We can't resolve it this way, I don't expect this to be possible, but we handle it
+            before_tz = tzdata_to_timezone(before_period, name)
+            after_tz = tzdata_to_timezone(after_period, name)
+            AmbiguousTimezoneInfo.new(before_tz, after_tz)
 
-          # Resolved
           [period] ->
             tzdata_to_timezone(period, name)
 
-          # This case happens when using wall clock time, we resolve it by using UTC clock time instead
-          [before_period, after_period | _] ->
-            case Tzdata.periods_for_time(name, seconds_from_zeroyear, :utc) do
-              [] ->
-                # We can't resolve it this way, I don't expect this to be possible, but we handle it
-                before_tz = tzdata_to_timezone(before_period, name)
-                after_tz = tzdata_to_timezone(after_period, name)
-                AmbiguousTimezoneInfo.new(before_tz, after_tz)
-
-              [period] ->
-                tzdata_to_timezone(period, name)
-
-              _ ->
-                # Still ambiguous, use wall clock time for info passed back to caller
-                before_tz = tzdata_to_timezone(before_period, name)
-                after_tz = tzdata_to_timezone(after_period, name)
-                AmbiguousTimezoneInfo.new(before_tz, after_tz)
-            end
+          _ ->
+            # Still ambiguous, use wall clock time for info passed back to caller
+            before_tz = tzdata_to_timezone(before_period, name)
+            after_tz = tzdata_to_timezone(after_period, name)
+            AmbiguousTimezoneInfo.new(before_tz, after_tz)
         end
     end
   end
@@ -404,9 +440,12 @@ defmodule Timex.Timezone do
   @doc """
   Convert a date to the given timezone (either TimezoneInfo or a timezone name)
   """
-  @spec convert(date :: DateTime.t(), tz :: AmbiguousTimezoneInfo.t()) ::
+  @spec convert(date :: DateTime.t() | NaiveDateTime.t(), tz :: AmbiguousTimezoneInfo.t()) ::
           AmbiguousDateTime.t() | {:error, term}
-  @spec convert(date :: DateTime.t(), tz :: TimezoneInfo.t() | String.t()) ::
+  @spec convert(
+          date :: DateTime.t() | NaiveDateTime.t(),
+          tz :: TimezoneInfo.t() | Types.valid_timezone()
+        ) ::
           DateTime.t() | AmbiguousDateTime.t() | {:error, term}
 
   def convert(%DateTime{} = date, %AmbiguousTimezoneInfo{} = tz) do
@@ -420,111 +459,23 @@ defmodule Timex.Timezone do
     date
   end
 
-  def convert(%DateTime{} = date, %TimezoneInfo{full_name: name} = tz) do
-    # Calculate the difference between `date`'s timezone, and the target timezone
-    delta = diff(date, tz)
-    secs = Timex.to_gregorian_seconds(date) + delta
+  def convert(%DateTime{} = date, %TimezoneInfo{full_name: name} = tzinfo) do
+    with {:ok, datetime} <- DateTime.shift_zone(date, name, Timex.tzdb()) do
+      datetime
+    else
+      {ty, a, b} when ty in [:gap, :ambiguous] ->
+        %AmbiguousDateTime{before: a, after: b, type: ty}
 
-    # if the zone does not exist, use the provided zoneinfo
-    timezone =
-      if Tzdata.zone_exists?(name) do
-        case resolve(name, secs, :wall) do
-          {:error, _} ->
-            # This wall clock time doesn't exist in that timezone, advance an hour and try again
-            resolve(name, secs + 3600, :wall)
+      {:error, :time_zone_not_found} ->
+        convert_fallback(date, tzinfo)
 
-          tz ->
-            tz
-        end
-      else
-        tz
-      end
-
-    # Offset the provided date's time by the difference
-    case timezone do
       {:error, _} = err ->
         err
-
-      ^tz ->
-        {seconds_from_zeroyear, microsecs} = do_shift(date, delta)
-        {{y, m, d}, {h, mm, s}} = :calendar.gregorian_seconds_to_datetime(seconds_from_zeroyear)
-
-        %DateTime{
-          :year => y,
-          :month => m,
-          :day => d,
-          :hour => h,
-          :minute => mm,
-          :second => s,
-          :microsecond => microsecs,
-          :time_zone => tz.full_name,
-          :zone_abbr => tz.abbreviation,
-          :utc_offset => tz.offset_utc,
-          :std_offset => tz.offset_std
-        }
-
-      %TimezoneInfo{} = new_zone ->
-        delta = diff(date, new_zone)
-        {seconds_from_zeroyear, microsecs} = do_shift(date, delta)
-        {{y, m, d}, {h, mm, s}} = :calendar.gregorian_seconds_to_datetime(seconds_from_zeroyear)
-
-        %DateTime{
-          :year => y,
-          :month => m,
-          :day => d,
-          :hour => h,
-          :minute => mm,
-          :second => s,
-          :microsecond => microsecs,
-          :time_zone => new_zone.full_name,
-          :zone_abbr => new_zone.abbreviation,
-          :utc_offset => new_zone.offset_utc,
-          :std_offset => new_zone.offset_std
-        }
-
-      %AmbiguousTimezoneInfo{before: before_tz, after: after_tz} ->
-        before_delta = diff(date, before_tz)
-        {before_shifted, before_us} = do_shift(date, before_delta)
-        after_delta = diff(date, after_tz)
-        {after_shifted, after_us} = do_shift(date, after_delta)
-        {{y, m, d}, {h, mm, s}} = :calendar.gregorian_seconds_to_datetime(before_shifted)
-
-        before_dt = %DateTime{
-          :year => y,
-          :month => m,
-          :day => d,
-          :hour => h,
-          :minute => mm,
-          :second => s,
-          :microsecond => before_us,
-          :time_zone => before_tz.full_name,
-          :zone_abbr => before_tz.abbreviation,
-          :utc_offset => before_tz.offset_utc,
-          :std_offset => before_tz.offset_std
-        }
-
-        {{y, m, d}, {h, mm, s}} = :calendar.gregorian_seconds_to_datetime(after_shifted)
-
-        after_dt = %DateTime{
-          :year => y,
-          :month => m,
-          :day => d,
-          :hour => h,
-          :minute => mm,
-          :second => s,
-          :microsecond => after_us,
-          :time_zone => after_tz.full_name,
-          :zone_abbr => after_tz.abbreviation,
-          :utc_offset => after_tz.offset_utc,
-          :std_offset => after_tz.offset_std
-        }
-
-        %AmbiguousDateTime{:before => before_dt, :after => after_dt}
     end
   end
 
   def convert(%DateTime{} = date, tz) do
-    case do_get(tz, date, :utc) do
+    case get(tz, date) do
       {:error, _} = err ->
         err
 
@@ -533,60 +484,117 @@ defmodule Timex.Timezone do
     end
   end
 
+  def convert(%NaiveDateTime{} = date, %AmbiguousTimezoneInfo{} = tz) do
+    before_date = convert(date, tz.before)
+    after_date = convert(date, tz.after)
+    %AmbiguousDateTime{:before => before_date, :after => after_date}
+  end
+
+  def convert(%NaiveDateTime{} = date, %TimezoneInfo{full_name: name} = tzinfo) do
+    with {:ok, datetime} <- DateTime.from_naive(date, name, Timex.tzdb()) do
+      datetime
+    else
+      {ty, a, b} when ty in [:gap, :ambiguous] ->
+        %AmbiguousDateTime{before: a, after: b, type: ty}
+
+      {:error, :time_zone_not_found} ->
+        convert_fallback(date, tzinfo)
+
+      {:error, _} = err ->
+        err
+    end
+  end
+
+  def convert(%NaiveDateTime{} = date, tz) do
+    with %TimezoneInfo{} = tzinfo <- get(tz, date) do
+      convert(date, tzinfo)
+    end
+  end
+
   def convert(date, tz) do
-    case Timex.to_datetime(date) do
-      {:error, _} = err -> err
-      date -> convert(date, tz)
+    case Timex.to_datetime(date, tz) do
+      {:error, _} = err ->
+        err
+
+      datetime ->
+        datetime
     end
   end
 
-  defp do_shift(%DateTime{:microsecond => us} = datetime, seconds) do
-    secs_from_zero =
-      :calendar.datetime_to_gregorian_seconds({
-        {datetime.year, datetime.month, datetime.day},
-        {datetime.hour, datetime.minute, datetime.second}
-      })
+  defp convert_fallback(%DateTime{} = date, %TimezoneInfo{full_name: name} = tzinfo) do
+    # Temporarily push the custom tzinfo into process state for our database
+    Process.put(__MODULE__.Database, tzinfo)
 
-    do_shift(secs_from_zero, us, seconds)
-  end
-
-  defp do_shift(secs_from_zero, microseconds, seconds)
-       when is_integer(secs_from_zero) do
-    case seconds do
-      0 ->
-        {secs_from_zero, microseconds}
-
-      _ ->
-        new_secs_from_zero = secs_from_zero + seconds
-
-        cond do
-          new_secs_from_zero <= 0 ->
-            raise "cannot shift a datetime before the beginning of the gregorian calendar!"
-
-          :else ->
-            {new_secs_from_zero, microseconds}
-        end
+    with {:ok, datetime} <- DateTime.shift_zone(date, name, __MODULE__) do
+      datetime
     end
   end
 
-  @doc """
-  Determine what offset is required to convert a date into a target timezone
-  """
-  @spec diff(date :: DateTime.t(), tz :: TimezoneInfo.t()) :: integer | {:error, term}
-  def diff(%DateTime{} = dt, %TimezoneInfo{} = dest) do
-    origin = %TimezoneInfo{
-      full_name: dt.time_zone,
-      abbreviation: dt.zone_abbr,
-      offset_utc: dt.utc_offset,
-      offset_std: dt.std_offset
-    }
+  defp convert_fallback(%NaiveDateTime{} = date, %TimezoneInfo{full_name: name} = tzinfo) do
+    # Temporarily push the custom tzinfo into process state for our database
+    Process.put(__MODULE__.Database, tzinfo)
 
-    diff(origin, dest)
+    with {:ok, datetime} <- DateTime.from_naive(date, name, __MODULE__) do
+      datetime
+    end
   end
 
-  def diff(%TimezoneInfo{} = origin, %TimezoneInfo{} = dest) do
-    total_offset(dest) - total_offset(origin)
+  @impl Calendar.TimeZoneDatabase
+  @doc false
+  def time_zone_period_from_utc_iso_days(iso_days, time_zone) do
+    # Get a NaiveDateTime for time_zone_periods_from_wall_datetime
+    {year, month, day, hour, minute, second, microsecond} =
+      Calendar.ISO.naive_datetime_from_iso_days(iso_days)
+
+    with {:ok, naive} <- NaiveDateTime.new(year, month, day, hour, minute, second, microsecond) do
+      time_zone_periods_from_wall_datetime(naive, time_zone)
+    else
+      {:error, _} ->
+        {:error, :time_zone_not_found}
+    end
   end
+
+  @impl Calendar.TimeZoneDatabase
+  @doc false
+  def time_zone_periods_from_wall_datetime(naive, _time_zone) do
+    # Pop the time zone from process state, validate the desired datetime falls
+    # within the bounds of the time zone, and return its period description if so
+    %TimezoneInfo{from: from, until: until} = tz = Process.put(__MODULE__.Database, nil)
+
+    with {:ok, range_start} <- period_boundary_to_naive(from),
+         {:ok, range_end} <- period_boundary_to_naive(until) do
+      cond do
+        range_start == :min and range_end == :max ->
+          {:ok, TimezoneInfo.to_period(tz)}
+
+        range_start == :min and NaiveDateTime.compare(naive, range_end) in [:lt, :eq] ->
+          {:ok, TimezoneInfo.to_period(tz)}
+
+        range_end == :max and NaiveDateTime.compare(naive, range_start) in [:gt, :eq] ->
+          {:ok, TimezoneInfo.to_period(tz)}
+
+        range_start != :min and range_end != :max and
+          NaiveDateTime.compare(naive, range_start) in [:gt, :eq] and
+            NaiveDateTime.compare(naive, range_end) in [:lt, :eq] ->
+          {:ok, TimezoneInfo.to_period(tz)}
+
+        :else ->
+          {:error, :time_zone_not_found}
+      end
+    else
+      {:error, _} ->
+        {:error, :time_zone_not_found}
+    end
+  end
+
+  defp period_boundary_to_naive(:min), do: {:ok, :min}
+  defp period_boundary_to_naive(:max), do: {:ok, :max}
+
+  defp period_boundary_to_naive({_, {{y, m, d}, {hh, mm, ss}}}) do
+    NaiveDateTime.new(y, m, d, hh, mm, ss)
+  end
+
+  defp period_boundary_to_naive(_), do: {:error, :invalid_period}
 
   @doc """
   Shifts the provided DateTime to the beginning of the day in it's timezone
@@ -690,8 +698,8 @@ defmodule Timex.Timezone do
       abbreviation: abbr,
       offset_std: std_off_secs,
       offset_utc: utc_off_secs,
-      from: start_bound |> erlang_datetime_to_boundary_date,
-      until: end_bound |> erlang_datetime_to_boundary_date
+      from: erlang_datetime_to_boundary_date(start_bound),
+      until: erlang_datetime_to_boundary_date(end_bound)
     }
   end
 

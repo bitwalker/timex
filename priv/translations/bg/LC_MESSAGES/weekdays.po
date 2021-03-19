@@ -1,0 +1,68 @@
+## "msgid"s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove "msgid"s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use "mix gettext.extract --merge" or "mix gettext.merge"
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: bg\n"
+"Plural-Forms: nplurals=2\n"
+
+#: lib/l10n/translator.ex:214
+msgid "Fri"
+msgstr "Петък"
+
+#: lib/l10n/translator.ex:222
+msgid "Friday"
+msgstr "Петък"
+
+#: lib/l10n/translator.ex:210
+msgid "Mon"
+msgstr "Понеделник"
+
+#: lib/l10n/translator.ex:218
+msgid "Monday"
+msgstr "Понеделник"
+
+#: lib/l10n/translator.ex:215
+msgid "Sat"
+msgstr "Събота"
+
+#: lib/l10n/translator.ex:223
+msgid "Saturday"
+msgstr "Събота"
+
+#: lib/l10n/translator.ex:216
+msgid "Sun"
+msgstr "Неделя"
+
+#: lib/l10n/translator.ex:224
+msgid "Sunday"
+msgstr "Неделя"
+
+#: lib/l10n/translator.ex:213
+msgid "Thu"
+msgstr "Четвъртък"
+
+#: lib/l10n/translator.ex:221
+msgid "Thursday"
+msgstr "Четвъртък"
+
+#: lib/l10n/translator.ex:211
+msgid "Tue"
+msgstr "Вторник"
+
+#: lib/l10n/translator.ex:219
+msgid "Tuesday"
+msgstr "Вторник"
+
+#: lib/l10n/translator.ex:212
+msgid "Wed"
+msgstr "Сряда"
+
+#: lib/l10n/translator.ex:220
+msgid "Wednesday"
+msgstr "Сряда"

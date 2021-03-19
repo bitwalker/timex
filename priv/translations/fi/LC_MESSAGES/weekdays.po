@@ -1,0 +1,68 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: fi\n"
+
+#: lib/l10n/translator.ex:214
+msgid "Fri"
+msgstr "pe"
+
+#: lib/l10n/translator.ex:222
+msgid "Friday"
+msgstr "perjantai"
+
+#: lib/l10n/translator.ex:210
+msgid "Mon"
+msgstr "ma"
+
+#: lib/l10n/translator.ex:218
+msgid "Monday"
+msgstr "maanantai"
+
+#: lib/l10n/translator.ex:215
+msgid "Sat"
+msgstr "la"
+
+#: lib/l10n/translator.ex:223
+msgid "Saturday"
+msgstr "lauantai"
+
+#: lib/l10n/translator.ex:216
+msgid "Sun"
+msgstr "su"
+
+#: lib/l10n/translator.ex:224
+msgid "Sunday"
+msgstr "sunnuntai"
+
+#: lib/l10n/translator.ex:213
+msgid "Thu"
+msgstr "to"
+
+#: lib/l10n/translator.ex:221
+msgid "Thursday"
+msgstr "torstai"
+
+#: lib/l10n/translator.ex:211
+msgid "Tue"
+msgstr "ti"
+
+#: lib/l10n/translator.ex:219
+msgid "Tuesday"
+msgstr "tiistai"
+
+#: lib/l10n/translator.ex:212
+msgid "Wed"
+msgstr "ke"
+
+#: lib/l10n/translator.ex:220
+msgid "Wednesday"
+msgstr "keskiviikko"

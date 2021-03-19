@@ -89,9 +89,7 @@ defmodule Timex.Parse.DateTime.Parsers do
   end
 
   def month_short(_) do
-    abbrs = Helpers.months() |> Enum.map(fn m -> String.slice(m, 0, 3) end)
-
-    one_of(word_of(~r/[[:alpha:]]/), abbrs)
+    one_of(word_of(~r/[[:alpha:]]/u), Helpers.months_abbr())
     |> map(&Helpers.to_month_num/1)
     |> label("month abbreviation")
   end
@@ -110,14 +108,26 @@ defmodule Timex.Parse.DateTime.Parsers do
     |> label("day of year")
   end
 
-  def week_of_year(opts \\ []) do
+  def week_of_year_mon(opts \\ []) do
     Helpers.integer(opts)
-    |> satisfy(fn week -> week >= 1 && week <= 53 end)
-    |> map(fn n -> [week_of_year: n] end)
-    |> label("week of year")
+    |> satisfy(fn week -> week >= 0 && week <= 52 end)
+    |> map(fn n -> [week_of_year_mon: n] end)
+    |> label("week of year (mon)")
   end
 
-  defdelegate week_of_year_sun(opts \\ []), to: __MODULE__, as: :week_of_year
+  def week_of_year_sun(opts \\ []) do
+    Helpers.integer(opts)
+    |> satisfy(fn week -> week >= 0 && week <= 52 end)
+    |> map(fn n -> [week_of_year_sun: n] end)
+    |> label("week of year (sun)")
+  end
+
+  def week_of_year_iso(opts \\ []) do
+    Helpers.integer(opts)
+    |> satisfy(fn week -> week >= 0 && week <= 53 end)
+    |> map(fn n -> [week_of_year_iso: n] end)
+    |> label("ISO week of year")
+  end
 
   def weekday(_) do
     fixed_integer(1)
@@ -155,19 +165,19 @@ defmodule Timex.Parse.DateTime.Parsers do
   end
 
   def ampm_lower(_) do
-    one_of(word(), ["am", "pm"])
+    one_of(word(), Helpers.ampm_lower())
     |> map(&Helpers.to_ampm/1)
     |> label("am/pm")
   end
 
   def ampm_upper(_) do
-    one_of(word(), ["AM", "PM"])
+    one_of(word(), Helpers.ampm_upper())
     |> map(&Helpers.to_ampm/1)
     |> label("AM/PM")
   end
 
   def ampm(_) do
-    one_of(word(), ["am", "AM", "pm", "PM"])
+    one_of(word(), Helpers.ampm_any())
     |> map(&Helpers.to_ampm/1)
     |> label("am/pm or AM/PM")
   end
@@ -299,7 +309,7 @@ defmodule Timex.Parse.DateTime.Parsers do
       year4(padding: :zeroes),
       ignore(char("-")),
       ignore(char("W")),
-      week_of_year(padding: :zeroes)
+      week_of_year_iso(padding: :zeroes)
     ])
   end
 
@@ -630,7 +640,7 @@ defmodule Timex.Parse.DateTime.Parsers do
   """
   def kitchen(opts) do
     sequence([
-      hour12(),
+      hour12(padding: :zeroes),
       literal(char(":")),
       minute(padding: :zeroes),
       ampm(opts)

@@ -25,7 +25,7 @@ defmodule ConversionTests do
 
   test "DateTime with fractional offset to NaiveDateTime" do
     datetime = Timex.to_datetime({{2016, 3, 5}, {0, 0, 0}}, "Asia/Kolkata")
-    assert ~N[2016-03-04T18:30:00] = Timex.to_naive_datetime(datetime)
+    assert ~N[2016-03-04 18:30:00] = Timex.to_naive_datetime(datetime)
   end
 
   test "to_gregorian_seconds" do
@@ -93,7 +93,7 @@ defmodule ConversionTests do
     "second" => "12",
     "time_zone" => "UTC"
   }
-  @default_utc_datetime Timex.to_datetime(~N[2015-02-28T13:37:12], "UTC")
+  @default_utc_datetime Timex.to_datetime(~N[2015-02-28T13:37:12], "Etc/UTC")
   @default_cph_datetime Timex.to_datetime(~N[2015-02-28T13:37:12], "Europe/Copenhagen")
 
   test "map with timezone to_datetime" do

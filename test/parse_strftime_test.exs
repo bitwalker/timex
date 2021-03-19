@@ -3,24 +3,12 @@ defmodule DateFormatTest.ParseStrftime do
   use Timex
 
   test "parse datetime" do
-    date = Timex.to_datetime({{2014, 7, 19}, {14, 20, 34}}, "Etc/GMT-7")
+    date = Timex.to_datetime({{2014, 7, 19}, {14, 20, 34}}, "Etc/UTC+7")
     assert {:ok, ^date} = parse("Sat, 19 Jul 2014 14:20:34 +0700", "%a, %d %b %Y %T %z")
   end
 
   test "issue #215" do
     assert {:ok, _date} = parse("14-Dec-00", "%e-%b-%y")
-  end
-
-  test "issue #66" do
-    date = Timex.to_datetime({{2015, 7, 6}, {0, 0, 0}}, "CST")
-
-    assert {:ok, ^date} =
-             parse("Mon Jul 06 2015 00:00:00 GMT+0200 (CST)", "%a %b %d %Y %H:%M:%S %Z%z (%Z)")
-
-    date2 = Timex.to_datetime({{2015, 7, 6}, {0, 0, 0}}, "CST")
-
-    assert {:ok, ^date2} =
-             parse("Mon Jul 06 2015 00:00:00 GMT +0200 (CST)", "%a %b %d %Y %H:%M:%S %Z %z (%Z)")
   end
 
   test "issue #319 - should parse microseconds even if 0" do

@@ -26,7 +26,6 @@ defmodule Timex.Timezone.Local do
   """
   alias Timex.Timezone.Utils
   alias Timex.Parse.ZoneInfo.Parser
-  alias Timex.Parse.ZoneInfo.Parser.{TransitionInfo, Zone}
 
   @_ETC_TIMEZONE "/etc/timezone"
   @_ETC_SYS_CLOCK "/etc/sysconfig/clock"
@@ -35,8 +34,6 @@ defmodule Timex.Timezone.Local do
   @_USR_ETC_LOCALTIME "/usr/local/etc/localtime"
 
   @type gregorian_seconds :: non_neg_integer
-
-  @epoch_seconds :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
 
   @doc """
   Looks up the local timezone configuration. Returns the name of a timezone
@@ -47,23 +44,26 @@ defmodule Timex.Timezone.Local do
   if it exists.
   """
   @spec lookup() :: String.t() | {:error, term}
-  @spec lookup(gregorian_seconds) :: String.t() | {:error, term}
 
-  def lookup(), do: lookup(:calendar.datetime_to_gregorian_seconds(:calendar.universal_time()))
-
-  def lookup(secs) when is_integer(secs) and secs > 0 do
+  def lookup() do
     case Application.get_env(:timex, :local_timezone) do
       nil ->
         tz =
           case :os.type() do
-            {:unix, :darwin} -> localtz(:osx, secs)
-            {:unix, _} -> localtz(:unix, secs)
-            {:win32, :nt} -> localtz(:win, secs)
-            _ -> {:error, {:localtz, :unsupported_operating_system}}
+            {:unix, :darwin} -> localtz(:osx)
+            {:unix, _} -> localtz(:unix)
+            {:win32, :nt} -> localtz(:win)
+            _ -> {:error, :time_zone_not_found}
           end
 
-        Application.put_env(:timex, :local_timezone, tz)
-        tz
+        with tz when is_binary(tz) <- tz do
+          Application.put_env(:timex, :local_timezone, tz)
+          tz
+        else
+          {:error, _} ->
+            {:error, :time_zone_not_found}
+        end
+
 
       tz ->
         tz
@@ -71,18 +71,18 @@ defmodule Timex.Timezone.Local do
   end
 
   # Get the locally configured timezone on OSX systems
-  @spec localtz(:osx | :unix | :win, gregorian_seconds) :: String.t() | no_return
-  defp localtz(:osx, date) do
+  @spec localtz(:osx | :unix | :win) :: String.t() | no_return
+  defp localtz(:osx) do
     # Allow TZ environment variable to override lookup
     tz =
       case System.get_env("TZ") do
         nil ->
           # Most accurate local timezone will come from /etc/localtime,
           # since we can lookup proper timezones for arbitrary dates
-          read_timezone_data(nil, @_ETC_LOCALTIME, date)
+          read_timezone_data(nil, @_ETC_LOCALTIME)
 
         ":" <> path ->
-          read_timezone_data(nil, path, date)
+          read_timezone_data(nil, path)
 
         tz ->
           {:ok, tz}
@@ -110,7 +110,7 @@ defmodule Timex.Timezone.Local do
   end
 
   # Get the locally configured timezone on *NIX systems
-  defp localtz(:unix, date) do
+  defp localtz(:unix) do
     tz =
       case System.get_env("TZ") do
         # Not found
@@ -118,7 +118,7 @@ defmodule Timex.Timezone.Local do
           nil
 
         ":" <> path ->
-          read_timezone_data(nil, path, date)
+          read_timezone_data(nil, path)
 
         tz ->
           {:ok, tz}
@@ -137,11 +137,11 @@ defmodule Timex.Timezone.Local do
         # along through the pipe until we're done. If we don't,
         # this will try each fallback location in order.
         {:ok, tz} =
-          read_timezone_data(nil, @_ETC_TIMEZONE, date)
-          |> read_timezone_data(@_ETC_SYS_CLOCK, date)
-          |> read_timezone_data(@_ETC_CONF_CLOCK, date)
-          |> read_timezone_data(@_ETC_LOCALTIME, date)
-          |> read_timezone_data(@_USR_ETC_LOCALTIME, date)
+          read_timezone_data(nil, @_ETC_LOCALTIME)
+          |> read_timezone_data(@_USR_ETC_LOCALTIME)
+          |> read_timezone_data(@_ETC_SYS_CLOCK)
+          |> read_timezone_data(@_ETC_CONF_CLOCK)
+          |> read_timezone_data(@_ETC_TIMEZONE)
 
         tz
     end
@@ -153,7 +153,7 @@ defmodule Timex.Timezone.Local do
   @tz_key_name 'TimeZoneKeyName'
   # We ignore the reference date here, since there is no way to lookup
   # transition times for historical/future dates
-  defp localtz(:win, _date) do
+  defp localtz(:win) do
     # Windows has many of its own unique time zone names, which can
     # also be translated to the OS's language.
     {:ok, handle} = :win32reg.open([:read])
@@ -217,112 +217,80 @@ defmodule Timex.Timezone.Local do
   end
 
   # Attempt to read timezone data from /etc/timezone
-  @spec read_timezone_data({:ok, String.t()} | nil, String.t(), gregorian_seconds) ::
+  @spec read_timezone_data({:ok, String.t()} | nil, String.t()) ::
           {:ok, String.t()} | nil | no_return
-  defp read_timezone_data(result, file, date)
+  defp read_timezone_data(result, file)
 
   # If we've found a timezone, just keep on piping it through
-  defp read_timezone_data({:ok, _} = result, _, _),
+  defp read_timezone_data({:ok, _} = result, _),
     do: result
 
   # Otherwise, read the next fallback location
-  defp read_timezone_data(_, @_ETC_TIMEZONE, date) do
+  defp read_timezone_data(_, @_ETC_TIMEZONE) do
     case File.read(@_ETC_TIMEZONE) do
-      {:ok, etctz} ->
-        cond do
-          String.starts_with?(etctz, "TZif2") ->
-            case parse_tzfile(etctz, date) do
-              {:error, m} -> raise m
-              {:ok, _} = res -> res
-            end
-
-          true ->
-            [no_hostdefs | _] = String.split(etctz, " ", global: false, trim: true)
-            [no_comments | _] = String.split(no_hostdefs, "#", global: false, trim: true)
-            {:ok, no_comments |> String.replace(" ", "_") |> String.trim("\n")}
-        end
+      {:ok, name} ->
+        {:ok, String.trim(name, " \n")}
 
       {:error, _} ->
         nil
     end
   end
 
-  defp read_timezone_data(_, file, _date)
+  defp read_timezone_data(_, file)
        when file == @_ETC_SYS_CLOCK or file == @_ETC_CONF_CLOCK do
-    case File.exists?(file) do
-      true ->
-        match =
-          file
-          |> File.stream!()
-          |> Stream.filter(fn line -> Regex.match?(~r/(^ZONE=)|(^TIMEZONE=)/, line) end)
-          |> Enum.to_list()
-          |> List.first()
+    if File.exists?(file) do
+      match =
+        file
+        |> File.stream!()
+        |> Stream.filter(fn line -> Regex.match?(~r/(^ZONE=)|(^TIMEZONE=)/, line) end)
+        |> Enum.to_list()
+        |> List.first()
 
-        case match do
-          nil ->
-            nil
+      case match do
+        nil ->
+          nil
 
-          m ->
-            tz =
-              case String.split(m, "\"") do
-                [_, tz, _] ->
-                  tz
-
-                ["ZONE=" <> tz] ->
-                  tz
-
-                ["TIMEZONE=" <> tz] ->
-                  tz
-              end
-
+        m ->
+          with [tz | _] <-
+                 String.split(m, :binary.compile_pattern(["ZONE=", "TIMEZONE=", "\"", "'"]),
+                   trim: true
+                 ) do
             {:ok, String.replace(tz, " ", "_")}
-        end
-
-      _ ->
-        nil
+          else
+            _ ->
+              nil
+          end
+      end
+    else
+      nil
     end
   end
 
-  defp read_timezone_data(_, file, date)
+  defp read_timezone_data(_, file)
        when file == @_ETC_LOCALTIME or file == @_USR_ETC_LOCALTIME do
-    case File.read(file) do
-      {:ok, contents} ->
-        case parse_tzfile(contents, date) do
-          {:ok, tz} ->
-            # We have a valid timezone, so get symlinked zone name, since `tz` here is an abbreviation
-            zone_file = file |> get_real_path |> String.replace(~r(^.*/zoneinfo/), "")
+    if File.exists?(file) do
+      name =
+        file
+        |> get_real_path()
+        |> String.replace(~r(^.*/zoneinfo/), "")
 
-            cond do
-              zone_file == "" -> {:ok, tz}
-              true -> {:ok, zone_file}
-            end
+      case name do
+        ^file ->
+          nil
 
-          {:error, err} ->
-            raise err
-        end
-
-      {:error, _} ->
-        nil
+        _ ->
+          {:ok, name}
+      end
     end
   end
 
-  @spec get_real_path(String.t()) :: String.t()
   defp get_real_path(path) do
-    case path |> String.to_charlist() |> :file.read_link_info() do
-      {:ok, {:file_info, _, :regular, _, _, _, _, _, _, _, _, _, _, _}} ->
+    case File.lstat!(path) do
+      %File.Stat{type: :symlink} ->
+        File.read_link!(path)
+
+      %File.Stat{type: :regular} ->
         path
-
-      {:ok, {:file_info, _, :symlink, _, _, _, _, _, _, _, _, _, _, _}} ->
-        {:ok, sym} = path |> String.to_charlist() |> :file.read_link()
-
-        case sym |> :filename.pathtype() do
-          :absolute ->
-            sym |> IO.iodata_to_binary()
-
-          :relative ->
-            symlink = sym |> IO.iodata_to_binary()
-            path |> Path.dirname() |> Path.join(symlink) |> Path.expand()
-        end
     end
   end
 
@@ -331,57 +299,7 @@ defmodule Timex.Timezone.Local do
   parses out the timezone for the curent date/time in UTC.
   """
   @spec parse_tzfile(binary) :: {:ok, String.t()} | {:error, term}
-  def parse_tzfile(tzdata),
-    do:
-      parse_tzfile(
-        tzdata,
-        :calendar.datetime_to_gregorian_seconds(:calendar.universal_time()) - @epoch_seconds
-      )
-
-  @doc """
-  Same as `parse_tzfile/1`, but takes a reference date (in gregorian seconds). The reference
-  date will be used to locate the timezone period for the local timezone which applies to that date.
-  """
-  @spec parse_tzfile(binary, gregorian_seconds) :: {:ok, String.t()} | {:error, term}
-  def parse_tzfile(tzdata, reference_date) when tzdata != nil and is_integer(reference_date) do
-    reference_date = reference_date - @epoch_seconds
-    # Parse file to Zone{}
-    {:ok, %Zone{transitions: transitions}} = Parser.parse(tzdata)
-    # Get the zone for the current time
-    transition =
-      transitions
-      |> Enum.sort(fn %TransitionInfo{starts_at: utime1}, %TransitionInfo{starts_at: utime2} ->
-        utime1 > utime2
-      end)
-      |> Enum.reject(fn %TransitionInfo{starts_at: unix_time} -> unix_time > reference_date end)
-      |> List.first()
-
-    # We'll need these handy
-    # Attempt to get the proper timezone for the current transition we're in
-    cond do
-      # Success
-      transition != nil ->
-        {:ok, transition.abbreviation}
-
-      # Fallback to the first standard-time zone available
-      true ->
-        fallback =
-          transitions
-          |> Enum.filter(fn zone -> zone.is_std? end)
-          |> List.last()
-
-        case fallback do
-          # Well, there are no standard-time zones then, just take the first zone available
-          nil ->
-            case transitions |> List.last() do
-              nil -> {:error, "Unable to locate the current timezone!"}
-              last_transition -> {:ok, last_transition.abbreviation}
-            end
-
-          # Found a reasonable fallback zone, success?
-          %TransitionInfo{abbreviation: abbreviation} ->
-            {:ok, abbreviation}
-        end
-    end
+  def parse_tzfile(tzdata) do
+    Parser.parse(tzdata)
   end
 end
