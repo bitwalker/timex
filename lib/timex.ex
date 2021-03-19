@@ -354,7 +354,7 @@ defmodule Timex do
       "2 days ago"
   """
   @spec from_now(Types.valid_datetime()) :: String.t() | {:error, term}
-  def from_now(datetime), do: from_now(datetime, Timex.Translator.default_locale())
+  def from_now(datetime), do: from_now(datetime, Timex.Translator.current_locale())
 
   @doc """
   Formats a DateTime using a fuzzy relative duration, translated using given locale
@@ -387,7 +387,7 @@ defmodule Timex do
   # Formats a DateTime using a fuzzy relative duration, with a reference datetime other than now
   @spec from_now(Types.valid_datetime(), Types.valid_datetime()) :: String.t() | {:error, term}
   def from_now(datetime, reference_date),
-    do: from_now(datetime, reference_date, Timex.Translator.default_locale())
+    do: from_now(datetime, reference_date, Timex.Translator.current_locale())
 
   @doc """
   Formats a DateTime using a fuzzy relative duration, with a reference datetime other than now,
@@ -1171,7 +1171,7 @@ defmodule Timex do
   """
   @spec day_name(Types.weekday()) :: String.t() | {:error, :invalid_weekday_number}
   def day_name(num) when num in 1..7 do
-    weekdays = Translator.get_weekdays(Translator.default_locale())
+    weekdays = Translator.get_weekdays(Translator.current_locale())
     Map.get(weekdays, num)
   end
 
@@ -1189,7 +1189,7 @@ defmodule Timex do
   """
   @spec day_shortname(Types.weekday()) :: String.t() | {:error, :invalid_weekday_number}
   def day_shortname(num) when num in 1..7 do
-    weekdays = Translator.get_weekdays_abbreviated(Translator.default_locale())
+    weekdays = Translator.get_weekdays_abbreviated(Translator.current_locale())
     Map.get(weekdays, num)
   end
 
@@ -1259,7 +1259,7 @@ defmodule Timex do
   """
   @spec month_name(Types.month()) :: String.t() | {:error, :invalid_month_number}
   def month_name(num) when num in 1..12 do
-    months = Translator.get_months(Translator.default_locale())
+    months = Translator.get_months(Translator.current_locale())
     Map.get(months, num)
   end
 
@@ -1277,7 +1277,7 @@ defmodule Timex do
   """
   @spec month_shortname(Types.month()) :: String.t() | {:error, :invalid_month_number}
   def month_shortname(num) when num in 1..12 do
-    months = Translator.get_months_abbreviated(Translator.default_locale())
+    months = Translator.get_months_abbreviated(Translator.current_locale())
     Map.get(months, num)
   end
 

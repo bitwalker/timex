@@ -1,3 +1,3 @@
 use Mix.Config
 
-config :timex, default_locale: "en"
+config :timex, Timex.Gettext, default_locale: "en"

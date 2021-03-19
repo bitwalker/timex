@@ -29,7 +29,7 @@ defmodule Timex.Mixfile do
 
   def application do
     [
-      env: [local_timezone: nil, default_locale: "en"],
+      env: [local_timezone: nil],
       mod: {Timex, []}
     ]
   end

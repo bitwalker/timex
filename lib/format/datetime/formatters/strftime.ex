@@ -107,8 +107,8 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
   @spec tokenize(String.t()) :: {:ok, [Directive.t()]} | {:error, term}
   defdelegate tokenize(format_string), to: Strftime
 
-  def format!(date, format_string), do: lformat!(date, format_string, Translator.default_locale())
-  def format(date, format_string), do: lformat(date, format_string, Translator.default_locale())
+  def format!(date, format_string), do: lformat!(date, format_string, Translator.current_locale())
+  def format(date, format_string), do: lformat(date, format_string, Translator.current_locale())
 
   @spec lformat!(Types.calendar_types(), String.t(), String.t()) :: String.t() | no_return
   def lformat!(date, format_string, locale) do

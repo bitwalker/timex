@@ -5,6 +5,22 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+
+**NOTE:** The config of the Timex default locale is changed to:
+```ex
+config :timex, Timex.Gettext, default_locale: "en"
+```
+This follows the standard set by Gettext, see: [the Gettext docs](https://hexdocs.pm/gettext/Gettext.html#module-default-locale)
+
+Now when the Gettext locale is being changed on runtime with:
+```ex
+Gettext.put_locale("nl")
+```
+The Gettext backend for Timex will follow suit. If for some reason you want Timex, and just Timex, to change its locale to something else you should target the Timex.Gettext backend with:
+```ex
+Timex.Gettext.put_locale("de")
+```
+
 ### Potentially Breaking
 
 - Fixed handling of `Etc/GMT` vs `GMT` timezones. The former must be POSIX compatible, which inverts the meaning of the sign, whereas the latter have no such restriction and are equivalent to `UTC(+/-)HH:MM`,
@@ -15,6 +31,7 @@ while this is fixing incorrect behavior, it could potentially break users relyin
 - #494, incorrect handling of parsing week numbers
 - Improve parsing of timezones
 - Incorrect stringification of error values returned in some circumstances
+- Let Timex follow the locale set by the global Gettext. See #501
 
 ### Added/Changed
 
