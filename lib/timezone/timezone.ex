@@ -14,13 +14,11 @@ defmodule Timex.Timezone do
   """
   alias Timex.AmbiguousDateTime
   alias Timex.TimezoneInfo
+  alias Timex.PosixTimezone
   alias Timex.AmbiguousTimezoneInfo
   alias Timex.Timezone.Local, as: Local
   alias Timex.Parse.Timezones.Posix
-  alias Timex.Parse.Timezones.Posix.PosixTimezone, as: PosixTz
   alias Timex.Types
-
-  @behaviour Calendar.TimeZoneDatabase
 
   @doc """
   Determines if a given zone name exists
@@ -31,7 +29,7 @@ defmodule Timex.Timezone do
       true
     else
       case lookup_posix(zone) do
-        tz when is_binary(tz) -> true
+        %PosixTimezone{} -> true
         _ -> false
       end
     end
@@ -228,8 +226,8 @@ defmodule Timex.Timezone do
       tz
     else
       case lookup_posix(tz) do
-        full_name when is_binary(full_name) ->
-          full_name
+        %PosixTimezone{name: name} ->
+          name
 
         nil ->
           {:error, :time_zone_not_found}
@@ -335,7 +333,12 @@ defmodule Timex.Timezone do
     if Tzdata.zone_exists?(name) do
       resolve(name, seconds_from_zeroyear, utc_or_wall)
     else
-      lookup_timezone_by_abbreviation(name, seconds_from_zeroyear, utc_or_wall)
+      with {:ok, %PosixTimezone{} = posixtz, _} <- Posix.parse(name) do
+        PosixTimezone.to_timezone_info(posixtz, Timex.to_naive_datetime(datetime))
+      else
+        {:error, _, _} ->
+          {:error, :time_zone_not_found}
+      end
     end
   end
 
@@ -516,15 +519,12 @@ defmodule Timex.Timezone do
     date
   end
 
-  def convert(%DateTime{} = date, %TimezoneInfo{full_name: name} = tzinfo) do
-    with {:ok, datetime} <- DateTime.shift_zone(date, name, Timex.tzdb()) do
+  def convert(%DateTime{} = date, %TimezoneInfo{full_name: name}) do
+    with {:ok, datetime} <- DateTime.shift_zone(date, name, Timex.Timezone.Database) do
       datetime
     else
       {ty, a, b} when ty in [:gap, :ambiguous] ->
         %AmbiguousDateTime{before: a, after: b, type: ty}
-
-      {:error, :time_zone_not_found} ->
-        convert_fallback(date, tzinfo)
 
       {:error, _} = err ->
         err
@@ -547,15 +547,12 @@ defmodule Timex.Timezone do
     %AmbiguousDateTime{:before => before_date, :after => after_date}
   end
 
-  def convert(%NaiveDateTime{} = date, %TimezoneInfo{full_name: name} = tzinfo) do
-    with {:ok, datetime} <- DateTime.from_naive(date, name, Timex.tzdb()) do
+  def convert(%NaiveDateTime{} = date, %TimezoneInfo{full_name: name}) do
+    with {:ok, datetime} <- DateTime.from_naive(date, name, Timex.Timezone.Database) do
       datetime
     else
       {ty, a, b} when ty in [:gap, :ambiguous] ->
         %AmbiguousDateTime{before: a, after: b, type: ty}
-
-      {:error, :time_zone_not_found} ->
-        convert_fallback(date, tzinfo)
 
       {:error, _} = err ->
         err
@@ -577,81 +574,6 @@ defmodule Timex.Timezone do
         datetime
     end
   end
-
-  defp convert_fallback(%DateTime{} = date, %TimezoneInfo{full_name: name} = tzinfo) do
-    # Temporarily push the custom tzinfo into process state for our database
-    Process.put(__MODULE__.Database, tzinfo)
-
-    with {:ok, datetime} <- DateTime.shift_zone(date, name, __MODULE__) do
-      datetime
-    end
-  end
-
-  defp convert_fallback(%NaiveDateTime{} = date, %TimezoneInfo{full_name: name} = tzinfo) do
-    # Temporarily push the custom tzinfo into process state for our database
-    Process.put(__MODULE__.Database, tzinfo)
-
-    with {:ok, datetime} <- DateTime.from_naive(date, name, __MODULE__) do
-      datetime
-    end
-  end
-
-  @impl Calendar.TimeZoneDatabase
-  @doc false
-  def time_zone_period_from_utc_iso_days(iso_days, time_zone) do
-    # Get a NaiveDateTime for time_zone_periods_from_wall_datetime
-    {year, month, day, hour, minute, second, microsecond} =
-      Calendar.ISO.naive_datetime_from_iso_days(iso_days)
-
-    with {:ok, naive} <- NaiveDateTime.new(year, month, day, hour, minute, second, microsecond) do
-      time_zone_periods_from_wall_datetime(naive, time_zone)
-    else
-      {:error, _} ->
-        {:error, :time_zone_not_found}
-    end
-  end
-
-  @impl Calendar.TimeZoneDatabase
-  @doc false
-  def time_zone_periods_from_wall_datetime(naive, _time_zone) do
-    # Pop the time zone from process state, validate the desired datetime falls
-    # within the bounds of the time zone, and return its period description if so
-    %TimezoneInfo{from: from, until: until} = tz = Process.put(__MODULE__.Database, nil)
-
-    with {:ok, range_start} <- period_boundary_to_naive(from),
-         {:ok, range_end} <- period_boundary_to_naive(until) do
-      cond do
-        range_start == :min and range_end == :max ->
-          {:ok, TimezoneInfo.to_period(tz)}
-
-        range_start == :min and NaiveDateTime.compare(naive, range_end) in [:lt, :eq] ->
-          {:ok, TimezoneInfo.to_period(tz)}
-
-        range_end == :max and NaiveDateTime.compare(naive, range_start) in [:gt, :eq] ->
-          {:ok, TimezoneInfo.to_period(tz)}
-
-        range_start != :min and range_end != :max and
-          NaiveDateTime.compare(naive, range_start) in [:gt, :eq] and
-            NaiveDateTime.compare(naive, range_end) in [:lt, :eq] ->
-          {:ok, TimezoneInfo.to_period(tz)}
-
-        :else ->
-          {:error, :time_zone_not_found}
-      end
-    else
-      {:error, _} ->
-        {:error, :time_zone_not_found}
-    end
-  end
-
-  defp period_boundary_to_naive(:min), do: {:ok, :min}
-  defp period_boundary_to_naive(:max), do: {:ok, :max}
-
-  defp period_boundary_to_naive({_, {{y, m, d}, {hh, mm, ss}}}) do
-    NaiveDateTime.new(y, m, d, hh, mm, ss)
-  end
-
-  defp period_boundary_to_naive(_), do: {:error, :invalid_period}
 
   @doc """
   Shifts the provided DateTime to the beginning of the day in it's timezone
@@ -760,20 +682,6 @@ defmodule Timex.Timezone do
     }
   end
 
-  # Fetches the first timezone period which matches the abbreviation and is
-  # valid for the given moment in time (secs from :zero)
-  @spec lookup_timezone_by_abbreviation(String.t(), integer, :utc | :wall) ::
-          String.t() | {:error, term}
-  defp lookup_timezone_by_abbreviation(abbr, secs, utc_or_wall) do
-    case lookup_posix(abbr) do
-      full_name when is_binary(full_name) ->
-        resolve(full_name, secs, utc_or_wall)
-
-      nil ->
-        {:error, {:invalid_timezone, abbr}}
-    end
-  end
-
   @spec boundary_to_erlang_datetime(:min | :max | integer) :: :min | :max | Types.datetime()
   defp boundary_to_erlang_datetime(:min), do: :min
   defp boundary_to_erlang_datetime(:max), do: :max
@@ -799,30 +707,16 @@ defmodule Timex.Timezone do
     {dow, date}
   end
 
-  @spec lookup_posix(String.t()) :: String.t() | nil
-  defp lookup_posix(timezone) when is_binary(timezone) do
-    Tzdata.zone_list()
-    # Filter out zones which definitely don't match
-    |> Enum.filter(&String.contains?(&1, timezone))
-    # For each candidate, attempt to parse as POSIX
-    # if the parse succeeds, and the timezone name requested
-    # is one of the parts, then that's our zone, otherwise, keep searching
-    |> Enum.find(fn probable_zone ->
-      case Posix.parse(probable_zone) do
-        {:ok, %PosixTz{:std_name => ^timezone}} ->
-          true
-
-        {:ok, %PosixTz{:dst_name => ^timezone}} ->
-          true
-
-        {:ok, %PosixTz{}} ->
-          false
-
-        {:error, _reason} ->
-          false
-      end
-    end)
+  @doc false
+  @spec lookup_posix(String.t()) :: PosixTimezone.t() | nil
+  def lookup_posix(timezone) when is_binary(timezone) do
+    with {:ok, %PosixTimezone{} = posixtz, _} <- Posix.parse(timezone) do
+      posixtz
+    else
+      _ ->
+        nil
+    end
   end
 
-  defp lookup_posix(_), do: nil
+  def lookup_posix(_), do: nil
 end

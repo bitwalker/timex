@@ -44,7 +44,7 @@ defimpl Timex.Protocol, for: DateTime do
     # NOTE: For legacy reasons we shift DateTimes to UTC when making them naive, 
     # but the standard library just drops the timezone info
     d
-    |> Timex.DateTime.shift_zone!("Etc/UTC", Timex.tzdb())
+    |> Timex.DateTime.shift_zone!("Etc/UTC", Timex.Timezone.Database)
     |> DateTime.to_naive()
   end
 
@@ -61,7 +61,12 @@ defimpl Timex.Protocol, for: DateTime do
     time = Timex.Time.new!(0, 0, 0, us)
 
     with {:ok, datetime} <-
-           Timex.DateTime.new(DateTime.to_date(datetime), time, time_zone, Timex.tzdb()) do
+           Timex.DateTime.new(
+             DateTime.to_date(datetime),
+             time,
+             time_zone,
+             Timex.Timezone.Database
+           ) do
       datetime
     else
       {:gap, _a, b} ->
@@ -79,7 +84,12 @@ defimpl Timex.Protocol, for: DateTime do
     time = Timex.Time.new!(23, 59, 59, us)
 
     with {:ok, datetime} <-
-           Timex.DateTime.new(DateTime.to_date(datetime), time, time_zone, Timex.tzdb()) do
+           Timex.DateTime.new(
+             DateTime.to_date(datetime),
+             time,
+             time_zone,
+             Timex.Timezone.Database
+           ) do
       datetime
     else
       {:gap, a, _b} ->
@@ -101,7 +111,7 @@ defimpl Timex.Protocol, for: DateTime do
 
     with weekstart when is_atom(weekstart) <- Timex.standardize_week_start(weekstart),
          date = Timex.Date.beginning_of_week(DateTime.to_date(date), weekstart),
-         {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.tzdb()) do
+         {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.Timezone.Database) do
       datetime
     else
       {:gap, _a, b} ->
@@ -121,7 +131,7 @@ defimpl Timex.Protocol, for: DateTime do
          date = Timex.Date.end_of_week(DateTime.to_date(date), weekstart),
          us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision),
          time = Timex.Time.new!(23, 59, 59, us),
-         {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.tzdb()) do
+         {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.Timezone.Database) do
       datetime
     else
       {:gap, a, _b} ->
@@ -141,7 +151,12 @@ defimpl Timex.Protocol, for: DateTime do
     time = Timex.Time.new!(0, 0, 0, us)
 
     with {:ok, datetime} <-
-           Timex.DateTime.new(Timex.Date.new!(year, 1, 1), time, time_zone, Timex.tzdb()) do
+           Timex.DateTime.new(
+             Timex.Date.new!(year, 1, 1),
+             time,
+             time_zone,
+             Timex.Timezone.Database
+           ) do
       datetime
     else
       {:gap, _a, b} ->
@@ -158,7 +173,12 @@ defimpl Timex.Protocol, for: DateTime do
     time = Timex.Time.new!(23, 59, 59, us)
 
     with {:ok, datetime} <-
-           Timex.DateTime.new(Timex.Date.new!(year, 12, 31), time, time_zone, Timex.tzdb()) do
+           Timex.DateTime.new(
+             Timex.Date.new!(year, 12, 31),
+             time,
+             time_zone,
+             Timex.Timezone.Database
+           ) do
       datetime
     else
       {:gap, a, _b} ->
@@ -181,7 +201,12 @@ defimpl Timex.Protocol, for: DateTime do
     time = Timex.Time.new!(0, 0, 0, us)
 
     with {:ok, datetime} <-
-           Timex.DateTime.new(Timex.Date.new!(year, month, 1), time, time_zone, Timex.tzdb()) do
+           Timex.DateTime.new(
+             Timex.Date.new!(year, month, 1),
+             time,
+             time_zone,
+             Timex.Timezone.Database
+           ) do
       datetime
     else
       {:gap, _a, b} ->
@@ -204,7 +229,7 @@ defimpl Timex.Protocol, for: DateTime do
     us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
     time = Timex.Time.new!(23, 59, 59, us)
 
-    with {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.tzdb()) do
+    with {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.Timezone.Database) do
       datetime
     else
       {:gap, a, _b} ->
@@ -226,7 +251,12 @@ defimpl Timex.Protocol, for: DateTime do
     time = Timex.Time.new!(0, 0, 0, us)
 
     with {:ok, datetime} <-
-           Timex.DateTime.new(Timex.Date.new!(year, month, 1), time, time_zone, Timex.tzdb()) do
+           Timex.DateTime.new(
+             Timex.Date.new!(year, month, 1),
+             time,
+             time_zone,
+             Timex.Timezone.Database
+           ) do
       datetime
     else
       {:gap, _a, b} ->
@@ -248,7 +278,7 @@ defimpl Timex.Protocol, for: DateTime do
     us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
     time = Timex.Time.new!(23, 59, 59, us)
 
-    with {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.tzdb()) do
+    with {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.Timezone.Database) do
       datetime
     else
       {:gap, a, _b} ->
@@ -417,13 +447,13 @@ defimpl Timex.Protocol, for: DateTime do
           err
 
         %DateTime{} = datetime when shift != 0 ->
-          DateTime.add(datetime, shift, :microsecond, Timex.tzdb())
+          DateTime.add(datetime, shift, :microsecond, Timex.Timezone.Database)
 
         %DateTime{} = datetime ->
           datetime
 
         {{ty, _, _}, %DateTime{} = orig} when ty in [:gap, :ambiguous] and shift != 0 ->
-          DateTime.add(orig, shift, :microsecond, Timex.tzdb())
+          DateTime.add(orig, shift, :microsecond, Timex.Timezone.Database)
 
         {{ty, _a, _b} = amb, _} when ty in [:gap, :ambiguous] ->
           amb
@@ -457,7 +487,8 @@ defimpl Timex.Protocol, for: DateTime do
 
     case do_logical_shift(datetime, sorted) do
       %DateTime{time_zone: time_zone} = dt ->
-        with {:ok, shifted} <- DateTime.from_naive(DateTime.to_naive(dt), time_zone, Timex.tzdb()) do
+        with {:ok, shifted} <-
+               DateTime.from_naive(DateTime.to_naive(dt), time_zone, Timex.Timezone.Database) do
           shifted
         else
           {ty, _, _} = amb when ty in [:gap, :ambiguous] ->

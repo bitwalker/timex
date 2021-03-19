@@ -42,7 +42,7 @@ defmodule DateFormatTest.ParseStrftime do
   end
 
   test "issue #446 - strftime_iso_kitchen should not discard dates" do
-    input_datetime_str = "July 23, 2018 05:34:04 PM PDT"
+    input_datetime_str = "July 23, 2018 05:34:04 PM PST8PDT"
 
     expected_datetime = %DateTime{
       calendar: Calendar.ISO,

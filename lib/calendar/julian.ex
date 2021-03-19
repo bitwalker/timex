@@ -71,6 +71,52 @@ defmodule Timex.Calendar.Julian do
   def julian_date(_, _, _, _, _, _), do: {:error, :invalid_datetime}
 
   @doc """
+  Given a Julian day of year, and a year, this function returns the
+  `Date` which that day falls on.
+
+  If no options are provided, leap days are disregarded, and the valid range for
+  the day provided is 1-365, i.e. there is no representation
+  for Feb 29.
+
+  To allow representing leap days, you may pass `leaps: true`, which in
+  turn expands the range of the day provided to 0-365.
+
+  NOTE: This is internally used for POSIX-TZ support, but may be useful
+  to others, so it is being made public.
+  """
+  def date_for_day_of_year(day, year, opts \\ [])
+      when is_integer(day) and day >= 0 and day <= 365 do
+    leaps? = Keyword.get(opts, :leaps, false)
+
+    day = if leaps?, do: day + 1, else: day
+
+    days =
+      if leaps? and :calendar.is_leap_year(year) do
+        [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+      else
+        [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+      end
+
+    {month, day} =
+      Enum.reduce_while(days, {1, 0}, fn eom, {last_month, jd} ->
+        next = eom + jd
+
+        cond do
+          day > next ->
+            {:cont, {last_month + 1, next}}
+
+          day == next ->
+            {:halt, {last_month, eom}}
+
+          day < next ->
+            {:halt, {last_month, day - jd}}
+        end
+      end)
+
+    Timex.Date.new!(year, month, day)
+  end
+
+  @doc """
   Returns the day of the week, starting with 0 for Sunday, or 1 for Monday
   """
   @spec day_of_week(Types.date(), :sun | :mon) :: Types.weekday()

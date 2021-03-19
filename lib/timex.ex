@@ -12,7 +12,7 @@ defmodule Timex do
       tzdata_started? ->
         case Calendar.get_time_zone_database() do
           Calendar.UTCOnlyTimeZoneDatabase ->
-            Calendar.put_time_zone_database(Tzdata.TimeZoneDatabase)
+            Calendar.put_time_zone_database(Timex.Timezone.Database)
 
           _ ->
             :ok
@@ -44,9 +44,6 @@ defmodule Timex do
   use Timex.Constants
   import Timex.Macros
 
-  @doc false
-  def tzdb, do: Application.get_env(:elixir, :time_zone_database, Tzdata.TimeZoneDatabase)
-
   @doc """
   Returns a Date representing the current day in UTC
   """
@@ -72,7 +69,7 @@ defmodule Timex do
   @spec now(Types.valid_timezone()) :: DateTime.t() | AmbiguousDateTime.t() | {:error, term}
   def now(tz) do
     with {:tzdata, tzname} when is_binary(tzname) <- {:tzdata, Timezone.name_of(tz)},
-         {:ok, dt} <- DateTime.now(tzname, tzdb()) do
+         {:ok, dt} <- DateTime.now(tzname, Timex.Timezone.Database) do
       dt
     else
       {:tzdata, {:error, _} = err} ->
@@ -95,7 +92,7 @@ defmodule Timex do
   @spec local() :: DateTime.t() | {:error, term}
   def local() do
     with tz when is_binary(tz) <- Timezone.Local.lookup(),
-         {:ok, datetime} <- DateTime.now(tz, tzdb()) do
+         {:ok, datetime} <- DateTime.now(tz, Timex.Timezone.Database) do
       datetime
     end
   end
@@ -112,7 +109,7 @@ defmodule Timex do
   @spec local(Types.valid_datetime()) :: DateTime.t() | AmbiguousDateTime.t() | {:error, term}
   def local(%DateTime{} = datetime) do
     with tz when is_binary(tz) <- Timezone.Local.lookup(),
-         {:ok, datetime} <- DateTime.shift_zone(datetime, tz, tzdb()) do
+         {:ok, datetime} <- DateTime.shift_zone(datetime, tz, Timex.Timezone.Database) do
       datetime
     end
   end

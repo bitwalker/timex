@@ -21,7 +21,7 @@ defimpl Timex.Protocol, for: Date do
 
   def to_datetime(%Date{} = date, timezone) do
     with {:tzdata, tz} when is_binary(tz) <- {:tzdata, Timex.Timezone.name_of(timezone)},
-         {:ok, datetime} <- Timex.DateTime.new(date, ~T[00:00:00], tz, Timex.tzdb()) do
+         {:ok, datetime} <- Timex.DateTime.new(date, ~T[00:00:00], tz, Timex.Timezone.Database) do
       datetime
     else
       {:tzdata, err} ->

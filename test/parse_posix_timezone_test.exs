@@ -1,49 +1,91 @@
 defmodule PosixTimezoneParsing.Tests do
   use ExUnit.Case, async: true
   alias Timex.Parse.Timezones.Posix
-  alias Timex.Parse.Timezones.Posix.PosixTimezone, as: TZ
+  alias Timex.PosixTimezone, as: TZ
 
-  test "can parse simple POSIX timezone" do
+  test "stdoffset[dst]" do
     tz = "CST6CDT"
-    res = %TZ{:name => "CST6CDT", :diff => 6, :std_name => "CST", :dst_name => "CDT"}
-    assert {:ok, ^res} = Posix.parse(tz)
-  end
-
-  test "can parse full POSIX timezone" do
-    tz = "CST6CDT,M3.2.0/2:00:00,M11.1.0/2:00:00"
 
     res = %TZ{
-      :name => "CST6CDT",
-      :diff => 6,
-      :std_name => "CST",
-      :dst_name => "CDT",
-      :dst_start => %{:month => 3, :week => 2, :day_of_week => 0, :time => {2, 0, 0}},
-      :dst_end => %{:month => 11, :week => 1, :day_of_week => 0, :time => {2, 0, 0}}
+      name: "CST6CDT",
+      std_offset: 6 * 3600 * -1,
+      dst_offset: 5 * 3600 * -1,
+      std_abbr: "CST",
+      dst_abbr: "CDT"
     }
 
-    assert {:ok, ^res} = Posix.parse(tz)
+    assert {:ok, ^res, ""} = Posix.parse(tz)
   end
 
-  test "non-POSIX timezone formats are rejected with an error tuple describing the reason" do
-    base = "CST6CDT,M3.2.0/2:00:00,M11.1.0/2:00:00"
-    mutations = 1..(String.length(base) - 1)
+  test "stdoffset[dst,[start/time,end/time]]" do
+    tz = "CST6CDT,M3.2.0/2:00:00,M11.1.0/2:00:00"
 
-    for variant <- mutations do
-      {head, tail} = String.split_at(base, variant)
-      {new_head, _} = String.split_at(head, String.length(head) - 1)
-      tz = new_head <> tail
+    std_offset = 6 * 3600 * -1
 
-      result =
-        case Posix.parse(tz) do
-          {:ok, _} ->
-            true
+    res = %TZ{
+      name: "CST6CDT",
+      std_offset: std_offset,
+      dst_offset: std_offset + 3600,
+      std_abbr: "CST",
+      dst_abbr: "CDT",
+      dst_start: {{:mwd, {3, 2, 0}}, ~T[02:00:00]},
+      dst_end: {{:mwd, {11, 1, 0}}, ~T[02:00:00]}
+    }
 
-          res ->
-            assert {:error, _} = res
-            true
-        end
+    assert {:ok, ^res, ""} = Posix.parse(tz)
+  end
 
-      assert true === result
-    end
+  test "stdoffset[dst,[start/time,end/time]], julian dates" do
+    tz = "CST-2CEST,J1/1:00,J110/1:00"
+
+    std_offset = 2 * 3600
+
+    res = %TZ{
+      name: "CST-2CEST",
+      std_offset: std_offset,
+      dst_offset: std_offset + 3600,
+      std_abbr: "CST",
+      dst_abbr: "CEST",
+      dst_start: {{:julian, 1}, ~T[01:00:00]},
+      dst_end: {{:julian, 110}, ~T[01:00:00]}
+    }
+
+    assert {:ok, ^res, ""} = Posix.parse(tz)
+  end
+
+  test "stdoffset[dst,[start/time,end/time]], julian dates (leap)" do
+    tz = "CST-2CEST,0/1:00,110/1:00"
+
+    std_offset = 2 * 3600
+
+    res = %TZ{
+      name: "CST-2CEST",
+      std_offset: std_offset,
+      dst_offset: std_offset + 3600,
+      std_abbr: "CST",
+      dst_abbr: "CEST",
+      dst_start: {{:julian_leap, 0}, ~T[01:00:00]},
+      dst_end: {{:julian_leap, 110}, ~T[01:00:00]}
+    }
+
+    assert {:ok, ^res, ""} = Posix.parse(tz)
+  end
+
+  test "stdoffset[dst[offset],[start/time,end/time]]" do
+    tz = "CST-2CEST-3,M3.2.0/2:00:00,M11.1.0/2:00:00"
+
+    std_offset = 2 * 3600
+
+    res = %TZ{
+      name: "CST-2CEST-3",
+      std_offset: std_offset,
+      dst_offset: 3 * 3600,
+      std_abbr: "CST",
+      dst_abbr: "CEST",
+      dst_start: {{:mwd, {3, 2, 0}}, ~T[02:00:00]},
+      dst_end: {{:mwd, {11, 1, 0}}, ~T[02:00:00]}
+    }
+
+    assert {:ok, ^res, ""} = Posix.parse(tz)
   end
 end

@@ -282,8 +282,8 @@ defmodule DateFormatTest.ParseDefault do
     date = Timex.to_datetime({{2013, 3, 5}, {23, 25, 19}}, "EST")
     assert {:ok, ^date} = parse("Tue Mar  5 23:25:19 EST 2013", "{UNIX}")
 
-    date = Timex.to_datetime({{2015, 10, 5}, {0, 7, 11}}, "PST")
-    assert {:ok, ^date} = parse("Mon Oct 5 00:07:11 PST 2015", "{UNIX}")
+    date = Timex.to_datetime({{2015, 10, 5}, {0, 7, 11}}, "MST")
+    assert {:ok, ^date} = parse("Mon Oct 5 00:07:11 MST 2015", "{UNIX}")
 
     date = Timex.to_datetime({{2015, 11, 16}, {22, 23, 48}}, "UTC")
     assert {:ok, ^date} = parse("Mon Nov 16 22:23:48 UTC 2015", "{UNIX}")

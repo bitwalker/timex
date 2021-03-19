@@ -126,11 +126,11 @@ defmodule TimezoneTests do
   end
 
   test "converting with custom time zone" do
-    offset = 3 * 60 * 60 + 15 * 60
-    custom_tx = Timex.TimezoneInfo.create("Custom/TZ", "ATZ", offset, 0, :min, :max)
-    noon = Timex.to_datetime({{2017, 3, 15}, {12, 0, 0}}, "Etc/UTC")
+    assert {:ok, posix_tz, _} = Timex.Parse.Timezones.Posix.parse("EZT6EYT")
+    custom_tx = Timex.PosixTimezone.to_timezone_info(posix_tz, ~N[2017-03-15 12:00:00])
+    noon = ~U[2017-03-15 12:00:00Z]
 
-    assert {{2017, 3, 15}, {15, 15, 0}} = noon |> Timezone.convert(custom_tx) |> Timex.to_erl()
+    assert ~N[2017-03-15 06:00:00] = Timezone.convert(noon, custom_tx) |> DateTime.to_naive()
   end
 
   test "issue #142 - invalid results produced when converting across DST in Europe/Zurich" do

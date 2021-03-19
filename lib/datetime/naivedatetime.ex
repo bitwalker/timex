@@ -236,7 +236,7 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   end
 
   def shift(%NaiveDateTime{} = datetime, shifts) when is_list(shifts) do
-    with {:ok, dt} <- DateTime.from_naive(datetime, "Etc/UTC", Timex.tzdb()) do
+    with {:ok, dt} <- DateTime.from_naive(datetime, "Etc/UTC", Timex.Timezone.Database) do
       case Timex.shift(dt, shifts) do
         {:error, _} = err ->
           err
