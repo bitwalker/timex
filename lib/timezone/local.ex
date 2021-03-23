@@ -65,7 +65,7 @@ defmodule Timex.Timezone.Local do
         end
 
 
-      tz ->
+      tz when is_binary(tz) ->
         tz
     end
   end

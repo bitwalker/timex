@@ -68,13 +68,10 @@ defmodule Timex do
   """
   @spec now(Types.valid_timezone()) :: DateTime.t() | AmbiguousDateTime.t() | {:error, term}
   def now(tz) do
-    with {:tzdata, tzname} when is_binary(tzname) <- {:tzdata, Timezone.name_of(tz)},
+    with tzname when is_binary(tzname) <- Timezone.name_of(tz),
          {:ok, dt} <- DateTime.now(tzname, Timex.Timezone.Database) do
       dt
     else
-      {:tzdata, {:error, _} = err} ->
-        err
-
       {:error, _} = err ->
         err
     end
@@ -94,6 +91,9 @@ defmodule Timex do
     with tz when is_binary(tz) <- Timezone.Local.lookup(),
          {:ok, datetime} <- DateTime.now(tz, Timex.Timezone.Database) do
       datetime
+    else
+      {:error, _} = err ->
+        err
     end
   end
 
@@ -111,12 +111,18 @@ defmodule Timex do
     with tz when is_binary(tz) <- Timezone.Local.lookup(),
          {:ok, datetime} <- DateTime.shift_zone(datetime, tz, Timex.Timezone.Database) do
       datetime
+    else
+      {:error, _} = err ->
+        err
     end
   end
 
   def local(date) do
-    with {:ok, tz} <- Timezone.local() do
+    with tz when is_binary(tz) <- Timezone.Local.lookup() do
       to_datetime(date, tz)
+    else
+      {:error, _} = err ->
+        err
     end
   end
 
