@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+
+### Added/Changed
+
+### Fixed
+
+---
+
+## 3.7.4
+
+### Fixed
+
+- Addressed issues #647, #648, #649, #650
+
 ## 3.7.3
 
 **NOTE:** The config of the Timex default locale is changed to:
