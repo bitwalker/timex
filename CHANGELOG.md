@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 **NOTE:** The config of the Timex default locale is changed to:
 ```ex
-config :timex, Timex.Gettext, default_locale: "en"
+config :your_app, Timex.Gettext, default_locale: "en"
 ```
 This follows the standard set by Gettext, see: [the Gettext docs](https://hexdocs.pm/gettext/Gettext.html#module-default-locale)
 
