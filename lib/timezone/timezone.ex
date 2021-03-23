@@ -194,32 +194,35 @@ defmodule Timex.Timezone do
       "Etc/UTC" ->
         "Etc/UTC"
 
-      "GMT" <> rest ->
-        "Etc/GMT" <> rest
+      <<"Etc/UTC", ?+, rest::binary>> ->
+        "Etc/GMT-" <> rest
+
+      <<"Etc/UTC", ?-, rest::binary>> ->
+        "Etc/GMT+" <> rest
     end
   end
 
   def name_of(<<"GMT", sign::utf8, hh::utf8>>) when sign in [?+, ?-],
-    do: "GMT" <> <<sign::utf8, hh::utf8>>
+    do: "Etc/UTC" <> <<sign::utf8, hh::utf8>>
 
   def name_of(<<"GMT", sign::utf8, hh::binary-size(2)-unit(8)>>) when sign in [?+, ?-],
-    do: "GMT" <> <<sign::utf8, hh::binary>>
+    do: "Etc/UTC" <> <<sign::utf8, hh::binary>>
 
   def name_of(<<"GMT", sign::utf8, hh::binary-size(2)-unit(8), ?:, mm::binary-size(2)-unit(8)>>)
       when sign in [?+, ?-],
-      do: "GMT" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
+      do: "Etc/UTC" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
 
   def name_of(<<"GMT", sign::utf8, hh::binary-size(1)-unit(8), ?:, mm::binary-size(2)-unit(8)>>)
       when sign in [?+, ?-],
-      do: "GMT" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
+      do: "Etc/UTC" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
 
   def name_of(<<"GMT", sign::utf8, hh::binary-size(2)-unit(8), mm::binary-size(2)-unit(8)>>)
       when sign in [?+, ?-],
-      do: "GMT" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
+      do: "Etc/UTC" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
 
   def name_of(<<"GMT", sign::utf8, hh::binary-size(1)-unit(8), mm::binary-size(2)-unit(8)>>)
       when sign in [?+, ?-],
-      do: "GMT" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
+      do: "Etc/UTC" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
 
   def name_of(tz) when is_binary(tz) do
     if Tzdata.zone_exists?(tz) do

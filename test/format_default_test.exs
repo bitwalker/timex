@@ -430,7 +430,7 @@ defmodule DateFormatTest.FormatDefault do
   # http://www.ruby-doc.org/core-2.0/Time.html#method-i-strftime
   # http://golang.org/pkg/time/#pkg-constants
   test "can properly format various complex compound formats" do
-    date = Timex.to_datetime({{2007, 11, 19}, {8, 37, 48}}, "Etc/GMT-6")
+    date = Timex.to_datetime({{2007, 11, 19}, {8, 37, 48}}, "Etc/UTC+6")
 
     assert {:ok, "083748+0600"} = format(date, "{0h24}{0m}{0s}{Z}")
     assert {:ok, "08:37:48+06:00"} = format(date, "{0h24}:{0m}:{0s}{Z:}")
