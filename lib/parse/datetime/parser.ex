@@ -211,7 +211,18 @@ defmodule Timex.Parse.DateTime.Parser do
   defp apply_directives(tokens, tokenizer),
     do: apply_directives(tokens, Timex.DateTime.Helpers.empty(), tokenizer)
 
-  defp apply_directives([], date, _), do: {:ok, date}
+  defp apply_directives([], %{year: y, month: m, day: d} = datetime, _) do 
+    with {:date, true} <- {:date, :calendar.valid_date(y, m, d)},
+         {:ok, %Time{}} <- Time.new(datetime.hour, datetime.minute, datetime.second, datetime.microsecond) do
+      {:ok, datetime}
+    else
+      {:date, _} ->
+        {:error, :invalid_date}
+
+      {:error, _} = err ->
+        err
+    end
+  end
 
   defp apply_directives([{token, value} | tokens], date, tokenizer) do
     case update_date(date, token, value, tokenizer) do

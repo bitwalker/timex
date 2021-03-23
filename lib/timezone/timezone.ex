@@ -191,14 +191,14 @@ defmodule Timex.Timezone do
       {:error, _} = err ->
         err
 
-      "Etc/UTC" ->
-        "Etc/UTC"
-
       <<"Etc/UTC", ?+, rest::binary>> ->
         "Etc/GMT-" <> rest
 
       <<"Etc/UTC", ?-, rest::binary>> ->
         "Etc/GMT+" <> rest
+
+      other ->
+        other
     end
   end
 
