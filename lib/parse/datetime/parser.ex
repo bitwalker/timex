@@ -211,16 +211,9 @@ defmodule Timex.Parse.DateTime.Parser do
   defp apply_directives(tokens, tokenizer),
     do: apply_directives(tokens, Timex.DateTime.Helpers.empty(), tokenizer)
 
-  defp apply_directives([], %{year: y, month: m, day: d} = datetime, _) do 
-    with {:date, true} <- {:date, :calendar.valid_date(y, m, d)},
-         {:ok, %Time{}} <- Time.new(datetime.hour, datetime.minute, datetime.second, datetime.microsecond) do
+  defp apply_directives([], datetime, _) do 
+    with :ok <- validate_datetime(datetime) do
       {:ok, datetime}
-    else
-      {:date, _} ->
-        {:error, :invalid_date}
-
-      {:error, _} = err ->
-        err
     end
   end
 
@@ -231,6 +224,19 @@ defmodule Timex.Parse.DateTime.Parser do
 
       updated ->
         apply_directives(tokens, updated, tokenizer)
+    end
+  end
+
+  defp validate_datetime(%{year: y, month: m, day: d} = datetime) do
+    with {:date, true} <- {:date, :calendar.valid_date(y, m, d)},
+         {:ok, %Time{}} <- Time.new(datetime.hour, datetime.minute, datetime.second, datetime.microsecond) do
+      :ok
+    else
+      {:date, _} ->
+        {:error, :invalid_date}
+
+      {:error, _} = err ->
+        err
     end
   end
 
@@ -280,25 +286,29 @@ defmodule Timex.Parse.DateTime.Parser do
         %{date | :year => year_shifted}
 
       y when y in [:year4, :iso_year4] ->
+        date = %{date | :year => value}
         # Special case for UNIX format dates, where the year is parsed after the timezone,
         # so we must lookup the timezone again to ensure it's properly set
         case Map.get(date, :time_zone) do
           time_zone when is_binary(time_zone) ->
-            seconds_from_zeroyear = Timex.to_gregorian_seconds(date)
+            # Need to validate the date/time before doing timezone operations
+            with :ok <- validate_datetime(date) do
+              seconds_from_zeroyear = Timex.to_gregorian_seconds(date)
 
-            case Timezone.resolve(time_zone, seconds_from_zeroyear) do
-              %TimezoneInfo{} = tz ->
-                Timex.to_datetime(date, tz)
+              case Timezone.resolve(time_zone, seconds_from_zeroyear) do
+                %TimezoneInfo{} = tz ->
+                  Timex.to_datetime(date, tz)
 
-              %AmbiguousTimezoneInfo{before: b, after: a} ->
-                bd = Timex.to_datetime(date, b)
-                ad = Timex.to_datetime(date, a)
+                %AmbiguousTimezoneInfo{before: b, after: a} ->
+                  bd = Timex.to_datetime(date, b)
+                  ad = Timex.to_datetime(date, a)
 
-                %AmbiguousDateTime{:before => bd, :after => ad}
+                  %AmbiguousDateTime{before: bd, after: ad}
+              end
             end
 
           nil ->
-            %{date | :year => value}
+            date
         end
 
       # Months
@@ -409,43 +419,53 @@ defmodule Timex.Parse.DateTime.Parser do
 
       # Timezones
       :zoffs ->
-        case value do
-          <<sign::utf8, _::binary-size(2)-unit(8)>> = zone when sign in [?+, ?-] ->
-            Timex.to_datetime(date, zone)
+        with :ok <- validate_datetime(date) do
+          case value do
+            <<sign::utf8, _::binary-size(2)-unit(8)>> = zone when sign in [?+, ?-] ->
+              Timex.to_datetime(date, zone)
 
-          <<sign::utf8, _::binary-size(4)-unit(8)>> = zone when sign in [?+, ?-] ->
-            Timex.to_datetime(date, zone)
+            <<sign::utf8, _::binary-size(4)-unit(8)>> = zone when sign in [?+, ?-] ->
+              Timex.to_datetime(date, zone)
 
-          _ ->
-            {:error, {:invalid_zoffs, value}}
+            _ ->
+              {:error, {:invalid_zoffs, value}}
+          end
         end
 
       :zname ->
-        Timex.to_datetime(date, value)
+        with :ok <- validate_datetime(date) do
+          Timex.to_datetime(date, value)
+        end
 
       :zoffs_colon ->
-        case value do
-          <<sign::utf8, _::binary-size(2)-unit(8), ?:, _::binary-size(2)-unit(8)>> = zone
-          when sign in [?+, ?-] ->
-            Timex.to_datetime(date, zone)
+        with :ok <- validate_datetime(date) do
+          case value do
+            <<sign::utf8, _::binary-size(2)-unit(8), ?:, _::binary-size(2)-unit(8)>> = zone
+            when sign in [?+, ?-] ->
+              Timex.to_datetime(date, zone)
 
-          _ ->
-            {:error, {:invalid_zoffs_colon, value}}
+            _ ->
+              {:error, {:invalid_zoffs_colon, value}}
+          end
         end
 
       :zoffs_sec ->
-        case value do
-          <<sign::utf8, _::binary-size(2)-unit(8), ?:, _::binary-size(2)-unit(8), ?:,
-            _::binary-size(2)-unit(8)>> = zone
-          when sign in [?+, ?-] ->
-            Timex.to_datetime(date, zone)
+        with :ok <- validate_datetime(date) do
+          case value do
+            <<sign::utf8, _::binary-size(2)-unit(8), ?:, _::binary-size(2)-unit(8), ?:,
+              _::binary-size(2)-unit(8)>> = zone
+            when sign in [?+, ?-] ->
+              Timex.to_datetime(date, zone)
 
-          _ ->
-            {:error, {:invalid_zoffs_sec, value}}
+            _ ->
+              {:error, {:invalid_zoffs_sec, value}}
+          end
         end
 
       :force_utc ->
-        Timex.to_datetime(date, "Etc/UTC")
+        with :ok <- validate_datetime(date) do
+          Timex.to_datetime(date, "Etc/UTC")
+        end
 
       :literal ->
         date
