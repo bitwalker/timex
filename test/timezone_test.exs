@@ -133,6 +133,12 @@ defmodule TimezoneTests do
     assert ~N[2017-03-15 06:00:00] = Timezone.convert(noon, custom_tx) |> DateTime.to_naive()
   end
 
+  test "converting with empty time zone returns error" do
+    assert {:ok, noon} = DateTime.from_naive(~N[2017-03-15 12:00:00], "Etc/UTC")
+
+    assert {:error, :time_zone_not_found} = Timezone.convert(noon, "")
+  end
+
   test "issue #142 - invalid results produced when converting across DST in Europe/Zurich" do
     # Hour of 2am is repeated twice for this change
     datetime1 = {{2015, 10, 25}, {3, 12, 34}}

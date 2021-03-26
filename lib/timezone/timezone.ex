@@ -224,6 +224,8 @@ defmodule Timex.Timezone do
       when sign in [?+, ?-],
       do: "Etc/UTC" <> <<sign::utf8, hh::binary, ?:, mm::binary>>
 
+  def name_of(""), do: {:error, :time_zone_not_found}
+
   def name_of(tz) when is_binary(tz) do
     if Tzdata.zone_exists?(tz) do
       tz
