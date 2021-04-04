@@ -33,12 +33,16 @@ defmodule Timex.Timezone.Database do
   def time_zone_periods_from_wall_datetime(naive, time_zone) do
     db = Tzdata.TimeZoneDatabase
 
-    case db.time_zone_periods_from_wall_datetime(naive, time_zone) do
-      {:error, :time_zone_not_found} ->
-        time_zone_periods_from_wall_datetime_fallback(naive, time_zone)
+    if Tzdata.zone_exists?(time_zone) do
+      case db.time_zone_periods_from_wall_datetime(naive, time_zone) do
+        {:error, :time_zone_not_found} ->
+          time_zone_periods_from_wall_datetime_fallback(naive, time_zone)
 
-      result ->
-        result
+        result ->
+          result
+      end
+    else
+      time_zone_periods_from_wall_datetime_fallback(naive, time_zone)
     end
   end
 
