@@ -102,6 +102,9 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
   def parse_extended(<<h::utf8, _::binary>>, :hour, _acc, count),
     do: {:error, "Expected 2 digit hour, but got `#{<<h::utf8>>}` instead.", count}
 
+  def parse_extended(_, :hour, _acc, count),
+    do: {:error, "Expected 2 digit hour.", count}
+
   # Minutes are optional
   def parse_extended(<<m1::utf8, m2::utf8, rest::binary>>, :minute, acc, count)
       when m1 >= ?0 and m1 < ?6 and
@@ -123,8 +126,11 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
     end
   end
 
-  def parse_extended(<<h::utf8, _::binary>>, :minute, _acc, count),
-    do: {:error, "Expected 2 digit minute, but got `#{<<h::utf8>>}` instead.", count}
+  def parse_extended(<<m1::utf8, _::binary>>, :minute, _acc, count),
+    do: {:error, "Expected 2 digit minute, but got `#{<<m1::utf8>>}` instead.", count}
+
+  def parse_extended(_, :minute, _acc, count),
+    do: {:error, "Expected 2 digit minute.", count}
 
   # Seconds are optional
   # Has fractional seconds
@@ -174,6 +180,9 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
 
   def parse_extended(<<h::utf8, _::binary>>, :second, _acc, count),
     do: {:error, "Expected valid value for seconds, but got `#{<<h::utf8>>}` instead.", count}
+
+  def parse_extended(_, :second, _acc, count),
+    do: {:error, "Expected valid value for seconds.", count}
 
   def parse_fractional_seconds(<<digit::utf8, rest::binary>>, count, acc)
       when digit >= ?0 and digit <= ?9 do
