@@ -89,6 +89,8 @@ defmodule Timex.Parse.Timezones.Posix do
     end
   end
 
+  defp finalize(nil), do: nil
+
   defp diff(std, dst), do: std - dst
 
   defp to_offset(0), do: "0"
