@@ -268,6 +268,23 @@ defmodule Timex.Timezone do
     end
   end
 
+  @doc """
+  Same as `get/2`, but allows specifying whether to obtain the TimezoneInfo based
+  on utc time or wall time manually (`:utc` or `:wall` respectively).
+  """
+  def get(:utc, _, _), do: %TimezoneInfo{}
+  def get(:local, datetime, _), do: local(datetime)
+
+  def get(tz, datetime, utc_or_wall) do
+    case name_of(tz) do
+      {:error, _} = err ->
+        err
+
+      name ->
+        get_info(name, datetime, utc_or_wall)
+    end
+  end
+
   defp get_info(timezone, datetime, utc_or_wall)
 
   defp get_info("Etc/UTC", _datetime, _utc_or_wall),
