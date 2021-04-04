@@ -9,7 +9,18 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+
 ---
+
+## 3.7.5
+
+### Added/Changed
+
+- Added `Timex.Timezone.get/3` to allow requesting timezones using utc or wall clock as desired
+
+### Fixed
+
+- Addressed issues #652, #658, #659, #656, #654, #653
 
 ## 3.7.4
 
