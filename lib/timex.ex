@@ -1919,6 +1919,10 @@ defmodule Timex do
     end
   end
 
+  def normalize(:microsecond, us) when is_integer(us) and us >= 0 and us <= 999_999 do
+    Timex.DateTime.Helpers.construct_microseconds(us, -1)
+  end
+
   def normalize(:day, {year, month, day}) do
     year = normalize(:year, year)
     month = normalize(:month, month)
