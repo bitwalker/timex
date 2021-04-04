@@ -20,18 +20,18 @@ msgstr ""
 "X-Generator: Poedit 2.2.1\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: lib/l10n/translator.ex:205
+#: lib/l10n/translator.ex:266
 msgid "AM"
 msgstr "ÖÖ"
 
-#: lib/l10n/translator.ex:207
+#: lib/l10n/translator.ex:268
 msgid "PM"
 msgstr "ÖS"
 
-#: lib/l10n/translator.ex:206
+#: lib/l10n/translator.ex:267
 msgid "am"
 msgstr "öö"
 
-#: lib/l10n/translator.ex:208
+#: lib/l10n/translator.ex:269
 msgid "pm"
 msgstr "ös"

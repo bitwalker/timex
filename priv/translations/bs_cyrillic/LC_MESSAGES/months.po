@@ -21,50 +21,50 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "Language: bs@cyrillic\n"
 
-#: lib/l10n/translator.ex:242
+#: lib/l10n/translator.ex:303
 msgid "April"
 msgstr "прил"
 
-#: lib/l10n/translator.ex:246
+#: lib/l10n/translator.ex:307
 msgid "August"
 msgstr "аугуст"
 
-#: lib/l10n/translator.ex:250
+#: lib/l10n/translator.ex:311
 msgid "December"
 msgstr "децембар"
 
-#: lib/l10n/translator.ex:240
+#: lib/l10n/translator.ex:301
 msgid "February"
 msgstr "фебруар"
 
-#: lib/l10n/translator.ex:239
+#: lib/l10n/translator.ex:300
 msgid "January"
 msgstr "јануар"
 
-#: lib/l10n/translator.ex:245
+#: lib/l10n/translator.ex:306
 msgid "July"
 msgstr "јули"
 
-#: lib/l10n/translator.ex:244
+#: lib/l10n/translator.ex:305
 msgid "June"
 msgstr "јуни"
 
-#: lib/l10n/translator.ex:241
+#: lib/l10n/translator.ex:302
 msgid "March"
 msgstr "март"
 
-#: lib/l10n/translator.ex:243
+#: lib/l10n/translator.ex:304
 msgid "May"
 msgstr "мај"
 
-#: lib/l10n/translator.ex:249
+#: lib/l10n/translator.ex:310
 msgid "November"
 msgstr "новембар"
 
-#: lib/l10n/translator.ex:248
+#: lib/l10n/translator.ex:309
 msgid "October"
 msgstr "октобар"
 
-#: lib/l10n/translator.ex:247
+#: lib/l10n/translator.ex:308
 msgid "September"
 msgstr "септембар"

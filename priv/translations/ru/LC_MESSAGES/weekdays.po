@@ -19,58 +19,58 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.7\n"
 
-#: lib/l10n/translator.ex:214
+#: lib/l10n/translator.ex:275
 msgid "Fri"
 msgstr "пт"
 
-#: lib/l10n/translator.ex:222
+#: lib/l10n/translator.ex:283
 msgid "Friday"
 msgstr "пятница"
 
-#: lib/l10n/translator.ex:210
+#: lib/l10n/translator.ex:271
 msgid "Mon"
 msgstr "пн"
 
-#: lib/l10n/translator.ex:218
+#: lib/l10n/translator.ex:279
 msgid "Monday"
 msgstr "понедельник"
 
-#: lib/l10n/translator.ex:215
+#: lib/l10n/translator.ex:276
 msgid "Sat"
 msgstr "сб"
 
-#: lib/l10n/translator.ex:223
+#: lib/l10n/translator.ex:284
 msgid "Saturday"
 msgstr "суббота"
 
-#: lib/l10n/translator.ex:216
+#: lib/l10n/translator.ex:277
 msgid "Sun"
 msgstr "вс"
 
-#: lib/l10n/translator.ex:224
+#: lib/l10n/translator.ex:285
 msgid "Sunday"
 msgstr "воскресенье"
 
-#: lib/l10n/translator.ex:213
+#: lib/l10n/translator.ex:274
 msgid "Thu"
 msgstr "чт"
 
-#: lib/l10n/translator.ex:221
+#: lib/l10n/translator.ex:282
 msgid "Thursday"
 msgstr "четверг"
 
-#: lib/l10n/translator.ex:211
+#: lib/l10n/translator.ex:272
 msgid "Tue"
 msgstr "вт"
 
-#: lib/l10n/translator.ex:219
+#: lib/l10n/translator.ex:280
 msgid "Tuesday"
 msgstr "вторник"
 
-#: lib/l10n/translator.ex:212
+#: lib/l10n/translator.ex:273
 msgid "Wed"
 msgstr "ср"
 
-#: lib/l10n/translator.ex:220
+#: lib/l10n/translator.ex:281
 msgid "Wednesday"
 msgstr "среда"

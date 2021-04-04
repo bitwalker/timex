@@ -21,50 +21,50 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "Language: ko\n"
 
-#: lib/l10n/translator.ex:242
+#: lib/l10n/translator.ex:303
 msgid "April"
 msgstr "4월"
 
-#: lib/l10n/translator.ex:246
+#: lib/l10n/translator.ex:307
 msgid "August"
 msgstr "8월"
 
-#: lib/l10n/translator.ex:250
+#: lib/l10n/translator.ex:311
 msgid "December"
 msgstr "12월"
 
-#: lib/l10n/translator.ex:240
+#: lib/l10n/translator.ex:301
 msgid "February"
 msgstr "2월"
 
-#: lib/l10n/translator.ex:239
+#: lib/l10n/translator.ex:300
 msgid "January"
 msgstr "1월"
 
-#: lib/l10n/translator.ex:245
+#: lib/l10n/translator.ex:306
 msgid "July"
 msgstr "7월"
 
-#: lib/l10n/translator.ex:244
+#: lib/l10n/translator.ex:305
 msgid "June"
 msgstr "6월"
 
-#: lib/l10n/translator.ex:241
+#: lib/l10n/translator.ex:302
 msgid "March"
 msgstr "3월"
 
-#: lib/l10n/translator.ex:243
+#: lib/l10n/translator.ex:304
 msgid "May"
 msgstr "5월"
 
-#: lib/l10n/translator.ex:249
+#: lib/l10n/translator.ex:310
 msgid "November"
 msgstr "11월"
 
-#: lib/l10n/translator.ex:248
+#: lib/l10n/translator.ex:309
 msgid "October"
 msgstr "10월"
 
-#: lib/l10n/translator.ex:247
+#: lib/l10n/translator.ex:308
 msgid "September"
 msgstr "9월"

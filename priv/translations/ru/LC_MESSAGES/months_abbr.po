@@ -10,50 +10,50 @@ msgid ""
 msgstr ""
 "Language: ru\n"
 
-#: lib/l10n/translator.ex:229
+#: lib/l10n/translator.ex:290
 msgid "Apr"
-msgstr "апр."
+msgstr "апр"
 
-#: lib/l10n/translator.ex:233
+#: lib/l10n/translator.ex:294
 msgid "Aug"
-msgstr "авг."
+msgstr "авг"
 
-#: lib/l10n/translator.ex:237
+#: lib/l10n/translator.ex:298
 msgid "Dec"
-msgstr "дек."
+msgstr "дек"
 
-#: lib/l10n/translator.ex:227
+#: lib/l10n/translator.ex:288
 msgid "Feb"
-msgstr "фев."
+msgstr "фев"
 
-#: lib/l10n/translator.ex:226
+#: lib/l10n/translator.ex:287
 msgid "Jan"
-msgstr "янв."
+msgstr "янв"
 
-#: lib/l10n/translator.ex:232
+#: lib/l10n/translator.ex:293
 msgid "Jul"
 msgstr "июля"
 
-#: lib/l10n/translator.ex:231
+#: lib/l10n/translator.ex:292
 msgid "Jun"
 msgstr "июня"
 
-#: lib/l10n/translator.ex:228
+#: lib/l10n/translator.ex:289
 msgid "Mar"
 msgstr "марта"
 
-#: lib/l10n/translator.ex:230
+#: lib/l10n/translator.ex:291
 msgid "May"
 msgstr "мая"
 
-#: lib/l10n/translator.ex:236
+#: lib/l10n/translator.ex:297
 msgid "Nov"
-msgstr "нояб."
+msgstr "нояб"
 
-#: lib/l10n/translator.ex:235
+#: lib/l10n/translator.ex:296
 msgid "Oct"
-msgstr "окт."
+msgstr "окт"
 
-#: lib/l10n/translator.ex:234
+#: lib/l10n/translator.ex:295
 msgid "Sep"
-msgstr "сент."
+msgstr "сент"

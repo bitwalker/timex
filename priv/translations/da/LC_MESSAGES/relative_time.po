@@ -20,222 +20,222 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.11\n"
 
-#: lib/l10n/translator.ex:259
+#: lib/l10n/translator.ex:320
 msgid "last month"
 msgstr "sidste måned"
 
-#: lib/l10n/translator.ex:265
+#: lib/l10n/translator.ex:326
 msgid "last week"
 msgstr "sidste uge"
 
-#: lib/l10n/translator.ex:253
+#: lib/l10n/translator.ex:314
 msgid "last year"
 msgstr "sidste år"
 
-#: lib/l10n/translator.ex:261
+#: lib/l10n/translator.ex:322
 msgid "next month"
 msgstr "næste måned"
 
-#: lib/l10n/translator.ex:267
+#: lib/l10n/translator.ex:328
 msgid "next week"
 msgstr "næste uge"
 
-#: lib/l10n/translator.ex:255
+#: lib/l10n/translator.ex:316
 msgid "next year"
 msgstr "næste år"
 
-#: lib/l10n/translator.ex:260
+#: lib/l10n/translator.ex:321
 msgid "this month"
 msgstr "denne måned"
 
-#: lib/l10n/translator.ex:266
+#: lib/l10n/translator.ex:327
 msgid "this week"
 msgstr "denne uge"
 
-#: lib/l10n/translator.ex:254
+#: lib/l10n/translator.ex:315
 msgid "this year"
 msgstr "dette år"
 
-#: lib/l10n/translator.ex:272
+#: lib/l10n/translator.ex:333
 msgid "today"
 msgstr "i dag"
 
-#: lib/l10n/translator.ex:273
+#: lib/l10n/translator.ex:334
 msgid "tomorrow"
 msgstr "i morgen"
 
-#: lib/l10n/translator.ex:271
+#: lib/l10n/translator.ex:332
 msgid "yesterday"
 msgstr "i går"
 
-#: lib/l10n/translator.ex:275
+#: lib/l10n/translator.ex:336
 msgid "%{count} day ago"
 msgid_plural "%{count} days ago"
 msgstr[0] "%{count} dag siden"
 msgstr[1] "%{count} dage siden"
 
-#: lib/l10n/translator.ex:300
+#: lib/l10n/translator.ex:361
 msgid "%{count} hour ago"
 msgid_plural "%{count} hours ago"
 msgstr[0] "%{count} time siden"
 msgstr[1] "%{count} timer siden"
 
-#: lib/l10n/translator.ex:303
+#: lib/l10n/translator.ex:364
 msgid "%{count} minute ago"
 msgid_plural "%{count} minutes ago"
 msgstr[0] "%{count} minut siden"
 msgstr[1] "%{count} minutter siden"
 
-#: lib/l10n/translator.ex:263
+#: lib/l10n/translator.ex:324
 msgid "%{count} month ago"
 msgid_plural "%{count} months ago"
 msgstr[0] "%{count} måned siden"
 msgstr[1] "%{count} måneder siden"
 
-#: lib/l10n/translator.ex:306
+#: lib/l10n/translator.ex:367
 msgid "%{count} second ago"
 msgid_plural "%{count} seconds ago"
 msgstr[0] "%{count} sekund siden"
 msgstr[1] "%{count} sekunder siden"
 
-#: lib/l10n/translator.ex:269
+#: lib/l10n/translator.ex:330
 msgid "%{count} week ago"
 msgid_plural "%{count} weeks ago"
 msgstr[0] "%{count} uge siden"
 msgstr[1] "%{count} uger siden"
 
-#: lib/l10n/translator.ex:257
+#: lib/l10n/translator.ex:318
 msgid "%{count} year ago"
 msgid_plural "%{count} years ago"
 msgstr[0] "%{count} år siden"
 msgstr[1] "%{count} år siden"
 
-#: lib/l10n/translator.ex:274
+#: lib/l10n/translator.ex:335
 msgid "in %{count} day"
 msgid_plural "in %{count} days"
 msgstr[0] "om %{count} dag"
 msgstr[1] "om %{count} dage"
 
-#: lib/l10n/translator.ex:299
+#: lib/l10n/translator.ex:360
 msgid "in %{count} hour"
 msgid_plural "in %{count} hours"
 msgstr[0] "om %{count} time"
 msgstr[1] "om %{count} timer"
 
-#: lib/l10n/translator.ex:302
+#: lib/l10n/translator.ex:363
 msgid "in %{count} minute"
 msgid_plural "in %{count} minutes"
 msgstr[0] "om %{count} minut"
 msgstr[1] "om %{count} minutter"
 
-#: lib/l10n/translator.ex:262
+#: lib/l10n/translator.ex:323
 msgid "in %{count} month"
 msgid_plural "in %{count} months"
 msgstr[0] "om %{count} måned"
 msgstr[1] "om %{count} måneder"
 
-#: lib/l10n/translator.ex:305
+#: lib/l10n/translator.ex:366
 msgid "in %{count} second"
 msgid_plural "in %{count} seconds"
 msgstr[0] "om %{count} sekund"
 msgstr[1] "om %{count} sekunder"
 
-#: lib/l10n/translator.ex:268
+#: lib/l10n/translator.ex:329
 msgid "in %{count} week"
 msgid_plural "in %{count} weeks"
 msgstr[0] "om %{count} uge"
 msgstr[1] "om %{count} uger"
 
-#: lib/l10n/translator.ex:256
+#: lib/l10n/translator.ex:317
 msgid "in %{count} year"
 msgid_plural "in %{count} years"
 msgstr[0] "om %{count} år"
 msgstr[1] "om %{count} år"
 
-#: lib/l10n/translator.ex:289
+#: lib/l10n/translator.ex:350
 msgid "last friday"
 msgstr "sidste fredag"
 
-#: lib/l10n/translator.ex:277
+#: lib/l10n/translator.ex:338
 msgid "last monday"
 msgstr "sidste mandag"
 
-#: lib/l10n/translator.ex:292
+#: lib/l10n/translator.ex:353
 msgid "last saturday"
 msgstr "sidste lørdag"
 
-#: lib/l10n/translator.ex:295
+#: lib/l10n/translator.ex:356
 msgid "last sunday"
 msgstr "sidste søndag"
 
-#: lib/l10n/translator.ex:286
+#: lib/l10n/translator.ex:347
 msgid "last thursday"
 msgstr "sidste torsdag"
 
-#: lib/l10n/translator.ex:280
+#: lib/l10n/translator.ex:341
 msgid "last tuesday"
 msgstr "sidste tirsdag"
 
-#: lib/l10n/translator.ex:283
+#: lib/l10n/translator.ex:344
 msgid "last wednesday"
 msgstr "sidste onsdag"
 
-#: lib/l10n/translator.ex:291
+#: lib/l10n/translator.ex:352
 msgid "next friday"
 msgstr "næste fredag"
 
-#: lib/l10n/translator.ex:279
+#: lib/l10n/translator.ex:340
 msgid "next monday"
 msgstr "næste mandag"
 
-#: lib/l10n/translator.ex:294
+#: lib/l10n/translator.ex:355
 msgid "next saturday"
 msgstr "næste lørdag"
 
-#: lib/l10n/translator.ex:297
+#: lib/l10n/translator.ex:358
 msgid "next sunday"
 msgstr "næste søndag"
 
-#: lib/l10n/translator.ex:288
+#: lib/l10n/translator.ex:349
 msgid "next thursday"
 msgstr "næste torsdag"
 
-#: lib/l10n/translator.ex:282
+#: lib/l10n/translator.ex:343
 msgid "next tuesday"
 msgstr "næste tirsdag"
 
-#: lib/l10n/translator.ex:285
+#: lib/l10n/translator.ex:346
 msgid "next wednesday"
 msgstr "næste onsdag"
 
-#: lib/l10n/translator.ex:290
+#: lib/l10n/translator.ex:351
 msgid "this friday"
 msgstr "denne fredag"
 
-#: lib/l10n/translator.ex:278
+#: lib/l10n/translator.ex:339
 msgid "this monday"
 msgstr "denne mandag"
 
-#: lib/l10n/translator.ex:293
+#: lib/l10n/translator.ex:354
 msgid "this saturday"
 msgstr "denne lørdag"
 
-#: lib/l10n/translator.ex:296
+#: lib/l10n/translator.ex:357
 msgid "this sunday"
 msgstr "denne søndag"
 
-#: lib/l10n/translator.ex:287
+#: lib/l10n/translator.ex:348
 msgid "this thursday"
 msgstr "denne torsdag"
 
-#: lib/l10n/translator.ex:281
+#: lib/l10n/translator.ex:342
 msgid "this tuesday"
 msgstr "denne tirsdag"
 
-#: lib/l10n/translator.ex:284
+#: lib/l10n/translator.ex:345
 msgid "this wednesday"
 msgstr "denne onsdag"
 
-#: lib/l10n/translator.ex:308
+#: lib/l10n/translator.ex:369
 msgid "now"
 msgstr "nu"

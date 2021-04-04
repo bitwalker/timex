@@ -11,61 +11,61 @@ msgid ""
 msgstr ""
 "Language: vi\n"
 
-#: lib/l10n/translator.ex:200
+#: lib/l10n/translator.ex:261
 msgid "%{count} day"
 msgid_plural "%{count} days"
 msgstr[0] "${count} ngày"
 msgstr[1] "${count} ngày"
 
-#: lib/l10n/translator.ex:199
+#: lib/l10n/translator.ex:260
 msgid "%{count} hour"
 msgid_plural "%{count} hours"
 msgstr[0] "%{count} giờ"
 msgstr[1] "%{count} giờ"
 
-#: lib/l10n/translator.ex:195
+#: lib/l10n/translator.ex:256
 msgid "%{count} microsecond"
 msgid_plural "%{count} microseconds"
 msgstr[0] "%{count} micro giây"
 msgstr[1] "%{count} micro giây"
 
-#: lib/l10n/translator.ex:196
+#: lib/l10n/translator.ex:257
 msgid "%{count} millisecond"
 msgid_plural "%{count} milliseconds"
 msgstr[0] "%{count} mili giây"
 msgstr[1] "%{count} mili giây"
 
-#: lib/l10n/translator.ex:198
+#: lib/l10n/translator.ex:259
 msgid "%{count} minute"
 msgid_plural "%{count} minutes"
 msgstr[0] "%{count} phút"
 msgstr[1] "%{count} phút"
 
-#: lib/l10n/translator.ex:202
+#: lib/l10n/translator.ex:263
 msgid "%{count} month"
 msgid_plural "%{count} months"
 msgstr[0] "%{count} tháng"
 msgstr[1] "%{count} tháng"
 
-#: lib/l10n/translator.ex:194
+#: lib/l10n/translator.ex:255
 msgid "%{count} nanosecond"
 msgid_plural "%{count} nanoseconds"
 msgstr[0] "%{count} nano giây"
 msgstr[1] "%{count} nano giây"
 
-#: lib/l10n/translator.ex:197
+#: lib/l10n/translator.ex:258
 msgid "%{count} second"
 msgid_plural "%{count} seconds"
 msgstr[0] "%{count} giây"
 msgstr[1] "%{count} giây"
 
-#: lib/l10n/translator.ex:201
+#: lib/l10n/translator.ex:262
 msgid "%{count} week"
 msgid_plural "%{count} weeks"
 msgstr[0] "%{count} tuần"
 msgstr[1] "%{count} tuần"
 
-#: lib/l10n/translator.ex:203
+#: lib/l10n/translator.ex:264
 msgid "%{count} year"
 msgid_plural "%{count} years"
 msgstr[0] "%{count} năm"

@@ -19,58 +19,58 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.7\n"
 
-#: lib/l10n/translator.ex:214
+#: lib/l10n/translator.ex:275
 msgid "Fri"
 msgstr "金"
 
-#: lib/l10n/translator.ex:222
+#: lib/l10n/translator.ex:283
 msgid "Friday"
 msgstr "金曜日"
 
-#: lib/l10n/translator.ex:210
+#: lib/l10n/translator.ex:271
 msgid "Mon"
 msgstr "月"
 
-#: lib/l10n/translator.ex:218
+#: lib/l10n/translator.ex:279
 msgid "Monday"
 msgstr "月曜日"
 
-#: lib/l10n/translator.ex:215
+#: lib/l10n/translator.ex:276
 msgid "Sat"
 msgstr "土"
 
-#: lib/l10n/translator.ex:223
+#: lib/l10n/translator.ex:284
 msgid "Saturday"
 msgstr "土曜日"
 
-#: lib/l10n/translator.ex:216
+#: lib/l10n/translator.ex:277
 msgid "Sun"
 msgstr "日"
 
-#: lib/l10n/translator.ex:224
+#: lib/l10n/translator.ex:285
 msgid "Sunday"
 msgstr "日曜日"
 
-#: lib/l10n/translator.ex:213
+#: lib/l10n/translator.ex:274
 msgid "Thu"
 msgstr "木"
 
-#: lib/l10n/translator.ex:221
+#: lib/l10n/translator.ex:282
 msgid "Thursday"
 msgstr "木曜日"
 
-#: lib/l10n/translator.ex:211
+#: lib/l10n/translator.ex:272
 msgid "Tue"
 msgstr "火"
 
-#: lib/l10n/translator.ex:219
+#: lib/l10n/translator.ex:280
 msgid "Tuesday"
 msgstr "火曜日"
 
-#: lib/l10n/translator.ex:212
+#: lib/l10n/translator.ex:273
 msgid "Wed"
 msgstr "水"
 
-#: lib/l10n/translator.ex:220
+#: lib/l10n/translator.ex:281
 msgid "Wednesday"
 msgstr "水曜日"

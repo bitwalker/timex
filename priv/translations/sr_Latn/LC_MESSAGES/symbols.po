@@ -21,30 +21,30 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "Language: sr@latin\n"
 
-#: lib/l10n/translator.ex:318
+#: lib/l10n/translator.ex:379
 msgid "+"
 msgstr "+"
 
-#: lib/l10n/translator.ex:314
+#: lib/l10n/translator.ex:375
 msgid ","
 msgstr ","
 
-#: lib/l10n/translator.ex:320
+#: lib/l10n/translator.ex:381
 msgid "-"
 msgstr "-"
 
-#: lib/l10n/translator.ex:312
+#: lib/l10n/translator.ex:373
 msgid "."
 msgstr "."
 
-#: lib/l10n/translator.ex:324
+#: lib/l10n/translator.ex:385
 msgid ":"
 msgstr ":"
 
-#: lib/l10n/translator.ex:316
+#: lib/l10n/translator.ex:377
 msgid ";"
 msgstr ";"
 
-#: lib/l10n/translator.ex:322
+#: lib/l10n/translator.ex:383
 msgid "E"
 msgstr "E"

@@ -23,236 +23,236 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.2.3\n"
 
-#: lib/l10n/translator.ex:259
+#: lib/l10n/translator.ex:320
 msgid "last month"
 msgstr "minulý měsíc"
 
-#: lib/l10n/translator.ex:265
+#: lib/l10n/translator.ex:326
 msgid "last week"
 msgstr "minulý týden"
 
-#: lib/l10n/translator.ex:253
+#: lib/l10n/translator.ex:314
 msgid "last year"
 msgstr "minulý rok"
 
-#: lib/l10n/translator.ex:261
+#: lib/l10n/translator.ex:322
 msgid "next month"
 msgstr "příští měsíc"
 
-#: lib/l10n/translator.ex:267
+#: lib/l10n/translator.ex:328
 msgid "next week"
 msgstr "příští týden"
 
-#: lib/l10n/translator.ex:255
+#: lib/l10n/translator.ex:316
 msgid "next year"
 msgstr "příští rok"
 
-#: lib/l10n/translator.ex:260
+#: lib/l10n/translator.ex:321
 msgid "this month"
 msgstr "tento měsíc"
 
-#: lib/l10n/translator.ex:266
+#: lib/l10n/translator.ex:327
 msgid "this week"
 msgstr "tento týden"
 
-#: lib/l10n/translator.ex:254
+#: lib/l10n/translator.ex:315
 msgid "this year"
 msgstr "tento rok"
 
-#: lib/l10n/translator.ex:272
+#: lib/l10n/translator.ex:333
 msgid "today"
 msgstr "dnes"
 
-#: lib/l10n/translator.ex:273
+#: lib/l10n/translator.ex:334
 msgid "tomorrow"
 msgstr "zítra"
 
-#: lib/l10n/translator.ex:271
+#: lib/l10n/translator.ex:332
 msgid "yesterday"
 msgstr "včera"
 
-#: lib/l10n/translator.ex:275
+#: lib/l10n/translator.ex:336
 msgid "%{count} day ago"
 msgid_plural "%{count} days ago"
 msgstr[0] "před %{count} dnem"
 msgstr[1] "před %{count} dny"
 msgstr[2] "před %{count} dny"
 
-#: lib/l10n/translator.ex:300
+#: lib/l10n/translator.ex:361
 msgid "%{count} hour ago"
 msgid_plural "%{count} hours ago"
 msgstr[0] "před %{count} hodinou"
 msgstr[1] "před %{count} hodinami"
 msgstr[2] "před %{count} hodinami"
 
-#: lib/l10n/translator.ex:303
+#: lib/l10n/translator.ex:364
 msgid "%{count} minute ago"
 msgid_plural "%{count} minutes ago"
 msgstr[0] "před %{count} minutou"
 msgstr[1] "před %{count} minutami"
 msgstr[2] "před %{count} minutami"
 
-#: lib/l10n/translator.ex:263
+#: lib/l10n/translator.ex:324
 msgid "%{count} month ago"
 msgid_plural "%{count} months ago"
 msgstr[0] "před %{count} měsícem"
 msgstr[1] "před %{count} měsíci"
 msgstr[2] "před %{count} měsíci"
 
-#: lib/l10n/translator.ex:306
+#: lib/l10n/translator.ex:367
 msgid "%{count} second ago"
 msgid_plural "%{count} seconds ago"
 msgstr[0] "před %{count} sekundou"
 msgstr[1] "před %{count} sekundami"
 msgstr[2] "před %{count} sekundami"
 
-#: lib/l10n/translator.ex:269
+#: lib/l10n/translator.ex:330
 msgid "%{count} week ago"
 msgid_plural "%{count} weeks ago"
 msgstr[0] "před %{count} týdnem"
 msgstr[1] "před %{count} týdny"
 msgstr[2] "před %{count} týdny"
 
-#: lib/l10n/translator.ex:257
+#: lib/l10n/translator.ex:318
 msgid "%{count} year ago"
 msgid_plural "%{count} years ago"
 msgstr[0] "před %{count} rokem"
 msgstr[1] "před %{count} léty"
 msgstr[2] "před %{count} léty"
 
-#: lib/l10n/translator.ex:274
+#: lib/l10n/translator.ex:335
 msgid "in %{count} day"
 msgid_plural "in %{count} days"
 msgstr[0] "za %{count} den"
 msgstr[1] "za %{count} dny"
 msgstr[2] "za %{count} dní"
 
-#: lib/l10n/translator.ex:299
+#: lib/l10n/translator.ex:360
 msgid "in %{count} hour"
 msgid_plural "in %{count} hours"
 msgstr[0] "za %{count} hodinu"
 msgstr[1] "za %{count} hodiny"
 msgstr[2] "za %{count} hodin"
 
-#: lib/l10n/translator.ex:302
+#: lib/l10n/translator.ex:363
 msgid "in %{count} minute"
 msgid_plural "in %{count} minutes"
 msgstr[0] "za %{count} minutu"
 msgstr[1] "za %{count} minuty"
 msgstr[2] "za %{count} minut"
 
-#: lib/l10n/translator.ex:262
+#: lib/l10n/translator.ex:323
 msgid "in %{count} month"
 msgid_plural "in %{count} months"
 msgstr[0] "za %{count} měsíc"
 msgstr[1] "za %{count} měsíce"
 msgstr[2] "za %{count} měsíců"
 
-#: lib/l10n/translator.ex:305
+#: lib/l10n/translator.ex:366
 msgid "in %{count} second"
 msgid_plural "in %{count} seconds"
 msgstr[0] "za %{count} sekundu"
 msgstr[1] "za %{count} sekundy"
 msgstr[2] "za %{count} sekund"
 
-#: lib/l10n/translator.ex:268
+#: lib/l10n/translator.ex:329
 msgid "in %{count} week"
 msgid_plural "in %{count} weeks"
 msgstr[0] "za %{count} týden"
 msgstr[1] "za %{count} týdny"
 msgstr[2] "za %{count} týdnů"
 
-#: lib/l10n/translator.ex:256
+#: lib/l10n/translator.ex:317
 msgid "in %{count} year"
 msgid_plural "in %{count} years"
 msgstr[0] "za %{count} rok"
 msgstr[1] "za %{count} roky"
 msgstr[2] "za %{count} let"
 
-#: lib/l10n/translator.ex:289
+#: lib/l10n/translator.ex:350
 msgid "last friday"
 msgstr "minulý pátek"
 
-#: lib/l10n/translator.ex:277
+#: lib/l10n/translator.ex:338
 msgid "last monday"
 msgstr "minulé pondělí"
 
-#: lib/l10n/translator.ex:292
+#: lib/l10n/translator.ex:353
 msgid "last saturday"
 msgstr "minulou sobotu"
 
-#: lib/l10n/translator.ex:295
+#: lib/l10n/translator.ex:356
 msgid "last sunday"
 msgstr "minulou neděli"
 
-#: lib/l10n/translator.ex:286
+#: lib/l10n/translator.ex:347
 msgid "last thursday"
 msgstr "minulý čtvrtek"
 
-#: lib/l10n/translator.ex:280
+#: lib/l10n/translator.ex:341
 msgid "last tuesday"
 msgstr "minulé úterý"
 
-#: lib/l10n/translator.ex:283
+#: lib/l10n/translator.ex:344
 msgid "last wednesday"
 msgstr "minulou stredu"
 
-#: lib/l10n/translator.ex:291
+#: lib/l10n/translator.ex:352
 msgid "next friday"
 msgstr "příští pátek"
 
-#: lib/l10n/translator.ex:279
+#: lib/l10n/translator.ex:340
 msgid "next monday"
 msgstr "příští pondělí"
 
-#: lib/l10n/translator.ex:294
+#: lib/l10n/translator.ex:355
 msgid "next saturday"
 msgstr "příští sobotu"
 
-#: lib/l10n/translator.ex:297
+#: lib/l10n/translator.ex:358
 msgid "next sunday"
 msgstr "příští neděli"
 
-#: lib/l10n/translator.ex:288
+#: lib/l10n/translator.ex:349
 msgid "next thursday"
 msgstr "příští čtvrtek"
 
-#: lib/l10n/translator.ex:282
+#: lib/l10n/translator.ex:343
 msgid "next tuesday"
 msgstr "příští úterý"
 
-#: lib/l10n/translator.ex:285
+#: lib/l10n/translator.ex:346
 msgid "next wednesday"
 msgstr "příští neděli"
 
-#: lib/l10n/translator.ex:290
+#: lib/l10n/translator.ex:351
 msgid "this friday"
 msgstr "tento pátek"
 
-#: lib/l10n/translator.ex:278
+#: lib/l10n/translator.ex:339
 msgid "this monday"
 msgstr "toto pondělí"
 
-#: lib/l10n/translator.ex:293
+#: lib/l10n/translator.ex:354
 msgid "this saturday"
 msgstr "tuto sobotu"
 
-#: lib/l10n/translator.ex:296
+#: lib/l10n/translator.ex:357
 msgid "this sunday"
 msgstr "tuto neděli"
 
-#: lib/l10n/translator.ex:287
+#: lib/l10n/translator.ex:348
 msgid "this thursday"
 msgstr "tento čtvrtek"
 
-#: lib/l10n/translator.ex:281
+#: lib/l10n/translator.ex:342
 msgid "this tuesday"
 msgstr "toto úterý"
 
-#: lib/l10n/translator.ex:284
+#: lib/l10n/translator.ex:345
 msgid "this wednesday"
 msgstr "tuto středu"
 
-#: lib/l10n/translator.ex:308
+#: lib/l10n/translator.ex:369
 msgid "now"
 msgstr "teď"

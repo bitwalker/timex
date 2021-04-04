@@ -19,50 +19,50 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.8\n"
 
-#: lib/l10n/translator.ex:242
+#: lib/l10n/translator.ex:303
 msgid "April"
 msgstr "Abril"
 
-#: lib/l10n/translator.ex:246
+#: lib/l10n/translator.ex:307
 msgid "August"
 msgstr "Agosto"
 
-#: lib/l10n/translator.ex:250
+#: lib/l10n/translator.ex:311
 msgid "December"
 msgstr "Dezembro"
 
-#: lib/l10n/translator.ex:240
+#: lib/l10n/translator.ex:301
 msgid "February"
 msgstr "Fevereiro"
 
-#: lib/l10n/translator.ex:239
+#: lib/l10n/translator.ex:300
 msgid "January"
 msgstr "Janeiro"
 
-#: lib/l10n/translator.ex:245
+#: lib/l10n/translator.ex:306
 msgid "July"
 msgstr "Julho"
 
-#: lib/l10n/translator.ex:244
+#: lib/l10n/translator.ex:305
 msgid "June"
 msgstr "Junho"
 
-#: lib/l10n/translator.ex:241
+#: lib/l10n/translator.ex:302
 msgid "March"
 msgstr "Março"
 
-#: lib/l10n/translator.ex:243
+#: lib/l10n/translator.ex:304
 msgid "May"
 msgstr "Maio"
 
-#: lib/l10n/translator.ex:249
+#: lib/l10n/translator.ex:310
 msgid "November"
 msgstr "Novembro"
 
-#: lib/l10n/translator.ex:248
+#: lib/l10n/translator.ex:309
 msgid "October"
 msgstr "Outubro"
 
-#: lib/l10n/translator.ex:247
+#: lib/l10n/translator.ex:308
 msgid "September"
 msgstr "Setembro"

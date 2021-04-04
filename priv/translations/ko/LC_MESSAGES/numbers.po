@@ -21,6 +21,6 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "Language: ko\n"
 
-#: lib/l10n/translator.ex:328
+#: lib/l10n/translator.ex:389
 msgid "#,##0.###"
 msgstr "#,##0.###"

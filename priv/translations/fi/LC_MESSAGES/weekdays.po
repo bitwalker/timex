@@ -11,58 +11,58 @@ msgid ""
 msgstr ""
 "Language: fi\n"
 
-#: lib/l10n/translator.ex:214
+#: lib/l10n/translator.ex:275
 msgid "Fri"
 msgstr "pe"
 
-#: lib/l10n/translator.ex:222
+#: lib/l10n/translator.ex:283
 msgid "Friday"
 msgstr "perjantai"
 
-#: lib/l10n/translator.ex:210
+#: lib/l10n/translator.ex:271
 msgid "Mon"
 msgstr "ma"
 
-#: lib/l10n/translator.ex:218
+#: lib/l10n/translator.ex:279
 msgid "Monday"
 msgstr "maanantai"
 
-#: lib/l10n/translator.ex:215
+#: lib/l10n/translator.ex:276
 msgid "Sat"
 msgstr "la"
 
-#: lib/l10n/translator.ex:223
+#: lib/l10n/translator.ex:284
 msgid "Saturday"
 msgstr "lauantai"
 
-#: lib/l10n/translator.ex:216
+#: lib/l10n/translator.ex:277
 msgid "Sun"
 msgstr "su"
 
-#: lib/l10n/translator.ex:224
+#: lib/l10n/translator.ex:285
 msgid "Sunday"
 msgstr "sunnuntai"
 
-#: lib/l10n/translator.ex:213
+#: lib/l10n/translator.ex:274
 msgid "Thu"
 msgstr "to"
 
-#: lib/l10n/translator.ex:221
+#: lib/l10n/translator.ex:282
 msgid "Thursday"
 msgstr "torstai"
 
-#: lib/l10n/translator.ex:211
+#: lib/l10n/translator.ex:272
 msgid "Tue"
 msgstr "ti"
 
-#: lib/l10n/translator.ex:219
+#: lib/l10n/translator.ex:280
 msgid "Tuesday"
 msgstr "tiistai"
 
-#: lib/l10n/translator.ex:212
+#: lib/l10n/translator.ex:273
 msgid "Wed"
 msgstr "ke"
 
-#: lib/l10n/translator.ex:220
+#: lib/l10n/translator.ex:281
 msgid "Wednesday"
 msgstr "keskiviikko"

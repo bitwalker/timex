@@ -11,50 +11,50 @@ msgstr ""
 "Language: he\n"
 "Plural-Forms: nplurals=2\n"
 
-#: lib/l10n/translator.ex:242
+#: lib/l10n/translator.ex:303
 msgid "April"
 msgstr "אפריל"
 
-#: lib/l10n/translator.ex:246
+#: lib/l10n/translator.ex:307
 msgid "August"
 msgstr "אוגוסט"
 
-#: lib/l10n/translator.ex:250
+#: lib/l10n/translator.ex:311
 msgid "December"
 msgstr "דצמבר"
 
-#: lib/l10n/translator.ex:240
+#: lib/l10n/translator.ex:301
 msgid "February"
 msgstr "פברואר"
 
-#: lib/l10n/translator.ex:239
+#: lib/l10n/translator.ex:300
 msgid "January"
 msgstr "ינואר"
 
-#: lib/l10n/translator.ex:245
+#: lib/l10n/translator.ex:306
 msgid "July"
 msgstr "יולי"
 
-#: lib/l10n/translator.ex:244
+#: lib/l10n/translator.ex:305
 msgid "June"
 msgstr "יוני"
 
-#: lib/l10n/translator.ex:241
+#: lib/l10n/translator.ex:302
 msgid "March"
 msgstr "מרץ"
 
-#: lib/l10n/translator.ex:243
+#: lib/l10n/translator.ex:304
 msgid "May"
 msgstr "מאי"
 
-#: lib/l10n/translator.ex:249
+#: lib/l10n/translator.ex:310
 msgid "November"
 msgstr "נובמבר"
 
-#: lib/l10n/translator.ex:248
+#: lib/l10n/translator.ex:309
 msgid "October"
 msgstr "אוקטובר"
 
-#: lib/l10n/translator.ex:247
+#: lib/l10n/translator.ex:308
 msgid "September"
 msgstr "ספטמבר"

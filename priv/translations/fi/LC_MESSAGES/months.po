@@ -11,50 +11,50 @@ msgid ""
 msgstr ""
 "Language: fi\n"
 
-#: lib/l10n/translator.ex:242
+#: lib/l10n/translator.ex:303
 msgid "April"
 msgstr "huhtikuu"
 
-#: lib/l10n/translator.ex:246
+#: lib/l10n/translator.ex:307
 msgid "August"
 msgstr "elokuu"
 
-#: lib/l10n/translator.ex:250
+#: lib/l10n/translator.ex:311
 msgid "December"
 msgstr "joulukuu"
 
-#: lib/l10n/translator.ex:240
+#: lib/l10n/translator.ex:301
 msgid "February"
 msgstr "helmikuu"
 
-#: lib/l10n/translator.ex:239
+#: lib/l10n/translator.ex:300
 msgid "January"
 msgstr "tammikuu"
 
-#: lib/l10n/translator.ex:245
+#: lib/l10n/translator.ex:306
 msgid "July"
 msgstr "heinäkuu"
 
-#: lib/l10n/translator.ex:244
+#: lib/l10n/translator.ex:305
 msgid "June"
 msgstr "kesäkuu"
 
-#: lib/l10n/translator.ex:241
+#: lib/l10n/translator.ex:302
 msgid "March"
 msgstr "maaliskuu"
 
-#: lib/l10n/translator.ex:243
+#: lib/l10n/translator.ex:304
 msgid "May"
 msgstr "toukokuu"
 
-#: lib/l10n/translator.ex:249
+#: lib/l10n/translator.ex:310
 msgid "November"
 msgstr "marraskuu"
 
-#: lib/l10n/translator.ex:248
+#: lib/l10n/translator.ex:309
 msgid "October"
 msgstr "lokakuu"
 
-#: lib/l10n/translator.ex:247
+#: lib/l10n/translator.ex:308
 msgid "September"
 msgstr "syyskuu"

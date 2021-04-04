@@ -20,58 +20,58 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.2.1\n"
 
-#: lib/l10n/translator.ex:214
+#: lib/l10n/translator.ex:275
 msgid "Fri"
 msgstr "Pá"
 
-#: lib/l10n/translator.ex:222
+#: lib/l10n/translator.ex:283
 msgid "Friday"
 msgstr "Pátek"
 
-#: lib/l10n/translator.ex:210
+#: lib/l10n/translator.ex:271
 msgid "Mon"
 msgstr "Pon"
 
-#: lib/l10n/translator.ex:218
+#: lib/l10n/translator.ex:279
 msgid "Monday"
 msgstr "Pondělí"
 
-#: lib/l10n/translator.ex:215
+#: lib/l10n/translator.ex:276
 msgid "Sat"
 msgstr "Sob"
 
-#: lib/l10n/translator.ex:223
+#: lib/l10n/translator.ex:284
 msgid "Saturday"
 msgstr "Sobota"
 
-#: lib/l10n/translator.ex:216
+#: lib/l10n/translator.ex:277
 msgid "Sun"
 msgstr "Ned"
 
-#: lib/l10n/translator.ex:224
+#: lib/l10n/translator.ex:285
 msgid "Sunday"
 msgstr "Neděle"
 
-#: lib/l10n/translator.ex:213
+#: lib/l10n/translator.ex:274
 msgid "Thu"
 msgstr "Čtv"
 
-#: lib/l10n/translator.ex:221
+#: lib/l10n/translator.ex:282
 msgid "Thursday"
 msgstr "Čtvrtek"
 
-#: lib/l10n/translator.ex:211
+#: lib/l10n/translator.ex:272
 msgid "Tue"
 msgstr "Út"
 
-#: lib/l10n/translator.ex:219
+#: lib/l10n/translator.ex:280
 msgid "Tuesday"
 msgstr "Úterý"
 
-#: lib/l10n/translator.ex:212
+#: lib/l10n/translator.ex:273
 msgid "Wed"
 msgstr "Stř"
 
-#: lib/l10n/translator.ex:220
+#: lib/l10n/translator.ex:281
 msgid "Wednesday"
 msgstr "Středa"

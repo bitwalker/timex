@@ -20,70 +20,70 @@ msgstr ""
 "X-Generator: Poedit 1.8.7\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: lib/l10n/translator.ex:200
+#: lib/l10n/translator.ex:261
 msgid "%{count} day"
 msgid_plural "%{count} days"
 msgstr[0] "%{count} день"
 msgstr[1] "%{count} дня"
 msgstr[2] "%{count} дней"
 
-#: lib/l10n/translator.ex:199
+#: lib/l10n/translator.ex:260
 msgid "%{count} hour"
 msgid_plural "%{count} hours"
 msgstr[0] "%{count} час"
 msgstr[1] "%{count} часа"
 msgstr[2] "%{count} часов"
 
-#: lib/l10n/translator.ex:195
+#: lib/l10n/translator.ex:256
 msgid "%{count} microsecond"
 msgid_plural "%{count} microseconds"
 msgstr[0] "%{count} микросекунда"
 msgstr[1] "%{count} микросекунды"
 msgstr[2] "%{count} микросекунд"
 
-#: lib/l10n/translator.ex:196
+#: lib/l10n/translator.ex:257
 msgid "%{count} millisecond"
 msgid_plural "%{count} milliseconds"
 msgstr[0] "%{count} миллисекунда"
 msgstr[1] "%{count} миллисекунды"
 msgstr[2] "%{count} миллисекунд"
 
-#: lib/l10n/translator.ex:198
+#: lib/l10n/translator.ex:259
 msgid "%{count} minute"
 msgid_plural "%{count} minutes"
 msgstr[0] "%{count} минута"
 msgstr[1] "%{count} минуты"
 msgstr[2] "%{count} минут"
 
-#: lib/l10n/translator.ex:202
+#: lib/l10n/translator.ex:263
 msgid "%{count} month"
 msgid_plural "%{count} months"
 msgstr[0] "%{count} месяц"
 msgstr[1] "%{count} месяца"
 msgstr[2] "%{count} месяцев"
 
-#: lib/l10n/translator.ex:194
+#: lib/l10n/translator.ex:255
 msgid "%{count} nanosecond"
 msgid_plural "%{count} nanoseconds"
 msgstr[0] "%{count} наносекунда"
 msgstr[1] "%{count} наносекунды"
 msgstr[2] "%{count} наносекунд"
 
-#: lib/l10n/translator.ex:197
+#: lib/l10n/translator.ex:258
 msgid "%{count} second"
 msgid_plural "%{count} seconds"
 msgstr[0] "%{count} секунда"
 msgstr[1] "%{count} секунды"
 msgstr[2] "%{count} секунд"
 
-#: lib/l10n/translator.ex:201
+#: lib/l10n/translator.ex:262
 msgid "%{count} week"
 msgid_plural "%{count} weeks"
 msgstr[0] "%{count} неделя"
 msgstr[1] "%{count} недели"
 msgstr[2] "%{count} недель"
 
-#: lib/l10n/translator.ex:203
+#: lib/l10n/translator.ex:264
 msgid "%{count} year"
 msgid_plural "%{count} years"
 msgstr[0] "%{count} год"

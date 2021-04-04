@@ -20,50 +20,50 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.2.1\n"
 
-#: lib/l10n/translator.ex:229
+#: lib/l10n/translator.ex:290
 msgid "Apr"
 msgstr "Dub"
 
-#: lib/l10n/translator.ex:233
+#: lib/l10n/translator.ex:294
 msgid "Aug"
 msgstr "Srp"
 
-#: lib/l10n/translator.ex:237
+#: lib/l10n/translator.ex:298
 msgid "Dec"
 msgstr "Pro"
 
-#: lib/l10n/translator.ex:227
+#: lib/l10n/translator.ex:288
 msgid "Feb"
 msgstr "Úno"
 
-#: lib/l10n/translator.ex:226
+#: lib/l10n/translator.ex:287
 msgid "Jan"
 msgstr "Led"
 
-#: lib/l10n/translator.ex:232
+#: lib/l10n/translator.ex:293
 msgid "Jul"
 msgstr "Čvc"
 
-#: lib/l10n/translator.ex:231
+#: lib/l10n/translator.ex:292
 msgid "Jun"
 msgstr "Čvr"
 
-#: lib/l10n/translator.ex:228
+#: lib/l10n/translator.ex:289
 msgid "Mar"
 msgstr "Bře"
 
-#: lib/l10n/translator.ex:230
+#: lib/l10n/translator.ex:291
 msgid "May"
 msgstr "Kvě"
 
-#: lib/l10n/translator.ex:236
+#: lib/l10n/translator.ex:297
 msgid "Nov"
 msgstr "Lis"
 
-#: lib/l10n/translator.ex:235
+#: lib/l10n/translator.ex:296
 msgid "Oct"
 msgstr "Říj"
 
-#: lib/l10n/translator.ex:234
+#: lib/l10n/translator.ex:295
 msgid "Sep"
 msgstr "Zář"

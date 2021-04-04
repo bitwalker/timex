@@ -20,70 +20,70 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.11\n"
 
-#: lib/l10n/translator.ex:200
+#: lib/l10n/translator.ex:261
 msgid "%{count} day"
 msgid_plural "%{count} days"
 msgstr[0] "%{count} zi"
 msgstr[1] "%{count} zile"
 msgstr[2] "%{count} de zile"
 
-#: lib/l10n/translator.ex:199
+#: lib/l10n/translator.ex:260
 msgid "%{count} hour"
 msgid_plural "%{count} hours"
 msgstr[0] "%{count} oră"
 msgstr[1] "%{count} ore"
 msgstr[2] "%{count} de ore"
 
-#: lib/l10n/translator.ex:195
+#: lib/l10n/translator.ex:256
 msgid "%{count} microsecond"
 msgid_plural "%{count} microseconds"
 msgstr[0] "%{count} microsecundă"
 msgstr[1] "%{count} microsecunde"
 msgstr[2] "%{count} de microsecunde"
 
-#: lib/l10n/translator.ex:196
+#: lib/l10n/translator.ex:257
 msgid "%{count} millisecond"
 msgid_plural "%{count} milliseconds"
 msgstr[0] "%{count} millisecundă"
 msgstr[1] "%{count} millisecunde"
 msgstr[2] "%{count} de millisecunde"
 
-#: lib/l10n/translator.ex:198
+#: lib/l10n/translator.ex:259
 msgid "%{count} minute"
 msgid_plural "%{count} minutes"
 msgstr[0] "%{count} minut"
 msgstr[1] "%{count} minute"
 msgstr[2] "%{count} de minute"
 
-#: lib/l10n/translator.ex:202
+#: lib/l10n/translator.ex:263
 msgid "%{count} month"
 msgid_plural "%{count} months"
 msgstr[0] "%{count} lună"
 msgstr[1] "%{count} luni"
 msgstr[2] "%{count} de luni"
 
-#: lib/l10n/translator.ex:194
+#: lib/l10n/translator.ex:255
 msgid "%{count} nanosecond"
 msgid_plural "%{count} nanoseconds"
 msgstr[0] "%{count} nanosecundă"
 msgstr[1] "%{count} nanosecunde"
 msgstr[2] "%{count} de nanosecunde"
 
-#: lib/l10n/translator.ex:197
+#: lib/l10n/translator.ex:258
 msgid "%{count} second"
 msgid_plural "%{count} seconds"
 msgstr[0] "%{count} secundă"
 msgstr[1] "%{count} secunde"
 msgstr[2] "%{count} de secunde"
 
-#: lib/l10n/translator.ex:201
+#: lib/l10n/translator.ex:262
 msgid "%{count} week"
 msgid_plural "%{count} weeks"
 msgstr[0] "%{count} săptămână"
 msgstr[1] "%{count} săptămâni"
 msgstr[2] "%{count} de săptămâni"
 
-#: lib/l10n/translator.ex:203
+#: lib/l10n/translator.ex:264
 msgid "%{count} year"
 msgid_plural "%{count} years"
 msgstr[0] "%{count} an"

@@ -11,18 +11,18 @@ msgid ""
 msgstr ""
 "Language: es\n"
 
-#: lib/l10n/translator.ex:205
+#: lib/l10n/translator.ex:266
 msgid "AM"
 msgstr "AM"
 
-#: lib/l10n/translator.ex:207
+#: lib/l10n/translator.ex:268
 msgid "PM"
 msgstr "PM"
 
-#: lib/l10n/translator.ex:206
+#: lib/l10n/translator.ex:267
 msgid "am"
 msgstr "am"
 
-#: lib/l10n/translator.ex:208
+#: lib/l10n/translator.ex:269
 msgid "pm"
 msgstr "pm"

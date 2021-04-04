@@ -21,18 +21,18 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "Language: ko\n"
 
-#: lib/l10n/translator.ex:205
+#: lib/l10n/translator.ex:266
 msgid "AM"
 msgstr "오전"
 
-#: lib/l10n/translator.ex:207
+#: lib/l10n/translator.ex:268
 msgid "PM"
 msgstr "오후"
 
-#: lib/l10n/translator.ex:206
+#: lib/l10n/translator.ex:267
 msgid "am"
 msgstr "오전"
 
-#: lib/l10n/translator.ex:208
+#: lib/l10n/translator.ex:269
 msgid "pm"
 msgstr "오후"

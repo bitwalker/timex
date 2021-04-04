@@ -11,30 +11,30 @@ msgstr ""
 "Language: bg\n"
 "Plural-Forms: nplurals=2\n"
 
-#: lib/l10n/translator.ex:318
+#: lib/l10n/translator.ex:379
 msgid "+"
 msgstr "+"
 
-#: lib/l10n/translator.ex:314
+#: lib/l10n/translator.ex:375
 msgid ","
 msgstr ","
 
-#: lib/l10n/translator.ex:320
+#: lib/l10n/translator.ex:381
 msgid "-"
 msgstr "-"
 
-#: lib/l10n/translator.ex:312
+#: lib/l10n/translator.ex:373
 msgid "."
 msgstr "."
 
-#: lib/l10n/translator.ex:324
+#: lib/l10n/translator.ex:385
 msgid ":"
 msgstr ":"
 
-#: lib/l10n/translator.ex:316
+#: lib/l10n/translator.ex:377
 msgid ";"
 msgstr ";"
 
-#: lib/l10n/translator.ex:322
+#: lib/l10n/translator.ex:383
 msgid "E"
 msgstr "E"
