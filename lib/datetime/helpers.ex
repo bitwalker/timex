@@ -145,4 +145,28 @@ defmodule Timex.DateTime.Helpers do
       new_p
     end
   end
+
+  def sort_options(options) when is_list(options) do
+    options =
+      case Keyword.pop(options, :day) do
+        {nil, options} -> options
+        {day, opts} -> Keyword.put(opts, :day, day)
+      end
+
+    options =
+      case Keyword.pop(options, :month) do
+        {nil, options} -> options
+        {month, opts} -> Keyword.put(opts, :month, month)
+      end
+
+    options =
+      case Keyword.pop(options, :year) do
+        {nil, options} -> options
+        {year, opts} -> Keyword.put(opts, :year, year)
+      end
+
+    options
+  end
+
+  def sort_options(options), do: options
 end
