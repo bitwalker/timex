@@ -3,6 +3,7 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   This module implements Timex functionality for NaiveDateTime
   """
   alias Timex.AmbiguousDateTime
+  alias Timex.DateTime.Helpers
   import Timex.Macros
 
   @epoch_seconds :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
@@ -56,7 +57,7 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   end
 
   def end_of_day(%NaiveDateTime{microsecond: {_, precision}} = datetime) do
-    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    us = Helpers.construct_microseconds(999_999, precision)
     %{datetime | :hour => 23, :minute => 59, :second => 59, :microsecond => us}
   end
 
@@ -70,7 +71,7 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   def end_of_week(%NaiveDateTime{microsecond: {_, precision}} = date, weekstart) do
     with ws when is_atom(ws) <- Timex.standardize_week_start(weekstart) do
       date = Timex.Date.end_of_week(date, ws)
-      us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+      us = Helpers.construct_microseconds(999_999, precision)
       Timex.NaiveDateTime.new!(date.year, date.month, date.day, 23, 59, 59, us)
     end
   end
@@ -80,7 +81,7 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   end
 
   def end_of_year(%NaiveDateTime{year: year, microsecond: {_, precision}}) do
-    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    us = Helpers.construct_microseconds(999_999, precision)
     Timex.NaiveDateTime.new!(year, 12, 31, 23, 59, 59, us)
   end
 
@@ -99,7 +100,7 @@ defimpl Timex.Protocol, for: NaiveDateTime do
 
   def end_of_month(%NaiveDateTime{year: year, month: month, microsecond: {_, precision}} = date) do
     day = days_in_month(date)
-    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    us = Helpers.construct_microseconds(999_999, precision)
     Timex.NaiveDateTime.new!(year, month, day, 23, 59, 59, us)
   end
 
@@ -141,7 +142,9 @@ defimpl Timex.Protocol, for: NaiveDateTime do
   def set(%NaiveDateTime{} = date, options) do
     validate? = Keyword.get(options, :validate, true)
 
-    Enum.reduce(options, date, fn
+    options
+    |> Helpers.sort_options()
+    |> Enum.reduce(date, fn
       _option, {:error, _} = err ->
         err
 

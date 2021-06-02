@@ -125,4 +125,21 @@ defmodule SetTests do
     assert new_date.minute == 0
     assert new_date.second == 0
   end
+
+  test "set day 31 and another month from date with month with only 30 days" do
+    original_date = Timex.to_datetime({{2021, 4, 1}, {12, 0, 0}})
+    new_date = Timex.set(original_date, day: 31, month: 5)
+
+    assert new_date.month == 5
+    assert new_date.day == 31
+  end
+
+  test "set day 29 for February from year without it" do
+    original_date = Timex.to_datetime({{2023, 2, 28}, {12, 0, 0}})
+    new_date = Timex.set(original_date, day: 29, month: 2, year: 2024)
+
+    assert new_date.month == 2
+    assert new_date.day == 29
+    assert new_date.year == 2024
+  end
 end
