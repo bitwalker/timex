@@ -840,8 +840,7 @@ defmodule Timex do
   @doc """
   Returns a boolean indicating whether the first `Timex.Comparable` occurs before the second
   """
-  @spec before?(Time.t(), Time.t()) :: boolean
-  @spec before?(Comparable.comparable(), Comparable.comparable()) :: boolean
+  @spec before?(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable()) :: boolean
   def before?(a, b) do
     case compare(a, b) do
       {:error, reason} ->
@@ -858,8 +857,7 @@ defmodule Timex do
   @doc """
   Returns a boolean indicating whether the first `Timex.Comparable` occurs after the second
   """
-  @spec after?(Time.t(), Time.t()) :: boolean
-  @spec after?(Comparable.comparable(), Comparable.comparable()) :: boolean
+  @spec after?(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable()) :: boolean
   def after?(a, b) do
     case compare(a, b) do
       {:error, reason} ->
@@ -890,11 +888,10 @@ defmodule Timex do
             | :start
             | :end
         ]
-  @spec between?(Time.t(), Time.t(), Time.t(), between_options) :: boolean
   @spec between?(
-          Comparable.comparable(),
-          Comparable.comparable(),
-          Comparable.comparable(),
+          Time.t() | Comparable.comparable(),
+          Time.t() | Comparable.comparable(),
+          Time.t() | Comparable.comparable(),
           between_options
         ) :: boolean
   def between?(a, start, ending, options \\ []) do
@@ -939,8 +936,7 @@ defmodule Timex do
       ...> #{__MODULE__}.equal?(date1, date2)
       true
   """
-  @spec equal?(Time, Time, Comparable.granularity()) :: boolean | no_return
-  @spec equal?(Comparable.comparable(), Comparable.comparable(), Comparable.granularity()) ::
+  @spec equal?(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
           boolean | no_return
   def equal?(a, a, granularity \\ :seconds)
   def equal?(a, a, _granularity), do: true
@@ -961,12 +957,11 @@ defmodule Timex do
   @doc """
   See docs for `compare/3`
   """
-  @spec compare(Time, Time) :: Comparable.compare_result()
+  @spec compare(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable()) :: Comparable.compare_result()
   def compare(%Time{} = a, %Time{} = b) do
     compare(a, b, :microseconds)
   end
 
-  @spec compare(Comparable.comparable(), Comparable.comparable()) :: Comparable.compare_result()
   defdelegate compare(a, b), to: Timex.Comparable
 
   @doc """
@@ -1022,8 +1017,7 @@ defmodule Timex do
       0
 
   """
-  @spec compare(Time, Time, Comparable.granularity()) :: Comparable.compare_result()
-  @spec compare(Comparable.comparable(), Comparable.comparable(), Comparable.granularity()) ::
+  @spec compare(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
           Comparable.compare_result()
   def compare(%Time{} = a, %Time{} = b, granularity),
     do: Timex.Comparable.Utils.to_compare_result(diff(a, b, granularity))
@@ -1033,8 +1027,7 @@ defmodule Timex do
   @doc """
   See docs for `diff/3`
   """
-  @spec diff(Time, Time) :: Duration.t() | integer | {:error, term}
-  @spec diff(Comparable.comparable(), Comparable.comparable()) ::
+  @spec diff(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable()) ::
           Duration.t() | integer | {:error, term}
   def diff(%Time{} = a, %Time{} = b), do: diff(a, b, :microseconds)
   defdelegate diff(a, b), to: Timex.Comparable
@@ -1070,8 +1063,7 @@ defmodule Timex do
 
   and the result will be an integer value of those units or a Duration.
   """
-  @spec diff(Time, Time, Comparable.granularity()) :: Duration.t() | integer | {:error, term}
-  @spec diff(Comparable.comparable(), Comparable.comparable(), Comparable.granularity()) ::
+  @spec diff(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
           Duration.t() | integer | {:error, term}
   def diff(%Time{}, %Time{}, granularity)
       when granularity in [
