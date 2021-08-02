@@ -9,6 +9,23 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+---
+
+## 3.7.6
+
+### Changed
+
+- The documentation on weekday formatting via `%w` and `%u` strftime directives and `WDmon` and `WDsun` 
+default directives did not match, and worse, the behaviour had regressed as well and did not match the
+docs for either. The behaviour now matches between the two formatters, as does the documentation, and
+aligns with the C strftime specification (i.e. Monday is 1..7, Sunday is 0..6)
+
+### Fixed
+
+- Clarify docs on comparison granularity for days/weeks
+- Fix incorrect weekday formatting (see #668)
+- Handled edge case where no locally-defined timezone is present (see #670)
+- Invalid validation of ambiguous date/times during parsing (see #674)
 
 ---
 
