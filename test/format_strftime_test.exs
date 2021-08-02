@@ -129,9 +129,9 @@ defmodule DateFormatTest.FormatStrftime do
   end
 
   test "format %w" do
-    assert {:ok, "6"} = format(@aug182013, "%w")
-    assert {:ok, "6"} = format(@aug182013, "%0w")
-    assert {:ok, "6"} = format(@aug182013, "%_w")
+    assert {:ok, "0"} = format(@aug182013, "%w")
+    assert {:ok, "0"} = format(@aug182013, "%0w")
+    assert {:ok, "0"} = format(@aug182013, "%_w")
   end
 
   test "format %u" do
@@ -425,9 +425,9 @@ defmodule DateFormatTest.FormatStrftime do
     assert format(dt, "%e") == {:ok, " 3"}
     assert format(dt, "%f") == {:ok, "012000"}
     assert format(dt, "%u") == {:ok, "1"}
-    assert format(dt, "%w") == {:ok, "0"}
+    assert format(dt, "%w") == {:ok, "1"}
     assert format(dt_sunday, "%u") == {:ok, "7"}
-    assert format(dt_sunday, "%w") == {:ok, "6"}
+    assert format(dt_sunday, "%w") == {:ok, "0"}
     assert format(dt, "%V") == {:ok, "45"}
     assert format(dt, "%G") == {:ok, "2014"}
     assert format(dt, "%g") == {:ok, "14"}
