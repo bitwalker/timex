@@ -978,17 +978,17 @@ defmodule Timex do
   - :distant_past will compare the first parameter against a date/time infinitely in the past (i.e. it will always return 1)
   - :distant_future will compare the first parameter against a date/time infinitely in the future (i.e. it will always return -1)
 
-  You can optionally specify a comparison granularity, any of the following:
+  You can optionally specify a comparison granularity from the list below.
 
   - :year
   - :years
   - :month
   - :months
-  - :week
+  - :week (an alias for 7 days)
   - :weeks
   - :calendar_week (weeks of the calendar as opposed to actual weeks in terms of days)
   - :calendar_weeks
-  - :day
+  - :day (an alias for 24 hours)
   - :days
   - :hour
   - :hours
@@ -1001,9 +1001,6 @@ defmodule Timex do
   - :microsecond (default)
   - :microseconds
   - :duration
-
-  and the dates will be compared with the corresponding accuracy.
-  The default granularity is `:microsecond`.
 
   ## Examples
 
