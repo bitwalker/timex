@@ -64,7 +64,6 @@ defmodule Timex.Timezone.Local do
             {:error, :time_zone_not_found}
         end
 
-
       tz when is_binary(tz) ->
         tz
     end
@@ -104,7 +103,7 @@ defmodule Timex.Timezone.Local do
         if String.length(tz) > 0 do
           tz
         else
-          raise("Unable to find local timezone.")
+          {:error, :time_zone_not_found}
         end
     end
   end
@@ -136,14 +135,17 @@ defmodule Timex.Timezone.Local do
         # defs are set up, if we find a value, it's just passed
         # along through the pipe until we're done. If we don't,
         # this will try each fallback location in order.
-        {:ok, tz} =
-          read_timezone_data(nil, @_ETC_LOCALTIME)
-          |> read_timezone_data(@_USR_ETC_LOCALTIME)
-          |> read_timezone_data(@_ETC_SYS_CLOCK)
-          |> read_timezone_data(@_ETC_CONF_CLOCK)
-          |> read_timezone_data(@_ETC_TIMEZONE)
-
-        tz
+        with {:ok, tz} <-
+               read_timezone_data(nil, @_ETC_LOCALTIME)
+               |> read_timezone_data(@_USR_ETC_LOCALTIME)
+               |> read_timezone_data(@_ETC_SYS_CLOCK)
+               |> read_timezone_data(@_ETC_CONF_CLOCK)
+               |> read_timezone_data(@_ETC_TIMEZONE) do
+          tz
+        else
+          _ ->
+            {:error, :time_zone_not_found}
+        end
     end
   end
 
@@ -205,7 +207,7 @@ defmodule Timex.Timezone.Local do
             nil ->
               # Try appending "Standard Time"
               case Utils.to_olson("#{timezone} Standard Time") do
-                nil -> raise "Could not find Windows time zone configuration!"
+                nil -> {:error, :time_zone_not_found}
                 final -> final
               end
 
