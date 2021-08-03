@@ -600,9 +600,8 @@ defmodule Timex.Format.DateTime.Formatter do
   def format_token(_locale, :wday_mon, date, _modifiers, flags, width),
     do: pad_numeric(Timex.weekday!(date, :monday), flags, width)
 
-  def format_token(_locale, :wday_sun, date, _modifiers, flags, width) do
-    pad_numeric(Timex.weekday!(date, :monday) - 1, flags, width)
-  end
+  def format_token(_locale, :wday_sun, date, _modifiers, flags, width),
+    do: pad_numeric(Timex.weekday!(date, :sunday) - 1, flags, width)
 
   def format_token(locale, :wdshort, date, _modifiers, _flags, _width) do
     day = Timex.weekday(date)

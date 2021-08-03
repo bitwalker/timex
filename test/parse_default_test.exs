@@ -14,6 +14,14 @@ defmodule DateFormatTest.ParseDefault do
     end)
   end
 
+  test "ambiguous date/time" do
+    assert {:ok, %AmbiguousDateTime{}} =
+             Timex.parse(
+               "2021-11-07T01:00:00.000-America/New_York",
+               "{ISOdate}T{ISOtime}-{Zname}"
+             )
+  end
+
   test "produce an error if input string contains no directives" do
     err = {:error, "Invalid format string, must contain at least one directive."}
     assert ^err = parse("hello", "hello")

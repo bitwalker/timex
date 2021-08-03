@@ -211,7 +211,7 @@ defmodule Timex.Parse.DateTime.Parser do
   defp apply_directives(tokens, tokenizer),
     do: apply_directives(tokens, Timex.DateTime.Helpers.empty(), tokenizer)
 
-  defp apply_directives([], datetime, _) do 
+  defp apply_directives([], datetime, _) do
     with :ok <- validate_datetime(datetime) do
       {:ok, datetime}
     end
@@ -229,12 +229,23 @@ defmodule Timex.Parse.DateTime.Parser do
 
   defp validate_datetime(%{year: y, month: m, day: d} = datetime) do
     with {:date, true} <- {:date, :calendar.valid_date(y, m, d)},
-         {:ok, %Time{}} <- Time.new(datetime.hour, datetime.minute, datetime.second, datetime.microsecond) do
+         {:ok, %Time{}} <-
+           Time.new(datetime.hour, datetime.minute, datetime.second, datetime.microsecond) do
       :ok
     else
       {:date, _} ->
         {:error, :invalid_date}
 
+      {:error, _} = err ->
+        err
+    end
+  end
+
+  defp validate_datetime(%AmbiguousDateTime{before: before_dt, after: after_dt}) do
+    with :ok <- validate_datetime(before_dt),
+         :ok <- validate_datetime(after_dt) do
+      :ok
+    else
       {:error, _} = err ->
         err
     end

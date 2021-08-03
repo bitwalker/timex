@@ -100,11 +100,11 @@ defmodule DateFormatTest.FormatDefault do
 
   test "format day of week" do
     date = Timex.to_datetime({2007, 11, 18})
-    assert {:ok, "6"} = format(date, "{WDsun}")
+    assert {:ok, "0"} = format(date, "{WDsun}")
     assert {:ok, "7"} = format(date, "{WDmon}")
-    assert {:ok, "6"} = format(date, "{0WDsun}")
+    assert {:ok, "0"} = format(date, "{0WDsun}")
     assert {:ok, "7"} = format(date, "{0WDmon}")
-    assert {:ok, "6"} = format(date, "{_WDsun}")
+    assert {:ok, "0"} = format(date, "{_WDsun}")
     assert {:ok, "7"} = format(date, "{_WDmon}")
   end
 
