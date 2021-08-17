@@ -1,0 +1,219 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+"Language: th\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: lib/l10n/translator.ex:320
+msgid "last month"
+msgstr "เดือนที่แล้ว"
+
+#: lib/l10n/translator.ex:326
+msgid "last week"
+msgstr "สัปดาห์ที่แล้ว"
+
+#: lib/l10n/translator.ex:314
+msgid "last year"
+msgstr "ปีที่แล้ว"
+
+#: lib/l10n/translator.ex:322
+msgid "next month"
+msgstr "เดือนหน้า"
+
+#: lib/l10n/translator.ex:328
+msgid "next week"
+msgstr "สัปดาห์หน้า"
+
+#: lib/l10n/translator.ex:316
+msgid "next year"
+msgstr "ปีหน้า"
+
+#: lib/l10n/translator.ex:321
+msgid "this month"
+msgstr "เดือนนี้"
+
+#: lib/l10n/translator.ex:327
+msgid "this week"
+msgstr "สัปดาห์นี้"
+
+#: lib/l10n/translator.ex:315
+msgid "this year"
+msgstr "ปีนี้"
+
+#: lib/l10n/translator.ex:333
+msgid "today"
+msgstr "วันนี้"
+
+#: lib/l10n/translator.ex:334
+msgid "tomorrow"
+msgstr "พรุ่งนี้"
+
+#: lib/l10n/translator.ex:332
+msgid "yesterday"
+msgstr "เมื่อวาน"
+
+#: lib/l10n/translator.ex:336
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "%{count} วันที่แล้ว"
+
+#: lib/l10n/translator.ex:361
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "%{count} ชั่วโมงที่แล้ว"
+
+#: lib/l10n/translator.ex:364
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "%{count} นาทีที่แล้ว"
+
+#: lib/l10n/translator.ex:324
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "%{count} เดือนที่แล้ว"
+
+#: lib/l10n/translator.ex:367
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "%{count} วินาทีที่แล้ว"
+
+#: lib/l10n/translator.ex:330
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "%{count} สัปดาห์ที่แล้ว"
+
+#: lib/l10n/translator.ex:318
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "%{count} ปีที่แล้ว"
+
+#: lib/l10n/translator.ex:335
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "ในอีก %{count} วัน"
+
+#: lib/l10n/translator.ex:360
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "ในอีก %{count} ชั่วโมง"
+
+#: lib/l10n/translator.ex:363
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "ในอีก %{count} นาที"
+
+#: lib/l10n/translator.ex:323
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "ในอีก %{count} เดือน"
+
+#: lib/l10n/translator.ex:366
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "ในอีก %{count} วินาที"
+
+#: lib/l10n/translator.ex:329
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "ในอีก %{count} สัปดาห์"
+
+#: lib/l10n/translator.ex:317
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "ในอีก %{count} ปี"
+
+#: lib/l10n/translator.ex:350
+msgid "last friday"
+msgstr "วันศุกร์ที่แล้ว"
+
+#: lib/l10n/translator.ex:338
+msgid "last monday"
+msgstr "วันจันทร์ที่แล้ว"
+
+#: lib/l10n/translator.ex:353
+msgid "last saturday"
+msgstr "วันเสาร์ที่แล้ว"
+
+#: lib/l10n/translator.ex:356
+msgid "last sunday"
+msgstr "วันอาทิตย์ที่แล้ว"
+
+#: lib/l10n/translator.ex:347
+msgid "last thursday"
+msgstr "วันพฤหัสบดีที่แล้ว"
+
+#: lib/l10n/translator.ex:341
+msgid "last tuesday"
+msgstr "วันอังดารที่แล้ว"
+
+#: lib/l10n/translator.ex:344
+msgid "last wednesday"
+msgstr "วันพุธที่แล้ว"
+
+#: lib/l10n/translator.ex:352
+msgid "next friday"
+msgstr "วันศุกร์หน้า"
+
+#: lib/l10n/translator.ex:340
+msgid "next monday"
+msgstr "วันจันทร์หน้า"
+
+#: lib/l10n/translator.ex:355
+msgid "next saturday"
+msgstr "วันเสาร์หน้า"
+
+#: lib/l10n/translator.ex:358
+msgid "next sunday"
+msgstr "วันอาทิตย์หน้า"
+
+#: lib/l10n/translator.ex:349
+msgid "next thursday"
+msgstr "วันพฤหัสบดีหน้า"
+
+#: lib/l10n/translator.ex:343
+msgid "next tuesday"
+msgstr "วันอังคารหน้า"
+
+#: lib/l10n/translator.ex:346
+msgid "next wednesday"
+msgstr "วันพุธหน้า"
+
+#: lib/l10n/translator.ex:351
+msgid "this friday"
+msgstr "วันศุกร์นี้"
+
+#: lib/l10n/translator.ex:339
+msgid "this monday"
+msgstr "วันจันทร์นี้"
+
+#: lib/l10n/translator.ex:354
+msgid "this saturday"
+msgstr "วันเสาร์นี้"
+
+#: lib/l10n/translator.ex:357
+msgid "this sunday"
+msgstr "วันอาทิตย์นี้"
+
+#: lib/l10n/translator.ex:348
+msgid "this thursday"
+msgstr "วันพฤหัสบดีนี้"
+
+#: lib/l10n/translator.ex:342
+msgid "this tuesday"
+msgstr "วันอังคารนี้"
+
+#: lib/l10n/translator.ex:345
+msgid "this wednesday"
+msgstr "วันพุธนี้"
+
+#: lib/l10n/translator.ex:369
+msgid "now"
+msgstr "ตอนนี้"
