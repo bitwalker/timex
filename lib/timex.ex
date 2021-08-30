@@ -1679,7 +1679,7 @@ defmodule Timex do
 
   @doc """
   Return a boolean indicating whether the given year is a leap year. You may
-  pase a date or a year number.
+  pass a date or a year number.
 
   ## Examples
 

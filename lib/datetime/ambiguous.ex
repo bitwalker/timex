@@ -12,7 +12,7 @@ defmodule Timex.AmbiguousDateTime do
   to -5 from UTC. Since there is no timezone period associated with the hours
   of 2-3 AM in the America/Chicago zone (it's neither CST nor CDT during that hour),
   one has to decide what the intent is. Timex makes the call that shifting to the
-  next period (i.e. "spring foward" using our example above) makes the most logical
+  next period (i.e. "spring forward" using our example above) makes the most logical
   sense when working with non-existent time periods.
 
   TL;DR - Timex will "spring forward" or "fall back", depending on what the zone change
@@ -26,7 +26,7 @@ defmodule Timex.AmbiguousDateTime do
   This one is the reason why this module exists. There are times, though rare, where more
   than one zone applies to a given date and time. For example, Asia/Taipei, on December 31st,
   1895, from 23:54:00 to 23:59:59, two timezone periods are active LMT, and JWST, because that
-  locale was switching to JWST from LMT. Because of this, it's impossible to know programmaticaly
+  locale was switching to JWST from LMT. Because of this, it's impossible to know programmatically
   which zone is desired. The programmer must make a choice on which zone they want to use.
 
   For this use case, Timex will return an AmbiguousDateTime any time you try to create a DateTime,

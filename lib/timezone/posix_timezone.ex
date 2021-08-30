@@ -157,7 +157,7 @@ defmodule Timex.PosixTimezone do
 
           date =
             if ldom > day do
-              # Last occurrance is in week 4, so shift back a week
+              # Last occurrence is in week 4, so shift back a week
               %{first_week_date | day: day - 7}
             else
               %{first_week_date | day: day}

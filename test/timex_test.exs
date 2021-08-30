@@ -570,7 +570,7 @@ defmodule TimexTests do
              Timex.diff(~T[12:00:00], ~T[12:00:00], :dayz)
   end
 
-  test "month diff is asymetrical for months of different lengths" do
+  test "month diff is asymmetrical for months of different lengths" do
     assert Timex.diff(~D[2017-02-28], ~D[2017-01-27], :months) === 1
     assert Timex.diff(~D[2017-02-28], ~D[2017-01-28], :months) === 1
     assert Timex.diff(~D[2017-02-28], ~D[2017-01-29], :months) === 0
