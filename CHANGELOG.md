@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Added timezone field to set_options type
+
 ---
 
 ## 3.7.6

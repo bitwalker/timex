@@ -1814,7 +1814,8 @@ defmodule Timex do
           hour: Types.hour(),
           minute: Types.minute(),
           second: Types.second(),
-          microsecond: Types.microsecond()
+          microsecond: Types.microsecond(),
+          timezone: Types.valid_timezone()
         ]
   @spec set(Types.valid_datetime(), set_options) :: Types.valid_datetime()
   defdelegate set(date, options), to: Timex.Protocol
