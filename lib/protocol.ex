@@ -180,7 +180,7 @@ defprotocol Timex.Protocol do
   @doc """
   Get the ordinal weekday number of the given date/time value and relative to the given weekstart
   """
-  @spec weekday(Types.valid_datetime(), Calendar.day_of_week()) ::
+  @spec weekday(Types.valid_datetime(), Types.weekday_name()) ::
           Types.weekday() | {:error, term}
   def weekday(datetime, weekstart)
 

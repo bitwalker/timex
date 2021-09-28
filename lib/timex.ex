@@ -1295,7 +1295,7 @@ defmodule Timex do
       iex> Timex.epoch() |> #{__MODULE__}.weekday(:sunday)
       5
   """
-  @spec weekday(Types.valid_datetime(), Calendar.day_of_week()) ::
+  @spec weekday(Types.valid_datetime(), Types.weekday_name()) ::
           Types.weekday() | {:error, :invalid_date}
   defdelegate weekday(datetime, weekstart), to: Timex.Protocol
 

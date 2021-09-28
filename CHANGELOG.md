@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fix incorrect `Timex.weekday/2` typespecs
+
 ---
 
 ## 3.7.6
