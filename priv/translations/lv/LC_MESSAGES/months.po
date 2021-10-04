@@ -1,0 +1,59 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: lv\n"
+
+#: lib/l10n/translator.ex:303
+msgid "April"
+msgstr "aprīlis"
+
+#: lib/l10n/translator.ex:307
+msgid "August"
+msgstr "augusts"
+
+#: lib/l10n/translator.ex:311
+msgid "December"
+msgstr "decembris"
+
+#: lib/l10n/translator.ex:301
+msgid "February"
+msgstr "februāris"
+
+#: lib/l10n/translator.ex:300
+msgid "January"
+msgstr "janvāris"
+
+#: lib/l10n/translator.ex:306
+msgid "July"
+msgstr "jūlijs"
+
+#: lib/l10n/translator.ex:305
+msgid "June"
+msgstr "jūnijs"
+
+#: lib/l10n/translator.ex:302
+msgid "March"
+msgstr "marts"
+
+#: lib/l10n/translator.ex:304
+msgid "May"
+msgstr "maijs"
+
+#: lib/l10n/translator.ex:310
+msgid "November"
+msgstr "novembris"
+
+#: lib/l10n/translator.ex:309
+msgid "October"
+msgstr "oktobris"
+
+#: lib/l10n/translator.ex:308
+msgid "September"
+msgstr "septembris"
