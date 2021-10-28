@@ -231,10 +231,10 @@ defmodule Timex do
   @doc """
   Formats a date/time value using the given format string (and optional formatter).
 
-  See Timex.Format.DateTime.Formatters.Default or Timex.Format.DateTime.Formatters.Strftime
+  See `Timex.Format.DateTime.Formatters.Default` or `Timex.Format.DateTime.Formatters.Strftime`
   for documentation on the syntax supported by those formatters.
 
-  To use the Default formatter, simply call format/2. To use the Strftime formatter, you
+  To use the Default formatter, simply call `format/2`. To use the Strftime formatter, you
   can either alias and pass Strftime by module name, or as a shortcut, you can pass :strftime
   instead.
 
@@ -481,10 +481,10 @@ defmodule Timex do
   @doc """
   Parses a datetime string into a DateTime struct, using the provided format string (and optional tokenizer).
 
-  See Timex.Format.DateTime.Formatters.Default or Timex.Format.DateTime.Formatters.Strftime
+  See `Timex.Format.DateTime.Formatters.Default` or `Timex.Format.DateTime.Formatters.Strftime`
   for documentation on the syntax supported in format strings by their respective tokenizers.
 
-  To use the Default tokenizer, simply call parse/2. To use the Strftime tokenizer, you
+  To use the Default tokenizer, simply call `parse/2`. To use the Strftime tokenizer, you
   can either alias and pass Timex.Parse.DateTime.Tokenizer.Strftime by module name,
   or as a shortcut, you can pass :strftime instead.
 
