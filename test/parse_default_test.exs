@@ -461,6 +461,11 @@ defmodule DateFormatTest.ParseDefault do
     assert "2017-06-27T08:32:55.800111+00:00" = Timex.format!(d, "{ISO:Extended}")
   end
 
+  test "roundtrip bug #705" do
+    assert {:error, "Expected 2 digit day."} = Timex.parse("2017-01-", "{ISO:Extended}")
+    assert {:error, "Expected 2 digit month."} = Timex.parse("2017-", "{ISO:Extended}")
+  end
+
   test "can parse a date/time using a specific locale" do
     {:ok, d} = Timex.lformat(DateTime.utc_now(), "{ANSIC}", "ru")
 
