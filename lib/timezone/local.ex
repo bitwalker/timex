@@ -231,7 +231,7 @@ defmodule Timex.Timezone.Local do
   defp read_timezone_data(_, @_ETC_TIMEZONE) do
     case File.read(@_ETC_TIMEZONE) do
       {:ok, name} ->
-        {:ok, String.trim(name, " \n")}
+        {:ok, String.trim(name)}
 
       {:error, _} ->
         nil
