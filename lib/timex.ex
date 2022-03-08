@@ -556,7 +556,7 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.century
+      iex> Timex.century
       21
 
   """
@@ -568,11 +568,11 @@ defmodule Timex do
 
   ## Examples
 
-      iex> Timex.today |> #{__MODULE__}.century
+      iex> Timex.today |> Timex.century
       21
-      iex> Timex.now |> #{__MODULE__}.century
+      iex> Timex.now |> Timex.century
       21
-      iex> #{__MODULE__}.century(2016)
+      iex> Timex.century(2016)
       21
 
   """
@@ -655,7 +655,7 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.iso_week({1970, 1, 1})
+      iex> Timex.iso_week({1970, 1, 1})
       {1970,1}
   """
   @spec iso_week(Types.valid_datetime()) :: {Types.year(), Types.weeknum()} | {:error, term}
@@ -666,7 +666,7 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.iso_week(1970, 1, 1)
+      iex> Timex.iso_week(1970, 1, 1)
       {1970,1}
   """
   @spec iso_week(Types.year(), Types.month(), Types.day()) ::
@@ -682,7 +682,7 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.iso_triplet(Timex.epoch)
+      iex> Timex.iso_triplet(Timex.epoch)
       {1970, 1, 4}
 
   """
@@ -771,7 +771,7 @@ defmodule Timex do
       ...> {tz.full_name, tz.abbreviation}
       {"America/Chicago", "CDT"}
 
-      iex> tz = #{__MODULE__}.timezone(+2, {2015, 4, 12})
+      iex> tz = Timex.timezone(+2, {2015, 4, 12})
       ...> {tz.full_name, tz.abbreviation}
       {"Etc/UTC+2", "+02"}
 
@@ -790,7 +790,7 @@ defmodule Timex do
       true
 
       iex> use Timex
-      ...> %Date{year: 1, day: 1, month: 13} |> #{__MODULE__}.is_valid?
+      ...> %Date{year: 1, day: 1, month: 13} |> Timex.is_valid?
       false
 
   """
@@ -928,12 +928,12 @@ defmodule Timex do
 
       iex> date1 = ~D[2014-03-01]
       ...> date2 = ~D[2014-03-01]
-      ...> #{__MODULE__}.equal?(date1, date2)
+      ...> Timex.equal?(date1, date2)
       true
 
       iex> date1 = ~D[2014-03-01]
       ...> date2 = Timex.to_datetime({2014, 3, 1}, "Etc/UTC")
-      ...> #{__MODULE__}.equal?(date1, date2)
+      ...> Timex.equal?(date1, date2)
       true
   """
   @spec equal?(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
@@ -1103,17 +1103,17 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.day_to_num("Monday")
+      iex> Timex.day_to_num("Monday")
       1
-      iex> #{__MODULE__}.day_to_num("monday")
+      iex> Timex.day_to_num("monday")
       1
-      iex> #{__MODULE__}.day_to_num("Mon")
+      iex> Timex.day_to_num("Mon")
       1
-      iex> #{__MODULE__}.day_to_num("mon")
+      iex> Timex.day_to_num("mon")
       1
-      iex> #{__MODULE__}.day_to_num(:mon)
+      iex> Timex.day_to_num(:mon)
       1
-      iex> #{__MODULE__}.day_to_num(:sunday)
+      iex> Timex.day_to_num(:sunday)
       7
 
   """
@@ -1156,9 +1156,9 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.day_name(1)
+      iex> Timex.day_name(1)
       "Monday"
-      iex> #{__MODULE__}.day_name(0)
+      iex> Timex.day_name(0)
       {:error, :invalid_weekday_number}
   """
   @spec day_name(Types.weekday()) :: String.t() | {:error, :invalid_weekday_number}
@@ -1174,9 +1174,9 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.day_shortname(1)
+      iex> Timex.day_shortname(1)
       "Mon"
-      iex> #{__MODULE__}.day_shortname(0)
+      iex> Timex.day_shortname(0)
       {:error, :invalid_weekday_number}
   """
   @spec day_shortname(Types.weekday()) :: String.t() | {:error, :invalid_weekday_number}
@@ -1192,15 +1192,15 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.month_to_num("January")
+      iex> Timex.month_to_num("January")
       1
-      iex> #{__MODULE__}.month_to_num("january")
+      iex> Timex.month_to_num("january")
       1
-      iex> #{__MODULE__}.month_to_num("Jan")
+      iex> Timex.month_to_num("Jan")
       1
-      iex> #{__MODULE__}.month_to_num("jan")
+      iex> Timex.month_to_num("jan")
       1
-      iex> #{__MODULE__}.month_to_num(:jan)
+      iex> Timex.month_to_num(:jan)
       1
   """
   @spec month_to_num(binary) :: integer | {:error, :invalid_month_name}
@@ -1244,9 +1244,9 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.month_name(1)
+      iex> Timex.month_name(1)
       "January"
-      iex> #{__MODULE__}.month_name(0)
+      iex> Timex.month_name(0)
       {:error, :invalid_month_number}
   """
   @spec month_name(Types.month()) :: String.t() | {:error, :invalid_month_number}
@@ -1262,9 +1262,9 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.month_shortname(1)
+      iex> Timex.month_shortname(1)
       "Jan"
-      iex> #{__MODULE__}.month_shortname(0)
+      iex> Timex.month_shortname(0)
       {:error, :invalid_month_number}
   """
   @spec month_shortname(Types.month()) :: String.t() | {:error, :invalid_month_number}
@@ -1280,7 +1280,7 @@ defmodule Timex do
 
   ## Examples
 
-      iex> Timex.epoch |> #{__MODULE__}.weekday
+      iex> Timex.epoch |> Timex.weekday
       4 # (i.e. Thursday)
 
   """
@@ -1683,9 +1683,9 @@ defmodule Timex do
 
   ## Examples
 
-      iex> Timex.epoch() |> #{__MODULE__}.is_leap?
+      iex> Timex.epoch() |> Timex.is_leap?
       false
-      iex> #{__MODULE__}.is_leap?(2012)
+      iex> Timex.is_leap?(2012)
       true
 
   """
