@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Corrected type definition for Types.week_of_month to include possiblity of 6th week (see #703)
+
 ---
 
 ## 3.7.6

@@ -5,7 +5,7 @@ defmodule Timex.Types do
   @type day :: Calendar.day()
   @type num_of_days :: 28..31
   @type daynum :: 1..366
-  @type week_of_month :: 1..5
+  @type week_of_month :: 1..6
   @type weekday :: 1..7
   @type weeknum :: 1..53
   # Time types
