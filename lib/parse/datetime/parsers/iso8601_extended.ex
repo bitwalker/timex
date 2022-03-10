@@ -37,6 +37,9 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
   def parse_extended(<<h::utf8, _::binary>>, :year, _acc, count),
     do: {:error, "Expected 4 digit year, but got `#{<<h::utf8>>}` instead.", count}
 
+  def parse_extended(_, :year, _acc, count),
+    do: {:error, "Expected 4 digit year.", count}
+
   def parse_extended(<<m1::utf8, m2::utf8, "-", rest::binary>>, :month, acc, count)
       when m1 >= ?0 and m1 < ?2 and
              m2 >= ?0 and m2 <= ?9 do
@@ -53,6 +56,9 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
 
   def parse_extended(<<h::utf8, _::binary>>, :month, _acc, count),
     do: {:error, "Expected 2 digit month, but got `#{<<h::utf8>>}` instead.", count}
+
+  def parse_extended(_, :month, _acc, count),
+    do: {:error, "Expected 2 digit month.", count}
 
   def parse_extended(<<d1::utf8, d2::utf8, sep::utf8, rest::binary>>, :day, acc, count)
       when d1 >= ?0 and d1 <= ?3 and
@@ -78,6 +84,9 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
 
   def parse_extended(<<h::utf8, _::binary>>, :day, _acc, count),
     do: {:error, "Expected 2 digit day, but got `#{<<h::utf8>>}` instead.", count}
+
+  def parse_extended(_, :day, _acc, count),
+    do: {:error, "Expected 2 digit day.", count}
 
   def parse_extended(<<h1::utf8, h2::utf8, rest::binary>>, :hour, acc, count)
       when h1 >= ?0 and h1 < ?3 and

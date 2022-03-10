@@ -218,7 +218,7 @@ defmodule ConversionTests do
     assert datetime == @default_utc_datetime
   end
 
-  test "map with unparseable string int value" do
+  test "map with unparsable string int value" do
     datetime =
       @default_map
       |> Map.put("minute", "")

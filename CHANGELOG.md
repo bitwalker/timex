@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Fix incorrect `Timex.weekday/2` typespecs
+- Corrected type definition for Types.week_of_month to include possiblity of 6th week (see #703)
 
 ---
 
