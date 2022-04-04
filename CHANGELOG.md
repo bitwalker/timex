@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added/Changed
 
+- Add Estonian translation
+
 ### Fixed
 
 - Corrected type definition for Types.week_of_month to include possiblity of 6th week (see #703)
@@ -17,7 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- The documentation on weekday formatting via `%w` and `%u` strftime directives and `WDmon` and `WDsun` 
+- The documentation on weekday formatting via `%w` and `%u` strftime directives and `WDmon` and `WDsun`
 default directives did not match, and worse, the behaviour had regressed as well and did not match the
 docs for either. The behaviour now matches between the two formatters, as does the documentation, and
 aligns with the C strftime specification (i.e. Monday is 1..7, Sunday is 0..6)
@@ -119,7 +121,7 @@ removed the unnecessary parsing work that was going on here.
 
 ### Fixed
 
-- Handling of timezones across DST. More generally we now handle gaps/ambiguity 
+- Handling of timezones across DST. More generally we now handle gaps/ambiguity
 much more consistently
 - ZoneInfo parser was refactored, now properly supports version 2/3
 files, addresses some small bugs in previous code
