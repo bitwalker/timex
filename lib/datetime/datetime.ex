@@ -3,7 +3,7 @@ defimpl Timex.Protocol, for: DateTime do
   A type which represents a date and time with timezone information (optional, UTC will
   be assumed for date/times with no timezone information provided).
 
-  Functions that produce time intervals use UNIX epoch (or simly Epoch) as the
+  Functions that produce time intervals use UNIX epoch (or simply Epoch) as the
   default reference date. Epoch is defined as UTC midnight of January 1, 1970.
 
   Time intervals in this module don't account for leap seconds.

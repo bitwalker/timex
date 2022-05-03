@@ -7,7 +7,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   # See https://tools.ietf.org/id/draft-murchison-tzdist-tzif-00.html for details 
   defmodule Zone do
     @moduledoc """
-    Represents the data retreived from a binary tzfile.
+    Represents the data retrieved from a binary tzfile.
     """
     # Maximum version encountered
     defstruct version: nil,

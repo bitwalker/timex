@@ -1,0 +1,81 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: et\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.0.1\n"
+
+#: lib/l10n/translator.ex:261
+msgid "%{count} day"
+msgid_plural "%{count} days"
+msgstr[0] "%{count} päev"
+msgstr[1] "%{count} päeva"
+
+#: lib/l10n/translator.ex:260
+msgid "%{count} hour"
+msgid_plural "%{count} hours"
+msgstr[0] "%{count} tund"
+msgstr[1] "%{count} tundi"
+
+#: lib/l10n/translator.ex:256
+msgid "%{count} microsecond"
+msgid_plural "%{count} microseconds"
+msgstr[0] "%{count} mikrosekund"
+msgstr[1] "%{count} mikrosekundit"
+
+#: lib/l10n/translator.ex:257
+msgid "%{count} millisecond"
+msgid_plural "%{count} milliseconds"
+msgstr[0] "%{count} millisekund"
+msgstr[1] "%{count} millisekundit"
+
+#: lib/l10n/translator.ex:259
+msgid "%{count} minute"
+msgid_plural "%{count} minutes"
+msgstr[0] "%{count} minut"
+msgstr[1] "%{count} minutit"
+
+#: lib/l10n/translator.ex:263
+msgid "%{count} month"
+msgid_plural "%{count} months"
+msgstr[0] "%{count} kuu"
+msgstr[1] "%{count} kuud"
+
+#: lib/l10n/translator.ex:255
+msgid "%{count} nanosecond"
+msgid_plural "%{count} nanoseconds"
+msgstr[0] "%{count} nanosekund"
+msgstr[1] "%{count} nanosekundit"
+
+#: lib/l10n/translator.ex:258
+msgid "%{count} second"
+msgid_plural "%{count} seconds"
+msgstr[0] "%{count} sekund"
+msgstr[1] "%{count} sekundit"
+
+#: lib/l10n/translator.ex:262
+msgid "%{count} week"
+msgid_plural "%{count} weeks"
+msgstr[0] "%{count} nädal"
+msgstr[1] "%{count} nädalat"
+
+#: lib/l10n/translator.ex:264
+msgid "%{count} year"
+msgid_plural "%{count} years"
+msgstr[0] "%{count} aasta"
+msgstr[1] "%{count} aastat"

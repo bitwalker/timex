@@ -152,10 +152,30 @@ defmodule Timex do
 
   @doc """
   Convert a date/time value and timezone name to a DateTime struct.
+
+  If the DateTime did not occur in the timezone, an error will be returned.
+
   If the DateTime is ambiguous and cannot be resolved, an AmbiguousDateTime will be returned,
   allowing the developer to choose which of the two choices is desired.
 
-  If no timezone is provided, "Etc/UTC" will be used
+  If no timezone is provided, "Etc/UTC" will be used.
+
+  ### Examples
+
+      iex> Timex.to_datetime(~N[2022-01-01 12:00:00], "America/New_York")
+      #DateTime<2022-01-01 12:00:00-05:00 EST America/New_York>
+
+      # This time was skipped as daylight savings started and clocks moved forward
+      iex> Timex.to_datetime(~N[2021-03-14 02:30:00], "America/New_York")
+      {:error, {:could_not_resolve_timezone, "America/New_York", 63782908200, :wall}}
+
+      # This time occurred twice as daylight savings ended and clocks moved back
+      iex> %AmbiguousDateTime{} = adt = Timex.to_datetime(~N[2021-11-07 01:30:00], "America/New_York")
+      ...> match?(%DateTime{zone_abbr: "EDT"}, adt.before) && match?(%DateTime{zone_abbr: "EST"}, adt.after)
+      true
+
+      iex> Timex.to_datetime(~N[2022-01-01 12:00:00])
+      ~U[2022-01-01 12:00:00Z]
   """
   @spec to_datetime(Types.valid_datetime()) :: DateTime.t() | {:error, term}
   @spec to_datetime(Types.valid_datetime(), Types.valid_timezone()) ::
@@ -231,10 +251,10 @@ defmodule Timex do
   @doc """
   Formats a date/time value using the given format string (and optional formatter).
 
-  See Timex.Format.DateTime.Formatters.Default or Timex.Format.DateTime.Formatters.Strftime
+  See `Timex.Format.DateTime.Formatters.Default` or `Timex.Format.DateTime.Formatters.Strftime`
   for documentation on the syntax supported by those formatters.
 
-  To use the Default formatter, simply call format/2. To use the Strftime formatter, you
+  To use the Default formatter, simply call `format/2`. To use the Strftime formatter, you
   can either alias and pass Strftime by module name, or as a shortcut, you can pass :strftime
   instead.
 
@@ -481,10 +501,10 @@ defmodule Timex do
   @doc """
   Parses a datetime string into a DateTime struct, using the provided format string (and optional tokenizer).
 
-  See Timex.Format.DateTime.Formatters.Default or Timex.Format.DateTime.Formatters.Strftime
+  See `Timex.Format.DateTime.Formatters.Default` or `Timex.Format.DateTime.Formatters.Strftime`
   for documentation on the syntax supported in format strings by their respective tokenizers.
 
-  To use the Default tokenizer, simply call parse/2. To use the Strftime tokenizer, you
+  To use the Default tokenizer, simply call `parse/2`. To use the Strftime tokenizer, you
   can either alias and pass Timex.Parse.DateTime.Tokenizer.Strftime by module name,
   or as a shortcut, you can pass :strftime instead.
 
@@ -508,9 +528,10 @@ defmodule Timex do
       true
 
   """
-  @spec parse(String.t(), String.t()) :: {:ok, DateTime.t() | NaiveDateTime.t()} | {:error, term}
+  @spec parse(String.t(), String.t()) ::
+          {:ok, DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t()} | {:error, term}
   @spec parse(String.t(), String.t(), atom) ::
-          {:ok, DateTime.t() | NaiveDateTime.t()} | {:error, term}
+          {:ok, DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t()} | {:error, term}
   defdelegate parse(datetime_string, format_string), to: Timex.Parse.DateTime.Parser
   defdelegate parse(datetime_string, format_string, tokenizer), to: Timex.Parse.DateTime.Parser
 
@@ -519,8 +540,10 @@ defmodule Timex do
 
   See parse/2 or parse/3 docs for usage examples.
   """
-  @spec parse!(String.t(), String.t()) :: DateTime.t() | NaiveDateTime.t() | no_return
-  @spec parse!(String.t(), String.t(), atom) :: DateTime.t() | NaiveDateTime.t() | no_return
+  @spec parse!(String.t(), String.t()) ::
+          DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t() | no_return
+  @spec parse!(String.t(), String.t(), atom) ::
+          DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t() | no_return
   defdelegate parse!(datetime_string, format_string), to: Timex.Parse.DateTime.Parser
   defdelegate parse!(datetime_string, format_string, tokenizer), to: Timex.Parse.DateTime.Parser
 
@@ -556,7 +579,7 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.century
+      iex> Timex.century
       21
 
   """
@@ -568,11 +591,11 @@ defmodule Timex do
 
   ## Examples
 
-      iex> Timex.today |> #{__MODULE__}.century
+      iex> Timex.today |> Timex.century
       21
-      iex> Timex.now |> #{__MODULE__}.century
+      iex> Timex.now |> Timex.century
       21
-      iex> #{__MODULE__}.century(2016)
+      iex> Timex.century(2016)
       21
 
   """
@@ -655,7 +678,7 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.iso_week({1970, 1, 1})
+      iex> Timex.iso_week({1970, 1, 1})
       {1970,1}
   """
   @spec iso_week(Types.valid_datetime()) :: {Types.year(), Types.weeknum()} | {:error, term}
@@ -666,7 +689,7 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.iso_week(1970, 1, 1)
+      iex> Timex.iso_week(1970, 1, 1)
       {1970,1}
   """
   @spec iso_week(Types.year(), Types.month(), Types.day()) ::
@@ -682,7 +705,7 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.iso_triplet(Timex.epoch)
+      iex> Timex.iso_triplet(Timex.epoch)
       {1970, 1, 4}
 
   """
@@ -771,7 +794,7 @@ defmodule Timex do
       ...> {tz.full_name, tz.abbreviation}
       {"America/Chicago", "CDT"}
 
-      iex> tz = #{__MODULE__}.timezone(+2, {2015, 4, 12})
+      iex> tz = Timex.timezone(+2, {2015, 4, 12})
       ...> {tz.full_name, tz.abbreviation}
       {"Etc/UTC+2", "+02"}
 
@@ -790,7 +813,7 @@ defmodule Timex do
       true
 
       iex> use Timex
-      ...> %Date{year: 1, day: 1, month: 13} |> #{__MODULE__}.is_valid?
+      ...> %Date{year: 1, day: 1, month: 13} |> Timex.is_valid?
       false
 
   """
@@ -928,15 +951,19 @@ defmodule Timex do
 
       iex> date1 = ~D[2014-03-01]
       ...> date2 = ~D[2014-03-01]
-      ...> #{__MODULE__}.equal?(date1, date2)
+      ...> Timex.equal?(date1, date2)
       true
 
       iex> date1 = ~D[2014-03-01]
       ...> date2 = Timex.to_datetime({2014, 3, 1}, "Etc/UTC")
-      ...> #{__MODULE__}.equal?(date1, date2)
+      ...> Timex.equal?(date1, date2)
       true
   """
-  @spec equal?(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
+  @spec equal?(
+          Time.t() | Comparable.comparable(),
+          Time.t() | Comparable.comparable(),
+          Comparable.granularity()
+        ) ::
           boolean | no_return
   def equal?(a, a, granularity \\ :seconds)
   def equal?(a, a, _granularity), do: true
@@ -957,7 +984,8 @@ defmodule Timex do
   @doc """
   See docs for `compare/3`
   """
-  @spec compare(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable()) :: Comparable.compare_result()
+  @spec compare(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable()) ::
+          Comparable.compare_result()
   def compare(%Time{} = a, %Time{} = b) do
     compare(a, b, :microseconds)
   end
@@ -1014,7 +1042,11 @@ defmodule Timex do
       0
 
   """
-  @spec compare(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
+  @spec compare(
+          Time.t() | Comparable.comparable(),
+          Time.t() | Comparable.comparable(),
+          Comparable.granularity()
+        ) ::
           Comparable.compare_result()
   def compare(%Time{} = a, %Time{} = b, granularity),
     do: Timex.Comparable.Utils.to_compare_result(diff(a, b, granularity))
@@ -1060,7 +1092,11 @@ defmodule Timex do
 
   and the result will be an integer value of those units or a Duration.
   """
-  @spec diff(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
+  @spec diff(
+          Time.t() | Comparable.comparable(),
+          Time.t() | Comparable.comparable(),
+          Comparable.granularity()
+        ) ::
           Duration.t() | integer | {:error, term}
   def diff(%Time{}, %Time{}, granularity)
       when granularity in [
@@ -1103,17 +1139,17 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.day_to_num("Monday")
+      iex> Timex.day_to_num("Monday")
       1
-      iex> #{__MODULE__}.day_to_num("monday")
+      iex> Timex.day_to_num("monday")
       1
-      iex> #{__MODULE__}.day_to_num("Mon")
+      iex> Timex.day_to_num("Mon")
       1
-      iex> #{__MODULE__}.day_to_num("mon")
+      iex> Timex.day_to_num("mon")
       1
-      iex> #{__MODULE__}.day_to_num(:mon)
+      iex> Timex.day_to_num(:mon)
       1
-      iex> #{__MODULE__}.day_to_num(:sunday)
+      iex> Timex.day_to_num(:sunday)
       7
 
   """
@@ -1156,9 +1192,9 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.day_name(1)
+      iex> Timex.day_name(1)
       "Monday"
-      iex> #{__MODULE__}.day_name(0)
+      iex> Timex.day_name(0)
       {:error, :invalid_weekday_number}
   """
   @spec day_name(Types.weekday()) :: String.t() | {:error, :invalid_weekday_number}
@@ -1174,9 +1210,9 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.day_shortname(1)
+      iex> Timex.day_shortname(1)
       "Mon"
-      iex> #{__MODULE__}.day_shortname(0)
+      iex> Timex.day_shortname(0)
       {:error, :invalid_weekday_number}
   """
   @spec day_shortname(Types.weekday()) :: String.t() | {:error, :invalid_weekday_number}
@@ -1192,15 +1228,15 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.month_to_num("January")
+      iex> Timex.month_to_num("January")
       1
-      iex> #{__MODULE__}.month_to_num("january")
+      iex> Timex.month_to_num("january")
       1
-      iex> #{__MODULE__}.month_to_num("Jan")
+      iex> Timex.month_to_num("Jan")
       1
-      iex> #{__MODULE__}.month_to_num("jan")
+      iex> Timex.month_to_num("jan")
       1
-      iex> #{__MODULE__}.month_to_num(:jan)
+      iex> Timex.month_to_num(:jan)
       1
   """
   @spec month_to_num(binary) :: integer | {:error, :invalid_month_name}
@@ -1244,9 +1280,9 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.month_name(1)
+      iex> Timex.month_name(1)
       "January"
-      iex> #{__MODULE__}.month_name(0)
+      iex> Timex.month_name(0)
       {:error, :invalid_month_number}
   """
   @spec month_name(Types.month()) :: String.t() | {:error, :invalid_month_number}
@@ -1262,9 +1298,9 @@ defmodule Timex do
 
   ## Examples
 
-      iex> #{__MODULE__}.month_shortname(1)
+      iex> Timex.month_shortname(1)
       "Jan"
-      iex> #{__MODULE__}.month_shortname(0)
+      iex> Timex.month_shortname(0)
       {:error, :invalid_month_number}
   """
   @spec month_shortname(Types.month()) :: String.t() | {:error, :invalid_month_number}
@@ -1280,7 +1316,7 @@ defmodule Timex do
 
   ## Examples
 
-      iex> Timex.epoch |> #{__MODULE__}.weekday
+      iex> Timex.epoch |> Timex.weekday
       4 # (i.e. Thursday)
 
   """
@@ -1679,13 +1715,13 @@ defmodule Timex do
 
   @doc """
   Return a boolean indicating whether the given year is a leap year. You may
-  pase a date or a year number.
+  pass a date or a year number.
 
   ## Examples
 
-      iex> Timex.epoch() |> #{__MODULE__}.is_leap?
+      iex> Timex.epoch() |> Timex.is_leap?
       false
-      iex> #{__MODULE__}.is_leap?(2012)
+      iex> Timex.is_leap?(2012)
       true
 
   """
