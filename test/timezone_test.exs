@@ -5,6 +5,7 @@ defmodule TimezoneTests do
   doctest Timex.Timezone
   doctest Timex.Timezone.Local
   doctest Timex.Timezone.Utils
+  doctest Timex.TimezoneInfo
 
   test "get" do
     %TimezoneInfo{} = tz = Timezone.get("America/Chicago", ~N[2015-01-01T01:00:00])
