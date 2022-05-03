@@ -120,7 +120,7 @@ The Duration module contains functions for working with Durations, including Erl
 
 Timex exposes a number of extension points for you, in order to accommodate different use cases:
 
-Timex itself defines it's core operations on the Date, DateTime, and NaiveDateTime types using the `Timex.Protocol` protocol. 
+Timex itself defines its core operations on the Date, DateTime, and NaiveDateTime types using the `Timex.Protocol` protocol. 
 From there, all other Timex functionality is derived. If you have custom date/datetime types you want to use with Timex, 
 this is the protocol you would need to implement.
 
