@@ -9,55 +9,55 @@
 ## effect: edit them in PO (`.po`) files instead.
 msgid ""
 msgstr ""
-"Language: vi\n"
+"Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: lib/l10n/translator.ex:261
 msgid "%{count} day"
 msgid_plural "%{count} days"
-msgstr[0] "${count} ngày"
+msgstr[0] "%{count} วัน"
 
 #: lib/l10n/translator.ex:260
 msgid "%{count} hour"
 msgid_plural "%{count} hours"
-msgstr[0] "%{count} giờ"
+msgstr[0] "%{count} ชั่วโมง"
 
 #: lib/l10n/translator.ex:256
 msgid "%{count} microsecond"
 msgid_plural "%{count} microseconds"
-msgstr[0] "%{count} micro giây"
+msgstr[0] "%{count} ไมโครวินาที"
 
 #: lib/l10n/translator.ex:257
 msgid "%{count} millisecond"
 msgid_plural "%{count} milliseconds"
-msgstr[0] "%{count} mili giây"
+msgstr[0] "%{count} มิลลิวินาที"
 
 #: lib/l10n/translator.ex:259
 msgid "%{count} minute"
 msgid_plural "%{count} minutes"
-msgstr[0] "%{count} phút"
+msgstr[0] "%{count} นาที"
 
 #: lib/l10n/translator.ex:263
 msgid "%{count} month"
 msgid_plural "%{count} months"
-msgstr[0] "%{count} tháng"
+msgstr[0] "%{count} เดือน"
 
 #: lib/l10n/translator.ex:255
 msgid "%{count} nanosecond"
 msgid_plural "%{count} nanoseconds"
-msgstr[0] "%{count} nano giây"
+msgstr[0] "%{count} นาโนวินาที"
 
 #: lib/l10n/translator.ex:258
 msgid "%{count} second"
 msgid_plural "%{count} seconds"
-msgstr[0] "%{count} giây"
+msgstr[0] "%{count} วินาที"
 
 #: lib/l10n/translator.ex:262
 msgid "%{count} week"
 msgid_plural "%{count} weeks"
-msgstr[0] "%{count} tuần"
+msgstr[0] "%{count} สัปดาห์"
 
 #: lib/l10n/translator.ex:264
 msgid "%{count} year"
 msgid_plural "%{count} years"
-msgstr[0] "%{count} năm"
+msgstr[0] "%{count} ปี"

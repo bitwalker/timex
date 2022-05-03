@@ -25,7 +25,8 @@ defmodule Timex.Parse.DateTime.Parser do
       "Etc/UTC"
 
   """
-  @spec parse(binary, binary) :: {:ok, DateTime.t() | NaiveDateTime.t()} | {:error, term}
+  @spec parse(binary, binary) ::
+          {:ok, DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t()} | {:error, term}
   def parse(date_string, format_string)
       when is_binary(date_string) and is_binary(format_string),
       do: parse(date_string, format_string, Default)
@@ -51,7 +52,8 @@ defmodule Timex.Parse.DateTime.Parser do
       "Etc/UTC-2"
 
   """
-  @spec parse(binary, binary, atom) :: {:ok, DateTime.t() | NaiveDateTime.t()} | {:error, term}
+  @spec parse(binary, binary, atom) ::
+          {:ok, DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t()} | {:error, term}
   def parse(date_string, format_string, tokenizer)
       when is_binary(date_string) and is_binary(format_string) do
     try do
@@ -67,7 +69,8 @@ defmodule Timex.Parse.DateTime.Parser do
   @doc """
   Same as `parse/2` and `parse/3`, but raises on error.
   """
-  @spec parse!(String.t(), String.t(), atom | nil) :: DateTime.t() | NaiveDateTime.t() | no_return
+  @spec parse!(String.t(), String.t(), atom | nil) ::
+          DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t() | no_return
   def parse!(date_string, format_string, tokenizer \\ Default)
 
   def parse!(date_string, format_string, :strftime),

@@ -152,10 +152,30 @@ defmodule Timex do
 
   @doc """
   Convert a date/time value and timezone name to a DateTime struct.
+
+  If the DateTime did not occur in the timezone, an error will be returned.
+
   If the DateTime is ambiguous and cannot be resolved, an AmbiguousDateTime will be returned,
   allowing the developer to choose which of the two choices is desired.
 
-  If no timezone is provided, "Etc/UTC" will be used
+  If no timezone is provided, "Etc/UTC" will be used.
+
+  ### Examples
+
+      iex> Timex.to_datetime(~N[2022-01-01 12:00:00], "America/New_York")
+      #DateTime<2022-01-01 12:00:00-05:00 EST America/New_York>
+
+      # This time was skipped as daylight savings started and clocks moved forward
+      iex> Timex.to_datetime(~N[2021-03-14 02:30:00], "America/New_York")
+      {:error, {:could_not_resolve_timezone, "America/New_York", 63782908200, :wall}}
+
+      # This time occurred twice as daylight savings ended and clocks moved back
+      iex> %AmbiguousDateTime{} = adt = Timex.to_datetime(~N[2021-11-07 01:30:00], "America/New_York")
+      ...> match?(%DateTime{zone_abbr: "EDT"}, adt.before) && match?(%DateTime{zone_abbr: "EST"}, adt.after)
+      true
+
+      iex> Timex.to_datetime(~N[2022-01-01 12:00:00])
+      ~U[2022-01-01 12:00:00Z]
   """
   @spec to_datetime(Types.valid_datetime()) :: DateTime.t() | {:error, term}
   @spec to_datetime(Types.valid_datetime(), Types.valid_timezone()) ::
@@ -231,10 +251,10 @@ defmodule Timex do
   @doc """
   Formats a date/time value using the given format string (and optional formatter).
 
-  See Timex.Format.DateTime.Formatters.Default or Timex.Format.DateTime.Formatters.Strftime
+  See `Timex.Format.DateTime.Formatters.Default` or `Timex.Format.DateTime.Formatters.Strftime`
   for documentation on the syntax supported by those formatters.
 
-  To use the Default formatter, simply call format/2. To use the Strftime formatter, you
+  To use the Default formatter, simply call `format/2`. To use the Strftime formatter, you
   can either alias and pass Strftime by module name, or as a shortcut, you can pass :strftime
   instead.
 
@@ -481,10 +501,10 @@ defmodule Timex do
   @doc """
   Parses a datetime string into a DateTime struct, using the provided format string (and optional tokenizer).
 
-  See Timex.Format.DateTime.Formatters.Default or Timex.Format.DateTime.Formatters.Strftime
+  See `Timex.Format.DateTime.Formatters.Default` or `Timex.Format.DateTime.Formatters.Strftime`
   for documentation on the syntax supported in format strings by their respective tokenizers.
 
-  To use the Default tokenizer, simply call parse/2. To use the Strftime tokenizer, you
+  To use the Default tokenizer, simply call `parse/2`. To use the Strftime tokenizer, you
   can either alias and pass Timex.Parse.DateTime.Tokenizer.Strftime by module name,
   or as a shortcut, you can pass :strftime instead.
 
@@ -508,9 +528,10 @@ defmodule Timex do
       true
 
   """
-  @spec parse(String.t(), String.t()) :: {:ok, DateTime.t() | NaiveDateTime.t()} | {:error, term}
+  @spec parse(String.t(), String.t()) ::
+          {:ok, DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t()} | {:error, term}
   @spec parse(String.t(), String.t(), atom) ::
-          {:ok, DateTime.t() | NaiveDateTime.t()} | {:error, term}
+          {:ok, DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t()} | {:error, term}
   defdelegate parse(datetime_string, format_string), to: Timex.Parse.DateTime.Parser
   defdelegate parse(datetime_string, format_string, tokenizer), to: Timex.Parse.DateTime.Parser
 
@@ -519,8 +540,10 @@ defmodule Timex do
 
   See parse/2 or parse/3 docs for usage examples.
   """
-  @spec parse!(String.t(), String.t()) :: DateTime.t() | NaiveDateTime.t() | no_return
-  @spec parse!(String.t(), String.t(), atom) :: DateTime.t() | NaiveDateTime.t() | no_return
+  @spec parse!(String.t(), String.t()) ::
+          DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t() | no_return
+  @spec parse!(String.t(), String.t(), atom) ::
+          DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t() | no_return
   defdelegate parse!(datetime_string, format_string), to: Timex.Parse.DateTime.Parser
   defdelegate parse!(datetime_string, format_string, tokenizer), to: Timex.Parse.DateTime.Parser
 
@@ -936,7 +959,11 @@ defmodule Timex do
       ...> Timex.equal?(date1, date2)
       true
   """
-  @spec equal?(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
+  @spec equal?(
+          Time.t() | Comparable.comparable(),
+          Time.t() | Comparable.comparable(),
+          Comparable.granularity()
+        ) ::
           boolean | no_return
   def equal?(a, a, granularity \\ :seconds)
   def equal?(a, a, _granularity), do: true
@@ -957,7 +984,8 @@ defmodule Timex do
   @doc """
   See docs for `compare/3`
   """
-  @spec compare(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable()) :: Comparable.compare_result()
+  @spec compare(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable()) ::
+          Comparable.compare_result()
   def compare(%Time{} = a, %Time{} = b) do
     compare(a, b, :microseconds)
   end
@@ -1014,7 +1042,11 @@ defmodule Timex do
       0
 
   """
-  @spec compare(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
+  @spec compare(
+          Time.t() | Comparable.comparable(),
+          Time.t() | Comparable.comparable(),
+          Comparable.granularity()
+        ) ::
           Comparable.compare_result()
   def compare(%Time{} = a, %Time{} = b, granularity),
     do: Timex.Comparable.Utils.to_compare_result(diff(a, b, granularity))
@@ -1060,7 +1092,11 @@ defmodule Timex do
 
   and the result will be an integer value of those units or a Duration.
   """
-  @spec diff(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
+  @spec diff(
+          Time.t() | Comparable.comparable(),
+          Time.t() | Comparable.comparable(),
+          Comparable.granularity()
+        ) ::
           Duration.t() | integer | {:error, term}
   def diff(%Time{}, %Time{}, granularity)
       when granularity in [
@@ -1814,7 +1850,8 @@ defmodule Timex do
           hour: Types.hour(),
           minute: Types.minute(),
           second: Types.second(),
-          microsecond: Types.microsecond()
+          microsecond: Types.microsecond(),
+          timezone: Types.valid_timezone()
         ]
   @spec set(Types.valid_datetime(), set_options) :: Types.valid_datetime()
   defdelegate set(date, options), to: Timex.Protocol
