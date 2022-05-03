@@ -10,6 +10,7 @@
 msgid ""
 msgstr ""
 "Language: vi\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: lib/l10n/translator.ex:320
 msgid "last month"
@@ -63,85 +64,71 @@ msgstr "hôm qua"
 msgid "%{count} day ago"
 msgid_plural "%{count} days ago"
 msgstr[0] "%{count} ngày trước"
-msgstr[1] "%{count} ngày trước"
 
 #: lib/l10n/translator.ex:361
 msgid "%{count} hour ago"
 msgid_plural "%{count} hours ago"
 msgstr[0] "%{count} giờ trước"
-msgstr[1] "%{count} giờ trước"
 
 #: lib/l10n/translator.ex:364
 msgid "%{count} minute ago"
 msgid_plural "%{count} minutes ago"
 msgstr[0] "%{count} phút trước"
-msgstr[1] "%{count} phút trước"
 
 #: lib/l10n/translator.ex:324
 msgid "%{count} month ago"
 msgid_plural "%{count} months ago"
 msgstr[0] "%{count} tháng trước"
-msgstr[1] "%{count} tháng trước"
 
 #: lib/l10n/translator.ex:367
 msgid "%{count} second ago"
 msgid_plural "%{count} seconds ago"
 msgstr[0] "%{count} giây trước"
-msgstr[1] "%{count} giây trước"
 
 #: lib/l10n/translator.ex:330
 msgid "%{count} week ago"
 msgid_plural "%{count} weeks ago"
 msgstr[0] "%{count} tuần trước"
-msgstr[1] "%{count} tuần trước"
 
 #: lib/l10n/translator.ex:318
 msgid "%{count} year ago"
 msgid_plural "%{count} years ago"
 msgstr[0] "%{count} năm trước"
-msgstr[1] "%{count} năm trước"
 
 #: lib/l10n/translator.ex:335
 msgid "in %{count} day"
 msgid_plural "in %{count} days"
 msgstr[0] "trong %{count} ngày"
-msgstr[1] "trong %{count} ngày"
 
 #: lib/l10n/translator.ex:360
 msgid "in %{count} hour"
 msgid_plural "in %{count} hours"
 msgstr[0] "trong %{count} giờ"
-msgstr[1] "trong %{count} giờ"
 
 #: lib/l10n/translator.ex:363
 msgid "in %{count} minute"
 msgid_plural "in %{count} minutes"
 msgstr[0] "trong %{count} phút"
-msgstr[1] "trong %{count} phút"
 
 #: lib/l10n/translator.ex:323
 msgid "in %{count} month"
 msgid_plural "in %{count} months"
 msgstr[0] "trong %{count} tháng"
-msgstr[1] "trong %{count} tháng"
 
 #: lib/l10n/translator.ex:366
 msgid "in %{count} second"
 msgid_plural "in %{count} seconds"
 msgstr[0] "trong %{count} giây"
-msgstr[1] "trong %{count} giây"
 
 #: lib/l10n/translator.ex:329
 msgid "in %{count} week"
 msgid_plural "in %{count} weeks"
 msgstr[0] "trong %{count} tuần"
-msgstr[1] "trong %{count} tuần"
 
 #: lib/l10n/translator.ex:317
 msgid "in %{count} year"
 msgid_plural "in %{count} years"
 msgstr[0] "trong %{count} năm"
-msgstr[1] "trong %{count} năm"
 
 #: lib/l10n/translator.ex:350
 msgid "last friday"
