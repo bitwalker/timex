@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added/Changed
 
 - Add Estonian translation
+- Added `TimezoneInfo.format_offset/1`
 
 ### Fixed
 

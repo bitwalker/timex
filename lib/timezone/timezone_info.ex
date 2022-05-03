@@ -82,6 +82,29 @@ defmodule Timex.TimezoneInfo do
     |> validate_and_return()
   end
 
+  @doc """
+  Formats the offset of a `Timex.TimezoneInfo` struct.
+
+  ## Examples
+
+      iex> tzinfo = Timex.Timezone.get("Etc/Greenwich", ~U[2022-01-01 00:00:00Z])
+      ...> #{__MODULE__}.format_offset(tzinfo)
+      "+00:00:00"
+
+      iex> tzinfo = Timex.Timezone.get("Africa/Nairobi", ~U[2022-01-01 00:00:00Z])
+      ...> #{__MODULE__}.format_offset(tzinfo)
+      "+03:00:00"
+
+      iex> tzinfo = Timex.Timezone.get("America/New_York", ~U[2022-01-01 00:00:00Z])
+      ...> #{__MODULE__}.format_offset(tzinfo)
+      "-05:00:00"
+  """
+  @spec format_offset(tzinfo :: t()) :: String.t()
+  def format_offset(tzinfo) do
+    total_offset = Timex.Timezone.total_offset(tzinfo)
+    do_format_offset(total_offset)
+  end
+
   def from_datetime(%DateTime{
         time_zone: name,
         zone_abbr: abbr,
@@ -160,4 +183,35 @@ defmodule Timex.TimezoneInfo do
 
   defp is_valid_constraint(c),
     do: {:error, "'#{inspect(c)}' is not a valid constraint for timezones"}
+
+  defp do_format_offset(offset_seconds) do
+    offset_hours = div(offset_seconds, 60 * 60)
+    offset_mins = div(rem(offset_seconds, 60 * 60), 60)
+    offset_secs = rem(rem(offset_seconds, 60 * 60), 60)
+    hour = "#{pad_numeric(offset_hours)}"
+    min = "#{pad_numeric(offset_mins)}"
+    secs = "#{pad_numeric(offset_secs)}"
+
+    cond do
+      offset_hours + offset_mins >= 0 -> "+#{hour}:#{min}:#{secs}"
+      true -> "#{hour}:#{min}:#{secs}"
+    end
+  end
+
+  defp pad_numeric(number) when is_integer(number), do: pad_numeric("#{number}")
+
+  defp pad_numeric(<<?-, number_str::binary>>) do
+    res = pad_numeric(number_str)
+    <<?-, res::binary>>
+  end
+
+  defp pad_numeric(number_str) do
+    min_width = 2
+    len = String.length(number_str)
+
+    cond do
+      len < min_width -> String.duplicate("0", min_width - len) <> number_str
+      true -> number_str
+    end
+  end
 end
