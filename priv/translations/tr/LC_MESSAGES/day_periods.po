@@ -22,16 +22,16 @@ msgstr ""
 
 #: lib/l10n/translator.ex:266
 msgid "AM"
-msgstr "ÖÖ"
+msgstr "Ã–Ã–"
 
 #: lib/l10n/translator.ex:268
 msgid "PM"
-msgstr "ÖS"
+msgstr "Ã–S"
 
 #: lib/l10n/translator.ex:267
 msgid "am"
-msgstr "öö"
+msgstr "Ã¶Ã¶"
 
 #: lib/l10n/translator.ex:269
 msgid "pm"
-msgstr "ös"
+msgstr "Ã¶s"
