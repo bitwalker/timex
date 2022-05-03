@@ -528,9 +528,10 @@ defmodule Timex do
       true
 
   """
-  @spec parse(String.t(), String.t()) :: {:ok, DateTime.t() | NaiveDateTime.t()} | {:error, term}
+  @spec parse(String.t(), String.t()) ::
+          {:ok, DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t()} | {:error, term}
   @spec parse(String.t(), String.t(), atom) ::
-          {:ok, DateTime.t() | NaiveDateTime.t()} | {:error, term}
+          {:ok, DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t()} | {:error, term}
   defdelegate parse(datetime_string, format_string), to: Timex.Parse.DateTime.Parser
   defdelegate parse(datetime_string, format_string, tokenizer), to: Timex.Parse.DateTime.Parser
 
@@ -539,8 +540,10 @@ defmodule Timex do
 
   See parse/2 or parse/3 docs for usage examples.
   """
-  @spec parse!(String.t(), String.t()) :: DateTime.t() | NaiveDateTime.t() | no_return
-  @spec parse!(String.t(), String.t(), atom) :: DateTime.t() | NaiveDateTime.t() | no_return
+  @spec parse!(String.t(), String.t()) ::
+          DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t() | no_return
+  @spec parse!(String.t(), String.t(), atom) ::
+          DateTime.t() | NaiveDateTime.t() | AmbiguousDateTime.t() | no_return
   defdelegate parse!(datetime_string, format_string), to: Timex.Parse.DateTime.Parser
   defdelegate parse!(datetime_string, format_string, tokenizer), to: Timex.Parse.DateTime.Parser
 
@@ -956,7 +959,11 @@ defmodule Timex do
       ...> Timex.equal?(date1, date2)
       true
   """
-  @spec equal?(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
+  @spec equal?(
+          Time.t() | Comparable.comparable(),
+          Time.t() | Comparable.comparable(),
+          Comparable.granularity()
+        ) ::
           boolean | no_return
   def equal?(a, a, granularity \\ :seconds)
   def equal?(a, a, _granularity), do: true
@@ -977,7 +984,8 @@ defmodule Timex do
   @doc """
   See docs for `compare/3`
   """
-  @spec compare(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable()) :: Comparable.compare_result()
+  @spec compare(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable()) ::
+          Comparable.compare_result()
   def compare(%Time{} = a, %Time{} = b) do
     compare(a, b, :microseconds)
   end
@@ -1034,7 +1042,11 @@ defmodule Timex do
       0
 
   """
-  @spec compare(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
+  @spec compare(
+          Time.t() | Comparable.comparable(),
+          Time.t() | Comparable.comparable(),
+          Comparable.granularity()
+        ) ::
           Comparable.compare_result()
   def compare(%Time{} = a, %Time{} = b, granularity),
     do: Timex.Comparable.Utils.to_compare_result(diff(a, b, granularity))
@@ -1080,7 +1092,11 @@ defmodule Timex do
 
   and the result will be an integer value of those units or a Duration.
   """
-  @spec diff(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable(), Comparable.granularity()) ::
+  @spec diff(
+          Time.t() | Comparable.comparable(),
+          Time.t() | Comparable.comparable(),
+          Comparable.granularity()
+        ) ::
           Duration.t() | integer | {:error, term}
   def diff(%Time{}, %Time{}, granularity)
       when granularity in [
