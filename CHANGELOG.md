@@ -7,6 +7,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added/Changed
 
+### Fixed
+
+---
+
+## 3.7.8
+
+### Added/Changed
+
+- Add Thai translations
 - Add Estonian translation
 - Added `TimezoneInfo.format_offset/1`
 
