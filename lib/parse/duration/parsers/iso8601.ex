@@ -110,7 +110,7 @@ defmodule Timex.Parse.Duration.Parsers.ISO8601Parser do
     do: {:error, "unexpected end of input at #{<<c::utf8>>}"}
 
   defp parse_components(<<c::utf8, rest::binary>>, acc) when c in @numeric do
-    case parse_component(rest, <<c::utf8>>) do
+    case parse_component(rest, {:integer, <<c::utf8>>}) do
       {:error, _} = err -> err
       {u, n, rest} -> parse_components(rest, [{u, n} | acc])
     end
@@ -122,43 +122,34 @@ defmodule Timex.Parse.Duration.Parsers.ISO8601Parser do
   defp parse_components(<<c::utf8, _::binary>>, _acc),
     do: {:error, "expected numeric, but got #{<<c::utf8>>}"}
 
-  @spec parse_component(binary, binary) :: {integer, number, binary}
+  @spec parse_component(binary, {:float | :integer, binary}) ::
+          {integer, number, binary} | {:error, msg :: binary()}
   defp parse_component(<<c::utf8>>, _acc) when c in @numeric,
     do: {:error, "unexpected end of input at #{<<c::utf8>>}"}
 
-  defp parse_component(<<c::utf8>>, acc) when c in 'WYMDHS' do
-    cond do
-      String.contains?(acc, ".") ->
-        case Float.parse(acc) do
-          {n, _} -> {c, n, <<>>}
-          :error -> {:error, "invalid number `#{acc}`"}
-        end
-
-      :else ->
-        case Integer.parse(acc) do
-          {n, _} -> {c, n, <<>>}
-          :error -> {:error, "invalid number `#{acc}`"}
-        end
+  defp parse_component(<<c::utf8>>, {type, acc}) when c in 'WYMDHS' do
+    case cast_number(type, acc) do
+      {n, _} -> {c, n, <<>>}
+      :error -> {:error, "invalid number `#{acc}`"}
     end
   end
 
-  defp parse_component(<<c::utf8, rest::binary>>, acc) when c in @numeric do
-    parse_component(rest, <<acc::binary, c::utf8>>)
+  defp parse_component(<<".", rest::binary>>, {:integer, acc}) do
+    parse_component(rest, {:float, <<acc::binary, ".">>})
   end
 
-  defp parse_component(<<c::utf8, rest::binary>>, acc) when c in 'WYMDHS' do
-    cond do
-      String.contains?(acc, ".") ->
-        case Float.parse(acc) do
-          {n, _} -> {c, n, rest}
-          :error -> {:error, "invalid number `#{acc}`"}
-        end
+  defp parse_component(<<c::utf8, rest::binary>>, {:integer, acc}) when c in @numeric do
+    parse_component(rest, {:integer, <<acc::binary, c::utf8>>})
+  end
 
-      :else ->
-        case Integer.parse(acc) do
-          {n, _} -> {c, n, rest}
-          :error -> {:error, "invalid number `#{acc}`"}
-        end
+  defp parse_component(<<c::utf8, rest::binary>>, {:float, acc}) when c in @numeric do
+    parse_component(rest, {:float, <<acc::binary, c::utf8>>})
+  end
+
+  defp parse_component(<<c::utf8, rest::binary>>, {type, acc}) when c in 'WYMDHS' do
+    case cast_number(type, acc) do
+      {n, _} -> {c, n, rest}
+      :error -> {:error, "invalid number `#{acc}`"}
     end
   end
 
@@ -166,4 +157,8 @@ defmodule Timex.Parse.Duration.Parsers.ISO8601Parser do
 
   defp parse_component(<<c::utf8, _::binary>>, _acc),
     do: {:error, "unexpected token #{<<c::utf8>>}"}
+
+  @spec cast_number(:float | :integer, binary) :: {number(), binary()} | :error
+  defp cast_number(:integer, binary), do: Integer.parse(binary)
+  defp cast_number(:float, binary), do: Float.parse(binary)
 end

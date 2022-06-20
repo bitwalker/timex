@@ -6,6 +6,7 @@ defmodule Timex.Timex.Bench do
 
     @datetime "2014-07-22T12:30:05Z"
     @datetime_zoned "2014-07-22T12:30:05+02:00"
+    @duration "P15Y3M2DT1H14M37.25S"
 
     setup_all do
       Application.ensure_all_started(:tzdata)
@@ -51,5 +52,9 @@ defmodule Timex.Timex.Bench do
     bench "Timex.local" do
       _ = Timex.local
       :ok
+    end
+
+    bench "Timex.Duration.parse" do
+      {:ok, _} = Timex.Duration.parse(@duration)
     end
 end
