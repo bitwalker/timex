@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added/Changed
 
+- Changed `Timex.Duration.Parse` to be 2x faster
+
 ### Fixed
 
 ---
