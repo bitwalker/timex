@@ -12,7 +12,7 @@ defmodule Timex.Mixfile do
       package: package(),
       deps: deps(),
       docs: docs(),
-      compilers: [:gettext] ++ Mix.compilers(),
+      compilers: Mix.compilers(),
       test_coverage: [tool: ExCoveralls],
       elixirc_paths: elixirc_paths(Mix.env()),
       preferred_cli_env: [
