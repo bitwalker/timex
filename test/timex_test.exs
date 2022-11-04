@@ -355,112 +355,138 @@ defmodule TimexTests do
     refute Timex.after?(~T[09:00:00], ~T[12:00:00])
   end
 
-  test "between?" do
-    date1 = Timex.to_datetime({{2013, 1, 1}, {0, 0, 0}})
-    date2 = Timex.to_datetime({{2013, 1, 5}, {0, 0, 0}})
-    date3 = Timex.to_datetime({{2013, 1, 9}, {0, 0, 0}})
+  describe "between?" do
+    test "w/o options" do
+      date1 = Timex.to_datetime({{2013, 1, 1}, {0, 0, 0}})
+      date2 = Timex.to_datetime({{2013, 1, 5}, {0, 0, 0}})
+      date3 = Timex.to_datetime({{2013, 1, 9}, {0, 0, 0}})
 
-    assert true == Timex.between?(date2, date1, date3)
+      assert true == Timex.between?(date2, date1, date3)
 
-    assert false == Timex.between?(date1, date2, date3)
-    assert false == Timex.between?(date3, date1, date2)
-    assert false == Timex.between?(date1, date1, date3)
-    assert false == Timex.between?(date3, date1, date3)
+      assert false == Timex.between?(date1, date2, date3)
+      assert false == Timex.between?(date3, date1, date2)
+      assert false == Timex.between?(date1, date1, date3)
+      assert false == Timex.between?(date3, date1, date3)
 
-    assert_raise ArgumentError, fn ->
-      Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}})
+      assert_raise ArgumentError, fn ->
+        Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}})
+      end
+
+      assert_raise ArgumentError, fn ->
+        Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}})
+      end
+
+      assert_raise ArgumentError, fn ->
+        Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {})
+      end
+
+      assert Timex.between?(~T[12:00:00], ~T[09:00:00], ~T[17:00:00])
+      refute Timex.between?(~T[07:00:00], ~T[09:00:00], ~T[17:00:00])
     end
 
-    assert_raise ArgumentError, fn ->
-      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}})
+    test "inclusive: true" do
+      date1 = Timex.to_datetime({{2013, 1, 1}, {0, 0, 0}})
+      date2 = Timex.to_datetime({{2013, 1, 5}, {0, 0, 0}})
+      date3 = Timex.to_datetime({{2013, 1, 9}, {0, 0, 0}})
+
+      options = [inclusive: true]
+
+      assert true == Timex.between?(date2, date1, date3, options)
+      assert true == Timex.between?(date1, date1, date3, options)
+      assert true == Timex.between?(date3, date1, date3, options)
+
+      assert false == Timex.between?(date1, date2, date3, options)
+      assert false == Timex.between?(date3, date1, date2, options)
+
+      assert_raise ArgumentError, fn ->
+        Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+      end
+
+      assert_raise ArgumentError, fn ->
+        Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
+      end
+
+      assert_raise ArgumentError, fn ->
+        Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+      end
     end
 
-    assert_raise ArgumentError, fn ->
-      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {})
+    test "inclusive: :start" do
+      date1 = Timex.to_datetime({{2013, 1, 1}, {0, 0, 0}})
+      date2 = Timex.to_datetime({{2013, 1, 5}, {0, 0, 0}})
+      date3 = Timex.to_datetime({{2013, 1, 9}, {0, 0, 0}})
+
+      options = [inclusive: :start]
+
+      assert true == Timex.between?(date2, date1, date3, options)
+      assert true == Timex.between?(date1, date1, date3, options)
+      assert false == Timex.between?(date3, date1, date3, options)
+
+      assert false == Timex.between?(date1, date2, date3, options)
+      assert false == Timex.between?(date3, date1, date2, options)
+
+      assert_raise ArgumentError, fn ->
+        Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+      end
+
+      assert_raise ArgumentError, fn ->
+        Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
+      end
+
+      assert_raise ArgumentError, fn ->
+        Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+      end
     end
 
-    assert Timex.between?(~T[12:00:00], ~T[09:00:00], ~T[17:00:00])
-    refute Timex.between?(~T[07:00:00], ~T[09:00:00], ~T[17:00:00])
-  end
+    test "inclusive: :end" do
+      date1 = Timex.to_datetime({{2013, 1, 1}, {0, 0, 0}})
+      date2 = Timex.to_datetime({{2013, 1, 5}, {0, 0, 0}})
+      date3 = Timex.to_datetime({{2013, 1, 9}, {0, 0, 0}})
 
-  test "between? inclusive" do
-    date1 = Timex.to_datetime({{2013, 1, 1}, {0, 0, 0}})
-    date2 = Timex.to_datetime({{2013, 1, 5}, {0, 0, 0}})
-    date3 = Timex.to_datetime({{2013, 1, 9}, {0, 0, 0}})
+      options = [inclusive: :end]
 
-    options = [inclusive: true]
+      assert true == Timex.between?(date2, date1, date3, options)
+      assert false == Timex.between?(date1, date1, date3, options)
+      assert true == Timex.between?(date3, date1, date3, options)
 
-    assert true == Timex.between?(date2, date1, date3, options)
-    assert true == Timex.between?(date1, date1, date3, options)
-    assert true == Timex.between?(date3, date1, date3, options)
+      assert false == Timex.between?(date1, date2, date3, options)
+      assert false == Timex.between?(date3, date1, date2, options)
 
-    assert false == Timex.between?(date1, date2, date3, options)
-    assert false == Timex.between?(date3, date1, date2, options)
+      assert_raise ArgumentError, fn ->
+        Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+      end
 
-    assert_raise ArgumentError, fn ->
-      Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
+      assert_raise ArgumentError, fn ->
+        Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
+      end
+
+      assert_raise ArgumentError, fn ->
+        Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+      end
     end
 
-    assert_raise ArgumentError, fn ->
-      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
-    end
+    test "cycled: true" do
+      date1 = Timex.to_datetime({{2013, 1, 1}, {0, 0, 0}})
+      date2 = Timex.to_datetime({{2013, 1, 5}, {0, 0, 0}})
+      date3 = Timex.to_datetime({{2013, 1, 9}, {0, 0, 0}})
 
-    assert_raise ArgumentError, fn ->
-      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
-    end
-  end
+      assert_raise ArgumentError, fn ->
+        assert true == Timex.between?(date2, date1, date3, cycled: true)
+      end
 
-  test "between? inclusive_start" do
-    date1 = Timex.to_datetime({{2013, 1, 1}, {0, 0, 0}})
-    date2 = Timex.to_datetime({{2013, 1, 5}, {0, 0, 0}})
-    date3 = Timex.to_datetime({{2013, 1, 9}, {0, 0, 0}})
+      assert Timex.between?(~T[01:00:00], ~T[00:00:00], ~T[02:00:00], cycled: true)
+      refute Timex.between?(~T[01:00:00], ~T[23:00:00], ~T[02:00:00], cycled: false)
+      assert Timex.between?(~T[01:00:00], ~T[23:00:00], ~T[02:00:00], cycled: true)
 
-    options = [inclusive: :start]
+      assert Timex.between?(~T[00:00:00], ~T[23:00:00], ~T[00:00:00],
+               cycled: true,
+               inclusive: :end
+      )
 
-    assert true == Timex.between?(date2, date1, date3, options)
-    assert true == Timex.between?(date1, date1, date3, options)
-    assert false == Timex.between?(date3, date1, date3, options)
-
-    assert false == Timex.between?(date1, date2, date3, options)
-    assert false == Timex.between?(date3, date1, date2, options)
-
-    assert_raise ArgumentError, fn ->
-      Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
-    end
-
-    assert_raise ArgumentError, fn ->
-      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
-    end
-
-    assert_raise ArgumentError, fn ->
-      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
-    end
-  end
-
-  test "between? inclusive_end" do
-    date1 = Timex.to_datetime({{2013, 1, 1}, {0, 0, 0}})
-    date2 = Timex.to_datetime({{2013, 1, 5}, {0, 0, 0}})
-    date3 = Timex.to_datetime({{2013, 1, 9}, {0, 0, 0}})
-
-    options = [inclusive: :end]
-
-    assert true == Timex.between?(date2, date1, date3, options)
-    assert false == Timex.between?(date1, date1, date3, options)
-    assert true == Timex.between?(date3, date1, date3, options)
-
-    assert false == Timex.between?(date1, date2, date3, options)
-    assert false == Timex.between?(date3, date1, date2, options)
-
-    assert_raise ArgumentError, fn ->
-      Timex.between?({}, {{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, options)
-    end
-
-    assert_raise ArgumentError, fn ->
-      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {}, {{2013, 1, 1}, {1, 1, 2}}, options)
-    end
-
-    assert_raise ArgumentError, fn ->
-      Timex.between?({{2013, 1, 1}, {1, 1, 2}}, {{2013, 1, 1}, {1, 1, 2}}, {}, options)
+      assert Timex.between?(~T[23:00:00], ~T[23:00:00], ~T[00:00:00],
+        cycled: true,
+        inclusive: :start
+      )
     end
   end
 
