@@ -11,7 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Updated `Timex.now/1` typespec to remove the `AmbiguousDateTime`
+- Updated `Timex.now/1` typespec to remove the `AmbiguousDateTime` 
 
 ---
 
