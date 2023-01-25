@@ -7,12 +7,12 @@ defmodule Timex.Mixfile do
     [
       app: :timex,
       version: @version,
-      elixir: "~> 1.8",
+      elixir: "~> 1.11",
       description: description(),
       package: package(),
       deps: deps(),
       docs: docs(),
-      compilers: [:gettext] ++ Mix.compilers(),
+      compilers: Mix.compilers(),
       test_coverage: [tool: ExCoveralls],
       elixirc_paths: elixirc_paths(Mix.env()),
       preferred_cli_env: [
@@ -57,7 +57,7 @@ defmodule Timex.Mixfile do
     [
       {:tzdata, "~> 1.1"},
       {:combine, "~> 0.10"},
-      {:gettext, "~> 0.10"},
+      {:gettext, "~> 0.20"},
       {:ex_doc, "~> 0.13", only: [:docs]},
       {:benchfella, "~> 0.3", only: [:bench]},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
