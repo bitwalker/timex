@@ -904,12 +904,19 @@ defmodule Timex do
   `inclusive: true` option.
   To set just one of the bounds as inclusive, use the
   `inclusive: :start` or `inclusive: :end` option.
+
+  Also, by default, for `Time.t`, if `start` and `end`
+  are on different sides of midnight,
+  it doesn't count as a continous period. Hence, `23:00 < 00:00, 01:00` would return `false`.
+  To use cycled time, use option `cycled: true`.
   """
+
   @type between_options :: [
           inclusive:
             boolean
             | :start
-            | :end
+            | :end,
+          cycled: boolean
         ]
   @spec between?(
           Time.t() | Comparable.comparable(),
@@ -926,17 +933,41 @@ defmodule Timex do
         _ -> {1, 1}
       end
 
-    in_bounds?(compare(a, start), compare(ending, a), start_test, ending_test)
+    passes_midnight? =
+      case Keyword.get(options, :cycled, false) do
+        true ->
+          case {a, start, ending} do
+            {%Time{}, %Time{}, %Time{}} ->
+              between?(ending, ~T[00:00:00], start, inclusive: :start)
+
+            _ ->
+              raise ArgumentError,
+                message:
+                  "cycled: true was passed, but one of arguments is not Time.t: #{inspect({a, start, ending})}"
+          end
+
+        false ->
+          false
+      end
+
+    in_bounds?(compare(a, start), compare(ending, a), start_test, ending_test, passes_midnight?)
   end
 
-  defp in_bounds?({:error, reason}, _, _, _),
+  defp in_bounds?({:error, reason}, _, _, _, _),
     do: raise(ArgumentError, message: "#{inspect(reason)}")
 
-  defp in_bounds?(_, {:error, reason}, _, _),
+  defp in_bounds?(_, {:error, reason}, _, _, _),
     do: raise(ArgumentError, message: "#{inspect(reason)}")
 
-  defp in_bounds?(start_comparison, ending_comparison, start_test, ending_test) do
-    start_comparison >= start_test && ending_comparison >= ending_test
+  defp in_bounds?(start_comparison, ending_comparison, start_test, ending_test, passes_midnight?) do
+    after_start? = start_comparison >= start_test
+    before_end? = ending_comparison >= ending_test
+
+    if passes_midnight? do
+      after_start? || before_end?
+    else
+      after_start? && before_end?
+    end
   end
 
   @doc """
