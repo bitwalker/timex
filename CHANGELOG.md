@@ -9,8 +9,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Changed `Timex.Duration.Parse` to be 2x faster
 - Fixed compilation warning from gettext
+- Added `cycled` option for `Timex.between?/4` to support time-range checks that pass through midnight
+- Add Croatian translation
 
 ### Fixed
+
+- Updated `Timex.now/1` typespec to remove the `AmbiguousDateTime` 
 
 ---
 
