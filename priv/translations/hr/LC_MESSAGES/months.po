@@ -1,0 +1,68 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: hr\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Mak Krnic <mak@banianitc.hr>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.4\n"
+
+#: lib/l10n/translator.ex:303
+msgid "April"
+msgstr "travanj"
+
+#: lib/l10n/translator.ex:307
+msgid "August"
+msgstr "kolovoz"
+
+#: lib/l10n/translator.ex:311
+msgid "December"
+msgstr "prosinac"
+
+#: lib/l10n/translator.ex:301
+msgid "February"
+msgstr "veljača"
+
+#: lib/l10n/translator.ex:300
+msgid "January"
+msgstr "siječanj"
+
+#: lib/l10n/translator.ex:306
+msgid "July"
+msgstr "srpanj"
+
+#: lib/l10n/translator.ex:305
+msgid "June"
+msgstr "lipanj"
+
+#: lib/l10n/translator.ex:302
+msgid "March"
+msgstr "ožujak"
+
+#: lib/l10n/translator.ex:304
+msgid "May"
+msgstr "svibanj"
+
+#: lib/l10n/translator.ex:310
+msgid "November"
+msgstr "studeni"
+
+#: lib/l10n/translator.ex:309
+msgid "October"
+msgstr "listopad"
+
+#: lib/l10n/translator.ex:308
+msgid "September"
+msgstr "rujan"
