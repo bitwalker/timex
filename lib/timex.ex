@@ -66,7 +66,7 @@ defmodule Timex do
   Returns a DateTime representing the current moment in time in the provided
   timezone.
   """
-  @spec now(Types.valid_timezone()) :: DateTime.t() | AmbiguousDateTime.t() | {:error, term}
+  @spec now(Types.valid_timezone()) :: DateTime.t() | {:error, term}
   def now(tz) do
     with tzname when is_binary(tzname) <- Timezone.name_of(tz),
          {:ok, dt} <- DateTime.now(tzname, Timex.Timezone.Database) do
