@@ -9,7 +9,7 @@
 msgid ""
 msgstr ""
 "Language: cs\n"
-"Plural-Forms: nplurals=3; "
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "plural=(n==1 ? 0 : n>=2 && "
 "n<=4 ? 1 : 2);\n"
 "Project-Id-Version: \n"
