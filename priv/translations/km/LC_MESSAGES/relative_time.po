@@ -1,0 +1,241 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+
+#: lib/l10n/translator.ex:320
+msgid "last month"
+msgstr "ខែមុន"
+
+#: lib/l10n/translator.ex:326
+msgid "last week"
+msgstr "សប្តាហ៍មុន"
+
+#: lib/l10n/translator.ex:314
+msgid "last year"
+msgstr "ឆ្នាំមុន"
+
+#: lib/l10n/translator.ex:322
+msgid "next month"
+msgstr "ខែក្រោយ"
+
+#: lib/l10n/translator.ex:328
+msgid "next week"
+msgstr "សប្តាហ៍ក្រោយ"
+
+#: lib/l10n/translator.ex:316
+msgid "next year"
+msgstr "ឆ្នាំក្រោយ"
+
+#: lib/l10n/translator.ex:321
+msgid "this month"
+msgstr "ខែនេះ"
+
+#: lib/l10n/translator.ex:327
+msgid "this week"
+msgstr "សប្តាហ៍នេះ"
+
+#: lib/l10n/translator.ex:315
+msgid "this year"
+msgstr "ឆ្នាំនេះ"
+
+#: lib/l10n/translator.ex:333
+msgid "today"
+msgstr "ថ្ងៃនេះ"
+
+#: lib/l10n/translator.ex:334
+msgid "tomorrow"
+msgstr "ថ្ងៃស្អែក"
+
+#: lib/l10n/translator.ex:332
+msgid "yesterday"
+msgstr "ម្សិលមិញ"
+
+#: lib/l10n/translator.ex:336
+msgid "%{count} day ago"
+msgid_plural "%{count} days ago"
+msgstr[0] "%{count} ថ្ងៃមុន"
+msgstr[1] "%{count} ថ្ងៃមុន"
+
+#: lib/l10n/translator.ex:361
+msgid "%{count} hour ago"
+msgid_plural "%{count} hours ago"
+msgstr[0] "%{count} ម៉ោងមុន"
+msgstr[1] "%{count} ម៉ោងមុន"
+
+#: lib/l10n/translator.ex:364
+msgid "%{count} minute ago"
+msgid_plural "%{count} minutes ago"
+msgstr[0] "%{count} នាទីមុន"
+msgstr[1] "%{count} នាទីមុន"
+
+#: lib/l10n/translator.ex:324
+msgid "%{count} month ago"
+msgid_plural "%{count} months ago"
+msgstr[0] "%{count} ខែមុន"
+msgstr[1] "%{count} ខែមុន"
+
+#: lib/l10n/translator.ex:367
+msgid "%{count} second ago"
+msgid_plural "%{count} seconds ago"
+msgstr[0] "%{count} វិនាទីមុន"
+msgstr[1] "%{count} វិនាទីមុន"
+
+#: lib/l10n/translator.ex:330
+msgid "%{count} week ago"
+msgid_plural "%{count} weeks ago"
+msgstr[0] "%{count} សប្តាហ៍មុន"
+msgstr[1] "%{count} សប្តាហ៍មុន"
+
+#: lib/l10n/translator.ex:318
+msgid "%{count} year ago"
+msgid_plural "%{count} years ago"
+msgstr[0] "%{count} ឆ្នាំមុន"
+msgstr[1] "%{count} ឆ្នាំមុន"
+
+#: lib/l10n/translator.ex:335
+msgid "in %{count} day"
+msgid_plural "in %{count} days"
+msgstr[0] "ក្នុង %{count} ថ្ងៃ"
+msgstr[1] "ក្នុង %{count} ថ្ងៃ"
+
+#: lib/l10n/translator.ex:360
+msgid "in %{count} hour"
+msgid_plural "in %{count} hours"
+msgstr[0] "ក្នុង %{count} ម៉ោង"
+msgstr[1] "ក្នុង %{count} ម៉ោង"
+
+#: lib/l10n/translator.ex:363
+msgid "in %{count} minute"
+msgid_plural "in %{count} minutes"
+msgstr[0] "ក្នុង %{count} នាទី"
+msgstr[1] "ក្នុង %{count} នាទី"
+
+#: lib/l10n/translator.ex:323
+msgid "in %{count} month"
+msgid_plural "in %{count} months"
+msgstr[0] "ក្នុង %{count} ខែ"
+msgstr[1] "ក្នុង %{count} ខែ"
+
+#: lib/l10n/translator.ex:366
+msgid "in %{count} second"
+msgid_plural "in %{count} seconds"
+msgstr[0] "ក្នុង %{count} វិនាទី"
+msgstr[1] "ក្នុង %{count} វិនាទី"
+
+#: lib/l10n/translator.ex:329
+msgid "in %{count} week"
+msgid_plural "in %{count} weeks"
+msgstr[0] "ក្នុង %{count} សប្តាហ៍"
+msgstr[1] "ក្នុង %{count} សប្តាហ៍"
+
+#: lib/l10n/translator.ex:317
+msgid "in %{count} year"
+msgid_plural "in %{count} years"
+msgstr[0] "ក្នុង %{count} ឆ្នាំ"
+msgstr[1] "ក្នុង %{count} ឆ្នាំ"
+
+#: lib/l10n/translator.ex:350
+msgid "last friday"
+msgstr "ថ្ងៃសុក្រមុន"
+
+#: lib/l10n/translator.ex:338
+msgid "last monday"
+msgstr "ថ្ងៃច័ន្ទមុន"
+
+#: lib/l10n/translator.ex:353
+msgid "last saturday"
+msgstr "ថ្ងៃសៅរ៍មុន"
+
+#: lib/l10n/translator.ex:356
+msgid "last sunday"
+msgstr "ថ្ងៃអាទិត្យមុន"
+
+#: lib/l10n/translator.ex:347
+msgid "last thursday"
+msgstr "ថ្ងៃព្រហស្បតិ៍មុន"
+
+#: lib/l10n/translator.ex:341
+msgid "last tuesday"
+msgstr "ថ្ងៃអង្គារមុន"
+
+#: lib/l10n/translator.ex:344
+msgid "last wednesday"
+msgstr "ថ្ងៃពុធមុន"
+
+#: lib/l10n/translator.ex:352
+msgid "next friday"
+msgstr "ថ្ងៃសុក្រក្រោយ"
+
+#: lib/l10n/translator.ex:340
+msgid "next monday"
+msgstr "ថ្ងៃច័ន្ទក្រោយ"
+
+#: lib/l10n/translator.ex:355
+msgid "next saturday"
+msgstr "ថ្ងៃសៅរ៍ក្រោយ"
+
+#: lib/l10n/translator.ex:358
+msgid "next sunday"
+msgstr "ថ្ងៃអាទិត្យក្រោយ"
+
+#: lib/l10n/translator.ex:349
+msgid "next thursday"
+msgstr "ថ្ងៃព្រហស្បតិ៍ក្រោយ"
+
+#: lib/l10n/translator.ex:343
+msgid "next tuesday"
+msgstr "ថ្ងៃអង្គារក្រោយ"
+
+#: lib/l10n/translator.ex:346
+msgid "next wednesday"
+msgstr "ថ្ងៃពុធក្រោយ"
+
+#: lib/l10n/translator.ex:351
+msgid "this friday"
+msgstr "ថ្ងៃសុក្រនេះ"
+
+#: lib/l10n/translator.ex:339
+msgid "this monday"
+msgstr "ថ្ងៃច័ន្ទនេះ"
+
+#: lib/l10n/translator.ex:354
+msgid "this saturday"
+msgstr "ថ្ងៃសៅរ៍នេះ"
+
+#: lib/l10n/translator.ex:357
+msgid "this sunday"
+msgstr "ថ្ងៃអាទិត្យនេះ"
+
+#: lib/l10n/translator.ex:348
+msgid "this thursday"
+msgstr "ថ្ងៃព្រហស្បតិ៍នេះ"
+
+#: lib/l10n/translator.ex:342
+msgid "this tuesday"
+msgstr "ថ្ងៃអង្គារនេះ"
+
+#: lib/l10n/translator.ex:345
+msgid "this wednesday"
+msgstr "ថ្ងៃពុធនេះ"
+
+#: lib/l10n/translator.ex:369
+msgid "now"
+msgstr "ឥឡូវនេះ"

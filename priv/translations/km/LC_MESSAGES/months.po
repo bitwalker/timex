@@ -1,0 +1,69 @@
+# # `msgid`s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove `msgid`s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use `mix gettext.extract --merge` or `mix gettext.merge`
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: en\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+"មករា កុម្ភៈ មីនា មេសា ឧសភា មិថុនា កក្កដា សីហា កញ្ញា តុលា វិច្ឆិកា ធ្នូ"
+
+#: lib/l10n/translator.ex:303
+msgid "April"
+msgstr "មេសា"
+
+#: lib/l10n/translator.ex:307
+msgid "August"
+msgstr "សីហា"
+
+#: lib/l10n/translator.ex:311
+msgid "December"
+msgstr "ធ្នូ"
+
+#: lib/l10n/translator.ex:301
+msgid "February"
+msgstr "កុម្ភៈ"
+
+#: lib/l10n/translator.ex:300
+msgid "January"
+msgstr "មករា"
+
+#: lib/l10n/translator.ex:306
+msgid "July"
+msgstr "កក្កដា"
+
+#: lib/l10n/translator.ex:305
+msgid "June"
+msgstr "មិថុនា"
+
+#: lib/l10n/translator.ex:302
+msgid "March"
+msgstr "មីនា"
+
+#: lib/l10n/translator.ex:304
+msgid "May"
+msgstr "ឧសភា"
+
+#: lib/l10n/translator.ex:310
+msgid "November"
+msgstr "វិច្ឆិកា"
+
+#: lib/l10n/translator.ex:309
+msgid "October"
+msgstr "តុលា"
+
+#: lib/l10n/translator.ex:308
+msgid "September"
+msgstr "កញ្ញា"
