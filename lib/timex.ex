@@ -1474,7 +1474,7 @@ defmodule Timex do
   Same as beginning_of_month/1, except takes year and month as distinct arguments
   """
   @spec beginning_of_month(Types.year(), Types.month()) :: Date.t() | {:error, term}
-  def beginning_of_month(year, month) when is_year(month) and is_month(month),
+  def beginning_of_month(year, month) when is_year(year) and is_month(month),
     do: %Date{year: year, month: month, day: 1}
 
   def beginning_of_month(_, _),
