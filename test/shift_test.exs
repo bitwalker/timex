@@ -229,4 +229,44 @@ defmodule ShiftTests do
     expected = ~D[2017-12-31] |> Timex.to_datetime()
     assert expected === date
   end
+
+  describe "DateTime does not change precision" do
+    test "seconds" do
+      datetime = Timex.shift(~U[2023-04-13 08:00:00Z], minutes: 1)
+      expected = ~U[2023-04-13 08:01:00Z]
+      assert expected === datetime
+    end
+
+    test "milliseconds" do
+      datetime = Timex.shift(~U[2023-04-13 08:00:00.000Z], minutes: 1)
+      expected = ~U[2023-04-13 08:01:00.000Z]
+      assert expected === datetime
+    end
+
+    test "microseconds" do
+      datetime = Timex.shift(~U[2023-04-13 08:00:00.000000Z], minutes: 1)
+      expected = ~U[2023-04-13 08:01:00.000000Z]
+      assert expected === datetime
+    end
+  end
+
+  describe "NaiveDateTime does not change precision" do
+    test "seconds" do
+      datetime = Timex.shift(~N[2023-04-13 08:00:00Z], minutes: 1)
+      expected = ~N[2023-04-13 08:01:00Z]
+      assert expected === datetime
+    end
+
+    test "milliseconds" do
+      datetime = Timex.shift(~N[2023-04-13 08:00:00.000Z], minutes: 1)
+      expected = ~N[2023-04-13 08:01:00.000Z]
+      assert expected === datetime
+    end
+
+    test "microseconds" do
+      datetime = Timex.shift(~N[2023-04-13 08:00:00.000000Z], minutes: 1)
+      expected = ~N[2023-04-13 08:01:00.000000Z]
+      assert expected === datetime
+    end
+  end
 end
