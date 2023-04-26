@@ -447,13 +447,17 @@ defimpl Timex.Protocol, for: DateTime do
           err
 
         %DateTime{} = datetime when shift != 0 ->
-          DateTime.add(datetime, shift, :microsecond, Timex.Timezone.Database)
+          datetime
+          |> DateTime.add(shift, :microsecond, Timex.Timezone.Database)
+          |> retain_precision(datetime)
 
         %DateTime{} = datetime ->
           datetime
 
-        {{ty, _, _}, %DateTime{} = orig} when ty in [:gap, :ambiguous] and shift != 0 ->
-          DateTime.add(orig, shift, :microsecond, Timex.Timezone.Database)
+        {{ty, _, _}, %DateTime{} = original} when ty in [:gap, :ambiguous] and shift != 0 ->
+          original
+          |> DateTime.add(shift, :microsecond, Timex.Timezone.Database)
+          |> retain_precision(datetime)
 
         {{ty, _a, _b} = amb, _} when ty in [:gap, :ambiguous] ->
           amb
@@ -478,6 +482,13 @@ defimpl Timex.Protocol, for: DateTime do
   catch
     :throw, {:error, _} = err ->
       err
+  end
+
+  defp retain_precision(
+         %DateTime{microsecond: {ms, _precision}} = new_datetime,
+         %DateTime{microsecond: {_ms, precision}} = _original_datetime
+       ) do
+    %{new_datetime | microsecond: {ms, precision}}
   end
 
   defp logical_shift(datetime, []), do: datetime
