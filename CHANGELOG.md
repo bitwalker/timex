@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Changed charlists from the deprecated `''` to `~c""`
 - Changed negative range to pass the step of default value for suppressing deprecation warnings
 - Update Gettext to 0.26
+- Add Catalan translation
 
 ### Fixed
 
