@@ -507,7 +507,7 @@ defmodule Timex.Duration do
 
   Can be useful for operations on collections of durations. For instance,
 
-      Enum.reduce(durations, Duration.zero, Duration.add(&1, &2))
+      Enum.reduce(durations, Duration.zero, &Duration.add(&1, &2))
 
   Can also be used to represent the timestamp of the start of the UNIX epoch,
   as all Erlang timestamps are relative to this point.
