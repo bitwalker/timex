@@ -72,7 +72,7 @@ msgstr "вчора"
 msgid "%{count} day ago"
 msgid_plural "%{count} days ago"
 msgstr[0] "%{count} день тому"
-msgstr[1] "%{count} дня тому"
+msgstr[1] "%{count} дні тому"
 msgstr[2] "%{count} днів тому"
 
 #: lib/l10n/translator.ex:361
