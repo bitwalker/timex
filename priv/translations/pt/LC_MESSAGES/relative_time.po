@@ -238,4 +238,4 @@ msgstr "esta quarta-feira"
 
 #: lib/l10n/translator.ex:369
 msgid "now"
-msgstr ""
+msgstr "agora"
