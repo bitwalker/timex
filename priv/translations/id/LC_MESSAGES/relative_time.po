@@ -238,4 +238,4 @@ msgstr "Rabu ini"
 
 #: lib/l10n/translator.ex:369
 msgid "now"
-msgstr ""
+msgstr "sekarang"
