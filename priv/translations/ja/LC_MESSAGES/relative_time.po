@@ -224,4 +224,4 @@ msgstr "今週の水曜日"
 
 #: lib/l10n/translator.ex:369
 msgid "now"
-msgstr ""
+msgstr "今"
