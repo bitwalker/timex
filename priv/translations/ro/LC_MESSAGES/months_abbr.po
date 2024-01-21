@@ -22,19 +22,19 @@ msgstr ""
 
 #: lib/l10n/translator.ex:290
 msgid "Apr"
-msgstr ""
+msgstr "Apr"
 
 #: lib/l10n/translator.ex:294
 msgid "Aug"
-msgstr ""
+msgstr "Aug"
 
 #: lib/l10n/translator.ex:298
 msgid "Dec"
-msgstr ""
+msgstr "Dec"
 
 #: lib/l10n/translator.ex:288
 msgid "Feb"
-msgstr ""
+msgstr "Feb"
 
 #: lib/l10n/translator.ex:287
 msgid "Jan"
@@ -50,7 +50,7 @@ msgstr "Iun"
 
 #: lib/l10n/translator.ex:289
 msgid "Mar"
-msgstr ""
+msgstr "Mar"
 
 #: lib/l10n/translator.ex:291
 msgid "May"
@@ -62,8 +62,8 @@ msgstr "Noi"
 
 #: lib/l10n/translator.ex:296
 msgid "Oct"
-msgstr ""
+msgstr "Oct"
 
 #: lib/l10n/translator.ex:295
 msgid "Sep"
-msgstr ""
+msgstr "Sep"
