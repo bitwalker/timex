@@ -50,16 +50,16 @@ defmodule Timex.TimezoneInfo do
   during daylight savings time for this timezone. If DST does not apply for this zone, simply
   set it to 0.
 
-  The from/until reference points must meet the following criteria:
+  The `from`/`until` reference points must meet the following criteria:
 
-      - Be set to `:min` for from, or `:max` for until, which represent
-        "infinity" for the start/end of the zone period.
-      - OR, be a tuple of {day_of_week, datetime}, where:
-        - `day_of_week` is an atom like `:sunday`
-        - `datetime` is an Erlang datetime tuple, e.g. `{{2016,10,8},{2,0,0}}`
+  - Be set to `:min` for `from`, or `:max` for `until`, which represents
+    "infinity" for the start/end of the zone period
+  - OR, be a tuple of `{day_of_week, datetime}`, where:
+    - `day_of_week` is an atom like `:sunday`
+    - `datetime` is an Erlang datetime tuple, e.g. `{{2016,10,8},{2,0,0}}`
 
-  *IMPORTANT*: Offsets are in seconds, not minutes, if you do not ensure they
-               are in the correct unit, runtime errors or incorrect results are probable.
+  **IMPORTANT**: Offsets are in seconds, not minutes. If you do not ensure they
+  are in the correct unit, runtime errors or incorrect results are probable.
 
   ## Examples
 
