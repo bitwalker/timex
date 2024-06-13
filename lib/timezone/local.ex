@@ -150,16 +150,16 @@ defmodule Timex.Timezone.Local do
   end
 
   # Get the locally configured timezone on Windows systems
-  @local_tz_key 'SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation'
-  @sys_tz_key 'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Time Zones'
-  @tz_key_name 'TimeZoneKeyName'
+  @local_tz_key ~c"SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation"
+  @sys_tz_key ~c"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Time Zones"
+  @tz_key_name ~c"TimeZoneKeyName"
   # We ignore the reference date here, since there is no way to lookup
   # transition times for historical/future dates
   defp localtz(:win) do
     # Windows has many of its own unique time zone names, which can
     # also be translated to the OS's language.
     {:ok, handle} = :win32reg.open([:read])
-    :ok = :win32reg.change_key(handle, '\\local_machine\\#{@local_tz_key}')
+    :ok = :win32reg.change_key(handle, ~c"\\local_machine\\#{@local_tz_key}")
     {:ok, values} = :win32reg.values(handle)
 
     if List.keymember?(values, @tz_key_name, 0) do
@@ -177,7 +177,7 @@ defmodule Timex.Timezone.Local do
     else
       # Windows 2000 or XP
       # This is the localized name:
-      localized = List.keyfind(values, 'StandardName', 0)
+      localized = List.keyfind(values, ~c"StandardName", 0)
       # Open the list of timezones to look up the real name:
       :ok = :win32reg.change_key(handle, @sys_tz_key)
       {:ok, subkeys} = :win32reg.sub_keys(handle)
@@ -187,7 +187,7 @@ defmodule Timex.Timezone.Local do
           :ok = :win32reg.change_key(handle, subkey)
           {:ok, values} = :win32reg.values(handle)
 
-          case List.keyfind(values, 'Std', 0) do
+          case List.keyfind(values, ~c"Std", 0) do
             {_, zone} when zone == localized -> zone
             _ -> nil
           end
