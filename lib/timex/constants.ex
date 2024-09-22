@@ -39,7 +39,7 @@ defmodule Timex.Constants do
         "November",
         "December"
       ]
-      @months Enum.map(Enum.with_index(@month_names), fn {name, i} -> {name, i + 1} end)
+      @months Enum.with_index(@month_names, 1)
       @month_abbrs Enum.map(@month_names, fn name -> String.slice(name, 0, 3) end)
       @valid_months 1..12
 
