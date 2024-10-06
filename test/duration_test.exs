@@ -97,7 +97,7 @@ defmodule DurationTests do
     assert Duration.to_seconds(13, :hours) == 13 * 3600
   end
 
-  test "from_*" do
+  test "from_* with integers" do
     assert Duration.to_erl(Duration.from_microseconds(1)) == {0, 0, 1}
     assert Duration.to_erl(Duration.from_milliseconds(1)) == {0, 0, 1000}
     assert Duration.to_erl(Duration.from_seconds(1)) == {0, 1, 0}
@@ -105,6 +105,16 @@ defmodule DurationTests do
     assert Duration.to_erl(Duration.from_hours(1)) == {0, 3600, 0}
     assert Duration.to_erl(Duration.from_days(1)) == {0, 86400, 0}
     assert Duration.to_erl(Duration.from_weeks(1)) == {0, 604_800, 0}
+  end
+
+  test "from_* with floats" do
+    assert Duration.to_erl(Duration.from_microseconds(1.5)) == {0, 0, 1}
+    assert Duration.to_erl(Duration.from_milliseconds(1.5)) == {0, 0, 1500}
+    assert Duration.to_erl(Duration.from_seconds(1.5)) == {0, 1, 500_000}
+    assert Duration.to_erl(Duration.from_minutes(1.5)) == {0, 90, 0}
+    assert Duration.to_erl(Duration.from_hours(1.5)) == {0, 5400, 0}
+    assert Duration.to_erl(Duration.from_days(1.5)) == {0, 129_600, 0}
+    assert Duration.to_erl(Duration.from_weeks(1.5)) == {0, 907_200, 0}
   end
 
   test "elapsed" do
