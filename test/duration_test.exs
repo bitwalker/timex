@@ -125,7 +125,7 @@ defmodule DurationTests do
 
   # Just make sure that Timex.Duration.measure is called at least once in the tests
   test "measure/1" do
-    reversed_list = Enum.to_list(100_000..1)
+    reversed_list = Enum.to_list(100_000..1//-1)
 
     assert {%Duration{} = d, ^reversed_list} =
              Duration.measure(fn -> Enum.reverse(1..100_000) end)
