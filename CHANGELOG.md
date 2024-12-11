@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added `cycled` option for `Timex.between?/4` to support time-range checks that pass through midnight
 - Add Croatian translation
 - Changed charlists from the deprecated `''` to `~c""`
+- Changed negative range to pass the step of default value for suppressing deprecation warnings
 
 ### Fixed
 

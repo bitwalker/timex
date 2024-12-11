@@ -19,7 +19,7 @@ defmodule ShiftTests do
   property "is always lower than input date for negative shift values" do
     check all(
             input_date <- PropertyHelpers.date_time_generator(:struct),
-            shift <- StreamData.integer(-1..-1000),
+            shift <- StreamData.integer(-1..-1000//-1),
             unit <- StreamData.member_of(@units)
           ) do
       date = Timex.shift(input_date, [{unit, shift}])
