@@ -57,12 +57,12 @@ defmodule Timex.Mixfile do
     [
       {:tzdata, "~> 1.1"},
       {:combine, "~> 0.10"},
-      {:gettext, "~> 0.20"},
+      {:gettext, "~> 0.26"},
       {:ex_doc, "~> 0.13", only: [:docs]},
       {:benchfella, "~> 0.3", only: [:bench]},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:excoveralls, "~> 0.4", only: [:test]},
-      {:stream_data, "~> 0.4", only: [:test]}
+      {:stream_data, "~> 1.1", only: [:test]}
     ]
   end
 

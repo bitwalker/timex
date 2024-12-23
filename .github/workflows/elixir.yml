@@ -7,13 +7,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
+      fail-fast: true
       matrix:
-        otp: ['24.2', '25']
-        elixir: ['1.12.3', '1.13.3', '1.14.0']
-        exclude:
-          - otp: '25'
-            elixir: '1.12.3'
+        include:
+          - otp: "27.2"
+            elixir: "1.18.0"
+            experimental: false
+          - otp: "27.2"
+            elixir: "1.17.3"
+            experimental: false
+          - otp: "26.2"
+            elixir: "1.17.3"
+            experimental: false
     steps:
       - uses: actions/checkout@v2
       - uses: erlef/setup-beam@v1
