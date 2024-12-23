@@ -1,5 +1,6 @@
 defmodule Timex.Translator do
-  import Timex.Gettext
+  use Gettext, backend: Timex.Gettext
+  #import Timex.Gettext
 
   defmacro with_locale(locale, do: block) do
     quote do
