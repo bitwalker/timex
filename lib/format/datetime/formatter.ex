@@ -890,6 +890,6 @@ defmodule Timex.Format.DateTime.Formatter do
   defp pad_char(:zeroes), do: <<?0>>
   defp pad_char(:spaces), do: <<32>>
 
-  defp width_spec(min..max), do: [min: min, max: max]
+  defp width_spec(min..max//1), do: [min: min, max: max]
   defp width_spec(min, max), do: [min: min, max: max]
 end
