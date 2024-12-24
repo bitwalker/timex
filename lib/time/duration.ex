@@ -346,7 +346,7 @@ defmodule Timex.Duration do
   @doc """
   Converts an integer value representing microseconds to a Duration
   """
-  @spec from_microseconds(integer) :: __MODULE__.t()
+  @spec from_microseconds(integer | float) :: __MODULE__.t()
   def from_microseconds(us) when is_integer(us) do
     mega = div(us, 1_000_000_000_000)
     sec = div(rem(us, 1_000_000_000_000), 1_000_000)
