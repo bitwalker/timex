@@ -4,6 +4,14 @@ defmodule Timex.DateTime.Helpers do
   alias Timex.{Types, Timezone, TimezoneInfo, AmbiguousDateTime, AmbiguousTimezoneInfo}
 
   @type precision :: -1 | 0..6
+  @set_option_priority %{
+    year: 1,
+    month: 2,
+    day: 3,
+    hour: 4,
+    minute: 5,
+    second: 6
+  }
 
   @doc """
   Constructs an empty NaiveDateTime, for internal use only
@@ -145,4 +153,10 @@ defmodule Timex.DateTime.Helpers do
       new_p
     end
   end
+
+  def sort_options(options) when is_list(options) do
+    Enum.sort_by(options, fn {k, _} -> Map.get(@set_option_priority, k, 99) end)
+  end
+
+  def sort_options(options), do: options
 end

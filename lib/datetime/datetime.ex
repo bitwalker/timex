@@ -13,6 +13,7 @@ defimpl Timex.Protocol, for: DateTime do
 
   alias Timex.{Duration, AmbiguousDateTime}
   alias Timex.{Timezone, TimezoneInfo}
+  alias Timex.DateTime.Helpers
 
   def to_julian(%DateTime{:year => y, :month => m, :day => d}) do
     Timex.Calendar.Julian.julian_date(y, m, d)
@@ -41,7 +42,7 @@ defimpl Timex.Protocol, for: DateTime do
   end
 
   def to_naive_datetime(%DateTime{} = d) do
-    # NOTE: For legacy reasons we shift DateTimes to UTC when making them naive, 
+    # NOTE: For legacy reasons we shift DateTimes to UTC when making them naive,
     # but the standard library just drops the timezone info
     d
     |> Timex.DateTime.shift_zone!("Etc/UTC", Timex.Timezone.Database)
@@ -57,7 +58,7 @@ defimpl Timex.Protocol, for: DateTime do
   def is_leap?(%DateTime{year: year}), do: :calendar.is_leap_year(year)
 
   def beginning_of_day(%DateTime{time_zone: time_zone, microsecond: {_, precision}} = datetime) do
-    us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
+    us = Helpers.construct_microseconds(0, precision)
     time = Timex.Time.new!(0, 0, 0, us)
 
     with {:ok, datetime} <-
@@ -80,7 +81,7 @@ defimpl Timex.Protocol, for: DateTime do
   end
 
   def end_of_day(%DateTime{time_zone: time_zone, microsecond: {_, precision}} = datetime) do
-    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    us = Helpers.construct_microseconds(999_999, precision)
     time = Timex.Time.new!(23, 59, 59, us)
 
     with {:ok, datetime} <-
@@ -106,7 +107,7 @@ defimpl Timex.Protocol, for: DateTime do
         %DateTime{time_zone: time_zone, microsecond: {_, precision}} = date,
         weekstart
       ) do
-    us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
+    us = Helpers.construct_microseconds(0, precision)
     time = Timex.Time.new!(0, 0, 0, us)
 
     with weekstart when is_atom(weekstart) <- Timex.standardize_week_start(weekstart),
@@ -129,7 +130,7 @@ defimpl Timex.Protocol, for: DateTime do
   def end_of_week(%DateTime{time_zone: time_zone, microsecond: {_, precision}} = date, weekstart) do
     with weekstart when is_atom(weekstart) <- Timex.standardize_week_start(weekstart),
          date = Timex.Date.end_of_week(DateTime.to_date(date), weekstart),
-         us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision),
+         us = Helpers.construct_microseconds(999_999, precision),
          time = Timex.Time.new!(23, 59, 59, us),
          {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.Timezone.Database) do
       datetime
@@ -147,7 +148,7 @@ defimpl Timex.Protocol, for: DateTime do
   end
 
   def beginning_of_year(%DateTime{year: year, time_zone: time_zone, microsecond: {_, precision}}) do
-    us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
+    us = Helpers.construct_microseconds(0, precision)
     time = Timex.Time.new!(0, 0, 0, us)
 
     with {:ok, datetime} <-
@@ -169,7 +170,7 @@ defimpl Timex.Protocol, for: DateTime do
   end
 
   def end_of_year(%DateTime{year: year, time_zone: time_zone, microsecond: {_, precision}}) do
-    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    us = Helpers.construct_microseconds(999_999, precision)
     time = Timex.Time.new!(23, 59, 59, us)
 
     with {:ok, datetime} <-
@@ -197,7 +198,7 @@ defimpl Timex.Protocol, for: DateTime do
         microsecond: {_, precision}
       }) do
     month = 1 + 3 * (Timex.quarter(month) - 1)
-    us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
+    us = Helpers.construct_microseconds(0, precision)
     time = Timex.Time.new!(0, 0, 0, us)
 
     with {:ok, datetime} <-
@@ -226,7 +227,7 @@ defimpl Timex.Protocol, for: DateTime do
       }) do
     month = 3 * Timex.quarter(month)
     date = Timex.Date.end_of_month(Timex.Date.new!(year, month, 1))
-    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    us = Helpers.construct_microseconds(999_999, precision)
     time = Timex.Time.new!(23, 59, 59, us)
 
     with {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.Timezone.Database) do
@@ -247,7 +248,7 @@ defimpl Timex.Protocol, for: DateTime do
         time_zone: time_zone,
         microsecond: {_, precision}
       }) do
-    us = Timex.DateTime.Helpers.construct_microseconds(0, precision)
+    us = Helpers.construct_microseconds(0, precision)
     time = Timex.Time.new!(0, 0, 0, us)
 
     with {:ok, datetime} <-
@@ -275,7 +276,7 @@ defimpl Timex.Protocol, for: DateTime do
         microsecond: {_, precision}
       }) do
     date = Timex.Date.end_of_month(Timex.Date.new!(year, month, 1))
-    us = Timex.DateTime.Helpers.construct_microseconds(999_999, precision)
+    us = Helpers.construct_microseconds(999_999, precision)
     time = Timex.Time.new!(23, 59, 59, us)
 
     with {:ok, datetime} <- Timex.DateTime.new(date, time, time_zone, Timex.Timezone.Database) do
@@ -325,7 +326,9 @@ defimpl Timex.Protocol, for: DateTime do
   def set(%DateTime{} = date, options) do
     validate? = Keyword.get(options, :validate, true)
 
-    Enum.reduce(options, date, fn
+    options
+    |> Helpers.sort_options()
+    |> Enum.reduce(date, fn
       _option, {:error, _} = err ->
         err
 
