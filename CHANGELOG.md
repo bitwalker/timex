@@ -19,7 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `Timex.now/1` typespec to remove the `AmbiguousDateTime`
 - Corrected pluralization rules for bg/cs/he/id/ro/ru
 - Fixed documentation formatting of `Timex.TimezoneInfo.create/6`
-- Updated tzdata to fix issues with 2024b
+- Updated tzdata to 1.1.3 which fixes warnings in Elixir 1.17+ and mitigates [CVE-2025-1211](https://github.com/advisories/GHSA-vq52-99r9-h5pw).
 
 ---
 
