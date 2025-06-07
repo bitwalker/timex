@@ -11,6 +11,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed compilation warning from gettext
 - Added `cycled` option for `Timex.between?/4` to support time-range checks that pass through midnight
 - Add Croatian translation
+- Changed charlists from the deprecated `''` to `~c""`
+- Changed negative range to pass the step of default value for suppressing deprecation warnings
 
 ### Fixed
 
@@ -18,6 +20,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Corrected pluralization rules for bg/cs/he/id/ro/ru
 - Fixed documentation formatting of `Timex.TimezoneInfo.create/6`
 - Fixed typo in `Ecto.md`
+- Updated tzdata to fix issues with 2024b
 
 ---
 
