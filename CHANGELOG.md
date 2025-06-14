@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Add Croatian translation
 - Changed charlists from the deprecated `''` to `~c""`
 - Changed negative range to pass the step of default value for suppressing deprecation warnings
+- Update Gettext to 0.26
 
 ### Fixed
 
@@ -20,6 +21,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Corrected pluralization rules for bg/cs/he/id/ro/ru
 - Fixed documentation formatting of `Timex.TimezoneInfo.create/6`
 - Updated tzdata to fix issues with 2024b
+- Fix deprecation: Module.eval_quoted/4 is deprecated. Use Code.eval_quoted/3 instead
+- Fix deprecation: "min..max inside match is deprecated"
 
 ---
 
