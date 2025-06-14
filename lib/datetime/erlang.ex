@@ -1,5 +1,6 @@
 defimpl Timex.Protocol, for: Tuple do
   alias Timex.AmbiguousDateTime
+  alias Timex.DateTime.Helpers
   import Timex.Macros
 
   @epoch :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
@@ -40,7 +41,7 @@ defimpl Timex.Protocol, for: Tuple do
   end
 
   def to_datetime({{y, m, d}, {h, mm, s, us}}, timezone) when is_datetime(y, m, d, h, mm, s) do
-    us = Timex.DateTime.Helpers.construct_microseconds(us)
+    us = Helpers.construct_microseconds(us)
     dt = Timex.NaiveDateTime.new!(y, m, d, h, mm, s, us)
 
     with %DateTime{} = datetime <- Timex.Timezone.convert(dt, timezone) do
@@ -57,7 +58,7 @@ defimpl Timex.Protocol, for: Tuple do
   def to_datetime(_, _), do: {:error, :invalid_date}
 
   def to_naive_datetime({{y, m, d}, {h, mm, s, us}}) when is_datetime(y, m, d, h, mm, s) do
-    us = Timex.DateTime.Helpers.construct_microseconds(us)
+    us = Helpers.construct_microseconds(us)
     Timex.NaiveDateTime.new!(y, m, d, h, mm, s, us)
   end
 
@@ -285,7 +286,9 @@ defimpl Timex.Protocol, for: Tuple do
   defp do_set(date, options, datetime_type) do
     validate? = Keyword.get(options, :validate, true)
 
-    Enum.reduce(options, date, fn
+    options
+    |> Helpers.sort_options()
+    |> Enum.reduce(date, fn
       _option, {:error, _} = err ->
         err
 
