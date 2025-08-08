@@ -4,7 +4,7 @@ How to use Timex DateTimes with Ecto.
 
 ### Getting Started
 
-Timex has can be integrated with Ecto via the `timex_ecto` plugin which is available on hex.pm:
+Timex can be integrated with Ecto via the `timex_ecto` plugin which is available on hex.pm:
 
 ```elixir
 defp deps do

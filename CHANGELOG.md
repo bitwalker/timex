@@ -20,6 +20,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `Timex.now/1` typespec to remove the `AmbiguousDateTime`
 - Corrected pluralization rules for bg/cs/he/id/ro/ru
 - Fixed documentation formatting of `Timex.TimezoneInfo.create/6`
+- Fixed typo in `Ecto.md`
 - Updated tzdata to fix issues with 2024b
 - Fix deprecation: Module.eval_quoted/4 is deprecated. Use Code.eval_quoted/3 instead
 - Fix deprecation: "min..max inside match is deprecated"
