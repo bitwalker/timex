@@ -112,6 +112,16 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
   @spec lformat(Types.valid_datetime(), Types.valid_datetime(), String.t()) ::
           String.t() | {:error, term}
   def lformat(start, finish, locale) do
+    case Timex.compare(start, finish) do
+      1 -> lformat(finish, start, locale)
+      _ -> do_lformat(start, finish, locale)
+    end
+  end
+
+  # Like `format/1`, this returns the same output regardless of which of the
+  # two datetimes is earlier -- `lformat/3` normalizes the (start, finish)
+  # order before calling this, so `start` is always <= `finish` here.
+  defp do_lformat(start, finish, locale) do
     with {:ok, years} <- to_int(Timex.diff(finish, start, :years)),
          {:ok, after_years} <- shifted(start, years: years),
          {:ok, months} <- to_int(Timex.diff(finish, after_years, :months)),

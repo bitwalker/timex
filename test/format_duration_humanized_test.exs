@@ -52,5 +52,21 @@ defmodule DurationFormatHumanizedTest do
     assert dfinish.zone_abbr == "GMT"
     assert "1 minute" = Formatters.Humanized.format(dstart, dfinish)
   end
+
+  test "format/2 is order-independent, like format/1" do
+    # format/1 always returns the same string for a duration regardless of
+    # sign (see "format negative duration" above). format/2 should behave the
+    # same way regardless of whether `finish` is chronologically before
+    # `start` -- previously this raised, because a negative :years/:months
+    # count was passed straight into Gettext's plural translation, which
+    # requires n >= 0.
+    {:ok, start} =
+      DateTime.new(~D[2015-01-15], ~T[00:00:00], "Pacific/Norfolk", Tzdata.TimeZoneDatabase)
+
+    {:ok, finish} =
+      DateTime.new(~D[2016-03-15], ~T[00:00:00], "Pacific/Norfolk", Tzdata.TimeZoneDatabase)
+
+    assert "1 year, 2 months" = Formatters.Humanized.format(finish, start)
+  end
 end
 
