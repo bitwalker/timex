@@ -23,6 +23,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated tzdata to fix issues with 2024b
 - Fix deprecation: Module.eval_quoted/4 is deprecated. Use Code.eval_quoted/3 instead
 - Fix deprecation: "min..max inside match is deprecated"
+- Fix week of year numbering for `{Wmon}`, `{Wsun}`, `%W` and `%U` in years starting on a Sunday or Monday
 
 ---
 

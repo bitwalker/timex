@@ -193,6 +193,14 @@ defmodule DateFormatTest.FormatStrftime do
     date = Timex.to_datetime({2013, 1, 7})
     assert {:ok, "01"} = format(date, "%W")
     assert {:ok, "1"} = format(date, "%-W")
+    date = Timex.to_datetime({2023, 4, 28})
+    assert {:ok, "17"} = format(date, "%W")
+    date = Timex.to_datetime({2023, 5, 1})
+    assert {:ok, "18"} = format(date, "%W")
+    date = Timex.to_datetime({2024, 1, 1})
+    assert {:ok, "01"} = format(date, "%W")
+    date = Timex.to_datetime({2024, 1, 8})
+    assert {:ok, "02"} = format(date, "%W")
   end
 
   test "format %U" do
@@ -206,6 +214,14 @@ defmodule DateFormatTest.FormatStrftime do
     date = Timex.to_datetime({2013, 1, 7})
     assert {:ok, "01"} = format(date, "%U")
     assert {:ok, "1"} = format(date, "%-U")
+    date = Timex.to_datetime({2023, 4, 28})
+    assert {:ok, "17"} = format(date, "%U")
+    date = Timex.to_datetime({2023, 4, 30})
+    assert {:ok, "18"} = format(date, "%U")
+    date = Timex.to_datetime({2024, 1, 1})
+    assert {:ok, "00"} = format(date, "%U")
+    date = Timex.to_datetime({2024, 1, 7})
+    assert {:ok, "01"} = format(date, "%U")
   end
 
   test "various simple date combinations" do

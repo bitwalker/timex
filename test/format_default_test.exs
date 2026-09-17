@@ -167,6 +167,23 @@ defmodule DateFormatTest.FormatDefault do
     date = Timex.to_datetime({2014, 12, 31})
     assert {:ok, "52"} = format(date, "{Wmon}")
     assert {:ok, "52"} = format(date, "{Wsun}")
+
+    # Years beginning on Sunday (2023) or Monday (2024)
+    date = Timex.to_datetime({2023, 4, 28})
+    assert {:ok, "17"} = format(date, "{Wmon}")
+    assert {:ok, "17"} = format(date, "{Wsun}")
+
+    date = Timex.to_datetime({2023, 4, 30})
+    assert {:ok, "17"} = format(date, "{Wmon}")
+    assert {:ok, "18"} = format(date, "{Wsun}")
+
+    date = Timex.to_datetime({2024, 1, 1})
+    assert {:ok, "1"} = format(date, "{Wmon}")
+    assert {:ok, "0"} = format(date, "{Wsun}")
+
+    date = Timex.to_datetime({2024, 1, 8})
+    assert {:ok, "2"} = format(date, "{Wmon}")
+    assert {:ok, "1"} = format(date, "{Wsun}")
   end
 
   test "format simple compound date formats" do
