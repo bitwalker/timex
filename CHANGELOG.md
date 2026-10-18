@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed `Timex.Duration.now/1` raising for `:minutes`, `:hours`, `:days` and `:weeks`
+- Corrected typespecs of `Timex.Calendar.Julian.julian_date/1`, `Timex.normalize/2`, `Timex.Protocol.DateTime.shift/2` and `Timex.Parse.ZoneInfo.Parser.parse/1`
 - Updated `Timex.now/1` typespec to remove the `AmbiguousDateTime`
 - Corrected pluralization rules for bg/cs/he/id/ro/ru
 - Fixed documentation formatting of `Timex.TimezoneInfo.create/6`

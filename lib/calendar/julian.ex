@@ -24,7 +24,7 @@ defmodule Timex.Calendar.Julian do
     do: julian_date(year, month, day)
 
   # Same as julian_date/1, except takes an Erlang datetime, and returns a more precise Julian date number
-  @spec julian_date(Types.datetime()) :: integer
+  @spec julian_date(Types.datetime()) :: float
   def julian_date({{year, month, day}, {hour, minute, second}}) do
     julian_date(year, month, day, hour, minute, second)
   end

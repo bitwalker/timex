@@ -150,6 +150,17 @@ defmodule DurationTests do
       difference_seconds = timex_now_seconds - erlang_now_seconds
       assert_in_delta(difference_seconds, 0.5, 1)
     end
+
+    test "now/1 returns whole minutes, hours, days and weeks" do
+      for {unit, divisor} <- [minutes: 60, hours: 3_600, days: 86_400, weeks: 604_800] do
+        before_seconds = System.system_time(:second)
+        result = Timex.Duration.now(unit)
+        after_seconds = System.system_time(:second)
+
+        assert is_integer(result)
+        assert result in div(before_seconds, divisor)..div(after_seconds, divisor)
+      end
+    end
   end
 
   def something_to_measure(x), do: x
