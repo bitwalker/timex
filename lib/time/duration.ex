@@ -625,10 +625,10 @@ defmodule Timex.Duration do
     do: System.system_time(:millisecond)
 
   def now(s) when s in [:second, :seconds], do: System.system_time(:second)
-  def now(:minutes), do: to_minutes(now(:microsecond))
-  def now(:hours), do: to_hours(now(:microsecond))
-  def now(:days), do: to_days(now(:microsecond))
-  def now(:weeks), do: to_weeks(now(:microsecond))
+  def now(:minutes), do: to_minutes(now(), truncate: true)
+  def now(:hours), do: to_hours(now(), truncate: true)
+  def now(:days), do: to_days(now(), truncate: true)
+  def now(:weeks), do: to_weeks(now(), truncate: true)
 
   @doc """
   An alias for `Duration.diff/3`

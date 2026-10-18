@@ -108,7 +108,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
 
   Parses the timezone information inside, and returns it as a Zone struct.
   """
-  @spec parse(binary) :: {:ok, Zone.t()} | {:error, binary}
+  @spec parse(binary) :: {:ok, Zone.t()} | {:error, binary | :invalid_zoneinfo_content}
   def parse(<<?T, ?Z, ?i, ?f, version::bytes(1), _reserved::bytes(15), rest::binary>>) do
     version =
       case version do

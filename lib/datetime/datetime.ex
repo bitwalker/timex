@@ -436,7 +436,8 @@ defimpl Timex.Protocol, for: DateTime do
 
   See docs for Timex.shift/2 for details.
   """
-  @spec shift(DateTime.t(), list({atom(), term})) :: DateTime.t() | {:error, term}
+  @spec shift(DateTime.t(), list({atom(), term})) ::
+          DateTime.t() | AmbiguousDateTime.t() | {:error, term}
   def shift(%DateTime{} = datetime, shifts) when is_list(shifts) do
     {logical_shifts, shifts} = Keyword.split(shifts, [:years, :months, :weeks, :days])
     shift = calculate_shift(shifts)

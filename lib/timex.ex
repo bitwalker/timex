@@ -1898,8 +1898,8 @@ defmodule Timex do
       23
   """
   @spec normalize(:date, {integer, integer, integer}) :: Types.date()
-  @spec normalize(:time, {integer, integer, integer} | {integer, integer, integer, integer}) ::
-          Types.time()
+  @spec normalize(:time, {integer, integer, integer}) :: Types.time()
+  @spec normalize(:time, {integer, integer, integer, integer}) :: Types.microsecond_time()
   @spec normalize(:day, {integer, integer, integer}) :: non_neg_integer
   @spec normalize(
           :year | :month | :day | :hour | :minute | :second | :millisecond | :microsecond,
