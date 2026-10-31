@@ -1,8 +1,8 @@
 ## Timex
 
-[![Master](https://github.com/bitwalker/timex/workflows/elixir/badge.svg?branch=master)](https://github.com/bitwalker/timex/actions?query=workflow%3A%22elixir%22+branch%3Amaster)
+[![Main](https://github.com/bitwalker/timex/workflows/elixir/badge.svg?branch=main)](https://github.com/bitwalker/timex/actions?query=workflow%3A%22elixir%22+branch%3Amain)
 [![Hex.pm Version](https://img.shields.io/hexpm/v/timex.svg?style=flat)](https://hex.pm/packages/timex)
-[![Coverage Status](https://coveralls.io/repos/github/bitwalker/timex/badge.svg?branch=master)](https://coveralls.io/github/bitwalker/timex?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/bitwalker/timex/badge.svg?branch=main)](https://coveralls.io/github/bitwalker/timex?branch=main)
 
 Timex is a rich, comprehensive Date/Time library for Elixir projects, with full timezone support via the `:tzdata` package. If
 you need to manipulate dates, times, datetimes, timestamps, etc., then Timex is for you! It is very easy to use Timex types
@@ -158,4 +158,4 @@ if you want to disable it, check [the Tzdata documentation](https://github.com/l
 
 ## License
 
-This software is licensed under [the MIT license](LICENSE.md).
+This software is licensed under [the MIT license](https://github.com/bitwalker/timex/blob/main/LICENSE.md).

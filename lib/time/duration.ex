@@ -631,7 +631,7 @@ defmodule Timex.Duration do
   def now(:weeks), do: to_weeks(now(:microsecond))
 
   @doc """
-  An alias for `Duration.diff/3`
+  An alias for `diff/3`
   """
   defdelegate elapsed(duration, ref \\ nil, type \\ nil), to: __MODULE__, as: :diff
 
@@ -691,7 +691,7 @@ defmodule Timex.Duration do
       ...> result == 4
       true
   """
-  @spec measure((() -> any)) :: {__MODULE__.t(), any}
+  @spec measure((-> any)) :: {__MODULE__.t(), any}
   def measure(fun) when is_function(fun) do
     {time, result} = :timer.tc(fun, [])
     {Duration.from_microseconds(time), result}

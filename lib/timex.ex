@@ -224,7 +224,10 @@ defmodule Timex do
 
   Unix times are always in UTC and therefore the DateTime will be returned in UTC.
   """
-  @spec from_unix(secs :: non_neg_integer, :native | Types.second_time_units()) ::
+  @spec from_unix(
+          secs :: integer,
+          :native | System.time_unit() | :seconds | :milliseconds | :microseconds | :nanoseconds
+        ) ::
           DateTime.t() | no_return
   def from_unix(secs, unit \\ :second)
 

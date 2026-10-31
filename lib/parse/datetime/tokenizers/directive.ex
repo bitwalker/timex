@@ -1,5 +1,10 @@
 defmodule Timex.Parse.DateTime.Tokenizers.Directive do
-  @moduledoc false
+  @moduledoc """
+  A parsing directive produced by a datetime tokenizer.
+
+  Custom tokenizers and formatters use these directives to describe literal text
+  and date/time fields, including their padding, width and parsing rules.
+  """
   alias Timex.Parse.DateTime.Parsers
   alias Timex.Parse.DateTime.Tokenizers.Directive
 
@@ -19,10 +24,10 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
 
   ## Examples
 
-      iex> alias Timex.Parsers.Directive
-      ...> %Directive{type: type, flags: flags} = Directive.get(:year4, "YYYY", padding: :zeros)
-      ...> {type, flags}
-      {:year4, [padding: :zeros]}
+      iex> alias Timex.Parse.DateTime.Tokenizers.Directive
+      ...> %Directive{type: type, flags: flags} = Directive.get(:year4, "YYYY", flags: [padding: :zeros])
+      ...> {type, flags[:padding]}
+      {:year4, :zeros}
 
   """
   @spec get(atom, String.t(), [{atom, term}] | []) :: Directive.t()

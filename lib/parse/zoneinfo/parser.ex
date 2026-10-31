@@ -17,6 +17,8 @@ defmodule Timex.Parse.ZoneInfo.Parser do
               leaps: [],
               # POSIX-TZ rule that describes the zone for future dates
               rule: nil
+
+    @type t :: %__MODULE__{}
   end
 
   defmodule Header do

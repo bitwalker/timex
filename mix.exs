@@ -52,7 +52,7 @@ defmodule Timex.Mixfile do
       maintainers: ["Paul Schoenfelder", "Chris Hildebrand"],
       licenses: ["MIT"],
       links: %{
-        Changelog: "https://github.com/bitwalker/timex/blob/master/CHANGELOG.md",
+        Changelog: "https://github.com/bitwalker/timex/blob/main/CHANGELOG.md",
         GitHub: "https://github.com/bitwalker/timex"
       }
     ]

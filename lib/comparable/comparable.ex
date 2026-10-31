@@ -66,7 +66,7 @@ defprotocol Timex.Comparable do
     - 0:  when equal
     - -1: when the first date/time comes before the second
     - 1:  when the first date/time comes after the second
-    - {:error, reason}: when there was a problem comparing,
+    - `{:error, reason}`: when there was a problem comparing,
       perhaps due to a value being passed which is not a valid date/datetime
 
   ## Examples

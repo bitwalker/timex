@@ -1,6 +1,7 @@
 defmodule Timex.Parser.Test do
   use ExUnit.Case, async: true
   doctest Timex.Parse.DateTime.Parser
+  doctest Timex.Parse.DateTime.Tokenizers.Directive
 
   use Combine
   import Timex.Parse.DateTime.Parsers

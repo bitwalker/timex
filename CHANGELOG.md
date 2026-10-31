@@ -380,8 +380,8 @@ Sorry I didn't keep this up to date, please review the commits in git for these 
 
 ### Added
 
-- `Duration.to_clock/1` - convert a Duration to a `{hour,min,sec,usec}` tuple
-- `Duration.from_clock/1` - convert a `{hour,min,sec,usec}` tuple to a Duration
+- `Timex.Duration.to_clock/1` - convert a Duration to a `{hour,min,sec,usec}` tuple
+- `Timex.Duration.from_clock/1` - convert a `{hour,min,sec,usec}` tuple to a Duration
 
 ## 3.0.0
 
@@ -414,7 +414,7 @@ of removals.
 - Renamed `:timestamp` options to `:duration`
 - Renamed `*_timestamp` functions to `*_duration`
 - Changed `Timex.Duration` to operate on and return `Duration` structs rather than Erlang timestamp tuples
-- Changed `Duration.from/2`, to `Duration.from_*/1`, moving the unit into the name.
+- Changed <code>Duration.from/2</code> (removed), to `Duration.from_*/1`, moving the unit into the name.
 - Renamed `to_erlang_datetime` to `to_erl`
 
 ### Removed
