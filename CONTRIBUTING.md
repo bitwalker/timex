@@ -132,6 +132,23 @@ install or select a supported pair. Before preparing a release, run
 `mix hex.audit` against the committed lockfile and check a fresh consumer's
 resolution as well; library consumers resolve their own dependencies.
 
+Tests use the timezone data bundled with the locked tzdata dependency, with automatic
+updates disabled in the test environment. Ordinary test runs do not download IANA data.
+Keep the dependency's bundled data unchanged; the live-update check uses a temporary
+data directory so it cannot change later test runs.
+
+To check compatibility with the current IANA release, run:
+
+```sh
+mix test test/tzdata_test.exs --include tzdata_update
+```
+
+This explicitly enables the network-dependent test, which downloads and builds new
+timezone data, loads it, and checks transitions. If the bundled release is already
+current, no rebuild is needed; the separate offline regression still checks IANA
+`24:00` normalization. GitHub Actions runs this check weekly and on manual dispatch
+using OTP 29. Use `mise` to install or select other Erlang/Elixir versions locally.
+
 With tests running and passing, and your [documentation](#contributing-documentation) done, your ready to send a PR!
 
 ## Contributing Documentation
