@@ -7,6 +7,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added/Changed
 
+- Require Elixir 1.16 and Erlang/OTP 26 or later.
+- Require tzdata 1.2.2 or later and use its verified built-in HTTP client by
+  default, removing Timex's mandatory Hackney dependency chain. Deployments need
+  an OS CA certificate bundle; remove explicit Hackney client configuration to
+  use the default. Applications depending on Hackney separately must update and
+  audit that dependency themselves.
 - Changed `Timex.Duration.Parse` to be 2x faster
 - Fixed compilation warning from gettext
 - Added `cycled` option for `Timex.between?/4` to support time-range checks that pass through midnight
@@ -17,6 +23,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Handle IANA `24:00` transitions on OTP 29 with updated tzdata.
 - Updated `Timex.now/1` typespec to remove the `AmbiguousDateTime`
 - Corrected pluralization rules for bg/cs/he/id/ro/ru
 - Fixed documentation formatting of `Timex.TimezoneInfo.create/6`

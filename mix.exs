@@ -7,7 +7,7 @@ defmodule Timex.Mixfile do
     [
       app: :timex,
       version: @version,
-      elixir: "~> 1.11",
+      elixir: "~> 1.16",
       description: description(),
       package: package(),
       deps: deps(),
@@ -55,7 +55,7 @@ defmodule Timex.Mixfile do
 
   def deps do
     [
-      {:tzdata, "~> 1.1"},
+      {:tzdata, "~> 1.2 and >= 1.2.2"},
       {:combine, "~> 0.10"},
       {:gettext, "~> 0.26"},
       {:ex_doc, "~> 0.13", only: [:docs]},

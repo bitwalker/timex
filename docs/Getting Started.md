@@ -2,6 +2,10 @@
 
 **Learn how to add timex to your Elixir project and start using it.**
 
+Timex requires Elixir 1.16 or later and Erlang/OTP 26 or later. Install the OS CA
+certificate bundle in your deployment so tzdata can verify HTTPS when updating
+timezone data. Its default HTTP client no longer requires Hackney.
+
 If you are looking for a general reference of what functions are available to you, take a
 look at the `Timex`, `Timex.Interval`, `Timex.Duration` modules, as they cover
 the vast majority of functionality you will care about.

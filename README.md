@@ -10,13 +10,28 @@ in place of default Erlang types, as well as Ecto types via the `timex_ecto` pac
 
 The complete documentation for Timex is located [here](https://hexdocs.pm/timex).
 
+## Requirements
+
+Timex requires Elixir 1.16 or later and Erlang/OTP 26 or later.
+
+Timezone updates use tzdata's built-in HTTP client, which verifies HTTPS against
+the operating system's trusted CA certificates. Ensure your deployment includes
+an accessible CA certificate bundle. Timex no longer requires Hackney or its
+dependencies.
+
+When upgrading, remove an explicit `config :tzdata, :http_client,
+Tzdata.HTTPClient.Hackney` setting to use the built-in client. If your application
+still needs Hackney independently, update it to a patched version and audit the
+whole application's dependency graph with `mix hex.audit`. Updating Timex does not
+upgrade unrelated application dependencies automatically.
+
 ## Migrating to Timex 3.x
 
 If you are coming from an earlier version of Timex, it is recommended that you evaluate whether or not the functionality provided
 by the standard library `Calendar` API is sufficient for your needs, as you may be able to avoid the dependency entirely.
 
-For those that require Timex for one reason or another, Timex now delegates to the standard library where possible, and provides
-backward compatibility to Elixir 1.8 for APIs which are used. This is to avoid duplicating effort, and to ease the maintenance of
+For those that require Timex for one reason or another, Timex delegates to the standard library where possible, within the supported
+runtime versions listed above. This avoids duplicating effort and eases the maintenance of
 this library in the future. Take a look at the documentation to see what APIs are available and how to use them. Many of them may have
 changed, been removed/renamed, or have had their semantics improved since early versions of the library, so if you are coming from
 an earlier version, you will need to review how you are using various APIs. The CHANGELOG is a helpful document to sort through what

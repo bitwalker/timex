@@ -127,6 +127,11 @@ The following *must* be done for all PRs (where applicable):
 
 After your changes are done, please remember to run the full test suite with `mix test`.
 
+The minimum supported runtime is Elixir 1.16 with Erlang/OTP 26. Use `mise` to
+install or select a supported pair. Before preparing a release, run
+`mix hex.audit` against the committed lockfile and check a fresh consumer's
+resolution as well; library consumers resolve their own dependencies.
+
 With tests running and passing, and your [documentation](#contributing-documentation) done, your ready to send a PR!
 
 ## Contributing Documentation
