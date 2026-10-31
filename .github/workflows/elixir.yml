@@ -3,20 +3,71 @@ name: elixir
 on:
   push:
   pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: Elixir ${{ matrix.elixir }} / OTP ${{ matrix.otp }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
     strategy:
+      fail-fast: false
       matrix:
-        otp: ['26', 'latest']
-        elixir: ['1.18', 'latest']
+        include:
+          - elixir: '1.16.3'
+            otp: '26.2.5.21'
+          - elixir: '1.17.3'
+            otp: '27.3.4.19'
+          - elixir: '1.18.6'
+            otp: '27.3.4.19'
+          - elixir: '1.19.7'
+            otp: '28.5.0.8'
+          - elixir: '1.20.5'
+            otp: '29.1'
+    env:
+      MIX_ENV: test
     steps:
-      - uses: actions/checkout@v4
-      - uses: erlef/setup-beam@v1
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          otp-version: ${{matrix.otp}}
-          elixir-version: ${{matrix.elixir}}
-      - run: mix deps.get
+          persist-credentials: false
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
+      - run: mix deps.get --check-locked
+      - run: mix deps.compile
+      - run: mix compile --warnings-as-errors
       - run: mix test
 
+  quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          otp-version: '29.1'
+          elixir-version: '1.20.5'
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
+      - run: mix deps.get --check-locked
+      - run: mix hex.audit
+      - run: mix format --check-formatted
+      - run: mix deps.get --check-locked
+        env:
+          MIX_ENV: docs
+      - run: mix docs --warnings-as-errors

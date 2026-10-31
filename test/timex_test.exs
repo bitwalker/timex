@@ -481,12 +481,12 @@ defmodule TimexTests do
       assert Timex.between?(~T[00:00:00], ~T[23:00:00], ~T[00:00:00],
                cycled: true,
                inclusive: :end
-      )
+             )
 
       assert Timex.between?(~T[23:00:00], ~T[23:00:00], ~T[00:00:00],
-        cycled: true,
-        inclusive: :start
-      )
+               cycled: true,
+               inclusive: :start
+             )
     end
   end
 
@@ -944,9 +944,7 @@ defmodule TimexTests do
       result = apply(Timex, modifier_fn, [input])
 
       assert expected_result == result,
-             "#{modifier_fn} for #{type_fn}:\n#{inspect(expected_result)} should equal #{
-               inspect(result)
-             }"
+             "#{modifier_fn} for #{type_fn}:\n#{inspect(expected_result)} should equal #{inspect(result)}"
     end
   end
 end

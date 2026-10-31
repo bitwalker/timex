@@ -125,7 +125,23 @@ The following *must* be done for all PRs (where applicable):
   likely be left unmerged until there is test coverage. If no tests are needed, just make
   sure you address that in your PR commentary.
 
-After your changes are done, please remember to run the full test suite with `mix test`.
+Before submitting changes, run:
+
+```sh
+mix deps.get --check-locked
+MIX_ENV=test mix deps.compile
+MIX_ENV=test mix compile --warnings-as-errors
+mix test
+mix hex.audit
+mix format --check-formatted
+MIX_ENV=docs mix deps.get --check-locked
+mix docs --warnings-as-errors
+```
+
+CI tests compatible pairs across Elixir 1.16–1.20 and OTP 26–29. Formatting
+and documentation checks use Elixir 1.20.5 / OTP 29.1. Dependency compilation
+runs before the strict first-party compile so upstream diagnostics remain
+visible without being treated as Timex compiler failures.
 
 The minimum supported runtime is Elixir 1.16 with Erlang/OTP 26. Use `mise` to
 install or select a supported pair. Before preparing a release, run

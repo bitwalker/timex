@@ -48,6 +48,7 @@ defmodule ZoneInfoParserTest do
             {:cont, txinfo}
         end
       end)
+
     case transition do
       nil ->
         nil
@@ -56,5 +57,6 @@ defmodule ZoneInfoParserTest do
         {:ok, abbr}
     end
   end
+
   defp get_abbr(other, _), do: other
 end

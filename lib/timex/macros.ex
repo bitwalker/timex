@@ -18,9 +18,7 @@ defmodule Timex.Macros do
       def unquote(head) do
         IO.write(
           :stderr,
-          "warning: #{unquote(caller)}.#{unquote(name)}/#{unquote(len)} is deprecated, #{
-            unquote(message)
-          }\n"
+          "warning: #{unquote(caller)}.#{unquote(name)}/#{unquote(len)} is deprecated, #{unquote(message)}\n"
         )
 
         unquote(body)

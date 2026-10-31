@@ -62,9 +62,7 @@ defmodule Timex.DateTime do
 
         {:error, reason} ->
           raise ArgumentError,
-                "cannot build datetime with #{inspect(date)} and #{inspect(time)}, reason: #{
-                  inspect(reason)
-                }"
+                "cannot build datetime with #{inspect(date)} and #{inspect(time)}, reason: #{inspect(reason)}"
       end
     end
 
