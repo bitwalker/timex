@@ -2,7 +2,6 @@ defmodule Timex.Calendar.Julian do
   @moduledoc """
   This module contains functions for working with dates in the Julian calendar.
   """
-  require Bitwise
   import Timex.Macros
   alias Timex.Types
 

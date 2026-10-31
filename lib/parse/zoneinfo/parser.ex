@@ -153,7 +153,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   defp parse_versioned_content(version, data)
 
   defp parse_versioned_content(1, data) do
-    with {:ok, zone, rest} <- parse_content(1, data, %Zone{version: 1}) do
+    with {:ok, %Zone{} = zone, rest} <- parse_content(1, data, %Zone{version: 1}) do
       transitions = Enum.sort_by(zone.transitions, fn tx -> tx.starts_at end)
       leaps = Enum.sort_by(zone.leaps, fn leap -> leap.epoch end)
       {:ok, %Zone{zone | transitions: transitions, leaps: leaps}, rest}
@@ -267,7 +267,12 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   end
 
   # Parse the number of transition times in this zone
-  defp parse_transition_times(version, data, %Header{transition_count: tx_count} = header, zone) do
+  defp parse_transition_times(
+         version,
+         data,
+         %Header{transition_count: tx_count} = header,
+         %Zone{} = zone
+       ) do
     {times, rest} = parse_array(data, tx_count, &parse_int(version, &1))
     parse_transition_info(version, rest, header, %Zone{zone | transitions: times})
   end
@@ -314,7 +319,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
          %Header{abbrev_length: len} = header,
          %Zone{transitions: transitions} = zone
        ) do
-    <<abbrevs::bytes(len), rest::binary>> = data
+    <<abbrevs::bytes(^len), rest::binary>> = data
 
     txinfos =
       Enum.map(transitions, fn %TransitionInfo{abbrev_index: idx} = tx ->
@@ -327,7 +332,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   end
 
   # Parses leap second information for this zone
-  defp parse_leap_seconds(version, data, %Header{leap_count: count} = header, zone) do
+  defp parse_leap_seconds(version, data, %Header{leap_count: count} = header, %Zone{} = zone) do
     {leaps, rest} =
       parse_array(data, count, fn data ->
         {epoch, next} = parse_int(version, data)
@@ -345,7 +350,12 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   end
 
   # Parses the trailing flags in the zoneinfo binary
-  defp parse_flags(version, data, %Header{utc_count: utc_count, wall_count: wall_count}, zone) do
+  defp parse_flags(
+         version,
+         data,
+         %Header{utc_count: utc_count, wall_count: wall_count},
+         %Zone{} = zone
+       ) do
     {is_std_indicators, rest} = parse_array(data, wall_count, &parse_char/1)
     {is_utc_indicators, rest} = parse_array(rest, utc_count, &parse_char/1)
 
@@ -366,7 +376,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   end
 
   # stdoffset[dst[offset][,start[/time],end[/time]]]
-  defp parse_posixtz_string(_version, <<?\n, rest::binary>>, zone) do
+  defp parse_posixtz_string(_version, <<?\n, rest::binary>>, %Zone{} = zone) do
     with {:ok, format_str, rest} <- parse_newline_terminated_str(rest),
          {:ok, rule, format_rest} <- parse_tz(format_str) do
       {:ok, %Zone{zone | rule: rule}, format_rest <> rest}
@@ -380,13 +390,13 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   defp parse_tz(""), do: {:ok, nil, ""}
   defp parse_tz(str), do: parse_tz(:std_abbr, str, %Rule{})
 
-  defp parse_tz(:std_abbr, str, rule) do
+  defp parse_tz(:std_abbr, str, %Rule{} = rule) do
     with {:ok, abbr, rest} <- parse_abbrev(str) do
       parse_tz(:std_offset, rest, %Rule{rule | std_abbr: abbr, dst_abbr: abbr})
     end
   end
 
-  defp parse_tz(:std_offset, str, rule) do
+  defp parse_tz(:std_offset, str, %Rule{} = rule) do
     with {:ok, offset, rest} <- parse_offset(str) do
       parse_tz(:dst_abbr, rest, %Rule{rule | std_offset: offset, dst_offset: offset})
     else
@@ -402,7 +412,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   end
 
   # dst[offset][,...]
-  defp parse_tz(:dst_abbr, str, rule) do
+  defp parse_tz(:dst_abbr, str, %Rule{} = rule) do
     with {:ok, abbr, rest} <- parse_abbrev(str),
          rule = %Rule{rule | dst_abbr: abbr} do
       # dst_offset is optional, and may or may not be followed by a comma and start/end rule
@@ -421,7 +431,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   end
 
   # offset[,...]
-  defp parse_tz(:dst_offset, str, rule) do
+  defp parse_tz(:dst_offset, str, %Rule{} = rule) do
     with {:ok, offset, rest} <- parse_offset(str),
          rule = %Rule{rule | dst_offset: offset} do
       case rest do
@@ -446,18 +456,12 @@ defmodule Timex.Parse.ZoneInfo.Parser do
     end
   end
 
-  defp parse_tz(:rule_period, str, rule) do
+  defp parse_tz(:rule_period, str, %Rule{} = rule) do
     case String.split(str, ",", parts: 2, trim: false) do
       [start_dt, end_dt] ->
         with {:ok, start_time, _} <- parse_posixtz_datetime(start_dt),
              {:ok, end_time, rest} <- parse_posixtz_datetime(end_dt) do
           {:ok, %Rule{rule | start_time: start_time, end_time: end_time}, rest}
-        else
-          {:ok, _, rest} ->
-            {:error, :expected_comma, rest}
-
-          {:error, _, _} = err ->
-            err
         end
 
       _ ->
@@ -524,9 +528,6 @@ defmodule Timex.Parse.ZoneInfo.Parser do
         :else ->
           {:ok, {:mwd, {m, n, d}}}
       end
-    else
-      :error ->
-        {:error, :invalid_number}
     end
   end
 

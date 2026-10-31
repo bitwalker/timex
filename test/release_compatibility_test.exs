@@ -1,6 +1,18 @@
 defmodule ReleaseCompatibilityTest do
   use ExUnit.Case, async: true
 
+  test "public comparison and conversion defaults remain available" do
+    assert Timex.compare(~D[2024-01-01], ~D[2024-01-02]) == -1
+    assert Timex.diff(~N[2024-01-02 00:00:00], ~N[2024-01-01 00:00:00]) == 86_400_000_000
+    assert Timex.to_datetime(~D[2024-01-01]) == ~U[2024-01-01 00:00:00Z]
+  end
+
+  test "Erlang tuple conversion produces Julian days rather than an internal success tuple" do
+    assert Timex.to_julian({2000, 1, 1}) == 2_451_545
+    assert Timex.to_julian({{2000, 1, 1}, {12, 0, 0}}) == 2_451_545
+    assert Timex.to_julian({2000, 13, 1}) == {:error, :invalid_date}
+  end
+
   test "whole-second shifts preserve declared precision" do
     assert Timex.shift(~U[2024-01-01 00:00:00Z], minutes: 1) == ~U[2024-01-01 00:01:00Z]
 

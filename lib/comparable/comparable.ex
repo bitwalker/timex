@@ -35,7 +35,7 @@ defprotocol Timex.Comparable do
   @doc """
   Compare two date or datetime types.
 
-  You can optionally specify a comparison granularity, any of the following:
+  Specify a comparison granularity from the following:
 
   - :year
   - :years
@@ -55,12 +55,13 @@ defprotocol Timex.Comparable do
   - :seconds
   - :millisecond
   - :milliseconds
-  - :microsecond (default)
+  - :microsecond
   - :microseconds
   - :duration
 
   and the dates will be compared with the corresponding accuracy.
-  The default granularity is `:microsecond`.
+  The protocol requires an explicit granularity. `Timex.compare/2` and
+  `Timex.diff/2` default to `:microsecond`.
 
     - 0:  when equal
     - -1: when the first date/time comes before the second
@@ -81,12 +82,12 @@ defprotocol Timex.Comparable do
       0
   """
   @spec compare(comparable, comparable, granularity) :: compare_result
-  def compare(a, b, granularity \\ :microsecond)
+  def compare(a, b, granularity)
 
   @doc """
   Get the difference between two date or datetime types.
 
-  You can optionally specify a diff granularity, any of the following:
+  Specify a diff granularity from the following:
 
   - :year
   - :years
@@ -106,7 +107,7 @@ defprotocol Timex.Comparable do
   - :seconds
   - :millisecond
   - :milliseconds
-  - :microsecond (default)
+  - :microsecond
   - :microseconds
   - :duration
 
@@ -136,5 +137,5 @@ defprotocol Timex.Comparable do
       0
   """
   @spec diff(comparable, comparable, granularity) :: diff_result
-  def diff(a, b, granularity \\ :microsecond)
+  def diff(a, b, granularity)
 end

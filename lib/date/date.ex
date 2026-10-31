@@ -224,8 +224,6 @@ defimpl Timex.Protocol, for: Date do
     end
   end
 
-  def shift(_, _), do: {:error, :badarg}
-
   defp to_seconds(%Date{year: y, month: m, day: d}, :zero),
     do: :calendar.datetime_to_gregorian_seconds({{y, m, d}, {0, 0, 0}})
 

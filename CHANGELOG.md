@@ -14,6 +14,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   use the default. Applications depending on Hackney separately must update and
   audit that dependency themselves.
 - Support both Gettext 0.26 and Gettext 1.x.
+- Remove deprecated protocol default arguments for Elixir 1.20 compatibility.
+  `Timex.compare/2`, `Timex.diff/2` and `Timex.to_datetime/1` retain their defaults;
+  direct calls to the protocols must supply the granularity or timezone explicitly.
 - Changed `Timex.Duration.Parse` to be 2x faster
 - Fixed compilation warning from gettext
 - Added `cycled` option for `Timex.between?/4` to support time-range checks that pass through midnight
@@ -27,7 +30,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Handle IANA `24:00` transitions on OTP 29 with updated tzdata.
 - Keep test timezone data offline and check live IANA updates separately.
 - Preserve datetime precision in elapsed shifts while retaining newly introduced
-  fractional seconds.
+  fractional seconds; restore Julian-day conversion of Erlang tuples exposed by
+  compiler diagnostics.
 - Updated `Timex.now/1` typespec to remove the `AmbiguousDateTime`
 - Corrected pluralization rules for bg/cs/he/id/ro/ru
 - Fixed documentation formatting of `Timex.TimezoneInfo.create/6`

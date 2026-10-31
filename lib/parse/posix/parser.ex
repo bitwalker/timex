@@ -116,13 +116,13 @@ defmodule Timex.Parse.Timezones.Posix do
   defp parse_tz(""), do: {:ok, nil, ""}
   defp parse_tz(str), do: parse_tz(:std_abbr, str, %TZ{})
 
-  defp parse_tz(:std_abbr, str, rule) do
+  defp parse_tz(:std_abbr, str, %TZ{} = rule) do
     with {:ok, abbr, rest} <- parse_abbrev(str) do
       parse_tz(:std_offset, rest, %TZ{rule | std_abbr: abbr})
     end
   end
 
-  defp parse_tz(:std_offset, str, rule) do
+  defp parse_tz(:std_offset, str, %TZ{} = rule) do
     with {:ok, offset, rest} <- parse_offset(str) do
       parse_tz(:dst_abbr, rest, %TZ{rule | std_offset: offset})
     else
@@ -138,7 +138,7 @@ defmodule Timex.Parse.Timezones.Posix do
   end
 
   # dst[offset][,...]
-  defp parse_tz(:dst_abbr, str, rule) do
+  defp parse_tz(:dst_abbr, str, %TZ{} = rule) do
     with {:ok, abbr, rest} <- parse_abbrev(str),
          rule = %TZ{rule | dst_abbr: abbr} do
       # dst_offset is optional, and may or may not be followed by a comma and start/end rule
@@ -157,7 +157,7 @@ defmodule Timex.Parse.Timezones.Posix do
   end
 
   # offset[,...]
-  defp parse_tz(:dst_offset, str, rule) do
+  defp parse_tz(:dst_offset, str, %TZ{} = rule) do
     with {:ok, offset, rest} <- parse_offset(str),
          rule = %TZ{rule | dst_offset: offset} do
       case rest do
@@ -182,18 +182,12 @@ defmodule Timex.Parse.Timezones.Posix do
     end
   end
 
-  defp parse_tz(:rule_period, str, rule) do
+  defp parse_tz(:rule_period, str, %TZ{} = rule) do
     case String.split(str, ",", parts: 2, trim: false) do
       [start_dt, end_dt] ->
         with {:ok, dst_start, _} <- parse_posixtz_datetime(start_dt),
              {:ok, dst_end, rest} <- parse_posixtz_datetime(end_dt) do
           {:ok, %TZ{rule | dst_start: dst_start, dst_end: dst_end}, rest}
-        else
-          {:ok, _, rest} ->
-            {:error, :expected_comma, rest}
-
-          {:error, _, _} = err ->
-            err
         end
 
       _ ->
@@ -260,9 +254,6 @@ defmodule Timex.Parse.Timezones.Posix do
         :else ->
           {:ok, {:mwd, {m, n, d}}}
       end
-    else
-      :error ->
-        {:error, :invalid_number}
     end
   end
 

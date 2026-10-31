@@ -545,9 +545,6 @@ defmodule Timex.Timezone do
     with {:ok, datetime} <- DateTime.shift_zone(date, name, Timex.Timezone.Database) do
       datetime
     else
-      {ty, a, b} when ty in [:gap, :ambiguous] ->
-        %AmbiguousDateTime{before: a, after: b, type: ty}
-
       {:error, _} = err ->
         err
     end

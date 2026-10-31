@@ -1021,7 +1021,7 @@ defmodule Timex do
     compare(a, b, :microseconds)
   end
 
-  defdelegate compare(a, b), to: Timex.Comparable
+  def compare(a, b), do: Timex.Comparable.compare(a, b, :microsecond)
 
   @doc """
   Compare two `Timex.Comparable` values, returning one of the following values:
@@ -1090,7 +1090,7 @@ defmodule Timex do
   @spec diff(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable()) ::
           Duration.t() | integer | {:error, term}
   def diff(%Time{} = a, %Time{} = b), do: diff(a, b, :microseconds)
-  defdelegate diff(a, b), to: Timex.Comparable
+  def diff(a, b), do: Timex.Comparable.diff(a, b, :microsecond)
 
   @doc """
   Calculate time interval between two dates. The result will be a signed integer, negative

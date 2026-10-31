@@ -5,7 +5,7 @@ defimpl Timex.Protocol, for: Tuple do
   @epoch :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
 
   def to_julian(date) do
-    with {y, m, d} <- to_erl_datetime(date),
+    with {:ok, {{y, m, d}, _time}} <- to_erl_datetime(date),
          do: Timex.Calendar.Julian.julian_date(y, m, d)
   end
 

@@ -14,8 +14,13 @@ defmodule Timex.Mixfile do
       docs: docs(),
       compilers: Mix.compilers(),
       test_coverage: [tool: ExCoveralls],
-      elixirc_paths: elixirc_paths(Mix.env()),
-      preferred_cli_env: [
+      elixirc_paths: elixirc_paths(Mix.env())
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [
         "hex.publish": :docs,
         docs: :docs,
         coveralls: :test,

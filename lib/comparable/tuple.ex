@@ -2,7 +2,6 @@ defimpl Timex.Comparable, for: Tuple do
   alias Timex.AmbiguousDateTime
   alias Timex.Comparable.Utils
   alias Timex.Comparable.Diff
-  require Timex.Macros
 
   def compare(a, :epoch, granularity), do: compare(a, Timex.epoch(), granularity)
   def compare(a, :zero, granularity), do: compare(a, Timex.zero(), granularity)
