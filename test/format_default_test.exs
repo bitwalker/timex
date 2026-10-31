@@ -356,7 +356,14 @@ defmodule DateFormatTest.FormatDefault do
     assert format(date, "{RFC3339}") == {:ok, "2014-09-26T17:10:20-03:00"}
     date = Timex.to_datetime({{2014, 9, 26}, {7, 0, 2}}, "Europe/Copenhagen")
     assert format(date, "{RFC3339}") == {:ok, "2014-09-26T07:00:02+02:00"}
-    date = Timex.to_datetime({{10, 9, 26}, {7, 0, 2}}, "Europe/Copenhagen")
+    # Keep year padding and offset rendering independent of historical tzdata revisions.
+    date = %{
+      ~U[0010-09-26 07:00:02Z]
+      | time_zone: "Etc/UTC+00:50",
+        zone_abbr: "UTC+00:50",
+        utc_offset: 3000
+    }
+
     assert format(date, "{RFC3339}") == {:ok, "0010-09-26T07:00:02+00:50"}
   end
 

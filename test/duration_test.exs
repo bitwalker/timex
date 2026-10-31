@@ -135,10 +135,11 @@ defmodule DurationTests do
 
   describe "now" do
     test "now/0 returns the duration since epoch" do
-      erlang_now_microseconds = div(:os.system_time(), 1000)
+      before = System.system_time(:microsecond)
       timex_now_microseconds = Timex.Duration.now() |> Timex.Duration.to_microseconds()
-      difference_microseconds = timex_now_microseconds - erlang_now_microseconds
-      assert_in_delta(difference_microseconds, 500_000, 500_001)
+      after_call = System.system_time(:microsecond)
+      assert timex_now_microseconds >= before
+      assert timex_now_microseconds <= after_call
     end
 
     test "now(:seconds) is correct" do
