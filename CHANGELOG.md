@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   an OS CA certificate bundle; remove explicit Hackney client configuration to
   use the default. Applications depending on Hackney separately must update and
   audit that dependency themselves.
+- Support both Gettext 0.26 and Gettext 1.x.
 - Changed `Timex.Duration.Parse` to be 2x faster
 - Fixed compilation warning from gettext
 - Added `cycled` option for `Timex.between?/4` to support time-range checks that pass through midnight

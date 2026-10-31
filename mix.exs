@@ -57,7 +57,7 @@ defmodule Timex.Mixfile do
     [
       {:tzdata, "~> 1.2 and >= 1.2.2"},
       {:combine, "~> 0.10"},
-      {:gettext, "~> 0.26"},
+      {:gettext, "~> 0.26 or ~> 1.0"},
       {:ex_doc, "~> 0.13", only: [:docs]},
       {:benchfella, "~> 0.3", only: [:bench]},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
