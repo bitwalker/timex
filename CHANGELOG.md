@@ -26,6 +26,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Handle IANA `24:00` transitions on OTP 29 with updated tzdata.
 - Keep test timezone data offline and check live IANA updates separately.
+- Preserve datetime precision in elapsed shifts while retaining newly introduced
+  fractional seconds.
 - Updated `Timex.now/1` typespec to remove the `AmbiguousDateTime`
 - Corrected pluralization rules for bg/cs/he/id/ro/ru
 - Fixed documentation formatting of `Timex.TimezoneInfo.create/6`

@@ -447,13 +447,13 @@ defimpl Timex.Protocol, for: DateTime do
           err
 
         %DateTime{} = datetime when shift != 0 ->
-          DateTime.add(datetime, shift, :microsecond, Timex.Timezone.Database)
+          add_elapsed(datetime, shift)
 
         %DateTime{} = datetime ->
           datetime
 
         {{ty, _, _}, %DateTime{} = orig} when ty in [:gap, :ambiguous] and shift != 0 ->
-          DateTime.add(orig, shift, :microsecond, Timex.Timezone.Database)
+          add_elapsed(orig, shift)
 
         {{ty, _a, _b} = amb, _} when ty in [:gap, :ambiguous] ->
           amb
@@ -479,6 +479,20 @@ defimpl Timex.Protocol, for: DateTime do
     :throw, {:error, _} = err ->
       err
   end
+
+  defp add_elapsed(%DateTime{microsecond: {_, precision}} = datetime, shift) do
+    shifted = DateTime.add(datetime, shift, :microsecond, Timex.Timezone.Database)
+    {microsecond, _} = shifted.microsecond
+    precision = max(precision, fractional_precision(microsecond, 6))
+    %{shifted | microsecond: {microsecond, precision}}
+  end
+
+  defp fractional_precision(0, _precision), do: 0
+
+  defp fractional_precision(microsecond, precision) when rem(microsecond, 10) == 0,
+    do: fractional_precision(div(microsecond, 10), precision - 1)
+
+  defp fractional_precision(_microsecond, precision), do: precision
 
   defp logical_shift(datetime, []), do: datetime
 
