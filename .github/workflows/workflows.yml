@@ -1,0 +1,65 @@
+name: Workflow checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 9 * * 1'
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  actions-lock:
+    name: Verify Actions lockfile
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4.4.0
+        with:
+          persist-credentials: false
+      - name: Install pinned verifier and verify online
+        run: |
+          gh extension install github/gh-actions-lock --pin v0.4.0
+          gh actions-lock --verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  actionlint:
+    name: Lint workflow syntax and shell scripts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4.4.0
+        with:
+          persist-credentials: false
+      - name: Run actionlint with ShellCheck
+        run: |
+          docker run --rm --volume "$PWD:/workdir:ro" --workdir /workdir \
+            rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 \
+            -color
+
+  zizmor:
+    name: Audit workflow security
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4.4.0
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@v0.8.0
+        with:
+          version: '1.31.1'
+          advanced-security: false
+          config: zizmor.yml
+          inputs: .github

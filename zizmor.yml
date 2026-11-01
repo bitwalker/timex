@@ -1,0 +1,5 @@
+rules:
+  unpinned-uses:
+    # actions.lock pins direct and transitive actions; CI verifies it online.
+    # Keep reusable workflow calls pinned to full commit SHAs separately.
+    disable: true

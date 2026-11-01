@@ -167,6 +167,54 @@ using OTP 29. Use `mise` to install or select other Erlang/Elixir versions local
 
 With tests running and passing, and your [documentation](#contributing-documentation) done, your ready to send a PR!
 
+### Workflow checks
+
+The workflow checks run on every push and pull request, on manual dispatch, and
+weekly. They verify the Actions lockfile online, lint workflow syntax and shell
+scripts with actionlint 1.7.12 and ShellCheck, and audit workflow security with
+zizmor 1.31.1. Fork pull requests need no secrets or write permissions.
+
+Run the same checks locally from the repository root with authenticated GitHub
+CLI access, actionlint 1.7.12, ShellCheck, and zizmor 1.31.1 installed:
+
+```sh
+gh extension install github/gh-actions-lock --pin v0.4.0 --force
+gh actions-lock --verify
+actionlint
+zizmor --config zizmor.yml .github
+```
+
+The `--force` flag upgrades an existing local verifier installation to the
+pinned release; versions before 0.3.0 can miss incomplete lockfile entries.
+
+CI uses a digest-pinned actionlint image that includes ShellCheck. The pinned
+zizmor action verifies its tool download against committed hashes, and its own
+transitive action dependencies are included in the lockfile. The verifier is
+pinned to an immutable release, using the CLI's binary-extension `--pin` option.
+
+After changing any workflow's `uses` entries, regenerate the complete lockfile:
+
+```sh
+gh actions-lock
+gh actions-lock --verify
+```
+
+Commit the generated `.github/workflows/actions.lock` together with the workflow
+changes. Review resolved commits, repository identities, and transitive actions;
+never edit the lockfile by hand. Ordinary regeneration preserves existing pins.
+To intentionally update them, review upstream changes before running
+`gh actions-lock --relock`. Investigate moved or unreachable refs instead of
+automatically accepting them with `--accept-moved`. Reusable workflow calls must
+use full commit SHAs separately. The `unpinned-uses` exception in `zizmor.yml`
+delegates action pinning to the verified lockfile; other security checks remain
+enabled.
+
+Dependabot groups GitHub Actions updates into weekly pull requests after a
+seven-day cooldown. Regenerate and review the lockfile on those branches before
+merging. Tool versions in `workflows.yml`, including the verifier release,
+actionlint image digest, and zizmor version, also need periodic review; the
+GitHub Actions ecosystem configuration does not update shell-installed tools.
+
 ## Contributing Documentation
 
 Please make sure all modules are well documented with a `@moduledoc`, any relevant
