@@ -11,19 +11,23 @@ defmodule Timex.AmbiguousDateTime do
   is just an easy way of remembering that the offset goes from -6 from UTC,
   to -5 from UTC. Since there is no timezone period associated with the hours
   of 2-3 AM in the America/Chicago zone (it's neither CST nor CDT during that hour),
-  one has to decide what the intent is. Timex makes the call that shifting to the
-  next period (i.e. "spring forward" using our example above) makes the most logical
-  sense when working with non-existent time periods.
+  one has to decide what the intent is.
 
-  TL;DR - Timex will "spring forward" or "fall back", depending on what the zone change
-  happens to be for the non-existent time. Using America/Chicago as an example, if you
-  try to create a DateTime for 2 AM on March 13, 2016, Timex will give you back 3 AM on
-  March 13, 2016, because the zone is in the middle of changing from CST to CDT, and the
-  earliest representable time in CDT is 3 AM.
+  Converting a naive datetime in an IANA timezone gap with `Timex.to_datetime/2`
+  or `Timex.Timezone.convert/2` returns this struct with `type: :gap`. Its `before`
+  field contains the last valid instant before the gap, and `after` contains the
+  first valid instant after it. For 2 AM on March 13, 2016 in America/Chicago,
+  those boundaries are 01:59:59.999999 CST and 03:00:00 CDT. Neither boundary
+  represents the nonexistent requested wall time; the caller decides whether to
+  reject the input or select a replacement.
+
+  Date-only `%Date{}` conversion has a separate midnight policy and selects the
+  later result if midnight is skipped or repeated. Operations such as beginning
+  or end of day also have their own boundary-selection rules.
 
   ## Ambiguity #2 - Times with more than one valid zone period
 
-  This one is the reason why this module exists. There are times, though rare, where more
+  There are times, though rare, where more
   than one zone applies to a given date and time. For example, Asia/Taipei, on December 31st,
   1895, from 23:54:00 to 23:59:59, two timezone periods are active LMT, and JWST, because that
   locale was switching to JWST from LMT. Because of this, it's impossible to know programmatically

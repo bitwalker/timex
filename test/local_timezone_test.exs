@@ -55,6 +55,20 @@ defmodule LocalTimezoneTest do
     assert %TimezoneInfo{abbreviation: "BST", offset_std: 3600} = Timezone.local(instant)
   end
 
+  test "local naive conversion exposes the gap without pre-resolving a period" do
+    for convert <- [&Timezone.convert/2, &Timex.to_datetime/2] do
+      assert %Timex.AmbiguousDateTime{type: :gap, before: earlier, after: later} =
+               convert.(~N[2024-03-31 01:13:41], :local)
+
+      assert earlier.time_zone == "Europe/London"
+      assert later.time_zone == "Europe/London"
+      assert DateTime.to_naive(earlier) == ~N[2024-03-31 00:59:59.999999]
+      assert DateTime.to_naive(later) == ~N[2024-03-31 02:00:00]
+      assert earlier.std_offset == 0
+      assert later.std_offset == 3600
+    end
+  end
+
   test "the two autumn overlap instants identify their distinct periods" do
     assert %TimezoneInfo{abbreviation: "BST", offset_std: 3600} =
              Timezone.local(~U[2024-10-27 00:30:00Z])

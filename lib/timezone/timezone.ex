@@ -490,10 +490,20 @@ defmodule Timex.Timezone do
   end
 
   @doc """
-  Convert a date to the given timezone (either TimezoneInfo or a timezone name)
+  Converts a date to the given timezone, accepting a timezone name or `TimezoneInfo`.
+
+  A `NaiveDateTime` is interpreted as wall time in the destination zone. In an
+  IANA timezone gap, returns an `AmbiguousDateTime` with `type: :gap`, whose
+  `before` and `after` values bound the missing wall times. In an overlap,
+  `type: :ambiguous` contains both valid interpretations in chronological order.
+  Neither result chooses an interpretation for the caller. Names and
+  `TimezoneInfo` values follow the same rules.
+
+  A `DateTime` identifies an instant, which is preserved when changing zones.
+  Unknown timezone names return `{:error, :time_zone_not_found}`.
   """
   @spec convert(date :: DateTime.t() | NaiveDateTime.t(), tz :: AmbiguousTimezoneInfo.t()) ::
-          AmbiguousDateTime.t() | {:error, term}
+          DateTime.t() | AmbiguousDateTime.t() | {:error, term}
   @spec convert(
           date :: DateTime.t() | NaiveDateTime.t(),
           tz :: TimezoneInfo.t() | Types.valid_timezone()
@@ -530,6 +540,14 @@ defmodule Timex.Timezone do
     end
   end
 
+  def convert(%NaiveDateTime{} = date, %AmbiguousTimezoneInfo{
+        before: %TimezoneInfo{full_name: name} = timezone,
+        after: %TimezoneInfo{full_name: name}
+      }) do
+    # Both periods describe the same zone; let the database resolve it once.
+    convert(date, timezone)
+  end
+
   def convert(%NaiveDateTime{} = date, %AmbiguousTimezoneInfo{} = tz) do
     before_date = convert(date, tz.before)
     after_date = convert(date, tz.after)
@@ -549,8 +567,16 @@ defmodule Timex.Timezone do
   end
 
   def convert(%NaiveDateTime{} = date, tz) do
-    with %TimezoneInfo{} = tzinfo <- get(tz, date) do
-      convert(date, tzinfo)
+    with name when is_binary(name) <- name_of(tz) do
+      if Tzdata.zone_exists?(name) do
+        # A gap has no wall-time period to look up before conversion.
+        convert(date, %TimezoneInfo{full_name: name})
+      else
+        # Synthetic offsets and POSIX zones retain their existing canonical names.
+        with %TimezoneInfo{} = tzinfo <- get(name, date) do
+          convert(date, tzinfo)
+        end
+      end
     end
   end
 

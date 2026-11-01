@@ -63,6 +63,7 @@ defmodule TzdataIntegrationTest do
     assert %Timex.AmbiguousDateTime{type: :ambiguous} =
              Timex.Timezone.convert(~N[2024-10-31 23:30:00], "Africa/Cairo")
 
-    assert {:error, _} = Timex.to_datetime(~N[2024-04-26 00:30:00], "Africa/Cairo")
+    assert %Timex.AmbiguousDateTime{type: :gap} =
+             Timex.to_datetime(~N[2024-04-26 00:30:00], "Africa/Cairo")
   end
 end

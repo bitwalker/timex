@@ -155,10 +155,19 @@ defmodule Timex do
   @doc """
   Convert a date/time value and timezone name to a DateTime struct.
 
-  If the DateTime did not occur in the timezone, an error will be returned.
+  Naive datetime values, including datetime tuples and maps without a timezone,
+  are interpreted as wall time in the destination zone. If the wall time falls
+  in an IANA timezone gap, returns an `AmbiguousDateTime` with `type: :gap`.
+  Its `before` value is the last valid instant before the gap and `after` is
+  the first valid instant after it; neither represents the requested wall time.
 
-  If the DateTime is ambiguous and cannot be resolved, an AmbiguousDateTime will be returned,
-  allowing the developer to choose which of the two choices is desired.
+  If the wall time occurs twice, returns an `AmbiguousDateTime` with
+  `type: :ambiguous`, containing both valid interpretations in chronological
+  order. The caller chooses how to handle either result.
+
+  `DateTime` inputs preserve their instant. Date-only `%Date{}` inputs retain
+  their midnight policy: if midnight is skipped or repeated, the later result
+  is selected. Unknown timezones return `{:error, :time_zone_not_found}`.
 
   If no timezone is provided, "Etc/UTC" will be used.
 
@@ -168,8 +177,9 @@ defmodule Timex do
       #DateTime<2022-01-01 12:00:00-05:00 EST America/New_York>
 
       # This time was skipped as daylight savings started and clocks moved forward
-      iex> Timex.to_datetime(~N[2021-03-14 02:30:00], "America/New_York")
-      {:error, {:could_not_resolve_timezone, "America/New_York", 63782908200, :wall}}
+      iex> %AmbiguousDateTime{type: :gap} = gap = Timex.to_datetime(~N[2021-03-14 02:30:00], "America/New_York")
+      iex> {DateTime.to_naive(gap.before), DateTime.to_naive(gap.after)}
+      {~N[2021-03-14 01:59:59.999999], ~N[2021-03-14 03:00:00]}
 
       # This time occurred twice as daylight savings ended and clocks moved back
       iex> %AmbiguousDateTime{} = adt = Timex.to_datetime(~N[2021-11-07 01:30:00], "America/New_York")

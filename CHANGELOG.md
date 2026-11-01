@@ -5,6 +5,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+### Changed
+
+- Naive datetime conversion through `Timex.to_datetime/2` and
+  `Timex.Timezone.convert/2` now returns `AmbiguousDateTime` with `type: :gap`
+  and the adjacent valid boundaries for nonexistent IANA wall times, consistently
+  for zone names and `TimezoneInfo` inputs (#789, #691). Callers matching
+  `{:error, {:could_not_resolve_timezone, ...}}` for gaps must handle this result
+  explicitly. Overlaps retain `type: :ambiguous`; neither result selects a time
+  automatically. Date-only `%Date{}` midnight handling and the existing POSIX
+  transition model are unchanged.
+
 ### Fixed
 
 - Parse plus-bearing timezone names while respecting following fields and
