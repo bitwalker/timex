@@ -31,19 +31,76 @@ defmodule Timex.Timezone.Database do
   @impl true
   @doc false
   def time_zone_periods_from_wall_datetime(naive, time_zone) do
-    db = Tzdata.TimeZoneDatabase
-
     if Tzdata.zone_exists?(time_zone) do
-      case db.time_zone_periods_from_wall_datetime(naive, time_zone) do
-        {:error, :time_zone_not_found} ->
-          time_zone_periods_from_wall_datetime_fallback(naive, time_zone)
+      seconds = naive |> NaiveDateTime.to_erl() |> :calendar.datetime_to_gregorian_seconds()
 
-        result ->
-          result
+      case Tzdata.periods_for_time(time_zone, seconds, :wall) do
+        [period] ->
+          {:ok, to_period(period)}
+
+        [_, _] = periods ->
+          [earlier, later] = Enum.sort_by(periods, & &1.from.utc)
+          {:ambiguous, to_period(earlier), to_period(later)}
+
+        [] ->
+          with {:ok, period} <- utc_period(time_zone, seconds) do
+            gap_for_wall_time(time_zone, seconds, period)
+          end
+
+        {:error, _} ->
+          time_zone_periods_from_wall_datetime_fallback(naive, time_zone)
       end
     else
       time_zone_periods_from_wall_datetime_fallback(naive, time_zone)
     end
+  end
+
+  # Follow actual UTC transitions, including dynamically generated future periods.
+  # The finite list returned by Tzdata.periods/1 cannot describe every future gap.
+  defp gap_for_wall_time(time_zone, seconds, %{until: %{wall: wall, utc: utc}} = earlier)
+       when is_integer(wall) and is_integer(utc) and wall <= seconds do
+    with {:ok, later} <- utc_period(time_zone, utc) do
+      if is_integer(later.from.wall) and later.from.wall > seconds do
+        gap_between(earlier, later)
+      else
+        gap_for_wall_time(time_zone, seconds, later)
+      end
+    end
+  end
+
+  defp gap_for_wall_time(time_zone, seconds, %{from: %{wall: wall, utc: utc}} = later)
+       when is_integer(wall) and is_integer(utc) and wall > seconds do
+    with {:ok, earlier} <- utc_period(time_zone, utc - 1) do
+      if is_integer(earlier.until.wall) and earlier.until.wall <= seconds do
+        gap_between(earlier, later)
+      else
+        gap_for_wall_time(time_zone, seconds, earlier)
+      end
+    end
+  end
+
+  defp gap_for_wall_time(_time_zone, _seconds, _period),
+    do: {:error, :time_zone_not_found}
+
+  defp utc_period(time_zone, seconds) do
+    case Tzdata.periods_for_time(time_zone, seconds, :utc) do
+      [period] -> {:ok, period}
+      _ -> {:error, :time_zone_not_found}
+    end
+  end
+
+  defp gap_between(earlier, later) do
+    until_wall =
+      earlier.until.wall |> :calendar.gregorian_seconds_to_datetime() |> NaiveDateTime.from_erl!()
+
+    from_wall =
+      later.from.wall |> :calendar.gregorian_seconds_to_datetime() |> NaiveDateTime.from_erl!()
+
+    {:gap, {to_period(earlier), until_wall}, {to_period(later), from_wall}}
+  end
+
+  defp to_period(period) do
+    %{utc_offset: period.utc_off, std_offset: period.std_off, zone_abbr: period.zone_abbr}
   end
 
   # Fallback method which looks for a desired timezone in the process state
