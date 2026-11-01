@@ -14,6 +14,7 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
             flags: [],
             width: [min: -1, max: nil],
             parser: nil,
+            parser_origin: nil,
             weight: 0
 
   @type t :: %__MODULE__{}
@@ -36,7 +37,11 @@ defmodule Timex.Parse.DateTime.Tokenizers.Directive do
     width = Keyword.get(opts, :width, min: min_width, max: nil)
     flags = Keyword.merge(Keyword.get(opts, :flags, []), width)
     modifiers = Keyword.get(opts, :modifiers, [])
-    get(type, directive, flags, modifiers, width)
+
+    case get(type, directive, flags, modifiers, width) do
+      %Directive{parser: parser} = result -> %{result | parser_origin: parser}
+      error -> error
+    end
   end
 
   @simple_types [

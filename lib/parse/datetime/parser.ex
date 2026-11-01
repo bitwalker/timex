@@ -3,8 +3,10 @@ defmodule Timex.Parse.DateTime.Parser do
   This is the base plugin behavior for all Timex date/time string parsers.
   """
   import Combine.Parsers.Base, only: [eof: 0, map: 2, pipe: 2]
+  import Combine.Parsers.Text, only: [char: 1]
 
   alias Timex.{Timezone, TimezoneInfo, AmbiguousDateTime, AmbiguousTimezoneInfo}
+  alias Combine.ParserState
   alias Timex.Parse.ParseError
   alias Timex.Parse.DateTime.Tokenizers.{Directive, Default, Strftime}
 
@@ -139,18 +141,7 @@ defmodule Timex.Parse.DateTime.Parser do
   end
 
   defp do_parse(str, directives, tokenizer) do
-    parsers =
-      directives
-      |> Stream.map(fn %Directive{weight: weight, parser: parser} ->
-        map(parser, &{&1, weight})
-      end)
-      |> Stream.filter(fn
-        nil -> false
-        _ -> true
-      end)
-      |> Enum.reverse()
-
-    case Combine.parse(str, pipe([eof() | parsers] |> Enum.reverse(), & &1)) do
+    case Combine.parse(str, pipe(directive_parsers(directives), & &1)) do
       [results] when is_list(results) ->
         results
         |> extract_parse_results
@@ -173,6 +164,131 @@ defmodule Timex.Parse.DateTime.Parser do
         err
     end
   end
+
+  # These compound directives contain the same timezone-name lexer.
+  @timezone_directives [:zname, :zabbr, :rfc_822, :rfc_1123, :unix]
+
+  defp directive_parsers([]), do: [eof()]
+
+  defp directive_parsers([
+         %Directive{type: type, parser: parser, weight: weight} = directive | rest
+       ])
+       when type in @timezone_directives and rest != [] do
+    suffix = pipe(directive_parsers(rest), & &1)
+    preflight? = Enum.all?([directive | rest], &native_parser?/1)
+    [timezone_with_suffix(map(parser, &{&1, weight}), suffix, literal_prefix(rest), preflight?)]
+  end
+
+  defp directive_parsers([%Directive{parser: parser, weight: weight} | rest]),
+    do: [map(parser, &{&1, weight}) | directive_parsers(rest)]
+
+  defp native_parser?(%Directive{type: :literal, value: value, parser: parser})
+       when is_binary(value),
+       do: parser == char(value)
+
+  defp native_parser?(%Directive{parser: parser, parser_origin: parser})
+       when is_function(parser, 1),
+       do: true
+
+  defp native_parser?(_), do: false
+
+  defp literal_prefix([%Directive{type: :literal, value: value, parser: parser} | rest])
+       when is_binary(value) do
+    # Only prune with known literal parsers; custom parsers remain authoritative.
+    if parser == char(value), do: value <> literal_prefix(rest), else: ""
+  end
+
+  defp literal_prefix(_), do: ""
+
+  defp timezone_with_suffix(parser, suffix, literal, preflight?) do
+    fn %ParserState{} = state ->
+      %ParserState{input: remaining} = greedy = parser.(%{state | results: []})
+      consumed = byte_size(state.input) - byte_size(remaining)
+
+      size =
+        if greedy.status == :error and consumed == 0, do: byte_size(state.input), else: consumed
+
+      state.input
+      |> timezone_boundaries(size, literal)
+      |> Stream.filter(fn boundary ->
+        # Native syntax can be checked before replaying a long prefix. Opaque
+        # callbacks may depend on state or side effects and are never preflighted.
+        boundary == size or not preflight? or
+          suffix.(%{
+            state
+            | input: binary_part(state.input, boundary, byte_size(state.input) - boundary),
+              results: []
+          }).status == :ok
+      end)
+      |> Enum.reduce_while(nil, fn boundary, failure ->
+        case timezone_prefix(parser, state, greedy, size, boundary) do
+          nil ->
+            {:cont, failure}
+
+          prefix ->
+            result = pipe([fn _ -> prefix end, suffix], &List.flatten/1).(state)
+
+            cond do
+              recognized_timezones?(result) ->
+                {:halt, result}
+
+              is_nil(failure) or
+                  (failure.status == :error and (result.status == :ok or boundary == size)) ->
+                {:cont, result}
+
+              true ->
+                {:cont, failure}
+            end
+        end
+      end)
+    end
+  end
+
+  defp timezone_boundaries(input, size, literal) do
+    matched = binary_part(input, 0, size)
+
+    boundaries =
+      matched
+      |> String.codepoints()
+      |> Enum.scan(0, fn char, size -> size + byte_size(char) end)
+      |> Enum.reverse()
+      |> then(fn sizes -> if sizes == [], do: [0], else: sizes end)
+
+    # Before '+' was accepted, a successful parse stopped at this boundary.
+    boundaries =
+      case :binary.match(matched, "+") do
+        {legacy, _} when legacy > 0 -> [legacy | List.delete(boundaries, legacy)]
+        _ -> boundaries
+      end
+
+    Enum.filter(boundaries, fn boundary ->
+      boundary == size or
+        String.starts_with?(binary_part(input, boundary, byte_size(input) - boundary), literal)
+    end)
+  end
+
+  defp timezone_prefix(_parser, _state, greedy, size, size), do: greedy
+
+  defp timezone_prefix(parser, state, _greedy, _size, boundary) do
+    case parser.(%{state | input: binary_part(state.input, 0, boundary), results: []}) do
+      %ParserState{status: :ok, input: ""} = parsed ->
+        %{parsed | input: binary_part(state.input, boundary, byte_size(state.input) - boundary)}
+
+      _ ->
+        nil
+    end
+  end
+
+  defp recognized_timezones?(%ParserState{status: :ok, results: results}) do
+    results
+    |> extract_parse_results()
+    |> Enum.all?(fn
+      {{:zname, name}, _weight} -> is_binary(Timezone.name_of(name))
+      _ -> true
+    end)
+  end
+
+  defp recognized_timezones?(_), do: false
 
   defp extract_parse_results(parse_results), do: extract_parse_results(parse_results, [])
   defp extract_parse_results([], acc), do: Enum.reverse(acc)

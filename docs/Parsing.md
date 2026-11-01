@@ -28,6 +28,27 @@ iex> Timex.parse("Tue, 06 Mar 2013 01:25:19 +0200", "{RFC1123}")
 
 ,You can also use "bang" versions (i.e. `parse!`), which will raise on failure rather than returning an `{:error, reason}` tuple (`parse!/1` and `parse!/2` respectively).
 
+### Timezone names and separators
+
+`{Zname}`, `{Zabbr}` and strftime `%Z` accept names containing `+`, including
+`Etc/GMT+4` and synthetic offsets such as `Etc/UTC+4:30`. Their signs retain the
+semantics of the named zone; for example, `Etc/GMT+4` is UTC-04:00.
+
+The parser uses the remaining format to find the end of a timezone field, so a
+separator may also occur inside the name:
+
+```elixir
+iex> {:ok, date} = Timex.parse("2025-01-01 Etc/GMT+4+12", "{ISOdate} {Zname}+{h24}")
+iex> {date.time_zone, date.hour, date.utc_offset}
+{"Etc/GMT+4", 12, -14400}
+```
+
+Existing successful uses of `+` as a separator retain their interpretation.
+Otherwise, the longest recognized timezone prefix that fits the remaining format
+is used. Adjacent variable-width fields can be ambiguous; use an explicit
+separator or a fixed-width field such as `{0h24}` to make the boundary clear.
+Custom tokenizers retain their supplied parsers and directive weights.
+
 ### Supported Standards and Common Formats
 
 #### RFC822
