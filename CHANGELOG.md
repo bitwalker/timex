@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Preserve canonical `Etc/GMT` names and their POSIX offset signs across timezone
+  lookup, conversion and setting (#685).
 - Resolve local timezone information using UTC for aware instants and honor the
   explicit clock basis in local timezone lookups (#755).
 

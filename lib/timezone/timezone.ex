@@ -61,8 +61,12 @@ defmodule Timex.Timezone do
 
   and resolves the full name of the timezone if it's able.
 
-  If a string is provided which isn't recognized, it is returned untouched,
-  only when `get/2` is called will the timezone lookup fail.
+  Canonical IANA names retain their database definitions, including the reversed
+  POSIX signs in `Etc/GMT` zones: `Etc/GMT-4` means UTC+04:00 and `Etc/GMT+4`
+  means UTC-04:00. Numeric offsets, signed offset strings, `GMT` shorthands and
+  synthetic `Etc/UTC` offsets use arithmetic signs instead (`GMT+4` means UTC+04:00).
+
+  An unrecognized name returns `{:error, :time_zone_not_found}`.
   """
   @spec name_of(Types.valid_timezone() | TimezoneInfo.t() | AmbiguousTimezoneInfo.t()) ::
           String.t()
@@ -179,22 +183,6 @@ defmodule Timex.Timezone do
 
   def name_of("Etc/UTC" <> offset), do: name_of(offset)
 
-  def name_of("Etc/GMT" <> offset) do
-    case name_of("GMT" <> offset) do
-      {:error, _} = err ->
-        err
-
-      <<"Etc/UTC", ?+, rest::binary>> ->
-        "Etc/GMT-" <> rest
-
-      <<"Etc/UTC", ?-, rest::binary>> ->
-        "Etc/GMT+" <> rest
-
-      other ->
-        other
-    end
-  end
-
   def name_of(<<"GMT", sign::utf8, hh::utf8>>) when sign in [?+, ?-],
     do: "Etc/UTC" <> <<sign::utf8, hh::utf8>>
 
@@ -280,17 +268,9 @@ defmodule Timex.Timezone do
   defp get_info("Etc/UTC", _datetime, _utc_or_wall),
     do: %TimezoneInfo{}
 
-  defp get_info("Etc/GMT", _datetime, _utc_or_wall),
-    do: %TimezoneInfo{}
-
   defp get_info(<<"Etc/UTC", sign::utf8, offset::binary>>, datetime, utc_or_wall)
        when sign in [?+, ?-] do
     get_utc_info("Etc/UTC", <<sign::utf8, offset::binary>>, datetime, utc_or_wall)
-  end
-
-  defp get_info(<<"Etc/GMT", sign::utf8, offset::binary>>, datetime, utc_or_wall)
-       when sign in [?+, ?-] do
-    get_utc_info("Etc/GMT", <<sign::utf8, offset::binary>>, datetime, utc_or_wall)
   end
 
   defp get_info(<<"GMT", sign::utf8, offset::binary>>, _datetime, _utc_or_wall)
