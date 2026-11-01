@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+
+### Fixed
+
+- Resolve local timezone information using UTC for aware instants and honor the
+  explicit clock basis in local timezone lookups (#755).
+
 ## 4.0.0 — 2026-10-31
 
 ### Added/Changed

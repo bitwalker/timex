@@ -39,25 +39,18 @@ defmodule Timex.Timezone do
   Gets the local timezone configuration for the current date and time.
   """
   @spec local() :: TimezoneInfo.t() | AmbiguousTimezoneInfo.t() | {:error, term}
-  def local(), do: local(:calendar.universal_time())
+  def local(), do: get(:local)
 
   @doc """
   Gets the local timezone configuration for the provided date and time.
-  The provided date and time can either be an Erlang datetime tuple, or a DateTime struct.
+  A `DateTime` identifies an instant, including its UTC offset. An Erlang datetime
+  tuple, `NaiveDateTime`, or other value without a timezone is interpreted as local
+  wall time. Use `get/3` with `:local` and an explicit basis to interpret an
+  unzoned value as UTC instead.
   """
   @spec local(Types.valid_datetime()) ::
           TimezoneInfo.t() | AmbiguousTimezoneInfo.t() | {:error, term}
-  def local(date) do
-    secs = Timex.to_gregorian_seconds(date)
-
-    case Local.lookup() do
-      {:error, _} = err ->
-        err
-
-      tz ->
-        resolve(tz, secs)
-    end
-  end
+  def local(date), do: get(:local, date)
 
   @doc """
   This function takes one of the varying timezone representations:
@@ -245,27 +238,19 @@ defmodule Timex.Timezone do
   @doc """
   Gets timezone info for a given zone name and date. The date provided
   can either be an Erlang datetime tuple, or a DateTime struct, and if one
-  is not provided, then the current date and time is returned.
+  is not provided, then the current instant is used. A `DateTime` is interpreted
+  as an instant; values without a timezone are interpreted as wall time in the
+  requested zone.
   """
   @spec get(Types.valid_timezone()) ::
           TimezoneInfo.t() | AmbiguousTimezoneInfo.t() | {:error, term}
   @spec get(Types.valid_timezone(), Types.valid_datetime()) ::
           TimezoneInfo.t() | AmbiguousTimezoneInfo.t() | {:error, term}
-  def get(tz, datetime \\ NaiveDateTime.utc_now())
-
-  def get(:utc, _datetime), do: %TimezoneInfo{}
-  def get(:local, datetime), do: local(datetime)
+  def get(tz), do: get(tz, DateTime.utc_now())
 
   def get(tz, datetime) do
     utc_or_wall = if match?(%DateTime{}, datetime), do: :utc, else: :wall
-
-    case name_of(tz) do
-      {:error, _} = err ->
-        err
-
-      name ->
-        get_info(name, datetime, utc_or_wall)
-    end
+    get(tz, datetime, utc_or_wall)
   end
 
   @doc """
@@ -273,7 +258,12 @@ defmodule Timex.Timezone do
   on utc time or wall time manually (`:utc` or `:wall` respectively).
   """
   def get(:utc, _, _), do: %TimezoneInfo{}
-  def get(:local, datetime, _), do: local(datetime)
+
+  def get(:local, datetime, utc_or_wall) do
+    with timezone when is_binary(timezone) <- Local.lookup() do
+      get(timezone, datetime, utc_or_wall)
+    end
+  end
 
   def get(tz, datetime, utc_or_wall) do
     case name_of(tz) do

@@ -98,7 +98,9 @@ defmodule Timex do
   end
 
   @doc """
-  Returns a DateTime representing the given date/time in the local timezone
+  Returns a DateTime representing the given date/time in the local timezone.
+  A timezone-aware input preserves its instant; an input without a timezone is
+  interpreted as local wall time.
 
   ## Example
 
