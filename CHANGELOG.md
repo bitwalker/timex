@@ -20,6 +20,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Preserve explicitly supplied zero fractional-second precision when parsing
+  `{ss}` and ASN.1 generalized time formats (#716).
 - Return whole epoch counts for `Timex.Duration.now/1` in minutes, hours, days
   and weeks instead of raising on an integer passed to duration conversion.
 - Honor custom parsers passed to `Timex.Duration.parse!/2` (#795).

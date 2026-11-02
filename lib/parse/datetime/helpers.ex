@@ -87,10 +87,7 @@ defmodule Timex.Parse.DateTime.Helpers do
     n = String.to_integer(fraction)
     n = n * div(1_000_000, trunc(:math.pow(10, precision)))
 
-    case n do
-      0 -> [sec_fractional: {0, 0}]
-      _ -> [sec_fractional: {n, precision}]
-    end
+    [sec_fractional: {n, precision}]
   end
 
   def parse_milliseconds(ms) do

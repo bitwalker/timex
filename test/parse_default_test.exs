@@ -314,6 +314,7 @@ defmodule DateFormatTest.ParseDefault do
     assert ^timestamp = Timex.to_unix(result)
 
     date = Timex.to_naive_datetime({{2009, 3, 5}, {23, 25, 19}})
+    date = %{date | microsecond: {0, 3}}
     assert {:ok, ^date} = parse("20090305232519.000", "{ASN1:GeneralizedTime}")
 
     date = Timex.to_naive_datetime({{2009, 3, 5}, {23, 25, 19}})
@@ -333,6 +334,7 @@ defmodule DateFormatTest.ParseDefault do
     assert 1_236_295_519 = Timex.to_unix(result)
 
     date = Timex.to_datetime({{2009, 3, 5}, {23, 25, 19}})
+    date = %{date | microsecond: {0, 3}}
     assert {:ok, ^date} = parse("20090305232519.000Z", "{ASN1:GeneralizedTime:Z}")
 
     date = Timex.to_datetime({{2009, 3, 5}, {23, 25, 19}})
@@ -352,6 +354,7 @@ defmodule DateFormatTest.ParseDefault do
     assert 1_236_320_719 = Timex.to_unix(result)
 
     date = Timex.to_datetime({{2009, 3, 5}, {23, 25, 19}}, "Etc/UTC-7")
+    date = %{date | microsecond: {0, 3}}
     assert {:ok, ^date} = parse("20090305232519.000-0700", "{ASN1:GeneralizedTime:TZ}")
 
     date = Timex.to_datetime({{2009, 3, 5}, {23, 25, 19}}, "Etc/UTC-7")
