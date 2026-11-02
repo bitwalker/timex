@@ -764,15 +764,14 @@ defmodule Timex.Format.DateTime.Formatter do
 
       _ ->
         total_offset = Timezone.total_offset(std, utc)
-        offset_hours = div(total_offset, 60 * 60)
-        offset_mins = div(rem(total_offset, 60 * 60), 60)
+        sign = if total_offset < 0, do: "-", else: "+"
+        magnitude = abs(total_offset)
+        offset_hours = div(magnitude, 60 * 60)
+        offset_mins = div(rem(magnitude, 60 * 60), 60)
         hour = pad_numeric(offset_hours, [padding: :zeroes], width_spec(2..2))
         min = pad_numeric(offset_mins, [padding: :zeroes], width_spec(2..2))
 
-        cond do
-          offset_hours + offset_mins >= 0 -> "+#{hour}#{min}"
-          true -> "#{hour}#{min}"
-        end
+        "#{sign}#{hour}#{min}"
     end
   end
 
@@ -788,13 +787,8 @@ defmodule Timex.Format.DateTime.Formatter do
         ""
 
       offset ->
-        case String.split(offset, "", trim: true, parts: 2) do
-          [qualifier, <<hour::binary-size(2), min::binary-size(2)>>] ->
-            <<qualifier::binary, hour::binary, ?:, min::binary>>
-
-          [qualifier, <<hour::binary-size(2), "-", min::binary-size(2)>>] ->
-            <<qualifier::binary, hour::binary, ?:, min::binary>>
-        end
+        <<sign, hour::binary-size(2), min::binary-size(2)>> = offset
+        <<sign, hour::binary, ?:, min::binary>>
     end
   end
 
@@ -815,7 +809,7 @@ defmodule Timex.Format.DateTime.Formatter do
 
       offset ->
         total_offset = Timezone.total_offset(std, utc)
-        offset_secs = rem(rem(total_offset, 60 * 60), 60)
+        offset_secs = rem(abs(total_offset), 60)
         "#{offset}:#{pad_numeric(offset_secs, [padding: :zeroes], width_spec(2..2))}"
     end
   end

@@ -20,6 +20,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Format negative fractional timezone offsets with one sign and unsigned
+  components in `TimezoneInfo` and datetime offset directives (#724).
 - Preserve explicitly supplied zero fractional-second precision when parsing
   `{ss}` and ASN.1 generalized time formats (#716).
 - Return whole epoch counts for `Timex.Duration.now/1` in minutes, hours, days

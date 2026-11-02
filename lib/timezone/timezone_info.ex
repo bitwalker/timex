@@ -185,33 +185,15 @@ defmodule Timex.TimezoneInfo do
     do: {:error, "'#{inspect(c)}' is not a valid constraint for timezones"}
 
   defp do_format_offset(offset_seconds) do
-    offset_hours = div(offset_seconds, 60 * 60)
-    offset_mins = div(rem(offset_seconds, 60 * 60), 60)
-    offset_secs = rem(rem(offset_seconds, 60 * 60), 60)
-    hour = "#{pad_numeric(offset_hours)}"
-    min = "#{pad_numeric(offset_mins)}"
-    secs = "#{pad_numeric(offset_secs)}"
-
-    cond do
-      offset_hours + offset_mins >= 0 -> "+#{hour}:#{min}:#{secs}"
-      true -> "#{hour}:#{min}:#{secs}"
-    end
+    sign = if offset_seconds < 0, do: "-", else: "+"
+    magnitude = abs(offset_seconds)
+    hour = pad_numeric(div(magnitude, 60 * 60))
+    min = pad_numeric(div(rem(magnitude, 60 * 60), 60))
+    secs = pad_numeric(rem(magnitude, 60))
+    "#{sign}#{hour}:#{min}:#{secs}"
   end
 
-  defp pad_numeric(number) when is_integer(number), do: pad_numeric("#{number}")
-
-  defp pad_numeric(<<?-, number_str::binary>>) do
-    res = pad_numeric(number_str)
-    <<?-, res::binary>>
-  end
-
-  defp pad_numeric(number_str) do
-    min_width = 2
-    len = String.length(number_str)
-
-    cond do
-      len < min_width -> String.duplicate("0", min_width - len) <> number_str
-      true -> number_str
-    end
+  defp pad_numeric(number) do
+    number |> Integer.to_string() |> String.pad_leading(2, "0")
   end
 end
