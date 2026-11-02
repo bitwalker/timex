@@ -329,7 +329,11 @@ defmodule Timex.Interval do
   """
   @spec contains?(__MODULE__.t(), __MODULE__.t()) :: boolean()
   def contains?(%__MODULE__{} = a, %__MODULE__{} = b) do
-    Timex.compare(min(a), min(b)) <= 0 && Timex.compare(max(a), max(b)) >= 0
+    starts = Timex.compare(a.from, b.from)
+    ends = Timex.compare(a.until, b.until)
+
+    (starts == -1 or (starts == 0 and (not a.left_open or b.left_open))) and
+      (ends == 1 or (ends == 0 and (not a.right_open or b.right_open)))
   end
 
   @doc """
@@ -345,18 +349,14 @@ defmodule Timex.Interval do
   """
   @spec overlaps?(__MODULE__.t(), __MODULE__.t()) :: boolean()
   def overlaps?(%__MODULE__{} = a, %__MODULE__{} = b) do
-    cond do
-      Timex.compare(max(a), min(b)) < 0 ->
-        # a is completely before b
-        false
+    not precedes?(a, b) and not precedes?(b, a)
+  end
 
-      Timex.compare(max(b), min(a)) < 0 ->
-        # b is completely before a
-        false
-
-      :else ->
-        # a and b have overlapping elements
-        true
+  defp precedes?(a, b) do
+    case Timex.compare(a.until, b.from) do
+      -1 -> true
+      0 -> a.right_open or b.left_open
+      _ -> false
     end
   end
 
@@ -429,28 +429,18 @@ defmodule Timex.Interval do
   """
   @spec difference(__MODULE__.t(), __MODULE__.t()) :: [__MODULE__.t()]
   def difference(%__MODULE__{} = original, %__MODULE__{} = removal) do
-    cond do
-      contains?(removal, original) ->
-        # eliminate
-        []
+    if overlaps?(original, removal) do
+      # A cut includes its boundary exactly when the removal excludes it.
+      parts = [
+        %{original | until: removal.from, right_open: not removal.left_open},
+        %{original | from: removal.until, left_open: not removal.right_open}
+      ]
 
-      !overlaps?(removal, original) ->
-        # return original
-        [original]
-
-      Timex.compare(min(removal), min(original)) <= 0 ->
-        # trim start
-        [Map.put(original, :from, Map.get(removal, :until))]
-
-      Timex.compare(max(original), max(removal)) <= 0 ->
-        # trim end
-        [Map.put(original, :until, Map.get(removal, :from))]
-
-      true ->
-        # split
-        part_before = Map.put(original, :until, Map.get(removal, :from))
-        part_after = Map.put(original, :from, Map.get(removal, :until))
-        [part_before, part_after]
+      Enum.filter(parts, fn part ->
+        valid_bounds?(part.from, part.until, part.left_open, part.right_open)
+      end)
+    else
+      [original]
     end
   end
 

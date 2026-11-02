@@ -428,7 +428,7 @@ defmodule IntervalTests do
                ]
     end
 
-    test "other than 'from' and 'until', preserves the original interval's attributes" do
+    test "preserves steps and outer boundaries while deriving the cut boundaries" do
       one_to_fives =
         for left_open <- [true, false],
             right_open <- [true, false],
@@ -464,24 +464,135 @@ defmodule IntervalTests do
         assert [split_1, split_2] = Interval.difference(one_to_five, two_to_three)
 
         assert split_1.left_open == one_to_five.left_open
-        assert split_1.right_open == one_to_five.right_open
+        assert split_1.right_open
         assert split_1.step == one_to_five.step
 
-        assert split_2.left_open == one_to_five.left_open
+        refute split_2.left_open
         assert split_2.right_open == one_to_five.right_open
         assert split_2.step == one_to_five.step
 
         assert [left_trimmed] = Interval.difference(one_to_five, midnight_to_two)
 
-        assert left_trimmed.left_open == one_to_five.left_open
+        refute left_trimmed.left_open
         assert left_trimmed.right_open == one_to_five.right_open
         assert left_trimmed.step == one_to_five.step
 
         assert [right_trimmed] = Interval.difference(one_to_five, four_to_six)
-        assert right_trimmed.right_open == one_to_five.right_open
+        assert right_trimmed.right_open
         assert right_trimmed.left_open == one_to_five.left_open
         assert right_trimmed.step == one_to_five.step
       end)
     end
+
+    test "equal open removal leaves exactly the closed original's endpoints" do
+      original =
+        Interval.new(
+          from: ~N[2024-01-01 12:00:00],
+          until: ~N[2024-01-01 13:00:00],
+          right_open: false
+        )
+
+      removal = %{original | left_open: true, right_open: true}
+
+      assert Interval.difference(original, removal) == [
+               Interval.new(from: original.from, until: original.from, right_open: false),
+               Interval.new(from: original.until, until: original.until, right_open: false)
+             ]
+    end
+
+    test "enclosing open removal eliminates the original even with a daily step" do
+      original =
+        Interval.new(from: ~N[2024-01-01 12:00:00], until: ~N[2024-01-01 13:00:00])
+
+      removal =
+        Interval.new(
+          from: ~N[2024-01-01 11:00:00],
+          until: ~N[2024-01-01 14:00:00],
+          left_open: true,
+          right_open: true
+        )
+
+      assert Interval.difference(original, removal) == []
+    end
+
+    test "relationships and subtraction obey endpoint membership independently of step" do
+      base = ~N[2024-01-01 12:00:00]
+
+      samples =
+        for half_second <- -4..16,
+            do: {half_second, NaiveDateTime.add(base, half_second * 500_000, :microsecond)}
+
+      removals =
+        for from <- -1..5,
+            until <- from..5,
+            left_open <- [false, true],
+            right_open <- [false, true],
+            from < until or (not left_open and not right_open) do
+          {sample_interval(base, from, until, left_open, right_open, days: 1),
+           sample_members(samples, from, until, left_open, right_open)}
+        end
+
+      for {from, until} <- [{0, 4}, {0, 0}, {4, 4}],
+          left_open <- [false, true],
+          right_open <- [false, true],
+          from < until or (not left_open and not right_open),
+          step <- [[days: 1], [seconds: 1]],
+          {removal, removed_members} <- removals do
+        original = sample_interval(base, from, until, left_open, right_open, step)
+        original_members = sample_members(samples, from, until, left_open, right_open)
+        context = inspect({original, removal})
+
+        assert Interval.contains?(original, removal) ==
+                 (removed_members -- original_members == []),
+               context
+
+        assert Interval.contains?(removal, original) ==
+                 (original_members -- removed_members == []),
+               context
+
+        assert Interval.overlaps?(original, removal) ==
+                 Enum.any?(original_members, &(&1 in removed_members)),
+               context
+
+        assert Interval.overlaps?(removal, original) == Interval.overlaps?(original, removal),
+               context
+
+        parts = Interval.difference(original, removal)
+        assert length(parts) <= 2, context
+
+        actual_members =
+          for {_index, point} <- samples, Enum.any?(parts, &Enum.member?(&1, point)), do: point
+
+        assert actual_members == original_members -- removed_members, context
+
+        for part <- parts do
+          assert Interval.new(Map.to_list(Map.from_struct(part))) == part, context
+          assert part.step == step, context
+          assert Interval.contains?(original, part), context
+          refute Interval.overlaps?(part, removal), context
+        end
+
+        if length(parts) == 2 do
+          refute Interval.overlaps?(hd(parts), List.last(parts)), context
+        end
+      end
+    end
+  end
+
+  defp sample_interval(base, from, until, left_open, right_open, step) do
+    Interval.new(
+      from: NaiveDateTime.add(base, from, :second),
+      until: NaiveDateTime.add(base, until, :second),
+      left_open: left_open,
+      right_open: right_open,
+      step: step
+    )
+  end
+
+  defp sample_members(samples, from, until, left_open, right_open) do
+    for {index, point} <- samples,
+        (index > from * 2 or (index == from * 2 and not left_open)) and
+          (index < until * 2 or (index == until * 2 and not right_open)),
+        do: point
   end
 end

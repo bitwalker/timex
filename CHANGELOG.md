@@ -20,6 +20,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Compare interval bounds independently of enumeration steps and preserve the
+  correct open or closed cut boundaries during subtraction (#788).
 - Format negative fractional timezone offsets with one sign and unsigned
   components in `TimezoneInfo` and datetime offset directives (#724).
 - Preserve explicitly supplied zero fractional-second precision when parsing
