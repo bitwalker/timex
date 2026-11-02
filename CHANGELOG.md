@@ -25,6 +25,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Parse complete POSIX rule names emitted by timezone-name formatting, retaining
+  following literal delimiters in default and strftime formats.
 - Honor UTC versus wall-time lookup for POSIX rules and preserve aware instants
   through calendar and Timex conversions, including GMT-prefixed specifications.
 - Preserve explicit POSIX transition rules in canonical timezone names, including
