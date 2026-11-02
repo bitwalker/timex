@@ -20,6 +20,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Return whole epoch counts for `Timex.Duration.now/1` in minutes, hours, days
+  and weeks instead of raising on an integer passed to duration conversion.
 - Honor custom parsers passed to `Timex.Duration.parse!/2` (#795).
 - Calculate Monday and Sunday week numbers from their first occurrence in the
   year, including week zero before that day (#742).

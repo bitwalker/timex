@@ -142,14 +142,33 @@ defmodule DurationTests do
       assert timex_now_microseconds <= after_call
     end
 
-    test "now(:seconds) is correct" do
-      erlang_now_seconds =
-        :calendar.datetime_to_gregorian_seconds(:calendar.universal_time()) -
-          :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
+    test "subsecond and second units preserve their unit scale and aliases" do
+      for {units, system_unit} <- [
+            {[:native, :nanosecond, :nanoseconds, :microsecond, :microseconds], :microsecond},
+            {[:millisecond, :milliseconds], :millisecond},
+            {[:second, :seconds], :second}
+          ],
+          unit <- units do
+        before_call = System.system_time(system_unit)
+        result = Duration.now(unit)
+        after_call = System.system_time(system_unit)
 
-      timex_now_seconds = Timex.Duration.now(:seconds)
-      difference_seconds = timex_now_seconds - erlang_now_seconds
-      assert_in_delta(difference_seconds, 0.5, 1)
+        assert is_integer(result)
+        assert result >= before_call
+        assert result <= after_call
+      end
+    end
+
+    for {unit, seconds_per_unit} <- [minutes: 60, hours: 3_600, days: 86_400, weeks: 604_800] do
+      test "now(:#{unit}) returns a whole epoch count in the requested unit" do
+        before_call = System.system_time(:second)
+        result = Duration.now(unquote(unit))
+        after_call = System.system_time(:second)
+
+        assert is_integer(result)
+        assert result >= div(before_call, unquote(seconds_per_unit))
+        assert result <= div(after_call, unquote(seconds_per_unit))
+      end
     end
   end
 

@@ -599,6 +599,8 @@ defmodule Timex.Duration do
   - :days
   - :weeks
 
+  When a unit is specified, the result is an integer count of whole units since Epoch.
+
   ## Examples
 
       iex> Timex.Duration.now(:seconds)
@@ -625,10 +627,10 @@ defmodule Timex.Duration do
     do: System.system_time(:millisecond)
 
   def now(s) when s in [:second, :seconds], do: System.system_time(:second)
-  def now(:minutes), do: to_minutes(now(:microsecond))
-  def now(:hours), do: to_hours(now(:microsecond))
-  def now(:days), do: to_days(now(:microsecond))
-  def now(:weeks), do: to_weeks(now(:microsecond))
+  def now(:minutes), do: div(now(:second), @secs_in_min)
+  def now(:hours), do: div(now(:second), @secs_in_hour)
+  def now(:days), do: div(now(:second), @secs_in_day)
+  def now(:weeks), do: div(now(:second), @secs_in_week)
 
   @doc """
   An alias for `diff/3`
