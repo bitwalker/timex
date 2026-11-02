@@ -20,6 +20,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Evaluate POSIX recurring transition dates correctly across Julian variants,
+  weekday occurrences, southern seasons and year boundaries. Store daylight
+  offsets as adjustments and resolve wall-clock gaps and overlaps explicitly.
 - Reject malformed POSIX timezone abbreviations, missing offsets, incomplete
   numeric components and trailing standalone input; preserve valid quoted and
   fractional-offset names during normalization (#790).

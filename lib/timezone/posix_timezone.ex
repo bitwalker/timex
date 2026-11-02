@@ -1,8 +1,13 @@
 defmodule Timex.PosixTimezone do
   @moduledoc """
   Used when parsing POSIX-TZ timezone rules.
+
+  Explicit rules recur each year. Transition times use the wall clock in effect
+  before the change: standard time at DST start and daylight time at DST end.
+  A daylight abbreviation without explicit transition rules retains standard time;
+  Timex does not infer regional DST defaults.
   """
-  alias Timex.TimezoneInfo
+  alias Timex.{AmbiguousTimezoneInfo, TimezoneInfo}
 
   defstruct name: nil,
             std_abbr: nil,
@@ -23,162 +28,232 @@ defmodule Timex.PosixTimezone do
           std_abbr: nil | String.t(),
           dst_abbr: nil | String.t(),
           std_offset: integer(),
-          dst_offset: integer(),
+          dst_offset: integer() | nil,
           dst_start: rule_bound(),
           dst_end: rule_bound()
         }
 
   @doc """
-  Obtains a `NaiveDateTime` representing the start of DST for this zone.
-
-  Returns nil if there is no DST period.
+  Obtains a `NaiveDateTime` representing the wall-clock start of DST for this zone.
+  Returns nil if there is no explicit DST period.
   """
   @spec dst_start(t, DateTime.t() | NaiveDateTime.t() | Date.t()) :: NaiveDateTime.t() | nil
-  def dst_start(posix_tz, date)
-
   def dst_start(%__MODULE__{dst_start: nil}, _), do: nil
 
-  def dst_start(%__MODULE__{dst_start: dst_start}, %{year: year}) do
-    bound_to_naive_datetime(dst_start, year)
-  end
+  def dst_start(%__MODULE__{dst_start: bound}, %{year: year}),
+    do: bound |> bound_seconds(year) |> NaiveDateTime.from_gregorian_seconds()
 
   @doc """
-  Obtains a `NaiveDateTime` representing the end of DST for this zone.
-
-  Returns nil if there is no DST period.
+  Obtains a `NaiveDateTime` representing the wall-clock end of DST for this zone.
+  Returns nil if there is no explicit DST period.
   """
   @spec dst_end(t, DateTime.t() | NaiveDateTime.t() | Date.t()) :: NaiveDateTime.t() | nil
-  def dst_end(posix_tz, date)
-
   def dst_end(%__MODULE__{dst_end: nil}, _), do: nil
 
-  def dst_end(%__MODULE__{dst_end: dst_end}, %{year: year}) do
-    bound_to_naive_datetime(dst_end, year)
-  end
+  def dst_end(%__MODULE__{dst_end: bound}, %{year: year}),
+    do: bound |> bound_seconds(year) |> NaiveDateTime.from_gregorian_seconds()
 
   @doc """
-  Returns a `TimezoneInfo` struct representing this timezone for the given datetime
-  """
-  @spec to_timezone_info(t, DateTime.t() | NaiveDateTime.t() | Date.t()) :: TimezoneInfo.t()
-  def to_timezone_info(%__MODULE__{} = tz, date) do
-    date = to_naive_datetime(date)
+  Returns timezone information for an instant (`DateTime`) or local wall time.
 
-    if is_dst?(tz, date) do
-      %TimezoneInfo{
-        full_name: tz.name,
-        abbreviation: tz.dst_abbr,
-        offset_std: tz.dst_offset,
-        offset_utc: tz.std_offset,
-        from: :min,
-        until: :max
-      }
-    else
-      %TimezoneInfo{
-        full_name: tz.name,
-        abbreviation: tz.std_abbr,
-        offset_std: 0,
-        offset_utc: tz.std_offset,
-        from: :min,
-        until: :max
-      }
+  Overlapping wall times return `AmbiguousTimezoneInfo`; nonexistent wall times
+  return a resolution error. The optional clock basis can be `:utc` or `:wall`.
+  """
+  @spec to_timezone_info(t, DateTime.t() | NaiveDateTime.t() | Date.t(), :utc | :wall | nil) ::
+          TimezoneInfo.t() | AmbiguousTimezoneInfo.t() | {:error, term()}
+  def to_timezone_info(%__MODULE__{} = tz, date, basis \\ nil) do
+    case resolve(tz, date, basis) do
+      {:ok, period} ->
+        to_info(tz, period)
+
+      {:ambiguous, earlier, later} ->
+        AmbiguousTimezoneInfo.new(to_info(tz, earlier), to_info(tz, later))
+
+      {:gap, _, _} ->
+        {:error, {:could_not_resolve_timezone, tz.name, seconds(to_naive(date)), :wall}}
+
+      {:error, _} = error ->
+        error
     end
   end
 
   @doc """
-  Returns a `Calendar.TimeZoneDatabase` compatible map, representing this timezone for the given datetime
+  Returns a calendar period for an instant or local wall time.
+
+  Ambiguous and nonexistent wall times return the corresponding
+  `Calendar.TimeZoneDatabase` ambiguity or gap tuple.
   """
   def to_period_for_date(%__MODULE__{} = tz, date) do
-    date = to_naive_datetime(date)
-
-    if is_dst?(tz, date) do
-      std_offset = tz.dst_offset
-      utc_offset = tz.std_offset
-
-      %{
-        std_offset: std_offset,
-        utc_offset: utc_offset,
-        zone_abbr: tz.dst_abbr,
-        time_zone: tz.name
-      }
-    else
-      %{std_offset: 0, utc_offset: tz.std_offset, zone_abbr: tz.std_abbr, time_zone: tz.name}
+    case resolve(tz, date, nil) do
+      {:ok, period} -> period
+      other -> other
     end
   end
 
   @doc """
-  Returns a boolean indicating if the datetime provided occurs during DST of the given POSIX timezone.
+  Returns true when the datetime resolves uniquely to daylight time.
+
+  Ambiguous or nonexistent local wall times return false. A `DateTime` is always
+  evaluated as an instant, including its UTC offset; a `Date` uses local noon.
   """
-  @spec is_dst?(t, DateTime.t() | NaiveDateTime.t() | Date.t()) :: boolean
+  @spec is_dst?(t, DateTime.t() | NaiveDateTime.t() | Date.t()) :: boolean()
+  def is_dst?(%__MODULE__{} = tz, %DateTime{} = date) do
+    utc = to_utc(date)
+    kind_at(transitions(tz, utc.year), seconds(utc)) == :dst
+  end
+
   def is_dst?(%__MODULE__{} = tz, date) do
-    with %NaiveDateTime{} = dst_start <- dst_start(tz, date),
-         %NaiveDateTime{} = dst_end <- dst_end(tz, date) do
-      cond do
-        NaiveDateTime.compare(date, dst_start) == :lt ->
-          false
+    date = to_naive(date)
 
-        NaiveDateTime.compare(date, dst_end) == :gt ->
-          false
+    wall_candidates(tz, seconds(date), transitions(tz, date.year)) |> Enum.map(&elem(&1, 1)) == [
+      :dst
+    ]
+  end
 
-        :else ->
-          true
+  @doc false
+  def period_from_utc(%__MODULE__{} = tz, utc) do
+    utc = to_utc(utc)
+    {:ok, period(tz, kind_at(transitions(tz, utc.year), seconds(utc)))}
+  end
+
+  @doc false
+  def periods_from_wall_datetime(%__MODULE__{} = tz, wall) do
+    wall = to_naive(wall)
+    events = transitions(tz, wall.year)
+    wall_seconds = seconds(wall)
+
+    case wall_candidates(tz, wall_seconds, events) do
+      [{_, kind}] ->
+        {:ok, period(tz, kind)}
+
+      [{_, earlier}, {_, later}] ->
+        {:ambiguous, period(tz, earlier), period(tz, later)}
+
+      [] ->
+        gap_for_wall(tz, wall_seconds, events)
+    end
+  end
+
+  defp resolve(tz, %DateTime{} = date, basis) when basis in [nil, :utc] do
+    period_from_utc(tz, date)
+  end
+
+  defp resolve(tz, date, :utc), do: period_from_utc(tz, to_naive(date))
+
+  defp resolve(tz, date, basis) when basis in [nil, :wall],
+    do: periods_from_wall_datetime(tz, to_naive(date))
+
+  defp wall_candidates(tz, wall, events) do
+    [:std, :dst]
+    |> Enum.map(&offset(tz, &1))
+    |> Enum.uniq()
+    |> Enum.flat_map(fn total ->
+      utc = wall - total
+      kind = kind_at(events, utc)
+      if offset(tz, kind) == total, do: [{utc, kind}], else: []
+    end)
+    |> Enum.sort()
+  end
+
+  defp transitions(%__MODULE__{dst_start: nil}, _year), do: []
+  defp transitions(%__MODULE__{dst_end: nil}, _year), do: []
+
+  defp transitions(tz, year) do
+    for rule_year <- (year - 1)..(year + 1),
+        event <- [
+          {bound_seconds(tz.dst_start, rule_year) - tz.std_offset, :std, :dst},
+          {bound_seconds(tz.dst_end, rule_year) - tz.dst_offset, :dst, :std}
+        ] do
+      event
+    end
+    # At coincident year-boundary transitions, the next season starts immediately.
+    |> Enum.sort_by(fn {at, _, after_kind} -> {at, after_kind == :dst} end)
+  end
+
+  defp kind_at(events, utc) do
+    initial =
+      case events do
+        [{_, before_kind, _} | _] -> before_kind
+        [] -> :std
       end
-    else
+
+    Enum.reduce_while(events, initial, fn {at, _, after_kind}, kind ->
+      if at <= utc, do: {:cont, after_kind}, else: {:halt, kind}
+    end)
+  end
+
+  defp gap_for_wall(tz, wall, events) do
+    case Enum.find(events, fn {at, before_kind, after_kind} ->
+           wall >= at + offset(tz, before_kind) and wall < at + offset(tz, after_kind)
+         end) do
+      {at, before_kind, after_kind} ->
+        {:gap,
+         {period(tz, before_kind),
+          NaiveDateTime.from_gregorian_seconds(at + offset(tz, before_kind))},
+         {period(tz, after_kind),
+          NaiveDateTime.from_gregorian_seconds(at + offset(tz, after_kind))}}
+
       nil ->
-        false
+        {:error, :time_zone_not_found}
     end
   end
 
-  defp bound_to_naive_datetime({{:mwd, month, week, weekday}, time}, year) do
-    month_start = Timex.Date.new!(year, month, 1)
-    month_start_dow = Timex.Date.day_of_week(month_start, :sunday) - 1
+  defp offset(tz, :std), do: tz.std_offset
+  defp offset(%__MODULE__{dst_offset: nil} = tz, :dst), do: tz.std_offset
+  defp offset(tz, :dst), do: tz.dst_offset
 
-    if weekday == month_start_dow and week == 1 do
-      # Got lucky, we're done
-      Timex.NaiveDateTime.new!(month_start, time)
-    else
-      first_week_date =
-        if month_start_dow <= weekday do
-          # The week starting on the 1st includes our weekday, so it is the first week of the month
-          %{month_start | day: month_start.day + (weekday - month_start_dow)}
-        else
-          # The week starting on the 1st does not include our weekday, so shift forward a week
-          eow = Timex.Date.end_of_week(month_start)
-          %{eow | day: eow.day + 1 + weekday}
-        end
-
-      cond do
-        week == 1 ->
-          first_week_date
-
-        :else ->
-          day_shift = (week - 1) * 7
-          day = first_week_date.day + day_shift
-          ldom = :calendar.last_day_of_the_month(year, month)
-
-          date =
-            if ldom > day do
-              # Last occurrence is in week 4, so shift back a week
-              %{first_week_date | day: day - 7}
-            else
-              %{first_week_date | day: day}
-            end
-
-          Timex.NaiveDateTime.new!(date, time)
-      end
-    end
+  defp period(tz, kind) do
+    %{
+      utc_offset: tz.std_offset,
+      std_offset: offset(tz, kind) - tz.std_offset,
+      zone_abbr: if(kind == :dst, do: tz.dst_abbr, else: tz.std_abbr),
+      time_zone: tz.name
+    }
   end
 
-  defp bound_to_naive_datetime({{:julian, day}, time}, year) do
-    date = Timex.Calendar.Julian.date_for_day_of_year(day - 1, year, leaps: false)
-    Timex.NaiveDateTime.new!(date, time)
+  defp to_info(tz, period) do
+    %TimezoneInfo{
+      full_name: tz.name,
+      abbreviation: period.zone_abbr,
+      offset_utc: period.utc_offset,
+      offset_std: period.std_offset
+    }
   end
 
-  defp bound_to_naive_datetime({{:julian_leap, day}, time}, year) do
-    date = Timex.Calendar.Julian.date_for_day_of_year(day, year, leaps: true)
-    Timex.NaiveDateTime.new!(date, time)
+  defp bound_seconds({rule, time}, year) do
+    {seconds, _} = Time.to_seconds_after_midnight(time)
+    # Gregorian rules repeat every 400 years. Work inside that cycle so adjacent
+    # rule years remain evaluable at the calendar's supported year boundaries.
+    cycle_days = Integer.floor_div(year, 400) * 146_097
+    days = cycle_days + rule_days(rule, Integer.mod(year, 400))
+    days * 86_400 + seconds
   end
 
-  defp to_naive_datetime(%NaiveDateTime{} = date), do: date
-  defp to_naive_datetime(%DateTime{} = date), do: DateTime.to_naive(date)
-  defp to_naive_datetime(%Date{} = date), do: Timex.NaiveDateTime.new!(date, ~T[12:00:00])
+  defp rule_days({:mwd, {month, week, weekday}}, year) do
+    first = Calendar.ISO.date_to_iso_days(year, month, 1)
+    first_weekday = Integer.mod(first + 6, 7)
+    day = 1 + Integer.mod(weekday - first_weekday, 7) + (week - 1) * 7
+    last = Calendar.ISO.days_in_month(year, month)
+    first + if(day > last, do: day - 7, else: day) - 1
+  end
+
+  defp rule_days({:julian, day}, year) do
+    leap_day = if Calendar.ISO.leap_year?(year) and day >= 60, do: 1, else: 0
+    Calendar.ISO.date_to_iso_days(year, 1, 1) + day - 1 + leap_day
+  end
+
+  defp rule_days({:julian_leap, day}, year),
+    do: Calendar.ISO.date_to_iso_days(year, 1, 1) + day
+
+  defp seconds(date), do: date |> NaiveDateTime.to_gregorian_seconds() |> elem(0)
+
+  defp to_utc(%DateTime{} = date) do
+    {utc, microseconds} = DateTime.to_gregorian_seconds(date)
+    NaiveDateTime.from_gregorian_seconds(utc, {microseconds, elem(date.microsecond, 1)})
+  end
+
+  defp to_utc(date), do: to_naive(date)
+  defp to_naive(%NaiveDateTime{} = date), do: date
+  defp to_naive(%DateTime{} = date), do: DateTime.to_naive(date)
+  defp to_naive(%Date{} = date), do: NaiveDateTime.new!(date, ~T[12:00:00])
 end
