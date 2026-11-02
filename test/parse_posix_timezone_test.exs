@@ -39,7 +39,7 @@ defmodule PosixTimezoneParsing.Tests do
           "ABC0DEF,M3junk.2.0,M11.1.0",
           "ABC0DEF,M3.2.+0,M11.1.0",
           "ABC0DEF,M3.2.0junk,M11.1.0",
-          "ABC0DEF,M3.2.0/25,M11.1.0"
+          "ABC0DEF,M3.2.0/168,M11.1.0"
         ] do
       assert {:error, _, _} = Posix.parse(zone)
     end
@@ -85,13 +85,13 @@ defmodule PosixTimezoneParsing.Tests do
     std_offset = 6 * 3600 * -1
 
     res = %TZ{
-      name: "CST6CDT",
+      name: "CST6CDT,M3.2.0/2:00:00,M11.1.0/2:00:00",
       std_offset: std_offset,
       dst_offset: std_offset + 3600,
       std_abbr: "CST",
       dst_abbr: "CDT",
-      dst_start: {{:mwd, {3, 2, 0}}, ~T[02:00:00]},
-      dst_end: {{:mwd, {11, 1, 0}}, ~T[02:00:00]}
+      dst_start: {{:mwd, {3, 2, 0}}, 7200},
+      dst_end: {{:mwd, {11, 1, 0}}, 7200}
     }
 
     assert {:ok, ^res, ""} = Posix.parse(tz)
@@ -103,13 +103,13 @@ defmodule PosixTimezoneParsing.Tests do
     std_offset = 2 * 3600
 
     res = %TZ{
-      name: "CST-2CEST",
+      name: "CST-2CEST,J1/1:00,J110/1:00",
       std_offset: std_offset,
       dst_offset: std_offset + 3600,
       std_abbr: "CST",
       dst_abbr: "CEST",
-      dst_start: {{:julian, 1}, ~T[01:00:00]},
-      dst_end: {{:julian, 110}, ~T[01:00:00]}
+      dst_start: {{:julian, 1}, 3600},
+      dst_end: {{:julian, 110}, 3600}
     }
 
     assert {:ok, ^res, ""} = Posix.parse(tz)
@@ -121,13 +121,13 @@ defmodule PosixTimezoneParsing.Tests do
     std_offset = 2 * 3600
 
     res = %TZ{
-      name: "CST-2CEST",
+      name: "CST-2CEST,0/1:00,110/1:00",
       std_offset: std_offset,
       dst_offset: std_offset + 3600,
       std_abbr: "CST",
       dst_abbr: "CEST",
-      dst_start: {{:julian_leap, 0}, ~T[01:00:00]},
-      dst_end: {{:julian_leap, 110}, ~T[01:00:00]}
+      dst_start: {{:julian_leap, 0}, 3600},
+      dst_end: {{:julian_leap, 110}, 3600}
     }
 
     assert {:ok, ^res, ""} = Posix.parse(tz)
@@ -139,13 +139,13 @@ defmodule PosixTimezoneParsing.Tests do
     std_offset = 2 * 3600
 
     res = %TZ{
-      name: "CST-2CEST-3",
+      name: "CST-2CEST-3,M3.2.0/2:00:00,M11.1.0/2:00:00",
       std_offset: std_offset,
       dst_offset: 3 * 3600,
       std_abbr: "CST",
       dst_abbr: "CEST",
-      dst_start: {{:mwd, {3, 2, 0}}, ~T[02:00:00]},
-      dst_end: {{:mwd, {11, 1, 0}}, ~T[02:00:00]}
+      dst_start: {{:mwd, {3, 2, 0}}, 7200},
+      dst_end: {{:mwd, {11, 1, 0}}, 7200}
     }
 
     assert {:ok, ^res, ""} = Posix.parse(tz)

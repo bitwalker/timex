@@ -6,6 +6,9 @@ defmodule Timex.PosixTimezone do
   before the change: standard time at DST start and daylight time at DST end.
   A daylight abbreviation without explicit transition rules retains standard time;
   Timex does not infer regional DST defaults.
+
+  Parsed rule times are signed seconds from midnight, allowing day carry. Legacy
+  structs containing `Time` values in their rule bounds are also accepted.
   """
   alias Timex.{AmbiguousTimezoneInfo, TimezoneInfo}
 
@@ -17,10 +20,11 @@ defmodule Timex.PosixTimezone do
             dst_start: nil,
             dst_end: nil
 
+  @type transition_time :: -604_799..604_799 | Time.t()
   @type rule_bound ::
-          {{:julian_leap, 0..365}, Time.t()}
-          | {{:julian, 1..365}, Time.t()}
-          | {{:mwd, {month :: 1..12, week :: 1..5, day_of_week :: 0..6}}, Time.t()}
+          {{:julian_leap, 0..365}, transition_time()}
+          | {{:julian, 1..365}, transition_time()}
+          | {{:mwd, {month :: 1..12, week :: 1..5, day_of_week :: 0..6}}, transition_time()}
           | nil
 
   @type t :: %__MODULE__{
@@ -221,13 +225,15 @@ defmodule Timex.PosixTimezone do
   end
 
   defp bound_seconds({rule, time}, year) do
-    {seconds, _} = Time.to_seconds_after_midnight(time)
     # Gregorian rules repeat every 400 years. Work inside that cycle so adjacent
     # rule years remain evaluable at the calendar's supported year boundaries.
     cycle_days = Integer.floor_div(year, 400) * 146_097
     days = cycle_days + rule_days(rule, Integer.mod(year, 400))
-    days * 86_400 + seconds
+    days * 86_400 + transition_seconds(time)
   end
+
+  defp transition_seconds(seconds) when is_integer(seconds), do: seconds
+  defp transition_seconds(%Time{} = time), do: time |> Time.to_seconds_after_midnight() |> elem(0)
 
   defp rule_days({:mwd, {month, week, weekday}}, year) do
     first = Calendar.ISO.date_to_iso_days(year, month, 1)

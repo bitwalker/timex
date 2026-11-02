@@ -7,6 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Parsed POSIX transition bounds now store signed seconds from midnight rather
+  than `Time` values, supporting hour 24 and signed transition hours through 167.
+  Existing custom `PosixTimezone` structs with `Time` bounds remain supported.
 - Allow equal interval endpoints when both bounds are closed, representing a
   singleton that enumerates exactly once (#787).
 - Naive datetime conversion through `Timex.to_datetime/2` and
@@ -20,6 +23,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Preserve explicit POSIX transition rules in canonical timezone names, including
+  parser round trips and transitions that carry into an adjacent day or year.
 - Evaluate POSIX recurring transition dates correctly across Julian variants,
   weekday occurrences, southern seasons and year boundaries. Store daylight
   offsets as adjustments and resolve wall-clock gaps and overlaps explicitly.
