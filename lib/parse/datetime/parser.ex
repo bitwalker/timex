@@ -2,7 +2,7 @@ defmodule Timex.Parse.DateTime.Parser do
   @moduledoc """
   This is the base plugin behavior for all Timex date/time string parsers.
   """
-  import Combine.Parsers.Base, only: [eof: 0, map: 2, pipe: 2]
+  import Combine.Parsers.Base, only: [eof: 0, eof: 1, map: 2, pipe: 2]
   import Combine.Parsers.Text, only: [char: 1]
 
   alias Timex.{Timezone, TimezoneInfo, AmbiguousDateTime, AmbiguousTimezoneInfo}
@@ -114,7 +114,9 @@ defmodule Timex.Parse.DateTime.Parser do
   # Special case iso8601/rfc3339 for performance
   defp do_parse(str, [%Directive{:type => type}], _tokenizer)
        when type in [:iso_8601_extended, :iso_8601_extended_z, :rfc_3339, :rfc_3339z] do
-    case Combine.parse(str, Timex.Parse.DateTime.Parsers.ISO8601Extended.parse()) do
+    parser = Timex.Parse.DateTime.Parsers.ISO8601Extended.parse() |> eof()
+
+    case Combine.parse(str, parser) do
       {:error, _} = err ->
         err
 

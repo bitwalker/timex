@@ -262,6 +262,9 @@ defmodule Timex.Parse.DateTime.Parsers.ISO8601Extended do
     {:ok, [{:zname, <<dir::utf8, h1::utf8, h2::utf8, ":00">>} | acc], count + 2, rest}
   end
 
+  def parse_offset(_, <<>>, _acc, count),
+    do: {:error, "Expected timezone offset after sign, but got end of input.", count}
+
   def parse_offset(_, <<h::utf8, _rest::binary>>, _acc, count),
     do: {:error, "Expected valid offset, but got `#{<<h::utf8>>}` instead.", count}
 end

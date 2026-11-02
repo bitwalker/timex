@@ -4,6 +4,10 @@
 
 ### How to use Timex for parsing DateTimes from strings
 
+Successful parsing consumes the entire input. Trailing characters, including
+whitespace, must be represented in the format string. For example,
+`Timex.parse("2025-03-09T12:34:56Zjunk", "{ISO:Extended}")` returns a parse error.
+
 Parsing a DateTime from an input string is very similar to formatting them, and is quite simple:
 
 ```elixir

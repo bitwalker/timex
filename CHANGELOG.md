@@ -18,6 +18,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Reject trailing input in singleton ISO/RFC3339 parsing and return parse errors
+  for offsets truncated immediately after their sign.
 - Preserve translated month values when parsing full or abbreviated month names.
 - Parse plus-bearing timezone names while respecting following fields and
   literal separators in default, strftime and compound formats.
