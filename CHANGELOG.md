@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Allow equal interval endpoints when both bounds are closed, representing a
+  singleton that enumerates exactly once (#787).
 - Naive datetime conversion through `Timex.to_datetime/2` and
   `Timex.Timezone.convert/2` now returns `AmbiguousDateTime` with `type: :gap`
   and the adjacent valid boundaries for nonexistent IANA wall times, consistently

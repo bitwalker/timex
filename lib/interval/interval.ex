@@ -86,7 +86,8 @@ defmodule Timex.Interval do
 
   - `from`: The date the interval starts at. Should be a `(Naive)DateTime`.
   - `until`: Either a `(Naive)DateTime`, or a time shift that will be applied to the `from` date.
-    This value _must_ be greater than `from`, otherwise an error will be returned.
+    This value must be greater than `from`, or equal to it when both bounds are closed.
+    Equal closed bounds represent a singleton interval; all other equal or reversed bounds return an error.
   - `left_open`: Whether the interval is left open. See explanation below.
   - `right_open`: Whether the interval is right open. See explanation below.
   - `step`: The step to use when iterating the interval, defaults to `[days: 1]`
@@ -168,7 +169,7 @@ defmodule Timex.Interval do
       invalid_until?(until) ->
         {:error, :invalid_until}
 
-      Timex.compare(until, from) <= 0 ->
+      not valid_bounds?(from, until, left_open, right_open) ->
         {:error, :invalid_until}
 
       :else ->
@@ -184,6 +185,14 @@ defmodule Timex.Interval do
 
   defp invalid_until?({:error, _}), do: true
   defp invalid_until?(_), do: false
+
+  defp valid_bounds?(from, until, left_open, right_open) do
+    case Timex.compare(from, until) do
+      -1 -> true
+      0 -> not left_open and not right_open
+      _ -> false
+    end
+  end
 
   defp invalid_step?([]), do: false
 
@@ -479,21 +488,28 @@ defmodule Timex.Interval do
     defp do_reduce(state, {:suspend, acc}, fun),
       do: {:suspended, acc, &do_reduce(state, &1, fun)}
 
+    defp do_reduce(:done, {:cont, acc}, _fun), do: {:done, acc}
+
     defp do_reduce({current_date, end_date, right_open, step}, {:cont, acc}, fun) do
-      if has_interval_ended?(current_date, end_date, right_open) do
-        {:done, acc}
-      else
-        case Timex.shift(current_date, step) do
-          {:error, {:unknown_shift_unit, unit}} ->
-            raise FormatError, message: "Invalid step unit for interval: #{inspect(unit)}"
+      cond do
+        has_interval_ended?(current_date, end_date, right_open) ->
+          {:done, acc}
 
-          {:error, err} ->
-            raise FormatError,
-              message: "Failed to shift to next element in interval: #{inspect(err)}"
+        Timex.compare(current_date, end_date) == 0 ->
+          do_reduce(:done, fun.(current_date, acc), fun)
 
-          next_date ->
-            do_reduce({next_date, end_date, right_open, step}, fun.(current_date, acc), fun)
-        end
+        true ->
+          case Timex.shift(current_date, step) do
+            {:error, {:unknown_shift_unit, unit}} ->
+              raise FormatError, message: "Invalid step unit for interval: #{inspect(unit)}"
+
+            {:error, err} ->
+              raise FormatError,
+                message: "Failed to shift to next element in interval: #{inspect(err)}"
+
+            next_date ->
+              do_reduce({next_date, end_date, right_open, step}, fun.(current_date, acc), fun)
+          end
       end
     end
 

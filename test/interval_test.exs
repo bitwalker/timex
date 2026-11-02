@@ -41,6 +41,40 @@ defmodule IntervalTests do
     test "returns an error tuple when given an invalid until" do
       assert {:error, :invalid_until} = Interval.new(until: "invalid_until")
     end
+
+    test "accepts equal endpoints only when both bounds are closed" do
+      for point <- [~D[2024-01-01], ~N[2024-01-01 12:00:00.123456]],
+          left_open <- [false, true],
+          right_open <- [false, true] do
+        interval =
+          Interval.new(from: point, until: point, left_open: left_open, right_open: right_open)
+
+        if left_open or right_open do
+          assert interval == {:error, :invalid_until}
+        else
+          assert %Interval{} = interval
+          assert Enum.to_list(interval) == [Timex.to_naive_datetime(point)]
+          assert Enum.member?(interval, point)
+          assert Interval.duration(interval, :microseconds) == 0
+          assert Interval.duration(interval, :duration) == Duration.zero()
+          assert Interval.contains?(interval, interval)
+          assert Interval.overlaps?(interval, interval)
+          assert Interval.difference(interval, interval) == []
+        end
+      end
+    end
+
+    test "rejects reversed endpoints under every boundary combination" do
+      for left_open <- [false, true], right_open <- [false, true] do
+        assert {:error, :invalid_until} =
+                 Interval.new(
+                   from: ~D[2024-01-02],
+                   until: ~D[2024-01-01],
+                   left_open: left_open,
+                   right_open: right_open
+                 )
+      end
+    end
   end
 
   describe "with_step/2" do
@@ -77,6 +111,25 @@ defmodule IntervalTests do
       |> Enum.map(&Timex.format!(&1, "%Y-%m-%d", :strftime))
 
     assert ["2014-09-22", "2014-09-23", "2014-09-24", "2014-09-25"] == dates
+  end
+
+  test "a closed singleton finishes without advancing its step" do
+    point = ~N[2024-01-01 12:00:00]
+
+    for step <- [[], [seconds: 0], [days: -1], [days: 1]] do
+      interval = Interval.new(from: point, until: point, right_open: false, step: step)
+      assert Enum.take(interval, 2) == [point]
+    end
+  end
+
+  test "a closed singleton can suspend and resume at its final element" do
+    point = ~N[2024-01-01 12:00:00]
+    interval = Interval.new(from: point, until: point, right_open: false)
+    reducer = fn value, acc -> {:suspend, [value | acc]} end
+
+    assert {:suspended, [^point], resume} = Enumerable.reduce(interval, {:cont, []}, reducer)
+    assert {:done, [^point]} = resume.({:cont, [point]})
+    assert {:halted, [^point]} = resume.({:halt, [point]})
   end
 
   test "left open interval excludes from" do
