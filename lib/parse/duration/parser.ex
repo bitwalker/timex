@@ -54,7 +54,7 @@ defmodule Timex.Parse.Duration.Parser do
   """
   @spec parse!(String.t(), module()) :: Duration.t() | no_return
   def parse!(str, parser) when is_binary(str) and is_atom(parser) do
-    case parse(str) do
+    case parse(str, parser) do
       {:ok, d} -> d
       {:error, reason} when is_binary(reason) -> raise ParseError, message: reason
       {:error, term} -> raise ParseError, message: "#{inspect(term)}"
