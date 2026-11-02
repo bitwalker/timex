@@ -467,9 +467,10 @@ defmodule DateFormatTest.ParseDefault do
   end
 
   test "can parse a date/time using a specific locale" do
-    {:ok, d} = Timex.lformat(DateTime.utc_now(), "{ANSIC}", "ru")
+    expected = ~N[2017-06-28 12:34:56]
+    {:ok, d} = Timex.lformat(expected, "{ANSIC}", "ru")
 
-    assert {:ok, %NaiveDateTime{}} =
+    assert {:ok, ^expected} =
              Timex.Translator.with_locale("ru", do: Timex.parse(d, "{ANSIC}"))
   end
 

@@ -31,6 +31,7 @@ defmodule Timex.Parse.DateTime.Helpers do
 
   def to_month_num(m) when is_binary(m) do
     Map.fetch!(Timex.Translator.get_months_lookup(Timex.Translator.current_locale()), m)
+    |> to_month()
   end
 
   def is_weekday(name) do

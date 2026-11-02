@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Preserve translated month values when parsing full or abbreviated month names.
 - Parse plus-bearing timezone names while respecting following fields and
   literal separators in default, strftime and compound formats.
 - Preserve canonical `Etc/GMT` names and their POSIX offset signs across timezone
