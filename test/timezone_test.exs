@@ -7,6 +7,51 @@ defmodule TimezoneTests do
   doctest Timex.Timezone.Utils
   doctest Timex.TimezoneInfo
 
+  test "POSIX timezone lookup rejects malformed names and incomplete consumption" do
+    for zone <- [
+          "<><>",
+          "<abc><>",
+          "<abc><def>",
+          "<ab:c>0DEF",
+          "<ab>0DEF",
+          "<abc0DEF",
+          "ABC0DEF,M3.2.0junk,M11.1.0",
+          "ABC0DEF,M3.2.0,M11.1.0junk",
+          "ABC0DEF\n",
+          "ABC0DEF\npayload"
+        ] do
+      refute Timex.is_valid_timezone?(zone), zone
+      refute Timezone.exists?(zone), zone
+      assert {:error, :time_zone_not_found} = Timezone.name_of(zone)
+      assert {:error, :time_zone_not_found} = Timezone.get(zone, ~N[2024-01-01 00:00:00])
+    end
+
+    for zone <- [nil, false, [], %{}] do
+      refute Timex.is_valid_timezone?(zone)
+      assert {:error, :time_zone_not_found} = Timezone.get(zone, ~N[2024-01-01 00:00:00])
+    end
+  end
+
+  test "valid fixed POSIX names retain quoting and numeric offsets during lookup" do
+    for {zone, abbreviation, offset} <- [
+          {"ABC0", "ABC", 0},
+          {"ABC5:30", "ABC", -19_800},
+          {"<+0545>-5:45", "+0545", 20_700}
+        ] do
+      assert Timex.is_valid_timezone?(zone)
+      assert Timezone.exists?(zone)
+      assert Timezone.name_of(zone) == zone
+
+      assert %TimezoneInfo{full_name: ^zone, abbreviation: ^abbreviation, offset_utc: ^offset} =
+               Timezone.get(zone, ~N[2024-01-01 00:00:00])
+    end
+
+    for zone <- ["America/New_York", :utc, "+05:45", -300] do
+      assert Timex.is_valid_timezone?(zone)
+      assert %TimezoneInfo{} = Timezone.get(zone, ~N[2024-01-01 00:00:00])
+    end
+  end
+
   test "get" do
     %TimezoneInfo{} = tz = Timezone.get("America/Chicago", ~N[2015-01-01T01:00:00])
     assert tz.full_name === "America/Chicago"

@@ -20,6 +20,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Reject malformed POSIX timezone abbreviations, missing offsets, incomplete
+  numeric components and trailing standalone input; preserve valid quoted and
+  fractional-offset names during normalization (#790).
 - Compare interval bounds independently of enumeration steps and preserve the
   correct open or closed cut boundaries during subtraction (#788).
 - Format negative fractional timezone offsets with one sign and unsigned

@@ -69,47 +69,54 @@ defmodule Timex.Parse.Timezones.Posix do
   defp finalize(%TZ{std_abbr: std, std_offset: soffs, dst_abbr: dst, dst_offset: nil} = tz)
        when is_binary(dst) do
     # DST exists, but offset is unset, so the standard dictates that this means an hour ahead of standard
-    %TZ{tz | name: "#{std}#{to_offset(soffs)}#{dst}", dst_offset: soffs + 3600}
+    %TZ{
+      tz
+      | name: "#{quote_abbrev(std)}#{to_offset(soffs)}#{quote_abbrev(dst)}",
+        dst_offset: soffs + 3600
+    }
   end
 
   defp finalize(%TZ{std_abbr: std, std_offset: soffs, dst_abbr: nil, dst_offset: nil} = tz) do
     # No DST, so set the abbreviation to STD and set the offset to the same
-    %TZ{tz | name: "#{std}#{soffs}", dst_abbr: std, dst_offset: soffs}
+    %TZ{tz | name: "#{quote_abbrev(std)}#{to_offset(soffs)}", dst_abbr: std, dst_offset: soffs}
   end
 
   defp finalize(
          %TZ{name: nil, std_abbr: std, std_offset: soffs, dst_abbr: dst, dst_offset: doffs} = tz
        ) do
-    # Construct the full name for this zone
-    if diff(soffs, doffs) == 3600 do
-      # The DST offset is one hour ahead of the STD offset, so we can omit it
-      %TZ{tz | name: "#{std}#{to_offset(soffs)}#{dst}"}
-    else
-      %TZ{tz | name: "#{std}#{to_offset(soffs)}#{dst}#{to_offset(doffs)}"}
-    end
+    # Retain an explicitly specified DST offset, including non-default offsets.
+    %TZ{
+      tz
+      | name: "#{quote_abbrev(std)}#{to_offset(soffs)}#{quote_abbrev(dst)}#{to_offset(doffs)}"
+    }
   end
 
   defp finalize(nil), do: nil
 
-  defp diff(std, dst), do: std - dst
+  defp quote_abbrev(abbreviation) do
+    if abbreviation |> String.to_charlist() |> Enum.all?(fn c -> is_alphabetic(c) end),
+      do: abbreviation,
+      else: "<#{abbreviation}>"
+  end
 
   defp to_offset(0), do: "0"
 
   defp to_offset(n) do
-    n = n * -1
+    sign = if n > 0, do: "-", else: ""
+    n = abs(n)
     hours = div(n, 3600)
     minutes = div(rem(n, 3600), 60)
-    seconds = rem(minutes, 60)
+    seconds = rem(n, 60)
 
     cond do
       seconds == 0 and minutes == 0 ->
-        "#{hours}"
+        "#{sign}#{hours}"
 
       seconds == 0 ->
-        "#{hours}:#{String.pad_leading(minutes, 2, "0")}"
+        "#{sign}#{hours}:#{String.pad_leading(to_string(minutes), 2, "0")}"
 
       :else ->
-        "#{hours}:#{String.pad_leading(minutes, 2, "0")}:#{String.pad_leading(seconds, 2, "0")}"
+        "#{sign}#{hours}:#{String.pad_leading(to_string(minutes), 2, "0")}:#{String.pad_leading(to_string(seconds), 2, "0")}"
     end
   end
 
@@ -126,11 +133,8 @@ defmodule Timex.Parse.Timezones.Posix do
     with {:ok, offset, rest} <- parse_offset(str) do
       parse_tz(:dst_abbr, rest, %TZ{rule | std_offset: offset})
     else
-      {:error, nil, ""} ->
-        {:error, :invalid_offset, ""}
-
       {:error, nil, rest} ->
-        parse_tz(:dst_abbr, rest, rule)
+        {:error, :invalid_offset, rest}
 
       {:error, _, _} = err ->
         err
@@ -138,6 +142,8 @@ defmodule Timex.Parse.Timezones.Posix do
   end
 
   # dst[offset][,...]
+  defp parse_tz(:dst_abbr, "", %TZ{} = rule), do: {:ok, rule, ""}
+
   defp parse_tz(:dst_abbr, str, %TZ{} = rule) do
     with {:ok, abbr, rest} <- parse_abbrev(str),
          rule = %TZ{rule | dst_abbr: abbr} do
@@ -168,26 +174,20 @@ defmodule Timex.Parse.Timezones.Posix do
           parse_tz(:rule_period, rest, rule)
 
         _ ->
-          {:error, :invalid_tz_rule_format}
+          {:error, :invalid_tz_rule_format, rest}
       end
-    else
-      {:error, nil, ""} ->
-        {:ok, rule, ""}
-
-      {:error, nil, <<?,, rest::binary>>} ->
-        parse_tz(:rule_period, rest, rule)
-
-      {:error, _, _} = err ->
-        err
     end
   end
 
   defp parse_tz(:rule_period, str, %TZ{} = rule) do
     case String.split(str, ",", parts: 2, trim: false) do
       [start_dt, end_dt] ->
-        with {:ok, dst_start, _} <- parse_posixtz_datetime(start_dt),
+        with {:ok, dst_start, ""} <- parse_posixtz_datetime(start_dt),
              {:ok, dst_end, rest} <- parse_posixtz_datetime(end_dt) do
           {:ok, %TZ{rule | dst_start: dst_start, dst_end: dst_end}, rest}
+        else
+          {:ok, _, rest} -> {:error, :invalid_tz_rule_format, rest}
+          {:error, _, _} = error -> error
         end
 
       _ ->
@@ -219,8 +219,8 @@ defmodule Timex.Parse.Timezones.Posix do
   defp parse_month_week_day(str) do
     case String.split(str, ".", parts: 3, trim: false) do
       [m, n, rest] ->
-        case Integer.parse(rest) do
-          {d, rest} ->
+        case parse_integer_unsigned(rest) do
+          {:ok, d, rest} ->
             with {:ok, date} <- parse_month_week_day(m, n, d) do
               {:ok, date, rest}
             else
@@ -228,7 +228,7 @@ defmodule Timex.Parse.Timezones.Posix do
                 {:error, reason, str}
             end
 
-          :error ->
+          {:error, _, _} ->
             {:error, :expected_day_number, str}
         end
 
@@ -290,11 +290,15 @@ defmodule Timex.Parse.Timezones.Posix do
   defp parse_quoted_abbrev(<<?>, rest::binary>>, acc),
     do: {:ok, acc, rest}
 
-  defp parse_quoted_abbrev(<<c::char(), rest::binary>>, acc),
-    do: parse_quoted_abbrev(rest, acc <> <<c::char()>>)
+  defp parse_quoted_abbrev(<<c::char(), rest::binary>>, acc)
+       when is_alphabetic(c) or is_digit(c) or c in [?+, ?-],
+       do: parse_quoted_abbrev(rest, acc <> <<c::char()>>)
 
   defp parse_quoted_abbrev(<<>>, acc),
     do: {:error, :unclosed_quoted_abbreviation, acc}
+
+  defp parse_quoted_abbrev(rest, acc),
+    do: {:error, {:invalid_quoted_abbreviation, acc}, rest}
 
   defp parse_unquoted_abbrev(str, acc \\ "")
 
@@ -316,34 +320,42 @@ defmodule Timex.Parse.Timezones.Posix do
   defp parse_offset(str, sign) do
     sign = if sign == ?+, do: -1, else: 1
 
-    with {:ok, time, rest} <- parse_time(str),
-         {seconds, _} <- Timex.Time.to_seconds_after_midnight(time) do
-      {:ok, sign * seconds, rest}
+    with {:ok, {hour, minute, second}, rest} <- parse_time_components(str) do
+      {:ok, sign * (hour * 3600 + minute * 60 + second), rest}
     end
   end
 
   defp parse_time(str) do
+    with {:ok, {hour, minute, second}, rest} <- parse_time_components(str) do
+      case Time.new(hour, minute, second) do
+        {:ok, time} -> {:ok, time, rest}
+        {:error, reason} -> {:error, reason, str}
+      end
+    end
+  end
+
+  defp parse_time_components(str) do
     case parse_integer_unsigned(str) do
       {:ok, hh, <<?:, rest::binary>>} when hh >= 0 and hh <= 24 ->
         case parse_integer_unsigned(rest) do
           {:ok, mm, <<?:, rest::binary>>} when mm >= 0 and mm < 60 ->
             case parse_integer_unsigned(rest) do
               {:ok, ss, rest} when ss >= 0 and ss < 60 ->
-                {:ok, Timex.Time.new!(hh, mm, ss), rest}
+                {:ok, {hh, mm, ss}, rest}
 
               _ ->
-                {:ok, Timex.Time.new!(hh, mm, 0), rest}
+                {:error, :invalid_second, rest}
             end
 
           {:ok, mm, rest} when mm >= 0 and mm < 60 ->
-            {:ok, Timex.Time.new!(hh, mm, 0), rest}
+            {:ok, {hh, mm, 0}, rest}
 
           _ ->
-            {:ok, Timex.Time.new!(hh, 0, 0), rest}
+            {:error, :invalid_minute, rest}
         end
 
       {:ok, hh, rest} when hh >= 0 and hh <= 24 ->
-        {:ok, Timex.Time.new!(hh, 0, 0), rest}
+        {:ok, {hh, 0, 0}, rest}
 
       {:ok, _, _} ->
         {:error, :invalid_hour, str}
@@ -356,18 +368,12 @@ defmodule Timex.Parse.Timezones.Posix do
   defp to_integer(n) when is_integer(n) and n >= 0, do: {:ok, n}
 
   defp to_integer(s) when is_binary(s) do
-    with {:ok, n, _} <- parse_integer_signed(s) do
-      {:ok, n}
-    end
-  end
-
-  defp parse_integer_signed(str) do
-    case Integer.parse(str) do
-      {value, rest} ->
-        {:ok, value, rest}
+    case parse_integer_unsigned(s) do
+      {:ok, n, ""} ->
+        {:ok, n}
 
       _ ->
-        {:error, :invalid_number, str}
+        {:error, :invalid_number}
     end
   end
 

@@ -325,10 +325,11 @@ defmodule Timex.Timezone do
     if Tzdata.zone_exists?(name) do
       resolve(name, seconds_from_zeroyear, utc_or_wall)
     else
-      with {:ok, %PosixTimezone{} = posixtz, _} <- Posix.parse(name) do
-        PosixTimezone.to_timezone_info(posixtz, Timex.to_naive_datetime(datetime))
-      else
-        {:error, _, _} ->
+      case lookup_posix(name) do
+        %PosixTimezone{} = posixtz ->
+          PosixTimezone.to_timezone_info(posixtz, Timex.to_naive_datetime(datetime))
+
+        nil ->
           {:error, :time_zone_not_found}
       end
     end
@@ -725,7 +726,8 @@ defmodule Timex.Timezone do
   @doc false
   @spec lookup_posix(String.t()) :: PosixTimezone.t() | nil
   def lookup_posix(timezone) when is_binary(timezone) do
-    with {:ok, %PosixTimezone{} = posixtz, _} <- Posix.parse(timezone) do
+    with false <- String.contains?(timezone, "\n"),
+         {:ok, %PosixTimezone{} = posixtz, ""} <- Posix.parse(timezone) do
       posixtz
     else
       _ ->
