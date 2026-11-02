@@ -555,45 +555,13 @@ defmodule Timex.Format.DateTime.Formatter do
     pad_numeric(week, flags, width)
   end
 
-  def format_token(_locale, :week_mon, %{:year => year} = date, _modifiers, flags, width) do
-    new_year = Timex.Date.new!(year, 1, 1)
-    week_start = Timex.Date.beginning_of_week(new_year, :monday)
-
-    # This date can be calculated by taking the day number of the year,
-    # shifting the day number of the year down by the number of days which
-    # occurred in the previous year, then dividing by 7
-    day_num =
-      if Date.compare(week_start, new_year) == :lt do
-        prev_year_day_start = Date.day_of_year(week_start)
-        prev_year_day_end = Date.day_of_year(Timex.Date.new!(week_start.year, 12, 31))
-        shift = prev_year_day_end - prev_year_day_start
-        shift + Date.day_of_year(Timex.Date.new!(year, date.month, date.day))
-      else
-        Date.day_of_year(Timex.Date.new!(year, date.month, date.day))
-      end
-
-    div(day_num, 7)
+  def format_token(_locale, :week_mon, date, _modifiers, flags, width) do
+    week_number(date, :monday)
     |> pad_numeric(flags, width)
   end
 
-  def format_token(_locale, :week_sun, %{:year => year} = date, _modifiers, flags, width) do
-    new_year = Timex.Date.new!(year, 1, 1)
-    week_start = Timex.Date.beginning_of_week(new_year, :sunday)
-
-    # This date can be calculated by taking the day number of the year,
-    # shifting the day number of the year down by the number of days which
-    # occurred in the previous year, then dividing by 7
-    day_num =
-      if Date.compare(week_start, new_year) == :lt do
-        prev_year_day_start = Date.day_of_year(week_start)
-        prev_year_day_end = Date.day_of_year(Timex.Date.new!(week_start.year, 12, 31))
-        shift = prev_year_day_end - prev_year_day_start
-        shift + Date.day_of_year(Timex.Date.new!(year, date.month, date.day))
-      else
-        Date.day_of_year(Timex.Date.new!(year, date.month, date.day))
-      end
-
-    div(day_num, 7)
+  def format_token(_locale, :week_sun, date, _modifiers, flags, width) do
+    week_number(date, :sunday)
     |> pad_numeric(flags, width)
   end
 
@@ -857,6 +825,12 @@ defmodule Timex.Format.DateTime.Formatter do
 
   def format_token(_locale, token, _, _, _, _) do
     {:error, {:formatter, :unsupported_token, token}}
+  end
+
+  # Days before the first selected weekday belong to week zero (%W and %U).
+  defp week_number(date, weekstart) do
+    weekday = Timex.weekday!(date, weekstart) - 1
+    div(Timex.day(date) + 6 - weekday, 7)
   end
 
   defp pad_numeric(number, flags, width) when is_integer(number),

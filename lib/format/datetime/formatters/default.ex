@@ -47,8 +47,8 @@ defmodule Timex.Format.DateTime.Formatters.Default do
   ### Weeks
 
   * `{Wiso}`    - ISO week number (01..53)
-  * `{Wmon}`    - week number of the year, Monday first (01..53)
-  * `{Wsun}`    - week number of the year, Sunday first (01..53)
+  * `{Wmon}`    - week number of the year, Monday first (00..53)
+  * `{Wsun}`    - week number of the year, Sunday first (00..53)
 
   ### Time
 

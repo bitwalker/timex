@@ -20,6 +20,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Calculate Monday and Sunday week numbers from their first occurrence in the
+  year, including week zero before that day (#742).
 - Reject trailing input in singleton ISO/RFC3339 parsing and return parse errors
   for offsets truncated immediately after their sign.
 - Preserve translated month values when parsing full or abbreviated month names.
