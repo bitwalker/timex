@@ -157,7 +157,7 @@ defmodule Timex do
 
   Naive datetime values, including datetime tuples and maps without a timezone,
   are interpreted as wall time in the destination zone. If the wall time falls
-  in an IANA timezone gap, returns an `AmbiguousDateTime` with `type: :gap`.
+  in an IANA or explicit POSIX timezone gap, returns an `AmbiguousDateTime` with `type: :gap`.
   Its `before` value is the last valid instant before the gap and `after` is
   the first valid instant after it; neither represents the requested wall time.
 

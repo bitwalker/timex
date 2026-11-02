@@ -273,61 +273,19 @@ defmodule Timex.Timezone do
     get_utc_info("Etc/UTC", <<sign::utf8, offset::binary>>, datetime, utc_or_wall)
   end
 
-  defp get_info(<<"GMT", sign::utf8, offset::binary>>, _datetime, _utc_or_wall)
-       when sign in [?+, ?-] do
-    with offset_secs when is_integer(offset_secs) <- parse_offset(offset) do
-      hours = div(offset_secs, 3600)
-      minutes = div(rem(offset_secs, 3600), 60)
-
-      if hours != 0 or minutes != 0 do
-        hh = String.pad_leading(to_string(hours), 2, "0")
-        mm = String.pad_leading(to_string(minutes), 2, "0")
-
-        {suffix, abbr, offset_utc} =
-          cond do
-            sign == ?+ and minutes == 0 ->
-              {"+#{hours}", "-#{hh}", offset_secs * -1}
-
-            sign == ?+ ->
-              {"+#{hours}:#{mm}", "-#{hh}:#{mm}", offset_secs * -1}
-
-            sign == ?- and minutes == 0 ->
-              {"-#{hours}", "+#{hh}", offset_secs}
-
-            sign == ?- ->
-              {"-#{hours}:#{mm}", "+#{hh}:#{mm}", offset_secs}
-          end
-
-        %TimezoneInfo{
-          full_name: <<"Etc/GMT", suffix::binary>>,
-          abbreviation: abbr,
-          offset_std: 0,
-          offset_utc: offset_utc,
-          from: :min,
-          until: :max
-        }
-      else
-        %TimezoneInfo{
-          full_name: "Etc/GMT",
-          abbreviation: "GMT",
-          offset_std: 0,
-          offset_utc: 0,
-          from: :min,
-          until: :max
-        }
-      end
-    end
-  end
-
   defp get_info(name, datetime, utc_or_wall) when is_binary(name) do
-    seconds_from_zeroyear = Timex.to_gregorian_seconds(datetime)
-
     if Tzdata.zone_exists?(name) do
+      seconds_from_zeroyear = Timex.to_gregorian_seconds(datetime)
       resolve(name, seconds_from_zeroyear, utc_or_wall)
     else
       case lookup_posix(name) do
         %PosixTimezone{} = posixtz ->
-          PosixTimezone.to_timezone_info(posixtz, Timex.to_naive_datetime(datetime))
+          date =
+            if match?(%DateTime{}, datetime),
+              do: datetime,
+              else: Timex.to_naive_datetime(datetime)
+
+          PosixTimezone.to_timezone_info(posixtz, date, utc_or_wall)
 
         nil ->
           {:error, :time_zone_not_found}
@@ -493,9 +451,9 @@ defmodule Timex.Timezone do
   @doc """
   Converts a date to the given timezone, accepting a timezone name or `TimezoneInfo`.
 
-  A `NaiveDateTime` is interpreted as wall time in the destination zone. In an
-  IANA timezone gap, returns an `AmbiguousDateTime` with `type: :gap`, whose
-  `before` and `after` values bound the missing wall times. In an overlap,
+  A `NaiveDateTime` is interpreted as wall time in the destination zone. A gap in
+  an IANA zone or an explicit POSIX rule returns an `AmbiguousDateTime` with
+  `type: :gap`, whose `before` and `after` values bound the missing wall times. In an overlap,
   `type: :ambiguous` contains both valid interpretations in chronological order.
   Neither result chooses an interpretation for the caller. Names and
   `TimezoneInfo` values follow the same rules.
@@ -569,11 +527,11 @@ defmodule Timex.Timezone do
 
   def convert(%NaiveDateTime{} = date, tz) do
     with name when is_binary(name) <- name_of(tz) do
-      if Tzdata.zone_exists?(name) do
-        # A gap has no wall-time period to look up before conversion.
+      if Tzdata.zone_exists?(name) or match?(%PosixTimezone{}, lookup_posix(name)) do
+        # Rule-based zones must resolve wall time before selecting a single period.
         convert(date, %TimezoneInfo{full_name: name})
       else
-        # Synthetic offsets and POSIX zones retain their existing canonical names.
+        # Synthetic offsets derive their canonical labels from timezone info.
         with %TimezoneInfo{} = tzinfo <- get(name, date) do
           convert(date, tzinfo)
         end

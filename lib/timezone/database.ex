@@ -3,28 +3,28 @@ defmodule Timex.Timezone.Database do
 
   alias Timex.Timezone
   alias Timex.TimezoneInfo
+  alias Timex.PosixTimezone
 
   @impl true
   @doc false
   def time_zone_period_from_utc_iso_days(iso_days, time_zone) do
-    db = Tzdata.TimeZoneDatabase
+    if Tzdata.zone_exists?(time_zone) do
+      Tzdata.TimeZoneDatabase.time_zone_period_from_utc_iso_days(iso_days, time_zone)
+    else
+      # These digits are UTC, not local wall time in the requested zone.
+      {year, month, day, hour, minute, second, microsecond} =
+        Calendar.ISO.naive_datetime_from_iso_days(iso_days)
 
-    case db.time_zone_period_from_utc_iso_days(iso_days, time_zone) do
-      {:error, :time_zone_not_found} ->
-        # Get a NaiveDateTime for time_zone_periods_from_wall_datetime
-        {year, month, day, hour, minute, second, microsecond} =
-          Calendar.ISO.naive_datetime_from_iso_days(iso_days)
-
-        with {:ok, naive} <-
-               NaiveDateTime.new(year, month, day, hour, minute, second, microsecond) do
-          time_zone_periods_from_wall_datetime(naive, time_zone)
-        else
-          {:error, _} ->
-            {:error, :time_zone_not_found}
+      with {:ok, naive} <-
+             NaiveDateTime.new(year, month, day, hour, minute, second, microsecond) do
+        case Timezone.lookup_posix(time_zone) do
+          %PosixTimezone{} = tz -> PosixTimezone.period_from_utc(tz, naive)
+          nil -> time_zone_periods_from_wall_datetime_fallback(naive, time_zone)
         end
-
-      result ->
-        result
+      else
+        {:error, _} ->
+          {:error, :time_zone_not_found}
+      end
     end
   end
 
@@ -141,8 +141,14 @@ defmodule Timex.Timezone.Database do
 
   # Fallback method which attempts to lookup the timezone by name
   defp time_zone_periods_from_wall_datetime_by_name(naive, time_zone) do
-    with %TimezoneInfo{} = tz <- Timezone.get(time_zone, naive) do
-      {:ok, TimezoneInfo.to_period(tz)}
+    case Timezone.lookup_posix(time_zone) do
+      %PosixTimezone{} = tz ->
+        PosixTimezone.periods_from_wall_datetime(tz, naive)
+
+      nil ->
+        with %TimezoneInfo{} = tz <- Timezone.get(time_zone, naive) do
+          {:ok, TimezoneInfo.to_period(tz)}
+        end
     end
   end
 

@@ -7,6 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Explicit POSIX timezone conversions now use the same gap-boundary and overlap
+  results as IANA zones. `PosixTimezone.is_dst?/2` returns true only for a unique
+  daylight interpretation; ambiguous or nonexistent wall times return false.
 - Parsed POSIX transition bounds now store signed seconds from midnight rather
   than `Time` values, supporting hour 24 and signed transition hours through 167.
   Existing custom `PosixTimezone` structs with `Time` bounds remain supported.
@@ -18,11 +21,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   for zone names and `TimezoneInfo` inputs (#789, #691). Callers matching
   `{:error, {:could_not_resolve_timezone, ...}}` for gaps must handle this result
   explicitly. Overlaps retain `type: :ambiguous`; neither result selects a time
-  automatically. Date-only `%Date{}` midnight handling and the existing POSIX
-  transition model are unchanged.
+  automatically. Date-only `%Date{}` midnight handling is unchanged.
 
 ### Fixed
 
+- Honor UTC versus wall-time lookup for POSIX rules and preserve aware instants
+  through calendar and Timex conversions, including GMT-prefixed specifications.
 - Preserve explicit POSIX transition rules in canonical timezone names, including
   parser round trips and transitions that carry into an adjacent day or year.
 - Evaluate POSIX recurring transition dates correctly across Julian variants,
