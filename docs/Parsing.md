@@ -8,6 +8,12 @@ Successful parsing consumes the entire input. Trailing characters, including
 whitespace, must be represented in the format string. For example,
 `Timex.parse("2025-03-09T12:34:56Zjunk", "{ISO:Extended}")` returns a parse error.
 
+The built-in parsers compare English month names and the current process locale's
+translations after applying locale-independent Unicode lowercasing (`String.downcase/1`).
+For example, `March`, `march`, and `MARCH` all match `{Mfull}` or strftime `%B`.
+Full-name directives remain distinct from abbreviation directives: `Mar` matches
+`{Mshort}`, `%b`, or `%h`, but does not match `{Mfull}` or `%B`.
+
 Parsing a DateTime from an input string is very similar to formatting them, and is quite simple:
 
 ```elixir

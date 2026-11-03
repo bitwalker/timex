@@ -3,9 +3,27 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 4.0.0 — Unreleased
 
-### Changed
+### Added/Changed
+
+- Require Elixir 1.16 and Erlang/OTP 26 or later.
+- Require tzdata 1.2.2 or later and use its verified built-in HTTP client by
+  default, removing Timex's mandatory Hackney dependency chain. Deployments need
+  an OS CA certificate bundle; remove explicit Hackney client configuration to
+  use the default. Applications depending on Hackney separately must update and
+  audit that dependency themselves.
+- Support both Gettext 0.26 and Gettext 1.x.
+- Remove deprecated protocol default arguments for Elixir 1.20 compatibility.
+  `Timex.compare/2`, `Timex.diff/2` and `Timex.to_datetime/1` retain their defaults;
+  direct calls to the protocols must supply the granularity or timezone explicitly.
+- Improve duration parsing performance.
+- Add the `cycled` option to `Timex.between?/4` for time ranges crossing midnight.
+- Add Croatian translations.
+- Use current Elixir charlist and stepped-range syntax.
+- Verify GitHub Actions dependencies with a generated action lockfile and add
+  actionlint, ShellCheck and zizmor checks, with pinned tools and least-privilege
+  workflow permissions.
 
 - Define ISO date arithmetic/conversion support as years 0 through 9999, with
   explicit unsupported-calendar/year errors and consistent boundary checks on
@@ -39,6 +57,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   automatically. Date-only `%Date{}` midnight handling is unchanged.
 
 ### Fixed
+
+- Resolve UTC timezone periods without converting unused transition limits
+  beyond year 9999 on older supported runtimes (#737).
+- Normalize weekday aliases for Erlang date tuple week calculations and preserve
+  structured formatting errors in bang APIs.
+- Document elapsed relative-time truncation and deterministic reference-clock
+  boundaries without changing datetime rounding policy (#752).
 
 - Restore fractional and leading-zero `Etc/GMT` aliases with POSIX signs while
   preserving canonical IANA names; reject malformed synthetic aliases (#394).
@@ -93,31 +118,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   lookup, conversion and setting (#685).
 - Resolve local timezone information using UTC for aware instants and honor the
   explicit clock basis in local timezone lookups (#755).
-
-## 4.0.0 — 2026-10-31
-
-### Added/Changed
-
-- Require Elixir 1.16 and Erlang/OTP 26 or later.
-- Require tzdata 1.2.2 or later and use its verified built-in HTTP client by
-  default, removing Timex's mandatory Hackney dependency chain. Deployments need
-  an OS CA certificate bundle; remove explicit Hackney client configuration to
-  use the default. Applications depending on Hackney separately must update and
-  audit that dependency themselves.
-- Support both Gettext 0.26 and Gettext 1.x.
-- Remove deprecated protocol default arguments for Elixir 1.20 compatibility.
-  `Timex.compare/2`, `Timex.diff/2` and `Timex.to_datetime/1` retain their defaults;
-  direct calls to the protocols must supply the granularity or timezone explicitly.
-- Changed `Timex.Duration.Parse` to be 2x faster
-- Fixed compilation warning from gettext
-- Added `cycled` option for `Timex.between?/4` to support time-range checks that pass through midnight
-- Add Croatian translation
-- Changed charlists from the deprecated `''` to `~c""`
-- Changed negative range to pass the step of default value for suppressing deprecation warnings
-- Update Gettext to 0.26
-
-### Fixed
-
 - Handle IANA `24:00` transitions on OTP 29 with updated tzdata.
 - Keep test timezone data offline and check live IANA updates separately.
 - Preserve datetime precision in elapsed shifts while retaining newly introduced
@@ -126,9 +126,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `Timex.now/1` typespec to remove the `AmbiguousDateTime`
 - Corrected pluralization rules for bg/cs/he/id/ro/ru
 - Fixed documentation formatting of `Timex.TimezoneInfo.create/6`
-- Updated tzdata to fix issues with 2024b
-- Fix deprecation: Module.eval_quoted/4 is deprecated. Use Code.eval_quoted/3 instead
-- Fix deprecation: "min..max inside match is deprecated"
+- Resolve compiler and deprecation diagnostics on supported Elixir releases.
 
 ---
 

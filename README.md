@@ -54,6 +54,30 @@ and lower-level timezone APIs retain their own contracts. Built-in protocol
 implementations assume supported inputs; direct protocol callers must enforce
 those preconditions.
 
+## Migrating to Timex 4.x
+
+- Upgrade to Elixir 1.16 / OTP 26 or later and update dependencies. Check the
+  certificate and HTTP-client requirements above, then audit your application's
+  complete dependency graph.
+- Public `Timex.compare/2`, `diff/2`, and `to_datetime/1` retain their defaults.
+  Direct protocol calls must supply the granularity or timezone explicitly.
+- Handle `AmbiguousDateTime` with `type: :gap` when converting nonexistent naive
+  wall times through IANA or explicit POSIX zones. Its `before` and `after` values
+  bound the gap; overlaps use `type: :ambiguous`. Neither selects a time for you.
+- Setters now validate the final result and refresh timezone metadata. Changing
+  January 31 to February clamps the day. Use `validate: false` only when raw,
+  potentially invalid fields are intended. Date-only tuple setters retain their
+  date-only shape.
+- Relative Date targets compare calendar days against the reference's UTC date.
+  Datetime targets retain elapsed-time thresholds; use an explicit reference for
+  deterministic output at those thresholds.
+- Built-in date arithmetic requires the ISO calendar and supported years described
+  above. Parsing requires complete input, including literal whitespace in the format.
+- Parsed `PosixTimezone` transition bounds are signed seconds from midnight.
+  Existing custom structs with `Time` bounds remain accepted. Explicit POSIX
+  conversions now expose gap/overlap results, and `is_dst?/2` is true only for a
+  unique daylight interpretation.
+
 ## Migrating to Timex 3.x
 
 If you are coming from an earlier version of Timex, it is recommended that you evaluate whether or not the functionality provided
@@ -175,9 +199,9 @@ and/or `Timex.Parse.DateTime.Parser` behaviours, depending on your needs.
 
 ### Timex with escript
 
-If you need to use Timex from within an escript, add `{:tzdata, "~> 0.1.8", override: true}` to your deps, more recent versions of :tzdata are unable to work in an escript because of the need to load ETS table files from priv, and due to the way ETS loads these files, it's not possible to do so.
-
-If your build still throws an error after this, try removing the `_build` and `deps` folder. Then execute `mix deps.unlock tzdata` and `mix deps.get`.
+Timex 4 requires tzdata 1.2.2 or later, including in escript deployments.
+Tzdata loads timezone data from files in its `priv` directory, so those files
+must be accessible at runtime. The historical tzdata 0.1.8 override is unsupported.
 
 ### Automatic time zone updates
 
