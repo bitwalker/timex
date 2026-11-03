@@ -5,26 +5,33 @@ defmodule Timex.Timezone.Database do
   alias Timex.TimezoneInfo
   alias Timex.PosixTimezone
 
+  @last_iso_day Calendar.ISO.date_to_iso_days(9999, 12, 31)
+
   @impl true
   @doc false
-  def time_zone_period_from_utc_iso_days(iso_days, time_zone) do
-    if Tzdata.zone_exists?(time_zone) do
-      Tzdata.TimeZoneDatabase.time_zone_period_from_utc_iso_days(iso_days, time_zone)
-    else
-      # These digits are UTC, not local wall time in the requested zone.
-      {year, month, day, hour, minute, second, microsecond} =
-        Calendar.ISO.naive_datetime_from_iso_days(iso_days)
+  def time_zone_period_from_utc_iso_days({days, _}, _time_zone)
+      when days not in 0..@last_iso_day,
+      do: {:error, :time_zone_not_found}
 
-      with {:ok, naive} <-
-             NaiveDateTime.new(year, month, day, hour, minute, second, microsecond) do
+  def time_zone_period_from_utc_iso_days(iso_days, time_zone) do
+    # These digits are UTC, not local wall time in the requested zone.
+    {year, month, day, hour, minute, second, microsecond} =
+      Calendar.ISO.naive_datetime_from_iso_days(iso_days)
+
+    with {:ok, naive} <-
+           NaiveDateTime.new(year, month, day, hour, minute, second, microsecond) do
+      if Tzdata.zone_exists?(time_zone) do
+        seconds = naive |> NaiveDateTime.to_erl() |> :calendar.datetime_to_gregorian_seconds()
+
+        with {:ok, period} <- utc_period(time_zone, seconds), do: {:ok, to_period(period)}
+      else
         case Timezone.lookup_posix(time_zone) do
           %PosixTimezone{} = tz -> PosixTimezone.period_from_utc(tz, naive)
           nil -> time_zone_periods_from_wall_datetime_fallback(naive, time_zone)
         end
-      else
-        {:error, _} ->
-          {:error, :time_zone_not_found}
       end
+    else
+      _ -> {:error, :time_zone_not_found}
     end
   end
 
