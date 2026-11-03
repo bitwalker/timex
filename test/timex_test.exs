@@ -741,6 +741,16 @@ defmodule TimexTests do
     assert {:error, :invalid_date} = Timex.end_of_quarter(nil)
   end
 
+  test "date tuples normalize weekday names before calculating week boundaries" do
+    for start <- [:mon, "Monday", 1] do
+      assert Timex.beginning_of_week({2026, 1, 1}, start) == {2025, 12, 29}
+    end
+
+    for start <- [:sun, "Sunday", 7] do
+      assert Timex.beginning_of_week({2026, 1, 1}, start) == {2025, 12, 28}
+    end
+  end
+
   test "beginning_of_week" do
     # Monday 30th November 2015
     date = Timex.to_datetime({{2015, 11, 30}, {13, 30, 30}})

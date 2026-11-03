@@ -99,7 +99,7 @@ defimpl Timex.Protocol, for: Tuple do
   def beginning_of_week({y, m, d}, weekstart) when is_date(y, m, d) do
     with ws when is_atom(ws) <- Timex.standardize_week_start(weekstart) do
       Timex.Date.new!(y, m, d)
-      |> Timex.Date.beginning_of_week(weekstart)
+      |> Timex.Date.beginning_of_week(ws)
       |> Date.to_erl()
     end
   end
