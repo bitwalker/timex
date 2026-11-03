@@ -91,11 +91,11 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   end
 
   defmacrop integer_32bit_be do
-    quote do: big - size(4) - unit(8) - integer
+    quote do: big - size(4) - unit(8) - signed - integer
   end
 
   defmacrop integer_64bit_be do
-    quote do: big - size(8) - unit(8) - integer
+    quote do: big - size(8) - unit(8) - signed - integer
   end
 
   defmacrop signed_char_be do
@@ -253,12 +253,12 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   #     | NL| POSIX TZ string       (0...)          |NL |
   #     +---+---------------------------------------+---+
   defp parse_content(version, <<header_raw::bytes(24), rest::binary>>, zone) do
-    {utc_count, header_raw} = parse_i32(header_raw)
-    {wall_count, header_raw} = parse_i32(header_raw)
-    {leap_count, header_raw} = parse_i32(header_raw)
-    {tx_count, header_raw} = parse_i32(header_raw)
-    {type_count, header_raw} = parse_i32(header_raw)
-    {abbrev_length, _} = parse_i32(header_raw)
+    {utc_count, header_raw} = parse_u32(header_raw)
+    {wall_count, header_raw} = parse_u32(header_raw)
+    {leap_count, header_raw} = parse_u32(header_raw)
+    {tx_count, header_raw} = parse_u32(header_raw)
+    {type_count, header_raw} = parse_u32(header_raw)
+    {abbrev_length, _} = parse_u32(header_raw)
 
     header = %Header{
       utc_count: utc_count,
@@ -466,6 +466,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
 
   defp parse_i32(<<val::integer_32bit_be(), rest::binary>>), do: {val, rest}
   defp parse_i64(<<val::integer_64bit_be(), rest::binary>>), do: {val, rest}
+  defp parse_u32(<<val::unsigned-big-integer-size(32), rest::binary>>), do: {val, rest}
   defp parse_char(<<val::signed_char_be(), rest::binary>>), do: {val, rest}
   defp parse_uchar(<<val::unsigned_char_be(), rest::binary>>), do: {val, rest}
 

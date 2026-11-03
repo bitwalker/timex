@@ -25,6 +25,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Decode signed TZif transition epochs, UTC offsets and leap corrections
+  correctly, while retaining unsigned header counts.
 - Parse TZif footers through the shared POSIX grammar, handling hour24 and
   version-appropriate extended transitions without raising. Validate complete
   newline framing and footer content, and correct fixed-zone/DST defaults.
