@@ -29,6 +29,8 @@ defmodule Timex.Parse.Timezones.Posix do
   Hours may range from -167 through 167, allowing transitions on adjacent days.
   Timezone offset hours retain their separate range of 0 through 24.
   The timezone name includes its explicit transition rules so it can be reparsed.
+  Pass `extended_transition_times: false` to `parse/2` for classic unsigned
+  transition hours through 24, as required in a version 2 TZif footer.
 
   For more info, see [POSIX.1-2024](https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap08.html)
   and [RFC 9636 section 3.3.2](https://www.rfc-editor.org/rfc/rfc9636.html#section-3.3.2).
@@ -65,9 +67,11 @@ defmodule Timex.Parse.Timezones.Posix do
     quote do: size(1) - unit(8) - integer
   end
 
-  def parse(s) when is_binary(s) do
+  def parse(s, options \\ []) when is_binary(s) do
+    extended? = Keyword.get(options, :extended_transition_times, true)
+
     with {:ok, format_str, rest} <- parse_newline_terminated_str(s),
-         {:ok, tz, format_rest} <- parse_tz(format_str) do
+         {:ok, tz, format_rest} <- parse_tz(format_str, extended?) do
       {:ok, finalize(tz, format_str, format_rest), format_rest <> rest}
     end
   end
@@ -139,18 +143,18 @@ defmodule Timex.Parse.Timezones.Posix do
     end
   end
 
-  defp parse_tz(""), do: {:ok, nil, ""}
-  defp parse_tz(str), do: parse_tz(:std_abbr, str, %TZ{})
+  defp parse_tz("", _extended?), do: {:ok, nil, ""}
+  defp parse_tz(str, extended?), do: parse_tz(:std_abbr, str, %TZ{}, extended?)
 
-  defp parse_tz(:std_abbr, str, %TZ{} = rule) do
+  defp parse_tz(:std_abbr, str, %TZ{} = rule, extended?) do
     with {:ok, abbr, rest} <- parse_abbrev(str) do
-      parse_tz(:std_offset, rest, %TZ{rule | std_abbr: abbr})
+      parse_tz(:std_offset, rest, %TZ{rule | std_abbr: abbr}, extended?)
     end
   end
 
-  defp parse_tz(:std_offset, str, %TZ{} = rule) do
+  defp parse_tz(:std_offset, str, %TZ{} = rule, extended?) do
     with {:ok, offset, rest} <- parse_offset(str) do
-      parse_tz(:dst_abbr, rest, %TZ{rule | std_offset: offset})
+      parse_tz(:dst_abbr, rest, %TZ{rule | std_offset: offset}, extended?)
     else
       {:error, nil, rest} ->
         {:error, :invalid_offset, rest}
@@ -161,9 +165,9 @@ defmodule Timex.Parse.Timezones.Posix do
   end
 
   # dst[offset][,...]
-  defp parse_tz(:dst_abbr, "", %TZ{} = rule), do: {:ok, rule, ""}
+  defp parse_tz(:dst_abbr, "", %TZ{} = rule, _extended?), do: {:ok, rule, ""}
 
-  defp parse_tz(:dst_abbr, str, %TZ{} = rule) do
+  defp parse_tz(:dst_abbr, str, %TZ{} = rule, extended?) do
     with {:ok, abbr, rest} <- parse_abbrev(str),
          rule = %TZ{rule | dst_abbr: abbr} do
       # dst_offset is optional, and may or may not be followed by a comma and start/end rule
@@ -173,16 +177,16 @@ defmodule Timex.Parse.Timezones.Posix do
           {:ok, rule, ""}
 
         <<?,, rest::binary>> ->
-          parse_tz(:rule_period, rest, rule)
+          parse_tz(:rule_period, rest, rule, extended?)
 
         _ ->
-          parse_tz(:dst_offset, rest, rule)
+          parse_tz(:dst_offset, rest, rule, extended?)
       end
     end
   end
 
   # offset[,...]
-  defp parse_tz(:dst_offset, str, %TZ{} = rule) do
+  defp parse_tz(:dst_offset, str, %TZ{} = rule, extended?) do
     with {:ok, offset, rest} <- parse_offset(str),
          rule = %TZ{rule | dst_offset: offset} do
       case rest do
@@ -190,7 +194,7 @@ defmodule Timex.Parse.Timezones.Posix do
           {:ok, rule, ""}
 
         <<?,, rest::binary>> ->
-          parse_tz(:rule_period, rest, rule)
+          parse_tz(:rule_period, rest, rule, extended?)
 
         _ ->
           {:error, :invalid_tz_rule_format, rest}
@@ -198,11 +202,11 @@ defmodule Timex.Parse.Timezones.Posix do
     end
   end
 
-  defp parse_tz(:rule_period, str, %TZ{} = rule) do
+  defp parse_tz(:rule_period, str, %TZ{} = rule, extended?) do
     case String.split(str, ",", parts: 2, trim: false) do
       [start_dt, end_dt] ->
-        with {:ok, dst_start, ""} <- parse_posixtz_datetime(start_dt),
-             {:ok, dst_end, rest} <- parse_posixtz_datetime(end_dt) do
+        with {:ok, dst_start, ""} <- parse_posixtz_datetime(start_dt, extended?),
+             {:ok, dst_end, rest} <- parse_posixtz_datetime(end_dt, extended?) do
           {:ok, %TZ{rule | dst_start: dst_start, dst_end: dst_end}, rest}
         else
           {:ok, _, rest} -> {:error, :invalid_tz_rule_format, rest}
@@ -214,7 +218,7 @@ defmodule Timex.Parse.Timezones.Posix do
     end
   end
 
-  defp parse_posixtz_datetime(str) do
+  defp parse_posixtz_datetime(str, extended?) do
     result =
       case str do
         <<?M, rest::binary>> -> parse_month_week_day(rest)
@@ -225,7 +229,7 @@ defmodule Timex.Parse.Timezones.Posix do
     with {:ok, date, rest} <- result do
       case rest do
         <<?/, rest::binary>> ->
-          with {:ok, time, rest} <- parse_time(rest) do
+          with {:ok, time, rest} <- parse_time(rest, extended?) do
             {:ok, {date, time}, rest}
           end
 
@@ -344,13 +348,13 @@ defmodule Timex.Parse.Timezones.Posix do
     end
   end
 
-  defp parse_time(<<sign, rest::binary>>) when sign in [?+, ?-],
-    do: parse_time(rest, if(sign == ?-, do: -1, else: 1))
+  defp parse_time(<<sign, rest::binary>>, true) when sign in [?+, ?-],
+    do: parse_time(rest, 167, if(sign == ?-, do: -1, else: 1))
 
-  defp parse_time(str), do: parse_time(str, 1)
+  defp parse_time(str, extended?), do: parse_time(str, if(extended?, do: 167, else: 24), 1)
 
-  defp parse_time(str, sign) do
-    with {:ok, {hour, minute, second}, rest} <- parse_time_components(str, 167) do
+  defp parse_time(str, max_hour, sign) do
+    with {:ok, {hour, minute, second}, rest} <- parse_time_components(str, max_hour) do
       {:ok, sign * (hour * 3600 + minute * 60 + second), rest}
     end
   end

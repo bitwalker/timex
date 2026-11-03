@@ -4,7 +4,9 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   such as those found in /usr/local/zoneinfo.
   """
 
-  # See https://tools.ietf.org/id/draft-murchison-tzdist-tzif-00.html for details
+  # See https://www.rfc-editor.org/rfc/rfc9636.html for details
+  alias Timex.Parse.Timezones.Posix
+
   defmodule Zone do
     @moduledoc """
     Represents the data retrieved from a binary tzfile.
@@ -67,6 +69,8 @@ defmodule Timex.Parse.ZoneInfo.Parser do
 
   defmodule Rule do
     @moduledoc false
+    # Offsets retain POSIX seconds west of UTC. Ordinary bounds retain Time;
+    # newly supported carried bounds use signed seconds from midnight.
     defstruct std_abbr: nil,
               std_offset: 0,
               dst_abbr: nil,
@@ -74,9 +78,6 @@ defmodule Timex.Parse.ZoneInfo.Parser do
               start_time: nil,
               end_time: nil
   end
-
-  defguardp is_digit(c) when c >= ?0 and c <= ?9
-  defguardp is_alphabetic(c) when (c >= ?A and c <= ?Z) or (c >= ?a and c <= ?z)
 
   ##############
   # Macros defining common bitstring modifier combinations in zoneinfo files
@@ -110,7 +111,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
 
   Parses the timezone information inside, and returns it as a Zone struct.
   """
-  @spec parse(binary) :: {:ok, Zone.t()} | {:error, binary}
+  @spec parse(binary) :: {:ok, Zone.t()} | {:error, term()}
   def parse(<<?T, ?Z, ?i, ?f, version::bytes(1), _reserved::bytes(15), rest::binary>>) do
     version =
       case version do
@@ -196,6 +197,9 @@ defmodule Timex.Parse.ZoneInfo.Parser do
     else
       {:header, bytes} ->
         {:error, {:invalid_version_header, version}, bytes}
+
+      {:error, _, _} = error ->
+        error
     end
   end
 
@@ -377,11 +381,26 @@ defmodule Timex.Parse.ZoneInfo.Parser do
     end
   end
 
-  # stdoffset[dst[offset][,start[/time],end[/time]]]
-  defp parse_posixtz_string(_version, <<?\n, rest::binary>>, %Zone{} = zone) do
-    with {:ok, format_str, rest} <- parse_newline_terminated_str(rest),
-         {:ok, rule, format_rest} <- parse_tz(format_str) do
-      {:ok, %Zone{zone | rule: rule}, format_rest <> rest}
+  # TZif frames its footer with two newlines. Parse only the complete enclosed
+  # string; the shared POSIX scanner also supports embedded input and remainders.
+  defp parse_posixtz_string(version, <<?\n, data::binary>>, %Zone{} = zone) do
+    case :binary.match(data, "\n") do
+      {size, 1} ->
+        <<footer::binary-size(^size), ?\n, rest::binary>> = data
+
+        case Posix.parse(footer, extended_transition_times: version >= 3) do
+          {:ok, rule, ""} ->
+            {:ok, %Zone{zone | rule: to_rule(rule)}, rest}
+
+          {:ok, _, remainder} ->
+            {:error, :invalid_tz_rule_format, remainder}
+
+          {:error, reason, remainder} ->
+            {:error, reason, remainder}
+        end
+
+      :nomatch ->
+        {:error, :unterminated_posix_footer, data}
     end
   end
 
@@ -389,276 +408,37 @@ defmodule Timex.Parse.ZoneInfo.Parser do
     {:error, {:invalid_format, "expected newline to follow set of utc/local indicators"}, rest}
   end
 
-  defp parse_tz(""), do: {:ok, nil, ""}
-  defp parse_tz(str), do: parse_tz(:std_abbr, str, %Rule{})
+  defp to_rule(nil), do: nil
 
-  defp parse_tz(:std_abbr, str, %Rule{} = rule) do
-    with {:ok, abbr, rest} <- parse_abbrev(str) do
-      parse_tz(:std_offset, rest, %Rule{rule | std_abbr: abbr, dst_abbr: abbr})
-    end
+  defp to_rule(%Timex.PosixTimezone{} = tz) do
+    %Rule{
+      std_abbr: tz.std_abbr,
+      std_offset: -tz.std_offset,
+      dst_abbr: tz.dst_abbr,
+      dst_offset: -tz.dst_offset,
+      start_time: to_rule_bound(tz.dst_start),
+      end_time: to_rule_bound(tz.dst_end)
+    }
   end
 
-  defp parse_tz(:std_offset, str, %Rule{} = rule) do
-    with {:ok, offset, rest} <- parse_offset(str) do
-      parse_tz(:dst_abbr, rest, %Rule{rule | std_offset: offset, dst_offset: offset})
-    else
-      {:error, nil, ""} ->
-        {:ok, rule, ""}
+  defp to_rule_bound(nil), do: nil
 
-      {:error, nil, rest} ->
-        parse_tz(:dst_abbr, rest, rule)
-
-      {:error, _, _} = err ->
-        err
-    end
-  end
-
-  # dst[offset][,...]
-  defp parse_tz(:dst_abbr, str, %Rule{} = rule) do
-    with {:ok, abbr, rest} <- parse_abbrev(str),
-         rule = %Rule{rule | dst_abbr: abbr} do
-      # dst_offset is optional, and may or may not be followed by a comma and start/end rule
-      # if the offset is not present.
-      case rest do
-        <<>> ->
-          {:ok, rule, ""}
-
-        <<?,, rest::binary>> ->
-          parse_tz(:rule_period, rest, rule)
-
-        _ ->
-          parse_tz(:dst_offset, rest, rule)
-      end
-    end
-  end
-
-  # offset[,...]
-  defp parse_tz(:dst_offset, str, %Rule{} = rule) do
-    with {:ok, offset, rest} <- parse_offset(str),
-         rule = %Rule{rule | dst_offset: offset} do
-      case rest do
-        <<>> ->
-          {:ok, rule, ""}
-
-        <<?,, rest::binary>> ->
-          parse_tz(:rule_period, rest, rule)
-
-        _ ->
-          {:error, :invalid_tz_rule_format}
-      end
-    else
-      {:error, nil, ""} ->
-        {:ok, rule, ""}
-
-      {:error, nil, <<?,, rest::binary>>} ->
-        parse_tz(:rule_period, rest, rule)
-
-      {:error, _, _} = err ->
-        err
-    end
-  end
-
-  defp parse_tz(:rule_period, str, %Rule{} = rule) do
-    case String.split(str, ",", parts: 2, trim: false) do
-      [start_dt, end_dt] ->
-        with {:ok, start_time, _} <- parse_posixtz_datetime(start_dt),
-             {:ok, end_time, rest} <- parse_posixtz_datetime(end_dt) do
-          {:ok, %Rule{rule | start_time: start_time, end_time: end_time}, rest}
-        end
-
-      _ ->
-        {:error, :expected_datetime_range, str}
-    end
-  end
-
-  defp parse_posixtz_datetime(str) do
-    result =
-      case str do
-        <<?M, rest::binary>> -> parse_month_week_day(rest)
-        <<?J, rest::binary>> -> parse_julian_day(rest, allow_leap_days: false)
-        _ -> parse_julian_day(str, allow_leap_days: true)
+  defp to_rule_bound({date, seconds}) do
+    date =
+      case date do
+        {:julian, day} -> {:julian, day, [allow_leap_days: false]}
+        {:julian_leap, day} -> {:julian, day, [allow_leap_days: true]}
+        other -> other
       end
 
-    with {:ok, date, rest} <- result do
-      case rest do
-        <<?/, rest::binary>> ->
-          with {:ok, time, rest} <- parse_time(rest) do
-            {:ok, {date, time}, rest}
-          end
-
-        _ ->
-          {:ok, {date, Timex.Time.new!(2, 0, 0, 0)}, rest}
+    time =
+      if seconds >= 0 and seconds < 86_400 do
+        Time.new!(div(seconds, 3600), div(rem(seconds, 3600), 60), rem(seconds, 60), 0)
+      else
+        seconds
       end
-    end
-  end
 
-  defp parse_month_week_day(str) do
-    case String.split(str, ".", parts: 3, trim: false) do
-      [m, n, rest] ->
-        case Integer.parse(rest) do
-          {d, rest} ->
-            with {:ok, date} <- parse_month_week_day(m, n, d) do
-              {:ok, date, rest}
-            else
-              {:error, reason} ->
-                {:error, reason, str}
-            end
-
-          :error ->
-            {:error, :expected_day_number, str}
-        end
-
-      _ ->
-        {:error, :invalid_month_week_day, str}
-    end
-  end
-
-  defp parse_month_week_day(m, n, d) do
-    with {:ok, m} <- to_integer(m),
-         {:ok, n} <- to_integer(n),
-         {:ok, d} <- to_integer(d) do
-      cond do
-        m < 1 or m > 12 ->
-          {:error, :invalid_month}
-
-        n < 1 or n > 5 ->
-          {:error, :invalid_week_of_month}
-
-        d < 0 or d > 6 ->
-          {:error, :invalid_week_day}
-
-        :else ->
-          {:ok, {:mwd, {m, n, d}}}
-      end
-    end
-  end
-
-  defp parse_julian_day(str, opts) do
-    with {:ok, day, rest} <- parse_integer_unsigned(str) do
-      allow_leaps? = Keyword.get(opts, :allow_leap_days, true)
-
-      cond do
-        # Day of year including Feb 29
-        allow_leaps? and day >= 0 and day <= 365 ->
-          {:ok, {:julian, day, opts}, rest}
-
-        allow_leaps? ->
-          {:error, {:invalid_julian_day, day}, str}
-
-        # Day of year without Feb 29, i.e. day 59 is Feb 28, and day 60 is Mar 1
-        day >= 1 and day <= 365 ->
-          {:ok, {:julian, day, opts}, rest}
-
-        :else ->
-          {:error, {:invalid_julian_day, day}, str}
-      end
-    end
-  end
-
-  defp parse_abbrev(<<?<, rest::binary>>), do: parse_quoted_abbrev(rest)
-  defp parse_abbrev(str), do: parse_unquoted_abbrev(str)
-
-  defp parse_quoted_abbrev(str, acc \\ "")
-
-  defp parse_quoted_abbrev(<<?>, rest::binary>>, acc) when byte_size(acc) < 3,
-    do: {:error, {:invalid_quoted_abbreviation, acc}, rest}
-
-  defp parse_quoted_abbrev(<<?>, rest::binary>>, acc),
-    do: {:ok, acc, rest}
-
-  defp parse_quoted_abbrev(<<c::char(), rest::binary>>, acc),
-    do: parse_quoted_abbrev(rest, acc <> <<c::char()>>)
-
-  defp parse_quoted_abbrev(<<>>, acc),
-    do: {:error, :unclosed_quoted_abbreviation, acc}
-
-  defp parse_unquoted_abbrev(str, acc \\ "")
-
-  defp parse_unquoted_abbrev(<<c::char(), rest::binary>>, acc) when is_alphabetic(c),
-    do: parse_unquoted_abbrev(rest, acc <> <<c::char()>>)
-
-  defp parse_unquoted_abbrev(rest, acc) when byte_size(acc) < 3,
-    do: {:error, {:invalid_unquoted_abbreviation, acc}, rest}
-
-  defp parse_unquoted_abbrev(rest, acc),
-    do: {:ok, acc, rest}
-
-  defp parse_offset(<<sign::char(), rest::binary>>) when sign in [?+, ?-],
-    do: parse_offset(rest, sign)
-
-  defp parse_offset(str) when is_binary(str),
-    do: parse_offset(str, ?+)
-
-  defp parse_offset(str, sign) do
-    sign = if sign == ?+, do: 1, else: -1
-
-    with {:ok, time, rest} <- parse_time(str),
-         {seconds, _} <- Timex.Time.to_seconds_after_midnight(time) do
-      {:ok, sign * seconds, rest}
-    end
-  end
-
-  defp parse_time(str) do
-    case parse_integer_unsigned(str) do
-      {:ok, hh, <<?:, rest::binary>>} when hh >= 0 and hh <= 24 ->
-        case parse_integer_unsigned(rest) do
-          {:ok, mm, <<?:, rest::binary>>} when mm >= 0 and mm < 60 ->
-            case parse_integer_unsigned(rest) do
-              {:ok, ss, rest} when ss >= 0 and ss < 60 ->
-                {:ok, Timex.Time.new!(hh, mm, ss, 0), rest}
-
-              _ ->
-                {:ok, Timex.Time.new!(hh, mm, 0, 0), rest}
-            end
-
-          {:ok, mm, rest} when mm >= 0 and mm < 60 ->
-            {:ok, Timex.Time.new!(hh, mm, 0, 0), rest}
-
-          _ ->
-            {:ok, Timex.Time.new!(hh, 0, 0, 0), rest}
-        end
-
-      {:ok, hh, rest} when hh >= 0 and hh <= 24 ->
-        {:ok, Timex.Time.new!(hh, 0, 0, 0), rest}
-
-      {:ok, _, _} ->
-        {:error, :invalid_hour, str}
-
-      {:error, _, _} = err ->
-        err
-    end
-  end
-
-  defp to_integer(n) when is_integer(n) and n >= 0, do: {:ok, n}
-
-  defp to_integer(s) when is_binary(s) do
-    with {:ok, n, _} <- parse_integer_signed(s) do
-      {:ok, n}
-    end
-  end
-
-  defp parse_integer_signed(str) do
-    case Integer.parse(str) do
-      {value, rest} ->
-        {:ok, value, rest}
-
-      _ ->
-        {:error, :invalid_number, str}
-    end
-  end
-
-  defp parse_integer_unsigned(str, acc \\ "")
-
-  defp parse_integer_unsigned(<<c::char(), rest::binary>>, acc) when is_digit(c) do
-    parse_integer_unsigned(rest, acc <> <<c::char()>>)
-  end
-
-  defp parse_integer_unsigned(rest, acc) when byte_size(acc) > 0 do
-    {:ok, String.to_integer(acc), rest}
-  end
-
-  defp parse_integer_unsigned(rest, _) do
-    {:error, :invalid_number, rest}
+    {date, time}
   end
 
   ################
@@ -696,14 +476,5 @@ defmodule Timex.Parse.ZoneInfo.Parser do
 
   defp parse_null_terminated_str(<<c::char(), rest::binary>>, acc) do
     parse_null_terminated_str(rest, acc <> <<c::char()>>)
-  end
-
-  defp parse_newline_terminated_str(bin), do: parse_newline_terminated_str(bin, <<>>)
-
-  defp parse_newline_terminated_str(<<>>, acc), do: {:ok, acc, ""}
-  defp parse_newline_terminated_str(<<?\n, rest::binary>>, acc), do: {:ok, acc, rest}
-
-  defp parse_newline_terminated_str(<<c::char(), rest::binary>>, acc) do
-    parse_newline_terminated_str(rest, acc <> <<c::char()>>)
   end
 end

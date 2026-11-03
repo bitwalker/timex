@@ -298,9 +298,9 @@ defmodule Timex.Timezone.Local do
 
   @doc """
   Given a binary representing the data from a tzfile (not the source version),
-  parses out the timezone for the current date/time in UTC.
+  returns its parsed timezone transitions, leap records and optional future rule.
   """
-  @spec parse_tzfile(binary) :: {:ok, String.t()} | {:error, term}
+  @spec parse_tzfile(binary) :: {:ok, Parser.Zone.t()} | {:error, term}
   def parse_tzfile(tzdata) do
     Parser.parse(tzdata)
   end

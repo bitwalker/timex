@@ -3,6 +3,20 @@ defmodule PosixTimezoneParsing.Tests do
   alias Timex.Parse.Timezones.Posix
   alias Timex.PosixTimezone, as: TZ
 
+  test "classic transition syntax rejects lexical signs and hours above24" do
+    for time <- ["+0", "-0", "+2", "-1", "25"] do
+      assert {:error, _, _} =
+               Posix.parse("ABC0DEF,J60/#{time},J300", extended_transition_times: false)
+    end
+
+    for time <- ["0", "24", "24:59:59"] do
+      assert {:ok, %TZ{}, ""} =
+               Posix.parse("ABC0DEF,J60/#{time},J300", extended_transition_times: false)
+    end
+
+    assert {:ok, %TZ{}, ""} = Posix.parse("ABC0DEF,J60/-1,J300")
+  end
+
   test "standard offset is required even when both abbreviations are quoted" do
     for zone <- ["<abc><def>", "<abc>+<def>", "<abc>-<def>"] do
       assert {:error, _, _} = Posix.parse(zone)

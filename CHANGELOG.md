@@ -25,6 +25,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Parse TZif footers through the shared POSIX grammar, handling hour24 and
+  version-appropriate extended transitions without raising. Validate complete
+  newline framing and footer content, and correct fixed-zone/DST defaults.
+  Preserve ordinary legacy rule fields; newly supported carried bounds use
+  signed seconds from midnight.
 - Parse complete POSIX rule names emitted by timezone-name formatting, retaining
   following literal delimiters in default and strftime formats.
 - Honor UTC versus wall-time lookup for POSIX rules and preserve aware instants
