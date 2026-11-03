@@ -5,34 +5,26 @@ defmodule Timex.Parse.DateTime.Helpers do
   alias Combine.Parsers.Text
   use Timex.Constants
 
-  def months do
-    @month_names ++ Map.values(Timex.Translator.get_months(Timex.Translator.current_locale()))
+  def month_lookup(:full) do
+    month_lookup(@month_names, Timex.Translator.get_months(Timex.Translator.current_locale()))
   end
 
-  def months_abbr do
-    @month_abbrs ++
-      Map.values(Timex.Translator.get_months_abbreviated(Timex.Translator.current_locale()))
+  def month_lookup(:short) do
+    month_lookup(
+      @month_abbrs,
+      Timex.Translator.get_months_abbreviated(Timex.Translator.current_locale())
+    )
+  end
+
+  defp month_lookup(english_names, translated_names) do
+    translated = Enum.map(translated_names, fn {month, name} -> {name, month} end)
+
+    Map.new(translated ++ Enum.with_index(english_names, 1), fn {name, month} ->
+      {String.downcase(name), month}
+    end)
   end
 
   def to_month(month) when is_integer(month), do: [month: month]
-
-  def to_month_num(m) when m in ["January", "Jan"], do: to_month(1)
-  def to_month_num(m) when m in ["February", "Feb"], do: to_month(2)
-  def to_month_num(m) when m in ["March", "Mar"], do: to_month(3)
-  def to_month_num(m) when m in ["April", "Apr"], do: to_month(4)
-  def to_month_num(m) when m in ["May", "May"], do: to_month(5)
-  def to_month_num(m) when m in ["June", "Jun"], do: to_month(6)
-  def to_month_num(m) when m in ["July", "Jul"], do: to_month(7)
-  def to_month_num(m) when m in ["August", "Aug"], do: to_month(8)
-  def to_month_num(m) when m in ["September", "Sep"], do: to_month(9)
-  def to_month_num(m) when m in ["October", "Oct"], do: to_month(10)
-  def to_month_num(m) when m in ["November", "Nov"], do: to_month(11)
-  def to_month_num(m) when m in ["December", "Dec"], do: to_month(12)
-
-  def to_month_num(m) when is_binary(m) do
-    Map.fetch!(Timex.Translator.get_months_lookup(Timex.Translator.current_locale()), m)
-    |> to_month()
-  end
 
   def is_weekday(name) do
     n = String.downcase(name)

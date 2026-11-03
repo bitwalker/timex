@@ -83,15 +83,21 @@ defmodule Timex.Parse.DateTime.Parsers do
   end
 
   def month_full(_) do
-    one_of(word_of(~r/[[:alpha:]]/u), Helpers.months())
-    |> map(&Helpers.to_month_num/1)
-    |> label("full month name")
+    month_name(:full, "full month name")
   end
 
   def month_short(_) do
-    one_of(word_of(~r/[[:alpha:]]/u), Helpers.months_abbr())
-    |> map(&Helpers.to_month_num/1)
-    |> label("month abbreviation")
+    month_name(:short, "month abbreviation")
+  end
+
+  defp month_name(kind, description) do
+    lookup = Helpers.month_lookup(kind)
+
+    word_of(~r/[[:alpha:]]/u)
+    |> map(&String.downcase/1)
+    |> one_of(Map.keys(lookup))
+    |> map(fn name -> Helpers.to_month(Map.fetch!(lookup, name)) end)
+    |> label(description)
   end
 
   def day_of_month(opts \\ []) do

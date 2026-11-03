@@ -161,6 +161,41 @@ defmodule DateFormatTest.ParseDefault do
     assert {:ok, ^date2003} = parse(" 8/08/ 3", "{_D}/{0M}/{_YY}")
   end
 
+  test "month names accept all letter cases while preserving directive distinctions" do
+    for name <- ["March", "march", "MARCH", "mArCh"] do
+      assert {:ok, ~N[2024-03-18 00:00:00]} = parse("18 #{name} 2024", "{D} {Mfull} {YYYY}")
+    end
+
+    for name <- ["Mar", "mar", "MAR", "mAr"] do
+      assert {:ok, ~N[2024-03-18 00:00:00]} = parse("18 #{name} 2024", "{D} {Mshort} {YYYY}")
+      assert {:error, _} = parse("18 #{name} 2024", "{D} {Mfull} {YYYY}")
+    end
+
+    assert {:error, _} = parse("18 MARCH 2024", "{D} {Mshort} {YYYY}")
+    assert {:error, _} = parse("18 Notamonth 2024", "{D} {Mfull} {YYYY}")
+    assert {:error, _} = parse("18 Xxx 2024", "{D} {Mshort} {YYYY}")
+  end
+
+  test "localized month names use Unicode case conversion and restore the process locale" do
+    original_locale = Timex.Translator.current_locale()
+
+    for {locale, directive, names, expected} <- [
+          {"de", "{Mfull}", ["März", "märz", "MÄRZ", "mÄrZ"], ~N[2024-03-18 00:00:00]},
+          {"fr", "{Mshort}", ["août", "AOÛT", "AoÛt"], ~N[2024-08-18 00:00:00]}
+        ] do
+      Gettext.with_locale(Timex.Gettext, locale, fn ->
+        for name <- names do
+          assert {:ok, ^expected} = parse("18 #{name} 2024", "{D} #{directive} {YYYY}")
+        end
+
+        assert {:ok, ~N[2024-03-18 00:00:00]} = parse("18 MARCH 2024", "{D} {Mfull} {YYYY}")
+        assert {:ok, ~N[2024-03-18 00:00:00]} = parse("18 MAR 2024", "{D} {Mshort} {YYYY}")
+      end)
+
+      assert Timex.Translator.current_locale() == original_locale
+    end
+  end
+
   test "parse hour24" do
     date_midnight = Timex.to_naive_datetime({0, 1, 1})
     assert {:error, "Expected `hour between 0 and 24` at line 1, column 1."} = parse("0", "{h24}")

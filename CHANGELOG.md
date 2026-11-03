@@ -27,6 +27,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Parse full and abbreviated translated month names case-insensitively, preserving
+  English fallback and each directive's full-name or abbreviation contract (#768).
+
 - Document default strftime padding and how explicit flags override it (#750).
 
 - Clarify that week-of-month numbering starts on Monday and includes the partial
