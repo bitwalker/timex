@@ -25,6 +25,35 @@ still needs Hackney independently, update it to a patched version and audit the
 whole application's dependency graph with `mix hex.audit`. Updating Timex does not
 upgrade unrelated application dependencies automatically.
 
+## Supported calendars and years
+
+Timex's date arithmetic and conversion entrypoints accept `Date`,
+`NaiveDateTime`, and `DateTime` inputs in `Calendar.ISO`, with years from 0
+through 9999. Date tuples and maps use the same year range. Unsupported inputs
+return `{:error, {:unsupported_calendar, calendar}}` or
+`{:error, {:unsupported_year, year}}`; `is_valid?/1` returns `false`, and
+boolean comparison helpers such as `equal?/2` raise `ArgumentError`.
+Comparisons also require the UTC instant to fall within that year range.
+ISO week-year metadata may refer to the preceding year: for example,
+`Timex.iso_week(~D[0000-01-01])` returns `{-1, 52}`.
+
+For another calendar, explicitly convert with `Date.convert/2`,
+`NaiveDateTime.convert/2`, or `DateTime.convert/2` and `Calendar.ISO` before
+calling Timex. These conversions preserve the represented date or instant
+instead of reinterpreting another calendar's fields as ISO values.
+
+Setters retain their normalization policy: negative replacement years clamp
+to zero, while years above 9999 return an unsupported-year error. Using
+`validate: false` permits raw replacement fields outside this range; subsequent
+Timex operations still require supported inputs. Composite date/time setter
+options must use `Calendar.ISO` even when validation is disabled.
+
+These checks apply to Timex's protocol-backed arithmetic and conversions.
+Standard-library constructor delegates such as `from_unix/2`, ordinary formatters,
+and lower-level timezone APIs retain their own contracts. Built-in protocol
+implementations assume supported inputs; direct protocol callers must enforce
+those preconditions.
+
 ## Migrating to Timex 3.x
 
 If you are coming from an earlier version of Timex, it is recommended that you evaluate whether or not the functionality provided

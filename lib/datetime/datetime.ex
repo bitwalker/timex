@@ -363,7 +363,7 @@ defimpl Timex.Protocol, for: DateTime do
     err in [FunctionClauseError] ->
       case {err.module, err.function} do
         {Calendar.ISO, _} ->
-          {:error, :invalid_date}
+          Timex.CalendarSupport.date_range_error(__STACKTRACE__) || {:error, :invalid_date}
 
         _ ->
           reraise err, __STACKTRACE__
@@ -374,10 +374,15 @@ defimpl Timex.Protocol, for: DateTime do
   end
 
   defp add_elapsed(%DateTime{microsecond: {_, precision}} = datetime, shift) do
-    shifted = DateTime.add(datetime, shift, :microsecond, Timex.Timezone.Database)
-    {microsecond, _} = shifted.microsecond
-    precision = max(precision, fractional_precision(microsecond, 6))
-    %{shifted | microsecond: {microsecond, precision}}
+    {seconds, microsecond} = Timex.DateTime.to_gregorian_seconds(datetime)
+
+    with :ok <-
+           Timex.CalendarSupport.validate_instant(seconds * 1_000_000 + microsecond + shift) do
+      shifted = DateTime.add(datetime, shift, :microsecond, Timex.Timezone.Database)
+      {microsecond, _} = shifted.microsecond
+      precision = max(precision, fractional_precision(microsecond, 6))
+      %{shifted | microsecond: {microsecond, precision}}
+    end
   end
 
   defp fractional_precision(0, _precision), do: 0

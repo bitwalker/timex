@@ -43,6 +43,7 @@ defmodule Timex do
 
   use Timex.Constants
   import Timex.Macros
+  import Timex.CalendarSupport, only: [is_unsupported_year: 1]
 
   @doc """
   Returns a Date representing the current day in UTC
@@ -110,9 +111,9 @@ defmodule Timex do
   """
   @spec local(Types.valid_datetime()) :: DateTime.t() | AmbiguousDateTime.t() | {:error, term}
   def local(%DateTime{} = datetime) do
-    with tz when is_binary(tz) <- Timezone.Local.lookup(),
-         {:ok, datetime} <- DateTime.shift_zone(datetime, tz, Timex.Timezone.Database) do
-      datetime
+    with :ok <- Timex.CalendarSupport.validate(datetime),
+         tz when is_binary(tz) <- Timezone.Local.lookup() do
+      to_datetime(datetime, tz)
     else
       {:error, _} = err ->
         err
@@ -144,13 +145,13 @@ defmodule Timex do
   Convert a date/time value to a Date struct.
   """
   @spec to_date(Types.valid_datetime()) :: Date.t() | {:error, term}
-  defdelegate to_date(date), to: Timex.Protocol
+  def to_date(date), do: apply_protocol(:to_date, date)
 
   @doc """
   Convert a date/time value to a NaiveDateTime struct.
   """
   @spec to_naive_datetime(Types.valid_datetime()) :: NaiveDateTime.t() | {:error, term}
-  defdelegate to_naive_datetime(date), to: Timex.Protocol
+  def to_naive_datetime(date), do: apply_protocol(:to_naive_datetime, date)
 
   @doc """
   Convert a date/time value and timezone name to a DateTime struct.
@@ -192,39 +193,43 @@ defmodule Timex do
   @spec to_datetime(Types.valid_datetime()) :: DateTime.t() | {:error, term}
   @spec to_datetime(Types.valid_datetime(), Types.valid_timezone()) ::
           DateTime.t() | AmbiguousDateTime.t() | {:error, term}
-  def to_datetime(%DateTime{} = dt), do: dt
-  def to_datetime(from), do: Timex.Protocol.to_datetime(from, "Etc/UTC")
-  defdelegate to_datetime(from, timezone), to: Timex.Protocol
+  def to_datetime(%DateTime{} = dt) do
+    with :ok <- Timex.CalendarSupport.validate(dt), do: dt
+  end
+
+  def to_datetime(from), do: apply_protocol(:to_datetime, from, ["Etc/UTC"])
+  def to_datetime(from, timezone), do: apply_protocol(:to_datetime, from, [timezone])
 
   @doc """
   Convert a date/time value to it's Erlang representation
   """
   @spec to_erl(Types.valid_datetime()) :: Types.date() | Types.datetime() | {:error, term}
-  defdelegate to_erl(date), to: Timex.Protocol
+  def to_erl(date), do: apply_protocol(:to_erl, date)
 
   @doc """
   Convert a date/time value to a Julian calendar date number
   """
   @spec to_julian(Types.valid_datetime()) :: integer | {:error, term}
-  defdelegate to_julian(datetime), to: Timex.Protocol
+  def to_julian(datetime), do: apply_protocol(:to_julian, datetime)
 
   @doc """
   Convert a date/time value to gregorian seconds (seconds since start of year zero)
   """
   @spec to_gregorian_seconds(Types.valid_datetime()) :: non_neg_integer | {:error, term}
-  defdelegate to_gregorian_seconds(datetime), to: Timex.Protocol
+  def to_gregorian_seconds(datetime), do: apply_protocol(:to_gregorian_seconds, datetime)
 
   @doc """
   Convert a date/time value to gregorian microseconds (microseconds since start of year zero)
   """
   @spec to_gregorian_microseconds(Types.valid_datetime()) :: non_neg_integer | {:error, term}
-  defdelegate to_gregorian_microseconds(datetime), to: Timex.Protocol
+  def to_gregorian_microseconds(datetime),
+    do: apply_protocol(:to_gregorian_microseconds, datetime)
 
   @doc """
   Convert a date/time value to seconds since the UNIX epoch
   """
   @spec to_unix(Types.valid_datetime()) :: non_neg_integer | {:error, term}
-  defdelegate to_unix(datetime), to: Timex.Protocol
+  def to_unix(datetime), do: apply_protocol(:to_unix, datetime)
 
   @doc """
   Delegates to `DateTime.from_unix!/2`. To recap the docs:
@@ -432,7 +437,10 @@ defmodule Timex do
           String.t() | {:error, term}
   def from_now(datetime, reference_date, locale) when is_binary(locale) do
     case Timex.Format.DateTime.Formatters.Relative.relative_to(
-           datetime, reference_date, "{relative}", locale
+           datetime,
+           reference_date,
+           "{relative}",
+           locale
          ) do
       {:ok, formatted} -> formatted
       {:error, _} = err -> err
@@ -597,6 +605,9 @@ defmodule Timex do
 
   """
   @spec century(Types.year() | Types.valid_datetime()) :: non_neg_integer | {:error, term}
+  def century(year) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
   def century(year) when is_integer(year) do
     base_century = div(year, 100)
     years_past = rem(year, 100)
@@ -607,7 +618,7 @@ defmodule Timex do
     end
   end
 
-  def century(date), do: Timex.Protocol.century(date)
+  def century(date), do: apply_protocol(:century, date)
 
   @doc """
   Convert an iso ordinal day number to the day it represents in the current year.
@@ -662,12 +673,15 @@ defmodule Timex do
   """
   @spec from_iso_day(non_neg_integer, Types.year() | Types.valid_datetime()) ::
           Types.valid_datetime() | {:error, term}
+  def from_iso_day(_day, year) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
   def from_iso_day(day, year) when is_day_of_year(day) and is_year(year) do
     {year, month, day} = Helpers.iso_day_to_date_tuple(year, day)
     %Date{year: year, month: month, day: day}
   end
 
-  def from_iso_day(day, datetime), do: Timex.Protocol.from_iso_day(datetime, day)
+  def from_iso_day(day, datetime), do: apply_protocol(:from_iso_day, datetime, [day])
 
   @doc """
   Return a pair {year, week number} (as defined by ISO 8601) that the given
@@ -679,7 +693,7 @@ defmodule Timex do
       {1970,1}
   """
   @spec iso_week(Types.valid_datetime()) :: {Types.year(), Types.weeknum()} | {:error, term}
-  defdelegate iso_week(datetime), to: Timex.Protocol
+  def iso_week(datetime), do: apply_protocol(:iso_week, datetime)
 
   @doc """
   Same as iso_week/1, except this takes a year, month, and day as distinct arguments.
@@ -691,6 +705,16 @@ defmodule Timex do
   """
   @spec iso_week(Types.year(), Types.month(), Types.day()) ::
           {Types.year(), Types.weeknum()} | {:error, term}
+  def iso_week(year, _month, _day) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
+  def iso_week(0, month, day) when is_date(0, month, day) do
+    # Gregorian weekdays repeat every 400 years. Keep Erlang's calculation
+    # away from negative years while preserving the preceding ISO week-year.
+    {year, week} = :calendar.iso_week_number({400, month, day})
+    {year - 400, week}
+  end
+
   def iso_week(year, month, day) when is_date(year, month, day),
     do: :calendar.iso_week_number({year, month, day})
 
@@ -734,6 +758,9 @@ defmodule Timex do
 
   """
   @spec from_iso_triplet(Types.iso_triplet()) :: Date.t() | {:error, term}
+  def from_iso_triplet({year, _, _}) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
   def from_iso_triplet({year, week, weekday})
       when is_year(year) and is_week_of_year(week) and is_day_of_week(weekday, :mon) do
     {_, _, jan4weekday} = iso_triplet({year, 1, 4})
@@ -758,8 +785,9 @@ defmodule Timex do
           {year, ordinal_day}
       end
 
-    {year, month, day} = Helpers.iso_day_to_date_tuple(year, iso_day)
-    %Date{year: year, month: month, day: day}
+    with :ok <- Timex.CalendarSupport.validate_year(year),
+         {year, month, day} <- Helpers.iso_day_to_date_tuple(year, iso_day),
+         do: %Date{year: year, month: month, day: day}
   end
 
   def from_iso_triplet({_, _, _}), do: {:error, {:from_iso_triplet, :invalid_triplet}}
@@ -816,7 +844,7 @@ defmodule Timex do
   """
   @spec is_valid?(Types.valid_datetime()) :: boolean
   def is_valid?(datetime) do
-    case Timex.Protocol.is_valid?(datetime) do
+    case apply_protocol(:is_valid?, datetime) do
       {:error, _reason} ->
         false
 
@@ -994,7 +1022,6 @@ defmodule Timex do
         ) ::
           boolean | no_return
   def equal?(a, a, granularity \\ :seconds)
-  def equal?(a, a, _granularity), do: true
 
   def equal?(a, b, granularity) do
     case compare(a, b, granularity) do
@@ -1018,7 +1045,7 @@ defmodule Timex do
     compare(a, b, :microseconds)
   end
 
-  def compare(a, b), do: Timex.Comparable.compare(a, b, :microsecond)
+  def compare(a, b), do: compare(a, b, :microsecond)
 
   @doc """
   Compare two `Timex.Comparable` values, returning one of the following values:
@@ -1079,7 +1106,11 @@ defmodule Timex do
   def compare(%Time{} = a, %Time{} = b, granularity),
     do: Timex.Comparable.Utils.to_compare_result(diff(a, b, granularity))
 
-  defdelegate compare(a, b, granularity), to: Timex.Comparable
+  def compare(a, b, granularity) do
+    with :ok <- Timex.CalendarSupport.validate_comparison(a),
+         :ok <- Timex.CalendarSupport.validate_comparison(b),
+         do: Timex.Comparable.compare(a, b, granularity)
+  end
 
   @doc """
   See docs for `diff/3`
@@ -1087,7 +1118,7 @@ defmodule Timex do
   @spec diff(Time.t() | Comparable.comparable(), Time.t() | Comparable.comparable()) ::
           Duration.t() | integer | {:error, term}
   def diff(%Time{} = a, %Time{} = b), do: diff(a, b, :microseconds)
-  def diff(a, b), do: Timex.Comparable.diff(a, b, :microsecond)
+  def diff(a, b), do: diff(a, b, :microsecond)
 
   @doc """
   Calculate time interval between two dates. The result will be a signed integer, negative
@@ -1157,7 +1188,11 @@ defmodule Timex do
     end
   end
 
-  defdelegate diff(a, b, granularity), to: Timex.Comparable
+  def diff(a, b, granularity) do
+    with :ok <- Timex.CalendarSupport.validate(a),
+         :ok <- Timex.CalendarSupport.validate(b),
+         do: Timex.Comparable.diff(a, b, granularity)
+  end
 
   @doc """
   Get the day of the week corresponding to the given name.
@@ -1349,7 +1384,7 @@ defmodule Timex do
 
   """
   @spec weekday(Types.valid_datetime()) :: Types.weekday() | {:error, :invalid_date}
-  defdelegate weekday(datetime), to: Timex.Protocol
+  def weekday(datetime), do: apply_protocol(:weekday, datetime)
 
   @doc """
   Like `weekday/1`, but accepts a valid starting weekday value.
@@ -1361,7 +1396,7 @@ defmodule Timex do
   """
   @spec weekday(Types.valid_datetime(), Types.weekday_name()) ::
           Types.weekday() | {:error, :invalid_date}
-  defdelegate weekday(datetime, weekstart), to: Timex.Protocol
+  def weekday(datetime, weekstart), do: apply_protocol(:weekday, datetime, [weekstart])
 
   @doc """
   Provides a version of `weekday/1` and `weekday/2` that raises on error.
@@ -1370,6 +1405,9 @@ defmodule Timex do
     case weekday(datetime, weekstart) do
       {:error, :invalid_date} ->
         raise ArgumentError, message: "invalid_date"
+
+      {:error, reason} ->
+        raise ArgumentError, message: inspect(reason)
 
       weekday when is_integer(weekday) ->
         weekday
@@ -1385,7 +1423,7 @@ defmodule Timex do
       177
   """
   @spec day(Types.valid_datetime()) :: Types.daynum() | {:error, term}
-  defdelegate day(datetime), to: Timex.Protocol
+  def day(datetime), do: apply_protocol(:day, datetime)
 
   @doc """
   Return the number of days in the month which the date falls on.
@@ -1397,12 +1435,15 @@ defmodule Timex do
 
   """
   @spec days_in_month(Types.valid_datetime()) :: Types.num_of_days() | {:error, term}
-  defdelegate days_in_month(datetime), to: Timex.Protocol
+  def days_in_month(datetime), do: apply_protocol(:days_in_month, datetime)
 
   @doc """
   Same as days_in_month/2, except takes year and month as distinct arguments
   """
   @spec days_in_month(Types.year(), Types.month()) :: Types.num_of_days() | {:error, term}
+  def days_in_month(year, _month) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
   defdelegate days_in_month(year, month), to: Timex.Helpers
 
   @doc """
@@ -1427,7 +1468,7 @@ defmodule Timex do
       2
   """
   @spec week_of_month(Types.valid_datetime()) :: Types.week_of_month()
-  defdelegate week_of_month(datetime), to: Timex.Protocol
+  def week_of_month(datetime), do: apply_protocol(:week_of_month, datetime)
 
   @doc """
   Same as `week_of_month/1`, except takes year, month, and day as distinct arguments.
@@ -1441,6 +1482,9 @@ defmodule Timex do
       5
   """
   @spec week_of_month(Types.year(), Types.month(), Types.day()) :: Types.week_of_month()
+  def week_of_month(year, _month, _day) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
   def week_of_month(year, month, day) when is_date(year, month, day) do
     next_year = year + 1
     prev_year = year - 1
@@ -1478,12 +1522,15 @@ defmodule Timex do
 
   """
   @spec beginning_of_month(Types.valid_datetime()) :: Types.valid_datetime() | {:error, term}
-  defdelegate beginning_of_month(datetime), to: Timex.Protocol
+  def beginning_of_month(datetime), do: apply_protocol(:beginning_of_month, datetime)
 
   @doc """
   Same as beginning_of_month/1, except takes year and month as distinct arguments
   """
   @spec beginning_of_month(Types.year(), Types.month()) :: Date.t() | {:error, term}
+  def beginning_of_month(year, _month) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
   def beginning_of_month(year, month) when is_year(year) and is_month(month),
     do: %Date{year: year, month: month, day: 1}
 
@@ -1499,7 +1546,7 @@ defmodule Timex do
 
   """
   @spec end_of_month(Types.valid_datetime()) :: Types.valid_datetime() | {:error, term}
-  defdelegate end_of_month(datetime), to: Timex.Protocol
+  def end_of_month(datetime), do: apply_protocol(:end_of_month, datetime)
 
   @doc """
   Same as end_of_month/1, except takes year and month as distinct arguments
@@ -1510,6 +1557,9 @@ defmodule Timex do
       ~D[2016-02-29]
   """
   @spec end_of_month(Types.year(), Types.month()) :: Date.t()
+  def end_of_month(year, _month) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
   def end_of_month(year, month) when is_year(year) and is_month(month),
     do: end_of_month(%Date{year: year, month: month, day: 1})
 
@@ -1535,7 +1585,7 @@ defmodule Timex do
   end
 
   def quarter(m) when is_integer(m), do: {:error, :invalid_month}
-  def quarter(datetime), do: Timex.Protocol.quarter(datetime)
+  def quarter(datetime), do: apply_protocol(:quarter, datetime)
 
   @doc """
   Given a date returns a date at the beginning of the quarter.
@@ -1546,7 +1596,7 @@ defmodule Timex do
 
   """
   @spec beginning_of_quarter(Types.valid_datetime()) :: Types.valid_datetime() | {:error, term}
-  defdelegate beginning_of_quarter(datetime), to: Timex.Protocol
+  def beginning_of_quarter(datetime), do: apply_protocol(:beginning_of_quarter, datetime)
 
   @doc """
   Given a date or a year and month returns a date at the end of the quarter.
@@ -1560,12 +1610,15 @@ defmodule Timex do
 
   """
   @spec end_of_quarter(Types.valid_datetime()) :: Types.valid_datetime() | {:error, term}
-  defdelegate end_of_quarter(datetime), to: Timex.Protocol
+  def end_of_quarter(datetime), do: apply_protocol(:end_of_quarter, datetime)
 
   @doc """
   Same as end_of_quarter/1, except takes year and month as distinct arguments
   """
   @spec end_of_quarter(Types.year(), Types.month()) :: Date.t() | {:error, term}
+  def end_of_quarter(year, _month) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
   def end_of_quarter(year, month) when is_year(year) and is_month(month) do
     end_of_month(%Date{year: year, month: 3 * quarter(month), day: 1})
   end
@@ -1586,10 +1639,13 @@ defmodule Timex do
   """
   @spec beginning_of_year(Types.year() | Types.valid_datetime()) ::
           Types.valid_datetime() | {:error, term}
+  def beginning_of_year(year) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
   def beginning_of_year(year) when is_year(year),
     do: %Date{year: year, month: 1, day: 1}
 
-  def beginning_of_year(datetime), do: Timex.Protocol.beginning_of_year(datetime)
+  def beginning_of_year(datetime), do: apply_protocol(:beginning_of_year, datetime)
 
   @doc """
   Given a date or a number create a date at the end of that year
@@ -1606,10 +1662,13 @@ defmodule Timex do
   """
   @spec end_of_year(Types.year() | Types.valid_datetime()) ::
           Types.valid_datetime() | {:error, term}
+  def end_of_year(year) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
   def end_of_year(year) when is_year(year),
     do: %Date{year: year, month: 12, day: 31}
 
-  def end_of_year(datetime), do: Timex.Protocol.end_of_year(datetime)
+  def end_of_year(datetime), do: apply_protocol(:end_of_year, datetime)
 
   @doc """
   Number of days to the beginning of the week
@@ -1700,7 +1759,8 @@ defmodule Timex do
   """
   @spec beginning_of_week(Types.valid_datetime(), Types.weekstart()) ::
           Types.valid_datetime() | {:error, term}
-  defdelegate beginning_of_week(date, weekstart \\ :mon), to: Timex.Protocol
+  def beginning_of_week(date, weekstart \\ :mon),
+    do: apply_protocol(:beginning_of_week, date, [weekstart])
 
   @doc """
   Returns a Date or a DateTime representing the end of the week, depending on the input,
@@ -1722,7 +1782,8 @@ defmodule Timex do
   """
   @spec end_of_week(Types.valid_datetime(), Types.weekstart()) ::
           Types.valid_datetime() | {:error, term}
-  defdelegate end_of_week(datetime, weekstart \\ 1), to: Timex.Protocol
+  def end_of_week(datetime, weekstart \\ 1),
+    do: apply_protocol(:end_of_week, datetime, [weekstart])
 
   @doc """
   Returns a DateTime representing the beginning of the day
@@ -1739,7 +1800,7 @@ defmodule Timex do
 
   """
   @spec beginning_of_day(Types.valid_datetime()) :: Types.valid_datetime() | {:error, term}
-  defdelegate beginning_of_day(datetime), to: Timex.Protocol
+  def beginning_of_day(datetime), do: apply_protocol(:beginning_of_day, datetime)
 
   @doc """
   Returns a DateTime representing the end of the day
@@ -1752,7 +1813,7 @@ defmodule Timex do
 
   """
   @spec end_of_day(Types.valid_datetime()) :: Types.valid_datetime() | {:error, term}
-  defdelegate end_of_day(datetime), to: Timex.Protocol
+  def end_of_day(datetime), do: apply_protocol(:end_of_day, datetime)
 
   @doc """
   Return a boolean indicating whether the given year is a leap year. You may
@@ -1767,8 +1828,11 @@ defmodule Timex do
 
   """
   @spec is_leap?(Types.valid_datetime() | Types.year()) :: boolean | {:error, term}
+  def is_leap?(year) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
   def is_leap?(year) when is_year(year), do: :calendar.is_leap_year(year)
-  defdelegate is_leap?(date), to: Timex.Protocol
+  def is_leap?(date), do: apply_protocol(:is_leap?, date)
 
   @doc """
   Add time to a date using a Duration
@@ -1851,7 +1915,7 @@ defmodule Timex do
         ]
   @spec shift(Types.valid_datetime(), shift_options) ::
           Types.valid_datetime() | AmbiguousDateTime.t() | {:error, term}
-  defdelegate shift(date, options), to: Timex.Protocol
+  def shift(date, options), do: apply_protocol(:shift, date, [options])
 
   @doc """
   Return a new date/time value with the specified fields replaced by new values.
@@ -1911,7 +1975,16 @@ defmodule Timex do
         ]
   @spec set(Types.valid_datetime(), set_options) ::
           Types.valid_datetime() | AmbiguousDateTime.t() | {:error, term}
-  defdelegate set(date, options), to: Timex.Protocol
+  def set(date, options) do
+    with :ok <- Timex.CalendarSupport.validate(date),
+         :ok <- Timex.CalendarSupport.validate_set_options(options) do
+      if Keyword.get(options, :validate, true) do
+        apply_protocol(:set, date, [options])
+      else
+        Timex.Protocol.set(date, options)
+      end
+    end
+  end
 
   @doc """
   Given a unit to normalize, and the value to normalize, produces a valid
@@ -1923,22 +1996,26 @@ defmodule Timex do
       iex> Timex.normalize(:hour, 26)
       23
   """
-  @spec normalize(:date, {integer, integer, integer}) :: Types.date()
+  @spec normalize(:date, {integer, integer, integer}) :: Types.date() | {:error, term}
   @spec normalize(:time, {integer, integer, integer} | {integer, integer, integer, integer}) ::
           Types.time()
-  @spec normalize(:day, {integer, integer, integer}) :: non_neg_integer
+  @spec normalize(:day, {integer, integer, integer}) :: non_neg_integer | {:error, term}
   @spec normalize(
           :year | :month | :day | :hour | :minute | :second | :millisecond | :microsecond,
           integer
-        ) :: non_neg_integer
+        ) :: non_neg_integer | {:error, term}
   def normalize(:date, {year, month, day}) do
-    year = normalize(:year, year)
-    month = normalize(:month, month)
-    day = normalize(:day, {year, month, day})
-    {year, month, day}
+    with year when is_integer(year) <- normalize(:year, year),
+         month = normalize(:month, month),
+         day when is_integer(day) <- normalize(:day, {year, month, day}),
+         do: {year, month, day}
   end
 
   def normalize(:year, year) when year < 0, do: 0
+
+  def normalize(:year, year) when is_unsupported_year(year),
+    do: Timex.CalendarSupport.validate_year(year)
+
   def normalize(:year, year), do: year
 
   def normalize(:month, month) do
@@ -2007,18 +2084,14 @@ defmodule Timex do
   end
 
   def normalize(:day, {year, month, day}) do
-    year = normalize(:year, year)
-    month = normalize(:month, month)
-
-    ndays =
-      case Timex.days_in_month(year, month) do
-        n when is_integer(n) -> n
+    with year when is_integer(year) <- normalize(:year, year),
+         month = normalize(:month, month),
+         ndays when is_integer(ndays) <- Timex.days_in_month(year, month) do
+      cond do
+        day < 1 -> 1
+        day > ndays -> ndays
+        :else -> day
       end
-
-    cond do
-      day < 1 -> 1
-      day > ndays -> ndays
-      :else -> day
     end
   end
 
@@ -2062,4 +2135,17 @@ defmodule Timex do
   end
 
   def standardize_week_start(_), do: {:error, :invalid_week_start}
+
+  defp apply_protocol(function, datetime, args \\ []) do
+    with :ok <- Timex.CalendarSupport.validate(datetime),
+         result <- apply(Timex.Protocol, function, [datetime | args]),
+         :ok <- Timex.CalendarSupport.validate(result),
+         do: result
+  rescue
+    error in FunctionClauseError ->
+      case Timex.CalendarSupport.date_range_error(__STACKTRACE__) do
+        nil -> reraise error, __STACKTRACE__
+        range_error -> range_error
+      end
+  end
 end

@@ -2,6 +2,11 @@ defprotocol Timex.Protocol do
   @moduledoc """
   This protocol defines the API for functions which take a `Date`,
   `NaiveDateTime`, or `DateTime` as input.
+
+  Built-in implementations assume `Calendar.ISO` inputs with years from 0
+  through 9999. The public `Timex` entrypoints enforce these preconditions and
+  return explicit unsupported-calendar or unsupported-year errors. Direct
+  protocol callers must validate inputs themselves.
   """
 
   @fallback_to_any true

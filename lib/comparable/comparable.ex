@@ -1,6 +1,11 @@
 defprotocol Timex.Comparable do
   @moduledoc """
   This protocol is used for comparing and diffing different date/time representations
+
+  Built-in date implementations assume `Calendar.ISO` fields with years from
+  0 through 9999. Use the public `Timex.compare/3` and `Timex.diff/3` entrypoints
+  for input validation. Calendar differences also require UTC instants within
+  this range, independent of the local wall year.
   """
   alias Timex.Types
 

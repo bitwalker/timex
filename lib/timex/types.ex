@@ -1,6 +1,6 @@
 defmodule Timex.Types do
   # Date types
-  @type year :: Calendar.year()
+  @type year :: 0..9999
   @type month :: Calendar.month()
   @type day :: Calendar.day()
   @type num_of_days :: 28..31

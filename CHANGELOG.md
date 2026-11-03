@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Define ISO date arithmetic/conversion support as years 0 through 9999, with
+  explicit unsupported-calendar/year errors and consistent boundary checks on
+  supported runtimes. Convert other calendars explicitly before calling Timex
+  (#765, #449).
+
 - Relative Date targets now compare calendar days against the reference's UTC
   date; datetime targets retain elapsed-time semantics (#775).
 

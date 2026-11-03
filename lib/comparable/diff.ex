@@ -8,7 +8,9 @@ defmodule Timex.Comparable.Diff do
   @spec diff(Types.microseconds(), Types.microseconds(), Comparable.granularity()) :: integer
   @spec diff(Types.valid_datetime(), Types.valid_datetime(), Comparable.granularity()) :: integer
   def diff(a, b, granularity) when is_integer(a) and is_integer(b) and is_atom(granularity) do
-    do_diff(a, b, granularity)
+    with :ok <- Timex.CalendarSupport.validate_instant(a),
+         :ok <- Timex.CalendarSupport.validate_instant(b),
+         do: do_diff(a, b, granularity)
   end
 
   def diff(a, b, granularity) do
@@ -37,31 +39,12 @@ defmodule Timex.Comparable.Diff do
   defp do_diff(a, b, :calendar_weeks), do: do_diff(a, b, :calendar_week)
 
   defp do_diff(a, b, :calendar_week) do
-    adate = :calendar.gregorian_seconds_to_datetime(div(a, 1_000 * 1_000))
-    bdate = :calendar.gregorian_seconds_to_datetime(div(b, 1_000 * 1_000))
-
-    days =
-      cond do
-        a > b ->
-          ending = Timex.end_of_week(adate)
-          start = Timex.beginning_of_week(bdate)
-          endu = Timex.to_gregorian_microseconds(ending)
-          startu = Timex.to_gregorian_microseconds(start)
-          do_diff(endu, startu, :days)
-
-        :else ->
-          ending = Timex.end_of_week(bdate)
-          start = Timex.beginning_of_week(adate)
-          endu = Timex.to_gregorian_microseconds(ending)
-          startu = Timex.to_gregorian_microseconds(start)
-          do_diff(startu, endu, :days)
-      end
-
-    cond do
-      days >= 0 && rem(days, 7) != 0 -> div(days, 7) + 1
-      days <= 0 && rem(days, 7) != 0 -> div(days, 7) - 1
-      :else -> div(days, 7)
-    end
+    # Gregorian day zero is Saturday. Index whole Monday-based weeks directly
+    # so their boundaries can fall outside the representable date range.
+    a_week = div(div(a, 86_400_000_000) + 5, 7)
+    b_week = div(div(b, 86_400_000_000) + 5, 7)
+    weeks = abs(a_week - b_week) + 1
+    if a > b, do: weeks, else: -weeks
   end
 
   defp do_diff(a, b, :months), do: do_diff(a, b, :month)
