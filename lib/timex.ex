@@ -1874,14 +1874,29 @@ defmodule Timex do
   @doc """
   Return a new date/time value with the specified fields replaced by new values.
 
-  Values are automatically validated and clamped to good values by default. If
-  you wish to skip validation, perhaps for performance reasons, pass `validate: false`.
+  By default, the final date/time is validated and its fields clamped to valid
+  values. The day is clamped against the final year and month, including when only
+  the year or month changes. For example, changing January 31 to February produces
+  February 28 (or 29 in a leap year).
 
-  Values are applied in order, so if you pass `[datetime: dt, date: d]`, the date value
-  from `date` will override `datetime`'s date value.
+  Replacements are applied in order, including repeated keys and composite
+  `:date`, `:time`, and `:datetime` values. For example, `[datetime: dt, date: d]`
+  uses the date from `d`. Validation happens after the replacements, so
+  `[day: 31, month: 1]` can produce January 31 even when the input is in February.
 
-  Options which do not apply to the input value (for example, `:hour` against a `Date` struct),
-  will be ignored.
+  For a `DateTime`, timezone metadata is resolved against the final wall date/time
+  in the selected timezone (or the original timezone if none is supplied). This
+  preserves the requested wall time rather than the original instant. A timezone
+  overlap or gap returns an `AmbiguousDateTime` with `type: :ambiguous` or `:gap`,
+  respectively; an unknown timezone returns `{:error, :time_zone_not_found}`.
+
+  Pass `validate: false` to keep raw field values, even if the result is invalid.
+  Existing timezone metadata is retained unless a timezone is explicitly supplied.
+  If `:validate` is repeated, its first value controls the entire operation.
+
+  The result preserves the input representation, including date-only Erlang
+  tuples and fractional-second tuples. Options which do not apply to the input
+  value (for example, `:hour` against a `Date` struct or date-only tuple) are ignored.
 
   ## Example
 
@@ -1912,7 +1927,8 @@ defmodule Timex do
           microsecond: Types.microsecond(),
           timezone: Types.valid_timezone()
         ]
-  @spec set(Types.valid_datetime(), set_options) :: Types.valid_datetime()
+  @spec set(Types.valid_datetime(), set_options) ::
+          Types.valid_datetime() | AmbiguousDateTime.t() | {:error, term}
   defdelegate set(date, options), to: Timex.Protocol
 
   @doc """

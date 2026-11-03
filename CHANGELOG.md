@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Validate setters after applying all replacements, clamping the day against the
+  final year/month. Preserve raw `validate: false` updates and tuple shapes.
+  Zoned setters refresh metadata against the final wall time and expose gaps
+  and overlaps explicitly (#411).
+
 - Accept TZif version 4 containers and preserve their raw leap records,
   including truncation and expiration data.
 - Explicit POSIX timezone conversions now use the same gap-boundary and overlap

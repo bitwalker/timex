@@ -269,161 +269,31 @@ defimpl Timex.Protocol, for: Tuple do
 
   def from_iso_day(_, _), do: {:error, :invalid_date}
 
-  def set({y, m, d} = date, options) when is_date(y, m, d),
-    do: do_set({date, {0, 0, 0}}, options, :date)
+  def set({y, m, d}, options) when is_date(y, m, d) do
+    with %Date{} = date <- Timex.Set.set(%Date{year: y, month: m, day: d}, options) do
+      {date.year, date.month, date.day}
+    end
+  end
 
-  def set({{y, m, d}, {h, mm, s}} = datetime, options) when is_datetime(y, m, d, h, mm, s),
-    do: do_set(datetime, options, :datetime)
+  def set({{y, m, d}, {h, mm, s}}, options) when is_datetime(y, m, d, h, mm, s) do
+    with %NaiveDateTime{} = date <- set_datetime(y, m, d, h, mm, s, {0, 0}, options) do
+      {{date.year, date.month, date.day}, {date.hour, date.minute, date.second}}
+    end
+  end
 
   def set({{y, m, d}, {h, mm, s, us}}, options) when is_datetime(y, m, d, h, mm, s) do
-    {date, {h, mm, s}} = do_set({{y, m, d}, {h, mm, s}}, options, :datetime)
-    {date, {h, mm, s, us}}
+    with %NaiveDateTime{} = date <- set_datetime(y, m, d, h, mm, s, us, options) do
+      {{date.year, date.month, date.day}, {date.hour, date.minute, date.second, date.microsecond}}
+    end
   end
 
   def set(_, _), do: {:error, :invalid_date}
 
-  defp do_set(date, options, datetime_type) do
-    validate? = Keyword.get(options, :validate, true)
-
-    Enum.reduce(options, date, fn
-      _option, {:error, _} = err ->
-        err
-
-      option, result ->
-        case option do
-          {:validate, _} ->
-            result
-
-          {:datetime, {{_, _, _} = date, {_, _, _} = time} = dt} ->
-            if validate? do
-              case datetime_type do
-                :date ->
-                  Timex.normalize(:date, date)
-
-                :datetime ->
-                  {Timex.normalize(:date, date), Timex.normalize(:time, time)}
-              end
-            else
-              case datetime_type do
-                :date -> date
-                :datetime -> dt
-              end
-            end
-
-          {:date, {_, _, _} = d} ->
-            if validate? do
-              case result do
-                {_, _, _} -> Timex.normalize(:date, d)
-                {{_, _, _}, {_, _, _} = t} -> {Timex.normalize(:date, d), t}
-              end
-            else
-              case result do
-                {_, _, _} -> d
-                {{_, _, _}, {_, _, _} = t} -> {d, t}
-              end
-            end
-
-          {:time, {_, _, _} = t} ->
-            if validate? do
-              case result do
-                {_, _, _} -> date
-                {{_, _, _} = d, {_, _, _}} -> {d, Timex.normalize(:time, t)}
-              end
-            else
-              case result do
-                {_, _, _} -> date
-                {{_, _, _} = d, {_, _, _}} -> {d, t}
-              end
-            end
-
-          {:day, d} ->
-            if validate? do
-              case result do
-                {y, m, _} -> {y, m, Timex.normalize(:day, {y, m, d})}
-                {{y, m, _}, {_, _, _} = t} -> {{y, m, Timex.normalize(:day, {y, m, d})}, t}
-              end
-            else
-              case result do
-                {y, m, _} -> {y, m, d}
-                {{y, m, _}, {_, _, _} = t} -> {{y, m, d}, t}
-              end
-            end
-
-          {:year, year} ->
-            if validate? do
-              case result do
-                {_, m, d} -> {Timex.normalize(:year, year), m, d}
-                {{_, m, d}, {_, _, _} = t} -> {{Timex.normalize(:year, year), m, d}, t}
-              end
-            else
-              case result do
-                {_, m, d} -> {year, m, d}
-                {{_, m, d}, {_, _, _} = t} -> {{year, m, d}, t}
-              end
-            end
-
-          {:month, month} ->
-            if validate? do
-              case result do
-                {y, _, d} ->
-                  {y, Timex.normalize(:month, month), Timex.normalize(:day, {y, month, d})}
-
-                {{y, _, d}, {_, _, _} = t} ->
-                  {{y, Timex.normalize(:month, month), Timex.normalize(:day, {y, month, d})}, t}
-              end
-            else
-              case result do
-                {y, _, d} -> {y, month, d}
-                {{y, _, d}, {_, _, _} = t} -> {{y, month, d}, t}
-              end
-            end
-
-          {:hour, hour} ->
-            if validate? do
-              case result do
-                {_, _, _} -> result
-                {{_, _, _} = d, {_, m, s}} -> {d, {Timex.normalize(:hour, hour), m, s}}
-              end
-            else
-              case result do
-                {_, _, _} -> result
-                {{_, _, _} = d, {_, m, s}} -> {d, {hour, m, s}}
-              end
-            end
-
-          {:minute, min} ->
-            if validate? do
-              case result do
-                {_, _, _} -> result
-                {{_, _, _} = d, {h, _, s}} -> {d, {h, Timex.normalize(:minute, min), s}}
-              end
-            else
-              case result do
-                {_, _, _} -> result
-                {{_, _, _} = d, {h, _, s}} -> {d, {h, min, s}}
-              end
-            end
-
-          {:second, sec} ->
-            if validate? do
-              case result do
-                {_, _, _} -> result
-                {{_, _, _} = d, {h, m, _}} -> {d, {h, m, Timex.normalize(:second, sec)}}
-              end
-            else
-              case result do
-                {_, _, _} -> result
-                {{_, _, _} = d, {h, m, _}} -> {d, {h, m, sec}}
-              end
-            end
-
-          {name, _} when name in [:timezone, :microsecond] ->
-            result
-
-          {option_name, _} ->
-            {:error, {:bad_option, option_name}}
-        end
-    end)
+  defp set_datetime(y, m, d, h, mm, s, us, options) do
+    Timex.Set.set(
+      %NaiveDateTime{year: y, month: m, day: d, hour: h, minute: mm, second: s, microsecond: us},
+      options
+    )
   end
 
   def shift(date, [{_, 0}]),

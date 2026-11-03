@@ -115,60 +115,7 @@ defimpl Timex.Protocol, for: Date do
     %Date{year: year, month: month, day: day_of_month}
   end
 
-  def set(%Date{} = date, options) do
-    validate? = Keyword.get(options, :validate, true)
-
-    Enum.reduce(options, date, fn
-      _option, {:error, _} = err ->
-        err
-
-      option, %Date{} = result ->
-        case option do
-          {:validate, _} ->
-            result
-
-          {:datetime, {{y, m, d}, {_, _, _}}} ->
-            if validate? do
-              %{
-                result
-                | :year => Timex.normalize(:year, y),
-                  :month => Timex.normalize(:month, m),
-                  :day => Timex.normalize(:day, {y, m, d})
-              }
-            else
-              %{result | :year => y, :month => m, :day => d}
-            end
-
-          {:date, {y, m, d}} ->
-            if validate? do
-              {yn, mn, dn} = Timex.normalize(:date, {y, m, d})
-              %{result | :year => yn, :month => mn, :day => dn}
-            else
-              %{result | :year => y, :month => m, :day => d}
-            end
-
-          {:day, d} ->
-            if validate? do
-              %{result | :day => Timex.normalize(:day, {result.year, result.month, d})}
-            else
-              %{result | :day => d}
-            end
-
-          {name, val} when name in [:year, :month] ->
-            if validate? do
-              Map.put(result, name, Timex.normalize(name, val))
-            else
-              Map.put(result, name, val)
-            end
-
-          {name, _} when name in [:time, :timezone, :hour, :minute, :second, :microsecond] ->
-            result
-
-          {option_name, _} ->
-            {:error, {:invalid_option, option_name}}
-        end
-    end)
-  end
+  def set(%Date{} = date, options), do: Timex.Set.set(date, options, :invalid_option)
 
   def shift(%Date{} = date, [{_, 0}]), do: date
 
