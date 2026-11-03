@@ -62,10 +62,10 @@ defmodule Timex.Format.DateTime.Formatter do
         raise ArgumentError, "invalid_date"
 
       {:error, {:format, reason}} ->
-        raise FormatError, message: to_string(reason)
+        raise FormatError, message: reason
 
       {:error, reason} ->
-        raise FormatError, message: to_string(reason)
+        raise FormatError, message: reason
     end
   end
 

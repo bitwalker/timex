@@ -82,6 +82,10 @@ defmodule Timex.Format.DateTime.Formatters.RelativeTest do
 
     assert Relative.relative_to(date, ~D[2026-01-01], "{relative}") ==
              {:error, {:unsupported_calendar, UnknownCalendar}}
+
+    assert_raise Timex.Format.FormatError, ~r/unsupported_calendar/, fn ->
+      Timex.format!(date, "{relative}", :relative)
+    end
   end
 
   test "invalid date structs return errors rather than raising in conversion or arithmetic" do
