@@ -22,4 +22,35 @@ defmodule DurationFormatHumanizedTest do
   test "format zero duration" do
     assert "0 microseconds" = format(0, 0, 0)
   end
+
+  test "format/2 across Pacific/Norfolk permanent UTC offset change" do
+    # Pacific/Norfolk permanently changed its UTC offset from +11:30 to +11:00
+    # on 4 October 2015 (a one-time tzdata rule change, not a recurring DST
+    # transition). format/1, given only a raw elapsed Duration, has no way to
+    # know the true offset delta and misattributes it as spurious trailing
+    # hours/minutes (see format_duration_humanized_bug_test.exs). format/2
+    # takes both datetimes and computes years/months via real calendar
+    # arithmetic, so the distance comes out clean.
+    {:ok, start} =
+      DateTime.new(~D[2015-01-15], ~T[00:00:00], "Pacific/Norfolk", Tzdata.TimeZoneDatabase)
+
+    {:ok, finish} =
+      DateTime.new(~D[2016-03-15], ~T[00:00:00], "Pacific/Norfolk", Tzdata.TimeZoneDatabase)
+
+    assert "1 year, 2 months" = Formatters.Humanized.format(start, finish)
+  end
+
+  test "format/2 across Europe/Dublin DST transition" do
+    # 2024-10-27 00:59:30 UTC is 01:59:30 IST in Dublin, one second before the
+    # "fall back" transition to GMT.
+    {:ok, dstart_utc} = DateTime.new(~D[2024-10-27], ~T[00:59:30], "Etc/UTC")
+    {:ok, dstart} = DateTime.shift_zone(dstart_utc, "Europe/Dublin", Tzdata.TimeZoneDatabase)
+    dfinish_utc = DateTime.add(dstart_utc, 60, :second)
+    {:ok, dfinish} = DateTime.shift_zone(dfinish_utc, "Europe/Dublin", Tzdata.TimeZoneDatabase)
+
+    assert dstart.zone_abbr == "IST"
+    assert dfinish.zone_abbr == "GMT"
+    assert "1 minute" = Formatters.Humanized.format(dstart, dfinish)
+  end
 end
+
