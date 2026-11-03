@@ -7,6 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Relative Date targets now compare calendar days against the reference's UTC
+  date; datetime targets retain elapsed-time semantics (#775).
+
 - Validate setters after applying all replacements, clamping the day against the
   final year/month. Preserve raw `validate: false` updates and tuple shapes.
   Zoned setters refresh metadata against the final wall time and expose gaps

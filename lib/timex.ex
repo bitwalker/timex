@@ -378,7 +378,10 @@ defmodule Timex do
     to: Timex.Format.DateTime.Formatter
 
   @doc """
-  Formats a DateTime using a fuzzy relative duration, from now.
+  Formats a date or datetime using a fuzzy relative duration, from now.
+
+  Date targets compare calendar days with today's UTC date. Datetime targets
+  compare elapsed time; see `Timex.Format.DateTime.Formatters.Relative`.
 
   ## Examples
 
@@ -410,15 +413,9 @@ defmodule Timex do
   """
   @spec from_now(Types.valid_datetime(), String.t()) :: String.t() | {:error, term}
   def from_now(datetime, locale) when is_binary(locale) do
-    case to_naive_datetime(datetime) do
-      {:error, _} = err ->
-        err
-
-      %NaiveDateTime{} = dt ->
-        case lformat(dt, "{relative}", locale, :relative) do
-          {:ok, formatted} -> formatted
-          {:error, _} = err -> err
-        end
+    case lformat(datetime, "{relative}", locale, :relative) do
+      {:ok, formatted} -> formatted
+      {:error, _} = err -> err
     end
   end
 
@@ -434,26 +431,11 @@ defmodule Timex do
   @spec from_now(Types.valid_datetime(), Types.valid_datetime(), String.t()) ::
           String.t() | {:error, term}
   def from_now(datetime, reference_date, locale) when is_binary(locale) do
-    case to_naive_datetime(datetime) do
-      {:error, _} = err ->
-        err
-
-      %NaiveDateTime{} = dt ->
-        case to_naive_datetime(reference_date) do
-          {:error, _} = err ->
-            err
-
-          %NaiveDateTime{} = ref ->
-            case Timex.Format.DateTime.Formatters.Relative.relative_to(
-                   dt,
-                   ref,
-                   "{relative}",
-                   locale
-                 ) do
-              {:ok, formatted} -> formatted
-              {:error, _} = err -> err
-            end
-        end
+    case Timex.Format.DateTime.Formatters.Relative.relative_to(
+           datetime, reference_date, "{relative}", locale
+         ) do
+      {:ok, formatted} -> formatted
+      {:error, _} = err -> err
     end
   end
 

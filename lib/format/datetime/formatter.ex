@@ -90,6 +90,10 @@ defmodule Timex.Format.DateTime.Formatter do
   def lformat(datetime, format_string, locale, :relative),
     do: lformat(datetime, format_string, locale, Relative)
 
+  def lformat(date, format_string, locale, Relative)
+      when is_binary(format_string) and is_binary(locale),
+      do: Relative.lformat(date, format_string, locale)
+
   def lformat(%{__struct__: struct} = date, format_string, locale, formatter)
       when struct in [Date, DateTime, NaiveDateTime, Time] and is_binary(format_string) and
              is_binary(locale) and is_atom(formatter) do

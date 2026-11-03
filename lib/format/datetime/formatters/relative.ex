@@ -1,25 +1,34 @@
 defmodule Timex.Format.DateTime.Formatters.Relative do
   @moduledoc """
-  Relative time, based on Moment.js
+  Localized relative date and time formatting.
 
-  Uses localized strings.
+  The format string must contain `{relative}`. Date targets compare calendar
+  days; datetime targets compare elapsed time after conversion to UTC.
 
-  The format string should contain {relative}, which is where the phrase will be injected.
+  Elapsed values truncate to whole seconds toward zero, then to whole units
+  within the following ranges. The same thresholds apply in both directions.
+  A month is an approximate 30 days and a year is 360 days in this formatter.
 
-  | Range	                     | Sample Output
-  ---------------------------------------------------------------------
-  | 0 seconds                  | now
-  | 1 to 45 seconds	           | a few seconds ago
-  | 45 to 90 seconds	         | a minute ago
-  | 90 seconds to 45 minutes	 | 2 minutes ago ... 45 minutes ago
-  | 45 to 90 minutes	         | an hour ago
-  | 90 minutes to 22 hours	   | 2 hours ago ... 22 hours ago
-  | 22 to 36 hours	           | a day ago
-  | 36 hours to 25 days	       | 2 days ago ... 25 days ago
-  | 25 to 45 days	             | a month ago
-  | 45 to 345 days	           | 2 months ago ... 11 months ago
-  | 345 to 545 days (1.5 years)  | a year ago
-  | 546 days+	                 | 2 years ago ... 20 years ago
+  | Absolute elapsed time | Past output | Future output |
+  | --- | --- | --- |
+  | 0 whole seconds | now | now |
+  | 1–45 seconds | N seconds ago | in N seconds |
+  | 46 seconds to <2 minutes | 1 minute ago | in 1 minute |
+  | 2 minutes to <1 hour | N minutes ago | in N minutes |
+  | 1 hour to <2 hours | 1 hour ago | in 1 hour |
+  | 2 hours to <24 hours | N hours ago | in N hours |
+  | 24 hours to <48 hours | yesterday | tomorrow |
+  | 48 hours to <30 days | N days ago | in N days |
+  | 30 days to <60 days | 1 month ago | in 1 month |
+  | 60 days to <360 days | N months ago | in N months |
+  | 360 days to <720 days | 1 year ago | in 1 year |
+  | 720 days or more | N years ago | in N years |
+
+  `Timex.from_now/1` samples the clock when formatting. A target computed as
+  two days after an earlier clock sample can therefore be less than 48 hours
+  away and render as "tomorrow". Pass the same reference to `Timex.from_now/2`
+  or `relative_to/3` for deterministic boundaries. Use Date targets when the
+  intended comparison is calendar days rather than elapsed hours.
   """
   use Timex.Format.DateTime.Formatter
   use Combine
@@ -51,7 +60,10 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
   end
 
   @doc """
-  Formats a date/time as a relative time formatted string
+  Formats a date/time as a relative time formatted string.
+
+  Date targets (including Erlang date tuples) compare calendar days with today's
+  UTC date. Datetime targets compare elapsed time. Time-only targets are unsupported.
 
   ## Examples
 
@@ -87,6 +99,14 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
     end
   end
 
+  @doc """
+  Formats a target relative to an explicit reference.
+
+  A Date target compares calendar dates, ignoring the reference's time of day.
+  An aware reference is first converted to UTC, so its UTC date is used. Datetime
+  targets compare elapsed time, treating naive values as UTC and date references
+  as midnight. Use Date targets for calendar-day labels such as "tomorrow".
+  """
   def relative_to(date, relative_to, format_string) do
     relative_to(date, relative_to, format_string, Translator.current_locale())
   end
@@ -105,11 +125,36 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
   end
 
   defp format_relative(locale, date, reference, dirs) do
+    calendar_days? = match?(%Date{}, date) or (is_tuple(date) and tuple_size(date) == 3)
+
     with %NaiveDateTime{} = date <- normalize_datetime(date),
          %NaiveDateTime{} = reference <- normalize_datetime(reference),
+         reference = if(calendar_days?, do: midnight(reference), else: reference),
          diff when is_integer(diff) <- Timex.diff(date, reference, :seconds) do
       do_format(locale, date, diff, dirs, <<>>)
     end
+  end
+
+  defp midnight(date), do: %{date | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
+
+  defp normalize_datetime({year, month, day}) do
+    valid_naive(year, month, day, 0, 0, 0, {0, 0}, Calendar.ISO)
+  end
+
+  defp normalize_datetime({{year, month, day}, {hour, minute, second}}) do
+    valid_naive(year, month, day, hour, minute, second, {0, 0}, Calendar.ISO)
+  end
+
+  defp normalize_datetime({{year, month, day}, {hour, minute, second, us}})
+       when is_integer(us) and us >= 0 and us <= 999_999 do
+    normalize_datetime(
+      {{year, month, day},
+       {hour, minute, second, Timex.DateTime.Helpers.construct_microseconds(us)}}
+    )
+  end
+
+  defp normalize_datetime({{year, month, day}, {hour, minute, second, us}}) do
+    valid_naive(year, month, day, hour, minute, second, us, Calendar.ISO)
   end
 
   defp normalize_datetime(%Date{} = date) do
@@ -142,11 +187,16 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
   defp valid_naive(year, month, day, hour, minute, second, {us, precision}, calendar)
        when is_integer(year) and is_integer(month) and is_integer(day) and
               is_integer(hour) and is_integer(minute) and is_integer(second) and
-              is_integer(us) and is_integer(precision) do
+              is_integer(us) and us >= 0 and us <= 999_999 and
+              is_integer(precision) and precision >= 0 and precision <= 6 and
+              calendar == Calendar.ISO do
     with {:ok, naive} <-
            NaiveDateTime.new(year, month, day, hour, minute, second, {us, precision}, calendar),
          do: naive
   end
+
+  defp valid_naive(_, _, _, _, _, _, _, calendar) when calendar != Calendar.ISO,
+    do: {:error, {:unsupported_calendar, calendar}}
 
   defp valid_naive(_, _, _, _, _, _, _, _), do: {:error, :invalid_date}
 
