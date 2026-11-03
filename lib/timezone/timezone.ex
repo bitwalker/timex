@@ -65,6 +65,9 @@ defmodule Timex.Timezone do
   POSIX signs in `Etc/GMT` zones: `Etc/GMT-4` means UTC+04:00 and `Etc/GMT+4`
   means UTC-04:00. Numeric offsets, signed offset strings, `GMT` shorthands and
   synthetic `Etc/UTC` offsets use arithmetic signs instead (`GMT+4` means UTC+04:00).
+  Synthetic `Etc/GMT` aliases with one or two hour digits and optional `:MM`
+  minutes normalize to `Etc/UTC` names with the equivalent offset; for example,
+  `Etc/GMT-09:30` becomes `Etc/UTC+09:30`.
 
   An unrecognized name returns `{:error, :time_zone_not_found}`.
   """
@@ -182,6 +185,20 @@ defmodule Timex.Timezone do
   end
 
   def name_of("Etc/UTC" <> offset), do: name_of(offset)
+
+  def name_of(<<"Etc/GMT", sign::utf8, offset::binary>> = zone) when sign in [?+, ?-] do
+    if Tzdata.zone_exists?(zone) do
+      zone
+    else
+      with true <- Regex.match?(~r/\A[0-9]{1,2}(?::[0-9]{2})?\z/, offset),
+           %PosixTimezone{} <- lookup_posix(<<"GMT", sign::utf8, offset::binary>>) do
+        arithmetic_sign = if sign == ?+, do: "-", else: "+"
+        name_of(arithmetic_sign <> offset)
+      else
+        _ -> {:error, :time_zone_not_found}
+      end
+    end
+  end
 
   def name_of(<<"GMT", sign::utf8, hh::utf8>>) when sign in [?+, ?-],
     do: "Etc/UTC" <> <<sign::utf8, hh::utf8>>

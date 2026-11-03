@@ -27,6 +27,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Restore fractional and leading-zero `Etc/GMT` aliases with POSIX signs while
+  preserving canonical IANA names; reject malformed synthetic aliases (#394).
+
 - Return conversion errors from relative formatting before arithmetic, including
   unsupported time-only inputs and invalid date fields (#774).
 
