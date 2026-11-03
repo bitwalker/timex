@@ -27,6 +27,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Document default strftime padding and how explicit flags override it (#750).
+
 - Clarify that week-of-month numbering starts on Monday and includes the partial
   week containing the first day of the month (#791).
 

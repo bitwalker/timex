@@ -25,6 +25,9 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
   * `:`, `::` - used only in combination with `%z`; see description of `%:z`
                 and `%::z` below
 
+  Explicit padding flags override the defaults shown below. For example, August
+  formats as `08` with `%m`, `8` with `%-m`, and ` 8` with `%_m`.
+
   `<width>` is a non-negative decimal number specifying the minimum field
   width.
 
@@ -37,22 +40,22 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
 
   ### Years and centuries
 
-  * `%Y` - full year number (0..9999)
-  * `%y` - the last two digits of the year number (0..99)
+  * `%Y` - full year number (0000..9999)
+  * `%y` - the last two digits of the year number (00..99)
   * `%C` - century number (00..99)
-  * `%G` - year number corresponding to the date's ISO week (0..9999)
-  * `%g` - year number (2 digits) corresponding to the date's ISO week (0..99)
+  * `%G` - year number corresponding to the date's ISO week (0000..9999)
+  * `%g` - year number (2 digits) corresponding to the date's ISO week (00..99)
 
   ### Months
 
-  * `%m` - month number (1..12)
+  * `%m` - month number (01..12)
   * `%b` - abbreviated month name (Jan..Dec, no padding)
-  * `%h` - same is `%b`
+  * `%h` - same as `%b`
   * `%B` - full month name (January..December, no padding)
 
   ### Days, and days of week
 
-  * `%d` - day number (1..31)
+  * `%d` - day number (01..31)
   * `%e` - same as `%d`, but padded with spaces ( 1..31)
   * `%j` - ordinal day of the year (001..366)
   * `%u` - weekday, Monday first (1..7)
@@ -70,7 +73,7 @@ defmodule Timex.Format.DateTime.Formatters.Strftime do
 
   * `%H` - hour of the day (00..23)
   * `%k` - same as `%H`, but padded with spaces ( 0..23)
-  * `%I` - hour of the day (1..12)
+  * `%I` - hour of the day (01..12)
   * `%l` - same as `%I`, but padded with spaces ( 1..12)
   * `%M` - minutes of the hour (00..59)
   * `%S` - seconds of the minute (00..60)
