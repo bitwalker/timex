@@ -165,7 +165,11 @@ defprotocol Timex.Protocol do
   def days_in_month(datetime)
 
   @doc """
-  Get the week number of the given date/time value, starting at 1
+  Get the week number within the month of the given date/time value, starting at 1.
+
+  Weeks begin on Monday. The partial week containing the first day of the month
+  is week 1, even when it begins in the preceding month or ISO year. A month can
+  contain up to six weeks.
   """
   @spec week_of_month(Types.valid_datetime()) :: Types.week_of_month() | {:error, term}
   def week_of_month(datetime)

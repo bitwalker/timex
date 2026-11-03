@@ -1424,7 +1424,11 @@ defmodule Timex do
   defdelegate days_in_month(year, month), to: Timex.Helpers
 
   @doc """
-  Returns the week number of the date provided, starting at 1.
+  Returns the week number within the month, starting at 1.
+
+  Weeks begin on Monday. The partial week containing the first day of the month
+  is week 1, even when it begins in the preceding month or ISO year. A month can
+  therefore contain up to six weeks.
 
   ## Examples
 
@@ -1433,12 +1437,21 @@ defmodule Timex do
 
       iex> Timex.week_of_month(~N[2016-03-14T00:00:00Z])
       3
+
+      iex> Timex.week_of_month(~D[2019-12-01])
+      1
+
+      iex> Timex.week_of_month(~D[2019-12-02])
+      2
   """
   @spec week_of_month(Types.valid_datetime()) :: Types.week_of_month()
   defdelegate week_of_month(datetime), to: Timex.Protocol
 
   @doc """
-  Same as week_of_month/1, except takes year, month, and day as distinct arguments
+  Same as `week_of_month/1`, except takes year, month, and day as distinct arguments.
+
+  Weeks begin on Monday, and the partial week containing the first day of the
+  month is week 1.
 
   ## Examples
 

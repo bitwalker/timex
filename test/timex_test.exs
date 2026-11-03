@@ -180,6 +180,23 @@ defmodule TimexTests do
     assert {:error, :invalid_date} = Timex.week_of_month(nil)
   end
 
+  test "week_of_month follows Monday boundaries across month and ISO year boundaries" do
+    for {date, expected} <- [
+          {~D[2019-12-01], 1},
+          {~D[2019-12-02], 2},
+          {~D[2019-12-29], 5},
+          {~D[2019-12-30], 6},
+          {~D[2021-01-03], 1},
+          {~D[2021-01-04], 2},
+          {~D[2021-02-01], 1},
+          {~D[2021-02-07], 1},
+          {~D[2021-02-08], 2}
+        ] do
+      assert Timex.week_of_month(date) == expected
+      assert Timex.week_of_month(date.year, date.month, date.day) == expected
+    end
+  end
+
   test "month_to_num" do
     assert Timex.month_to_num("April") == 4
     assert Timex.month_to_num("april") == 4

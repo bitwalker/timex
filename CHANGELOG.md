@@ -27,6 +27,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Clarify that week-of-month numbering starts on Monday and includes the partial
+  week containing the first day of the month (#791).
+
 - Decode signed TZif transition epochs, UTC offsets and leap corrections
   correctly, while retaining unsigned header counts.
 - Parse TZif footers through the shared POSIX grammar, handling hour24 and
