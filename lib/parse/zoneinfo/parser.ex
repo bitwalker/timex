@@ -2,6 +2,9 @@ defmodule Timex.Parse.ZoneInfo.Parser do
   @moduledoc """
   This module is responsible for parsing binary zoneinfo files,
   such as those found in /usr/local/zoneinfo.
+
+  Supports TZif versions 1 through 4. Leap-second records, including version 4
+  truncation and expiration data, are returned as raw records.
   """
 
   # See https://www.rfc-editor.org/rfc/rfc9636.html for details
@@ -124,6 +127,9 @@ defmodule Timex.Parse.ZoneInfo.Parser do
         <<?3>> ->
           3
 
+        <<?4>> ->
+          4
+
         byte ->
           {:error, {:invalid_tzfile_version, byte}, rest}
       end
@@ -169,6 +175,7 @@ defmodule Timex.Parse.ZoneInfo.Parser do
         1 -> <<0>>
         2 -> <<?2>>
         3 -> <<?3>>
+        4 -> <<?4>>
       end
 
     with {:ok, zone1, rest} <- parse_content(1, data, %Zone{version: 1}),

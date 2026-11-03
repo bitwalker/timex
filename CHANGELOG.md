@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Accept TZif version 4 containers and preserve their raw leap records,
+  including truncation and expiration data.
 - Explicit POSIX timezone conversions now use the same gap-boundary and overlap
   results as IANA zones. `PosixTimezone.is_dst?/2` returns true only for a unique
   daylight interpretation; ambiguous or nonexistent wall times return false.
