@@ -27,6 +27,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Return conversion errors from relative formatting before arithmetic, including
+  unsupported time-only inputs and invalid date fields (#774).
+
 - Parse full and abbreviated translated month names case-insensitively, preserving
   English fallback and each directive's full-name or abbreviation contract (#768).
 

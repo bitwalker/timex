@@ -26,6 +26,14 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
   alias Timex.Format.FormatError
   alias Timex.{Types, Translator}
 
+  @type relative_date ::
+          Date.t()
+          | NaiveDateTime.t()
+          | DateTime.t()
+          | Types.date()
+          | Types.datetime()
+          | Types.microsecond_datetime()
+
   @spec tokenize(String.t()) :: {:ok, [Directive.t()]} | {:error, term}
   def tokenize(format_string) do
     case Combine.parse(format_string, relative_parser()) do
@@ -50,13 +58,13 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
       iex> #{__MODULE__}.format(Timex.shift(Timex.now, minutes: -1), "{relative}")
       {:ok, "1 minute ago"}
   """
-  @spec format(Types.calendar_types(), String.t()) :: {:ok, String.t()} | {:error, term}
+  @spec format(relative_date(), String.t()) :: {:ok, String.t()} | {:error, term}
   def format(date, format_string), do: lformat(date, format_string, Translator.current_locale())
 
-  @spec format!(Types.calendar_types(), String.t()) :: String.t() | no_return
+  @spec format!(relative_date(), String.t()) :: String.t() | no_return
   def format!(date, format_string), do: lformat!(date, format_string, Translator.current_locale())
 
-  @spec lformat(Types.calendar_types(), String.t(), String.t()) ::
+  @spec lformat(relative_date(), String.t(), String.t()) ::
           {:ok, String.t()} | {:error, term}
   def lformat(date, format_string, locale) do
     case tokenize(format_string) do
@@ -64,20 +72,14 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
         {:error, "There were no formatting directives in the provided string."}
 
       {:ok, dirs} when is_list(dirs) ->
-        do_format(
-          locale,
-          Timex.to_naive_datetime(date),
-          Timex.Protocol.NaiveDateTime.now(),
-          dirs,
-          <<>>
-        )
+        format_relative(locale, date, Timex.Protocol.NaiveDateTime.now(), dirs)
 
       {:error, reason} ->
         {:error, {:format, reason}}
     end
   end
 
-  @spec lformat!(Types.calendar_types(), String.t(), String.t()) :: String.t() | no_return
+  @spec lformat!(relative_date(), String.t(), String.t()) :: String.t() | no_return
   def lformat!(date, format_string, locale) do
     case lformat(date, format_string, locale) do
       {:ok, result} -> result
@@ -95,18 +97,58 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
         {:error, "There were no formatting directives in the provided string."}
 
       {:ok, dirs} when is_list(dirs) ->
-        do_format(
-          locale,
-          Timex.to_naive_datetime(date),
-          Timex.to_naive_datetime(relative_to),
-          dirs,
-          <<>>
-        )
+        format_relative(locale, date, relative_to, dirs)
 
       {:error, reason} ->
         {:error, {:format, reason}}
     end
   end
+
+  defp format_relative(locale, date, reference, dirs) do
+    with %NaiveDateTime{} = date <- normalize_datetime(date),
+         %NaiveDateTime{} = reference <- normalize_datetime(reference),
+         diff when is_integer(diff) <- Timex.diff(date, reference, :seconds) do
+      do_format(locale, date, diff, dirs, <<>>)
+    end
+  end
+
+  defp normalize_datetime(%Date{} = date) do
+    valid_naive(date.year, date.month, date.day, 0, 0, 0, {0, 0}, date.calendar)
+  end
+
+  defp normalize_datetime(%DateTime{utc_offset: utc, std_offset: std} = date)
+       when is_integer(utc) and is_integer(std) do
+    with %NaiveDateTime{} <- normalize_datetime(DateTime.to_naive(date)),
+         do: Timex.to_naive_datetime(date)
+  end
+
+  defp normalize_datetime(%DateTime{}), do: {:error, :invalid_date}
+
+  defp normalize_datetime(date) do
+    with %NaiveDateTime{} = naive <- Timex.to_naive_datetime(date) do
+      valid_naive(
+        naive.year,
+        naive.month,
+        naive.day,
+        naive.hour,
+        naive.minute,
+        naive.second,
+        naive.microsecond,
+        naive.calendar
+      )
+    end
+  end
+
+  defp valid_naive(year, month, day, hour, minute, second, {us, precision}, calendar)
+       when is_integer(year) and is_integer(month) and is_integer(day) and
+              is_integer(hour) and is_integer(minute) and is_integer(second) and
+              is_integer(us) and is_integer(precision) do
+    with {:ok, naive} <-
+           NaiveDateTime.new(year, month, day, hour, minute, second, {us, precision}, calendar),
+         do: naive
+  end
+
+  defp valid_naive(_, _, _, _, _, _, _, _), do: {:error, :invalid_date}
 
   @minute 60
   @hour @minute * 60
@@ -121,9 +163,7 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
     do_format(locale, date, relative, dirs, <<result::binary, char::binary>>)
   end
 
-  defp do_format(locale, date, relative, [%Directive{type: :relative} | dirs], result) do
-    diff = Timex.diff(date, relative, :seconds)
-
+  defp do_format(locale, date, diff, [%Directive{type: :relative} | dirs], result) do
     phrase =
       cond do
         # future
@@ -326,7 +366,7 @@ defmodule Timex.Format.DateTime.Formatters.Relative do
           )
       end
 
-    do_format(locale, date, relative, dirs, <<result::binary, phrase::binary>>)
+    do_format(locale, date, diff, dirs, <<result::binary, phrase::binary>>)
   end
 
   defp do_format(
