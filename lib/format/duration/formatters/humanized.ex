@@ -6,6 +6,7 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
   """
   use Timex.Format.Duration.Formatter
   alias Timex.Translator
+  alias Timex.Types
 
   @minute 60
   @hour @minute * 60
@@ -18,6 +19,7 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
 
   @doc """
   Return a human readable string representing the absolute value of duration (i.e. would
+
   return the same output for both negative and positive representations of a given duration)
 
   ## Examples
@@ -48,6 +50,31 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
   def format(_), do: {:error, :invalid_duration}
 
   @doc """
+  Return a human readable string representing the calendar distance between two
+  datetimes, computing years/months from actual calendar arithmetic rather than
+  fixed 365/30-day buckets.
+
+  Naively bucketing the raw elapsed duration (as `format/1` does) misattributes
+  any UTC offset change that occurs between `start` and `finish` (a DST
+  transition, or a timezone's UTC offset changing permanently, as happened for
+  `Pacific/Norfolk` on October 4, 2015) as spurious trailing hours/minutes. This
+  function avoids that by first advancing `start` by the exact number of
+  calendar years and months, and only converting the true remainder to a
+  duration.
+
+  ## Examples
+
+      iex> use Timex
+      ...> start = Timex.to_datetime({{2015, 1, 15}, {0, 0, 0}}, "Pacific/Norfolk")
+      ...> finish = Timex.to_datetime({{2016, 3, 15}, {0, 0, 0}}, "Pacific/Norfolk")
+      ...> #{__MODULE__}.format(start, finish)
+      "1 year, 2 months"
+
+  """
+  @spec format(Types.valid_datetime(), Types.valid_datetime()) :: String.t() | {:error, term}
+  def format(start, finish), do: lformat(start, finish, Translator.current_locale())
+
+  @doc """
   Return a human readable string representing the time interval, translated to the given locale
 
   ## Examples
@@ -69,6 +96,64 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
   end
 
   def lformat(_, _locale), do: {:error, :invalid_duration}
+
+  @doc """
+  Same as `format/2`, except it also accepts a locale to translate to.
+
+  ## Examples
+
+      iex> use Timex
+      ...> start = Timex.to_datetime({{2015, 1, 15}, {0, 0, 0}}, "Pacific/Norfolk")
+      ...> finish = Timex.to_datetime({{2016, 3, 15}, {0, 0, 0}}, "Pacific/Norfolk")
+      ...> #{__MODULE__}.lformat(start, finish, "ru")
+      "1 год, 2 месяца"
+
+  """
+  @spec lformat(Types.valid_datetime(), Types.valid_datetime(), String.t()) ::
+          String.t() | {:error, term}
+  def lformat(start, finish, locale) do
+    case Timex.compare(start, finish) do
+      1 -> lformat(finish, start, locale)
+      _ -> do_lformat(start, finish, locale)
+    end
+  end
+
+  # Like `format/1`, this returns the same output regardless of which of the
+  # two datetimes is earlier -- `lformat/3` normalizes the (start, finish)
+  # order before calling this, so `start` is always <= `finish` here.
+  defp do_lformat(start, finish, locale) do
+    with {:ok, years} <- to_int(Timex.diff(finish, start, :years)),
+         {:ok, after_years} <- shifted(start, years: years),
+         {:ok, months} <- to_int(Timex.diff(finish, after_years, :months)),
+         {:ok, after_months} <- shifted(after_years, months: months),
+         {:ok, remainder_us} <- to_int(Timex.diff(finish, after_months, :microseconds)) do
+      calendar_components = for {unit, count} <- [year: years, month: months], count != 0, do: {unit, count}
+
+      remainder_components =
+        Duration.from_microseconds(remainder_us)
+        |> deconstruct()
+        |> Enum.reject(fn {_unit, count} -> count == 0 end)
+
+      case calendar_components ++ remainder_components do
+        [] -> do_format([{:microsecond, 0}], locale)
+        components -> do_format(components, locale)
+      end
+    else
+      {:error, _} = err -> err
+    end
+  end
+
+  defp to_int(n) when is_integer(n), do: {:ok, n}
+  defp to_int({:error, _} = err), do: err
+
+  defp shifted(datetime, [{_unit, 0}]), do: {:ok, datetime}
+
+  defp shifted(datetime, opts) do
+    case Timex.shift(datetime, opts) do
+      {:error, _} = err -> err
+      shifted -> {:ok, shifted}
+    end
+  end
 
   defp do_format(components, locale),
     do: do_format(components, <<>>, locale)
