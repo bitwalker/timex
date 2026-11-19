@@ -98,7 +98,7 @@ defmodule Timex.Format.Duration.Formatters.Humanized do
   end
 
   defp deconstruct({0, 0}, []),
-    do: deconstruct({0, 0}, microsecond: 0)
+    do: deconstruct({0, 0}, second: 0)
 
   defp deconstruct({0, 0}, components),
     do: Enum.reverse(components)
