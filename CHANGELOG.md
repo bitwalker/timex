@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file (at least to the extent possible, I am not infallible sadly).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+
+### Added/Changed
+
+- Compile translations as one module per locale, so Gettext compiles them in
+  parallel and the package compiles faster. Translations are unchanged.
+
 ## 4.0.0 — Unreleased
 
 ### Added/Changed
